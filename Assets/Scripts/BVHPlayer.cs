@@ -269,6 +269,7 @@ public class BVHPlayer : MonoBehaviour
         parseFile();
         motionDB = new float[bp.frames][];
         loadTransforms();
+        //ingestMotionMatchingDB();
     }
 
     // Update is called once per frame

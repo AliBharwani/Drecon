@@ -2,6 +2,21 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
+
+# Pycharm stuff
+.idea
+.idea_modules/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+# dotenv
+.env
+
+# virtualenv
+venv/
+ENV/
+
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
