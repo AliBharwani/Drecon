@@ -24,6 +24,7 @@ public class BVHPlayer : MonoBehaviour
     private float[][] motionDB;
 
     public bool blender = false;
+    public int startAtFrame = 0;
 
     private BVHParser bp = null;
     private int currentFrame = 0;
@@ -87,12 +88,12 @@ public class BVHPlayer : MonoBehaviour
 
     private float getAtCurrentFrame(BVHParser.BVHBone bone, Channel c)
     {
-        return getAtFrame(bone, c, currentFrame);
+        return getAtFrame(bone, c, currentFrame + startAtFrame);
     }
 
     private float getAtLastFrame(BVHParser.BVHBone bone, Channel c)
     {
-        return getAtFrame(bone, c, currentFrame - 1);
+        return getAtFrame(bone, c, currentFrame - 1 + startAtFrame);
     }
 
     private Vector3 getDifferenceInPosition(BVHParser.BVHBone bone)

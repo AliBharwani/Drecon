@@ -48,7 +48,16 @@ def clean_data():
                     hipTrajAndOrientation[i] = strValues[15:]
                     if i > end:
                         continue
-                    finalVal = strValues[:15] + hipTrajAndOrientation[i + 20] + hipTrajAndOrientation[i + 40] + hipTrajAndOrientation[i + 60] + [str(i)]
+                    currentHipPosX = float(strValues[15])
+                    currentHipPosZ = float(strValues[16])
+                    finalVal = strValues[:15] # + hipTrajAndOrientation[i + 20] + hipTrajAndOrientation[i + 40] + hipTrajAndOrientation[i + 60] + [str(i)]
+                    for j in [20, 40, 60]:
+                        futureHipPosX = float(hipTrajAndOrientation[i + j][0])
+                        futureHipPosZ = float(hipTrajAndOrientation[i + j][1])
+                        finalVal += [str(futureHipPosX - currentHipPosX) , str(futureHipPosZ - currentHipPosZ)]
+                        finalVal += hipTrajAndOrientation[i + j][2:]
+                    finalVal += [str(i)]
+
                     finalContents.appendleft(",".join(finalVal))
             with open(newfile_dir + name + "_unnormalized_outputs.txt", 'w') as outfile:
                 outfile.write("\n".join(finalContents))
@@ -66,7 +75,7 @@ def get_mean_and_std_dev():
             for line in contents:
                 vals = line.split(',')
                 if len(vals) != 31:
-                    raise Exception("WTF")
+                    raise Exception("WTF", len(vals))
                 for i in range(search_vec_len): # last val is index
                     means_helper[i][0] += float(vals[i])
                     means_helper[i][1] += 1
@@ -90,9 +99,11 @@ def get_mean_and_std_dev():
         stats = std_dev_helper[i]
         std_devs[i] = math.sqrt(stats[0] / (stats[1] - 1))
 
+    maxXVel, maxZVel = get_max_hip_vel()
     with open(newfile_dir + "stats.txt", 'w') as f:
         f.write("Means: \n" + ",".join([str(val) for val in means]))
         f.write("\nStd_Devs: \n" + ",".join([str(val) for val in std_devs]))
+        f.write("\nMax X vel: " + str(maxXVel) + "  Max Z vel: " + str(maxZVel))
 
 
 def normalizeData():
@@ -108,9 +119,24 @@ def normalizeData():
                         values[i] = (values[i] - means[i]) / std_devs[i]
                     outfile.write(",".join([str(val) for val in values])+ "\n")
 
+def get_max_hip_vel():
+    maxXVel = 0
+    maxZVel = 0
+    for name in usable_frames.keys():
+        with open(newfile_dir + name + "_unnormalized_outputs.txt") as f:
+            contents = f.readlines()
+            for line in contents:
+                vals = line.split(',')
+                maxXVel = max(maxXVel, float(vals[12]))
+                maxZVel = max(maxZVel, float(vals[14]))
+    print("Max X vel: " + str(maxXVel))
+    print("Max Z vel: " + str(maxZVel))
+    return maxXVel, maxZVel
+
 
 # clean_data()
-normalizeData()
+# normalizeData()
+get_max_hip_vel()
 
 # unity search vector code
 # return new float[] {

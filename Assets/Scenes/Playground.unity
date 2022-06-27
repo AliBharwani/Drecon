@@ -399,7 +399,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 42338788}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e63bd5248fb47b84496a2055b5bffb19, type: 3}
   m_Name: 
@@ -414,8 +414,9 @@ MonoBehaviour:
   root: {fileID: 42338788}
   hip: {fileID: 1812220947}
   clearFileNameOnStart: 1
-  dryRun: 0
+  dryRun: 1
   blender: 1
+  startAtFrame: 200
 --- !u!114 &42338790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,6 +429,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8217efa318ed90c43b59306c09bfbc75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  KeepSceneViewActive: 1
+  targetFramerate: 30
+  leftFoot: {fileID: 1570008007}
+  rightFoot: {fileID: 674057683}
+  root: {fileID: 42338788}
+  hip: {fileID: 1812220947}
+  updateEveryNFrame: 10
+  drawGizmos: 1
+  useQuadraticVel: 0
 --- !u!4 &42338792
 Transform:
   m_ObjectHideFlags: 0
@@ -641,6 +651,7 @@ MonoBehaviour:
   clearFileNameOnStart: 1
   dryRun: 1
   blender: 0
+  startAtFrame: 0
 --- !u!114 &53912931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9543,6 +9554,7 @@ MonoBehaviour:
   clearFileNameOnStart: 1
   dryRun: 1
   blender: 0
+  startAtFrame: 0
 --- !u!114 &268823593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22797,6 +22809,7 @@ MonoBehaviour:
   clearFileNameOnStart: 1
   dryRun: 0
   blender: 1
+  startAtFrame: 0
 --- !u!4 &1054313487
 Transform:
   m_ObjectHideFlags: 0
@@ -23904,7 +23917,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9078993845375825671, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
@@ -26548,6 +26561,7 @@ MonoBehaviour:
   clearFileNameOnStart: 1
   dryRun: 0
   blender: 1
+  startAtFrame: 0
 --- !u!4 &1504689704
 Transform:
   m_ObjectHideFlags: 0
@@ -39214,6 +39228,7 @@ MonoBehaviour:
   clearFileNameOnStart: 1
   dryRun: 1
   blender: 0
+  startAtFrame: 0
 --- !u!1 &2114283753834967212
 GameObject:
   m_ObjectHideFlags: 0
