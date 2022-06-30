@@ -57,7 +57,7 @@ public class KDTree
         List<double[]> valuesRight = values.GetRange(median_idx + 1, numValuesAfterMedian);
         newNode.left = recursiveBuild(depth + 1, valuesLeft);
         newNode.right = recursiveBuild(depth + 1, valuesRight);
-        newNode.isLeaf = newNode.left == null && newNode.right == null;
+        // newNode.isLeaf = newNode.left == null && newNode.right == null;
         //if (!newNode.isLeaf && (newNode.left == null || newNode.right == null))
         //{
         //    Debug.Log("CORNER CASE FOUND! ");

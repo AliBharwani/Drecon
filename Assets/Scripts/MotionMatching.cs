@@ -20,6 +20,8 @@ public class MotionMatching : MonoBehaviour
     public bool useQuadraticVel = true;
     public bool yrotonly = true;
     public float gizmoSphereRad = .01f;
+    public float hackyMaxVelReducer = 5f;
+    public bool applyMM = false;
 
     private Vector3 hipRotOffset; 
     private Vector3 lastLeftFootGlobalPos;
@@ -46,25 +48,26 @@ public class MotionMatching : MonoBehaviour
     private Gamepad gamepad;
     private float maxXVel; //= 4.92068f;
     private float maxZVel; // = 6.021712f;
-    private Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap;
+    //private Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap;
     private int frameCounter = 0;
     private Vector3 animDebugStart, animDebugEnd, inputDebugStart, inputDebugEnd, finalDebugStart, finalDebugEnd;
     private List<Vector3> gizmoSpheres1 = new List<Vector3>(); 
     private List<Vector3> gizmoSpheres2 = new List<Vector3>();
     private List<Vector3> gizmoSpheres3 = new List<Vector3>();
     private List<string> textLabels = new List<string>();
-    private BVHParser[] bvhFiles;
+    private Dictionary<BVHParser.BVHBone, Transform>[] bvhMaps;
 
     private bool firstFrame = true;
     private void loadBVHFiles()
     {
-        boneToTransformMap = new Dictionary<BVHParser.BVHBone, Transform>();
-        bvhFiles = new BVHParser[prefixes.Length];
+        //boneToTransformMap = new Dictionary<BVHParser.BVHBone, Transform>();
+        bvhMaps = new Dictionary<BVHParser.BVHBone, Transform>[prefixes.Length];
         for (int i = 0; i < prefixes.Length; i++)
         {
             string prefix = prefixes[i];
-            bvhFiles[i] = BVHUtils.parseFile(prefix + ".bvh");
-            BVHUtils.loadTransforms(bvhFiles[i], boneToTransformMap, transform);
+            BVHParser bp = BVHUtils.parseFile(prefix + ".bvh");
+            bvhMaps[i] = new Dictionary<BVHParser.BVHBone, Transform>();
+            BVHUtils.loadTransforms(bp, bvhMaps[i], transform);
         }
     }
     private void ingestMotionMatchingDB()
@@ -136,7 +139,7 @@ public class MotionMatching : MonoBehaviour
 
     private void normalizeVector(float[] vec)
     {
-        for(int i = 0; i < 30; i ++)
+        for(int i = 0; i < searchVecLen; i ++)
         {
             vec[i] = (vec[i] - means[i]) / std_devs[i];
         }
@@ -230,13 +233,13 @@ public class MotionMatching : MonoBehaviour
                 animDebugEnd = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
             }
             gizmoSpheres1.Add(new Vector3(futureXPos, 0, futureZPos) + hip.transform.position);
-            if (userInputtingLeftStick())
-            {
+            //if (userInputtingLeftStick())
+            //{
                 int startIdx = (i - 1) * 2;
                 futureXPos = combineCurTrajWithUser(futureXPos, userTraj[startIdx], frameNum);
                 futureZPos = combineCurTrajWithUser(futureZPos, userTraj[startIdx + 1], frameNum);
                 gizmoSpheres3.Add(new Vector3(futureXPos, 0, futureZPos) + hip.transform.position);
-            }
+            //}
 
             hipFutureTrajAndOrientations[idx] = futureXPos;
             hipFutureTrajAndOrientations[idx + 1] = futureZPos;
@@ -245,14 +248,14 @@ public class MotionMatching : MonoBehaviour
             //float currentEulerY = hip.transform.rotation.eulerAngles.y;
             //float difference = hip.transform.rotation.eulerAngles.y - targetY;
             float futureYRot = hipAngularVelPerFrame.y * frameNum;
-            if (userInputtingLeftStick())
-            {
+            //if (userInputtingLeftStick())
+            //{
                 float targetY = userInputTargetY();
-                Debug.Log("Targety: " + targetY.ToString() + " Outputed Y : " + hip.transform.rotation.eulerAngles.y.ToString());
+                //Debug.Log("Targety: " + targetY.ToString() + " Outputed Y : " + hip.transform.rotation.eulerAngles.y.ToString());
 
                 futureYRot = combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum);
                 textLabels.Add(futureYRot.ToString());
-            }
+            //}
             hipFutureTrajAndOrientations[idx + 2] = futureYRot;
             //float futureXRot = hipAngularVelPerFrame.x * frameNum;
             //float futureYRot = hipAngularVelPerFrame.y * frameNum;
@@ -419,11 +422,13 @@ public class MotionMatching : MonoBehaviour
     {
         float[] currentSearchVector = getCurrentSearchVector();
         normalizeVector(currentSearchVector);
-        double[] bestMatchingAnimation = motionDB.nnSearch(currentSearchVector);
+        double[] bestMatchingAnimation = motionDB.bruteForceSearch(currentSearchVector);
         int frameIdx = (int)bestMatchingAnimation[searchVecLen];
         int fileIdx = (int)bestMatchingAnimation[searchVecLen + 1];
         Debug.Log("Playing file: " + prefixes[fileIdx] + " Frame: " + frameIdx.ToString());
-        BVHUtils.playFrame(frameIdx, boneToTransformMap);
+        if (applyMM) { 
+        BVHUtils.playFrame(frameIdx, bvhMaps[fileIdx]);
+        }
     }
     void Start()
     {
@@ -437,6 +442,8 @@ public class MotionMatching : MonoBehaviour
             UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
         }
         ingestMotionMatchingDB();
+        maxXVel /= hackyMaxVelReducer;
+        maxZVel /= hackyMaxVelReducer;
         loadBVHFiles();
         gamepad = Gamepad.current;
     }
