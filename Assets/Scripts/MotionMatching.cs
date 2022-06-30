@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 using UnityEngine.InputSystem;
+using UnityEditor;
 
 public class MotionMatching : MonoBehaviour
 {
@@ -15,18 +16,21 @@ public class MotionMatching : MonoBehaviour
     public GameObject root;
     public GameObject hip;
     public int updateEveryNFrame = 10;
-    private int frameCounter = 0;
     public bool drawGizmos = true;
     public bool useQuadraticVel = true;
+    public bool yrotonly = true;
+    public float gizmoSphereRad = .01f;
 
+    private Vector3 hipRotOffset; 
     private Vector3 lastLeftFootGlobalPos;
     private Vector3 lastRightFootGlobalPos;
     private Vector3 lastHipPos;
     private Quaternion lastHipQuat;
-    private KDTree motionDB = new KDTree();
-    private string pathToAnims = @"D:/Unity/Unity 2021 Editor Test/Assets/LAFLAN Data/Animations/";
-    private double[] means = new double[] { -0.0458957508171, 0.148889939955, -1.98212023408, -0.0303706152439, 0.147394518158, -2.00615341094, -0.00105541224217, 0.000328890938174, 0.0011302420994, -0.00187898262142, 3.8678468464e-05, 0.00122720085238, -0.00165934029416, -0.000206693790398, 0.00128557976763, -0.00163039570779, 0.00114093651462, 182.212187285, 188.200992116, 267.64185031, -0.00379681699947, 0.00228497923495, 182.354338485, 188.366045526, 267.646277596, -0.0064437902479, 0.00327497249638, 182.299978261, 188.581469405, 267.647131713 };
-    private double[] std_devs = new double[] { 2.75672803451, 0.0851475658313, 5.39294074082, 2.76605976978, 0.0867144467634, 5.404615269, 1.50215804108, 0.671604269949, 1.99188466153, 1.52159098328, 0.687993202854, 2.0142738406, 1.02034196113, 0.29502827464, 1.43598251437, 0.653119557334, 0.933524741409, 175.25471024, 107.414065461, 8.47444261664, 1.20173555218, 1.77276238065, 175.25317976, 107.38595772, 8.47702118087, 1.60681077673, 2.47236803325, 175.261603812, 107.328262296, 8.47962818468 };
+    private int searchVecLen;
+    private KDTree motionDB;
+    // private string pathToAnims = @"D:/Unity/Unity 2021 Editor Test/Assets/LAFLAN Data/Animations/";
+    private float[] means;
+    private float[] std_devs;
     private string[] prefixes = {
             "walk1_subject1",
             "walk1_subject2",
@@ -40,22 +44,76 @@ public class MotionMatching : MonoBehaviour
         };
     private float frameTime = .03333f;
     private Gamepad gamepad;
-    private float maxXVel = 4.92068f;
-    private float maxZVel = 6.021712f;
-
+    private float maxXVel; //= 4.92068f;
+    private float maxZVel; // = 6.021712f;
+    private Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap;
+    private int frameCounter = 0;
     private Vector3 animDebugStart, animDebugEnd, inputDebugStart, inputDebugEnd, finalDebugStart, finalDebugEnd;
-    private List<Vector3> gizmoSpheres1 = new List<Vector3>();  // MUST BE EVEN LENGTH
+    private List<Vector3> gizmoSpheres1 = new List<Vector3>(); 
     private List<Vector3> gizmoSpheres2 = new List<Vector3>();
-    private bool firstFrame = true;
+    private List<Vector3> gizmoSpheres3 = new List<Vector3>();
+    private List<string> textLabels = new List<string>();
+    private BVHParser[] bvhFiles;
 
+    private bool firstFrame = true;
+    private void loadBVHFiles()
+    {
+        boneToTransformMap = new Dictionary<BVHParser.BVHBone, Transform>();
+        bvhFiles = new BVHParser[prefixes.Length];
+        for (int i = 0; i < prefixes.Length; i++)
+        {
+            string prefix = prefixes[i];
+            bvhFiles[i] = BVHUtils.parseFile(prefix + ".bvh");
+            BVHUtils.loadTransforms(bvhFiles[i], boneToTransformMap, transform);
+        }
+    }
     private void ingestMotionMatchingDB()
     {
         // @ escapes the backslashes
 
         DateTime startTime = DateTime.Now;
         int counter = 0;
-        string pathToData = @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/";
-
+        string pathToData = yrotonly ? @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs_yrotonly/" : @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/";
+        int j = 0;
+        foreach (string line in File.ReadLines(pathToData +  "stats.txt"))
+        {
+            if (j == 0)
+            {
+                if (!line.StartsWith("Means:"))
+                {
+                    throw new Exception("Parsing error at j " + j.ToString());
+                }
+            } else if (j == 1)
+            {
+                List<string> stringValues = line.Split(',').ToList();
+                means = stringValues.Select(float.Parse).ToArray();
+            } else if (j == 2)
+            {
+                if (!line.StartsWith("Std_Devs:"))
+                {
+                    throw new Exception("Parsing error at j " + j.ToString());
+                }
+            } else if (j == 3)
+            {
+                List<string> stringValues = line.Split(',').ToList();
+                std_devs = stringValues.Select(float.Parse).ToArray();
+            } else if (j == 4)
+            {
+                if (!line.StartsWith("Max X"))
+                {
+                    throw new Exception("Parsing error at j " + j.ToString());
+                }
+            } else if (j == 5)
+            {
+                List<string> stringValues = line.Split(',').ToList();
+                maxXVel = float.Parse(stringValues[0]);
+                maxZVel = float.Parse(stringValues[1]);
+            }
+            j++;
+        }
+        //Debug.Log("Means: " + string.Join(",", means));
+        //Debug.Log("std_devs: " + string.Join(",", std_devs));
+        //Debug.Log("maxXVel: " + maxXVel.ToString() + " maxZVel: " + maxZVel.ToString());
         for (int i= 0; i < prefixes.Length; i++)
         {
             string prefix = prefixes[i];
@@ -76,7 +134,7 @@ public class MotionMatching : MonoBehaviour
 
     }
 
-    private void normalizeVector(double[] vec)
+    private void normalizeVector(float[] vec)
     {
         for(int i = 0; i < 30; i ++)
         {
@@ -91,7 +149,7 @@ public class MotionMatching : MonoBehaviour
         Gizmos.color = Color.blue;
         foreach(Vector3 spherePos in gizmoSpheres1)
         {
-            Gizmos.DrawSphere(spherePos, .1f);
+            Gizmos.DrawSphere(spherePos, gizmoSphereRad);
         }
         if (animDebugStart != null)
         {
@@ -100,7 +158,7 @@ public class MotionMatching : MonoBehaviour
         Gizmos.color = Color.red;
         foreach (Vector3 spherePos in gizmoSpheres2)
         {
-            Gizmos.DrawSphere(spherePos, .1f);
+            Gizmos.DrawSphere(spherePos, gizmoSphereRad);
         }
         if (inputDebugStart != null)
         {
@@ -111,13 +169,27 @@ public class MotionMatching : MonoBehaviour
         {
             Gizmos.DrawLine(finalDebugStart, finalDebugEnd);
         }
+        for (int i = 0; i < gizmoSpheres3.Count; i++)
+        {
+            Vector3 spherePos = gizmoSpheres3[i];
+            Gizmos.DrawSphere(spherePos, gizmoSphereRad);
+            Handles.Label(spherePos, textLabels[i]);
+        }
+        //foreach (Vector3 spherePos in gizmoSpheres3)
+        //{
+        //    Gizmos.DrawSphere(spherePos, .1f);
+        //}
+        //foreach (string label in textLabels)
+        //{
+        //    Handles.Label(transform.position, "Text");
+        //}
     }
     private float[] getCurrentSearchVector()
     {
         if (firstFrame)
         {
             firstFrame = false;
-            return new float[30];
+            return new float[searchVecLen];
         }
 
         // get left and right foot local positions and global velocities
@@ -129,8 +201,6 @@ public class MotionMatching : MonoBehaviour
         Vector3 rightFootGlobalVelocity = (rightFoot.transform.position - lastRightFootGlobalPos) / frameTime;
 
         // hip global velocity (one number in r3, 3 numbers)
-        //Debug.Log("hip.transform.position: " + hip.transform.position.ToString("F6") + "  lastHipTransform.position: " + lastHipPos.ToString("F6"));
-
         Vector3 hipGlobalVelPerFrame = hip.transform.position - lastHipPos;
 
         Vector3 hipGlobalVel = (hip.transform.position - lastHipPos) / frameTime;
@@ -144,30 +214,54 @@ public class MotionMatching : MonoBehaviour
 
         // (hip)trajectory positions and orientations  located at 20, 40, and 60 frames in the future which are projected onto the
         // groundplane(t-sub - i in R ^ 6, d - sub - i in R ^ 6, concatenating 3 xy pairs -> R ^ 6, total 12 numbers) 
-        // hack - for right now just list trajectory position and orientation, then in cleanup we map the features 
-        //Vector2 curTrajectoryOntoGroundPlane = new Vector2(hip.transform.position.x, hip.transform.position.z);
-        //Vector2 curOrientationOntoGroundPlane = new Vector2(hip.transform.rotation.eulerAngles.x, hip.transform.rotation.eulerAngles.z);
-        float[] hipFutureTrajAndOrientations = new float[15];
+        int additionalLen = yrotonly ? 9 : 15;
+        float[] hipFutureTrajAndOrientations = new float[additionalLen];
         int idx = 0;
-        Debug.Log(hipGlobalVelPerFrame.ToString("F6"));
+        float[] userTraj = readUserInput();
+        animDebugStart = hip.transform.position;
+
         for (int i = 1; i < 4; i++)
         {
             int frameNum = i * 20;
             float futureXPos = hipGlobalVelPerFrame.x * frameNum;
             float futureZPos = hipGlobalVelPerFrame.z * frameNum;
+            if (i == 3)
+            {
+                animDebugEnd = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
+            }
             gizmoSpheres1.Add(new Vector3(futureXPos, 0, futureZPos) + hip.transform.position);
+            if (userInputtingLeftStick())
+            {
+                int startIdx = (i - 1) * 2;
+                futureXPos = combineCurTrajWithUser(futureXPos, userTraj[startIdx], frameNum);
+                futureZPos = combineCurTrajWithUser(futureZPos, userTraj[startIdx + 1], frameNum);
+                gizmoSpheres3.Add(new Vector3(futureXPos, 0, futureZPos) + hip.transform.position);
+            }
+
             hipFutureTrajAndOrientations[idx] = futureXPos;
             hipFutureTrajAndOrientations[idx + 1] = futureZPos;
-            float futureXRot = hipAngularVelPerFrame.x * frameNum;
+
+            // Combine future Y rotation and current Y rotation
+            //float currentEulerY = hip.transform.rotation.eulerAngles.y;
+            //float difference = hip.transform.rotation.eulerAngles.y - targetY;
             float futureYRot = hipAngularVelPerFrame.y * frameNum;
-            float futureZRot = hipAngularVelPerFrame.z * frameNum;
-            hipFutureTrajAndOrientations[idx + 2] = futureXRot;
-            hipFutureTrajAndOrientations[idx + 3] = futureYRot;
-            hipFutureTrajAndOrientations[idx + 4] = futureZRot;
-            idx += 5;
+            if (userInputtingLeftStick())
+            {
+                float targetY = userInputTargetY();
+                Debug.Log("Targety: " + targetY.ToString() + " Outputed Y : " + hip.transform.rotation.eulerAngles.y.ToString());
+
+                futureYRot = combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum);
+                textLabels.Add(futureYRot.ToString());
+            }
+            hipFutureTrajAndOrientations[idx + 2] = futureYRot;
+            //float futureXRot = hipAngularVelPerFrame.x * frameNum;
+            //float futureYRot = hipAngularVelPerFrame.y * frameNum;
+            //float futureZRot = hipAngularVelPerFrame.z * frameNum;
+            //hipFutureTrajAndOrientations[idx + 2] = futureXRot;
+            //hipFutureTrajAndOrientations[idx + 3] = futureYRot;
+            //hipFutureTrajAndOrientations[idx + 4] = futureZRot;
+            idx += additionalLen / 3;
         }
-        animDebugStart = hip.transform.position;
-        animDebugEnd = new Vector3(hipFutureTrajAndOrientations[10], 0, hipFutureTrajAndOrientations[11]) + hip.transform.position;
         return new float[] {
                 leftFootLocalPos.x,
                 leftFootLocalPos.y,
@@ -193,19 +287,96 @@ public class MotionMatching : MonoBehaviour
                 hipFutureTrajAndOrientations[6],
                 hipFutureTrajAndOrientations[7],
                 hipFutureTrajAndOrientations[8],
-                hipFutureTrajAndOrientations[9],
-                hipFutureTrajAndOrientations[10],
-                hipFutureTrajAndOrientations[11],
-                hipFutureTrajAndOrientations[12],
-                hipFutureTrajAndOrientations[13],
-                hipFutureTrajAndOrientations[14],
+                //hipFutureTrajAndOrientations[9],
+                //hipFutureTrajAndOrientations[10],
+                //hipFutureTrajAndOrientations[11],
+                //hipFutureTrajAndOrientations[12],
+                //hipFutureTrajAndOrientations[13],
+                //hipFutureTrajAndOrientations[14],
         };
     }
-    private void readUserInput()
+
+    private float combineCurTrajWithUser(float curTraj, float userTraj, int frameNum)
+    {
+        // values I like: (.2, .85); 
+        float a = .2f;
+        float b = .85f;
+        if (frameNum == 60)
+        {
+            return userTraj;
+        } else if (frameNum == 40)
+        {
+            return b * userTraj + (1 - b) * curTraj;
+        } else if (frameNum == 20)
+        {
+            return a * userTraj + (1 - a) * curTraj;
+        }
+        throw new Exception("combineCurTrajWithUser called with invalid frameNum " + frameNum.ToString());
+    }
+
+    private float combineYRots(float curY, float userY, int frameNum)
+    {
+        // values I like: (.2, .85); 
+        float a = .2f;
+        float b = .85f;
+        if (frameNum == 60)
+        {
+            return userY;
+        }
+        if (Mathf.Abs(curY - userY) <= 180)
+        {
+            float diff = curY - userY;
+            if (frameNum == 40)
+            {
+                return curY - (diff * b);
+            } else if (frameNum == 20)
+            {
+                return curY - (diff * a);
+            }
+        } else
+        {
+            // imagine curY points to 1oclock (60deg), and userY points to 4oclock (330deg) - want curY to drag back
+            float diff;
+            if (curY < userY)
+            {
+                diff = curY + (360 - userY);
+                float val = frameNum == 40 ? curY - (diff * b) : curY - (diff * a);
+                return val < 0 ? 360 + val : val;
+            }
+            else
+            {
+                diff = userY + (360 - curY);
+                float val = frameNum == 40 ? curY + (diff * b) : curY + (diff * a);
+                return val > 360 ? val - 360 : val;
+            }
+        }
+        
+        throw new Exception("combineCurTrajWithUser called with invalid frameNum " + frameNum.ToString());
+    }
+
+    private bool userInputtingLeftStick()
     {
         if (gamepad == null)
             gamepad = Gamepad.current;
         Vector2 stickL = gamepad.leftStick.ReadValue();
+        return  !(Mathf.Approximately(stickL.x, 0) && Mathf.Approximately(stickL.y, 0)) ;
+    }
+
+    private float userInputTargetY()
+    {
+        Vector2 stickL = gamepad.leftStick.ReadValue();
+        float angle = Mathf.Atan2(stickL.y, stickL.x) * Mathf.Rad2Deg * -1;
+        angle = angle < 0f ? angle + 360 : angle;
+        // Have to rotate 90 deg
+        return angle;
+    }
+    private float[] readUserInput()
+    {
+        Vector2 stickL = gamepad.leftStick.ReadValue();
+        //if (Mathf.Approximately(stickL.x, 0) && Mathf.Approximately(stickL.y, 0))
+        //{
+        //    return new float[6];
+        //}
         float desiredXVel, desiredZVel;
         if (useQuadraticVel)
         {
@@ -218,17 +389,23 @@ public class MotionMatching : MonoBehaviour
             desiredZVel = stickL.y * maxZVel;
         }
         inputDebugStart = hip.transform.position;
+        float[] userTraj = new float[6];
+        int idx = 0;
         for (int i = 1; i < 4; i++)
         {
             int frameNum = i * 20;
             float futureXPos = (desiredXVel * frameTime) * frameNum;
             float futureZPos = (desiredZVel  * frameTime) * frameNum;
+            userTraj[idx] = futureXPos;
+            userTraj[idx + 1] = futureZPos;
             gizmoSpheres2.Add(new Vector3(futureXPos, 0, futureZPos) + hip.transform.position);
             if (i == 3)
             {
                 inputDebugEnd =new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
             }
+            idx += 2;
         }
+        return userTraj;
         //Debug.Log("Desired x vel: " + desiredXVel.ToString() + " Desierd z vel: " + desiredZVel.ToString());
     }
     /*
@@ -241,22 +418,26 @@ public class MotionMatching : MonoBehaviour
     private void motionMatch()
     {
         float[] currentSearchVector = getCurrentSearchVector();
-        readUserInput();
-        //normalizeVector(currentSearchVector);
-        //double[] userInputSomething = magic();
-        //double[] combined = combined(currentSearchVector, userInputSomething);
-        //double[] bestMatchingAnimation = motionDB.nnSearch(searchVector);
-        //string filePath = pathToAnims + prefixes[(int)bestMatchingAnimation[31]] + ".bvh";
-        //lerp(bestMatchingAnimation[30], filePath);
+        normalizeVector(currentSearchVector);
+        double[] bestMatchingAnimation = motionDB.nnSearch(currentSearchVector);
+        int frameIdx = (int)bestMatchingAnimation[searchVecLen];
+        int fileIdx = (int)bestMatchingAnimation[searchVecLen + 1];
+        Debug.Log("Playing file: " + prefixes[fileIdx] + " Frame: " + frameIdx.ToString());
+        BVHUtils.playFrame(frameIdx, boneToTransformMap);
     }
     void Start()
     {
+        // + 2 for extra data 
+        searchVecLen = yrotonly ? 24 : 30;
+        motionDB = new KDTree(searchVecLen, 2);
         Application.targetFrameRate = targetFramerate;
+        hipRotOffset = hip.transform.rotation.eulerAngles;
         if (this.KeepSceneViewActive && Application.isEditor)
         {
             UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
         }
         ingestMotionMatchingDB();
+        loadBVHFiles();
         gamepad = Gamepad.current;
     }
 
@@ -265,18 +446,12 @@ public class MotionMatching : MonoBehaviour
     {
         gizmoSpheres1 = new List<Vector3>();  // MUST BE EVEN LENGTH
         gizmoSpheres2 = new List<Vector3>();
-        if (frameCounter % updateEveryNFrame == 0)
-        {
-            //motionMatch();
-            //var gamepad = Gamepad.current;
-            //if (gamepad == null)
-            //{
-            //    Debug.Log("Gamepad null");
-            //    return;  // No gamepad connected.
-            //}
-            //Vector2 move = gamepad.leftStick.ReadValue();
-            //Debug.Log("Frame: " + frameCounter.ToString() + " Left stick value: " + move.ToString());
-        }
+        gizmoSpheres3 = new List<Vector3>();
+        textLabels = new List<string>();
+
+        //if (frameCounter % updateEveryNFrame == 0)
+        //{
+        //}
         motionMatch();
         lastHipPos = hip.transform.position;
         lastHipQuat = hip.transform.rotation;

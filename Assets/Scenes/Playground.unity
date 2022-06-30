@@ -408,7 +408,6 @@ MonoBehaviour:
   KeepSceneViewActive: 1
   scale: 0.01
   overrideFrames: -1
-  targetFramerate: 30
   leftFoot: {fileID: 1570008007}
   rightFoot: {fileID: 674057683}
   root: {fileID: 42338788}
@@ -416,7 +415,7 @@ MonoBehaviour:
   clearFileNameOnStart: 1
   dryRun: 1
   blender: 1
-  startAtFrame: 200
+  startAtFrame: 300
 --- !u!114 &42338790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -437,7 +436,9 @@ MonoBehaviour:
   hip: {fileID: 1812220947}
   updateEveryNFrame: 10
   drawGizmos: 1
-  useQuadraticVel: 0
+  useQuadraticVel: 1
+  yrotonly: 1
+  gizmoSphereRad: 0.01
 --- !u!4 &42338792
 Transform:
   m_ObjectHideFlags: 0
@@ -643,7 +644,6 @@ MonoBehaviour:
   KeepSceneViewActive: 1
   scale: 0.01
   overrideFrames: -1
-  targetFramerate: 30
   leftFoot: {fileID: 1090538449}
   rightFoot: {fileID: 1614820550}
   root: {fileID: 53912929}
@@ -9546,7 +9546,6 @@ MonoBehaviour:
   KeepSceneViewActive: 1
   scale: 0.01
   overrideFrames: -1
-  targetFramerate: 30
   leftFoot: {fileID: 15610156}
   rightFoot: {fileID: 38503507}
   root: {fileID: 268823591}
@@ -22801,7 +22800,6 @@ MonoBehaviour:
   KeepSceneViewActive: 1
   scale: 0.01
   overrideFrames: -1
-  targetFramerate: 30
   leftFoot: {fileID: 1538836707}
   rightFoot: {fileID: 1882078658}
   root: {fileID: 1054313485}
@@ -26553,7 +26551,6 @@ MonoBehaviour:
   KeepSceneViewActive: 1
   scale: 0.01
   overrideFrames: -1
-  targetFramerate: 30
   leftFoot: {fileID: 1432944387}
   rightFoot: {fileID: 310061098}
   root: {fileID: 1504689702}
@@ -36839,7 +36836,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1812220947}
-  m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: -0.5}
+  m_LocalRotation: {x: 0, y: -0, z: 0.7071068, w: -0.7071068}
   m_LocalPosition: {x: 1.8436734e-14, y: 0.9317413, z: -0.04283123}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -36848,7 +36845,7 @@ Transform:
   - {fileID: 1368784296}
   m_Father: {fileID: 42338792}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 270}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 270}
 --- !u!1 &1812826010
 GameObject:
   m_ObjectHideFlags: 0
@@ -39220,7 +39217,6 @@ MonoBehaviour:
   KeepSceneViewActive: 1
   scale: 0.01
   overrideFrames: 1000
-  targetFramerate: 30
   leftFoot: {fileID: 0}
   rightFoot: {fileID: 0}
   root: {fileID: 0}

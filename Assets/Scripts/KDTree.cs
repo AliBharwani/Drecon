@@ -65,14 +65,14 @@ public class KDTree
         return newNode;
     }
 
-    public double[] nnSearch(double[] searchVector, int depth = 0 )
+    public double[] nnSearch(float[] searchVector, int depth = 0 )
     {
         closest = null;
         recursiveNNSearch(root, searchVector, depth);
         return closest.data;
     }
 
-    private void recursiveNNSearch(Node node, double[] searchVector, int depth) 
+    private void recursiveNNSearch(Node node, float[] searchVector, int depth) 
     {
         if (node == null)
             return;
@@ -80,7 +80,7 @@ public class KDTree
         // if the bounding box is too far, do nothing 
         //if (closest != null && Math.Pow(node.data[axis] - searchVector[axis], 2) > currentBestDist)
         //    return;
-        double dist = distanceBetween(searchVector, node.data);
+        double dist = distanceBetween( node.data, searchVector);
         if (closest == null || dist < currentBestDist)
         {
             closest = node;
@@ -107,11 +107,11 @@ public class KDTree
             }
         }
     }
-    private double distBetweenAtAxis(double[] a, double[] b, int axis)
+    private double distBetweenAtAxis(double[] a, float[] b, int axis)
     {
         return Math.Pow(a[axis] - b[axis], 2);
     }
-    private double distanceBetween(double[] a, double[] b)
+    private double distanceBetween(double[] a, float[] b)
     {
         // use squared euclidan distance to avoid having to calculate square roots
         double answer = 0;
@@ -122,17 +122,17 @@ public class KDTree
         return answer;
     }
 
-    public double[] bruteForceSearch(double[] searchVector)
+    public double[] bruteForceSearch(float[] searchVector)
     {
         closest = null;
         recursiveBruteForceSearch(root, searchVector);
         return closest.data;
     }
-    private void recursiveBruteForceSearch(Node node, double[] searchVector)
+    private void recursiveBruteForceSearch(Node node, float[] searchVector)
     {
         if (node == null)
             return;
-        double dist = distanceBetween(searchVector, node.data);
+        double dist = distanceBetween( node.data, searchVector);
         if (closest == null || dist < currentBestDist)
         {
             closest = node;

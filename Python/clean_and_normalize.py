@@ -1,5 +1,6 @@
 import os
 import math
+import argparse
 from collections import deque
 ## Usable frames
 usable_frames = {
@@ -18,12 +19,14 @@ usable_frames = {
 
 outputs_dir = "D:/Unity/Unity 2021 Editor Test/Assets/outputs/" # sprint1_subject2_output.txt
 newfile_dir = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/"
-
+y_rot_only = False
+newfile_dir_yrotonly = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs_yrotonly/"
 # My serach vector length:
 # 12 + 3 (what they had)
 # 5 * 3 (they used 2 numbers for traj and orientation, I use 2 numbers for traj and 3 for orientation - I think I only need 1 for orientation but being extra safe
+# 3 * 3 if only using one for orientation (y_rot_only)
 # = 30
-search_vec_len = 30
+search_vec_len = 24 if y_rot_only else 30
 
 def clean_data():
     # Final search vector should be:
@@ -55,11 +58,15 @@ def clean_data():
                         futureHipPosX = float(hipTrajAndOrientation[i + j][0])
                         futureHipPosZ = float(hipTrajAndOrientation[i + j][1])
                         finalVal += [str(futureHipPosX - currentHipPosX) , str(futureHipPosZ - currentHipPosZ)]
-                        finalVal += hipTrajAndOrientation[i + j][2:]
+                        if y_rot_only:
+                            finalVal += [hipTrajAndOrientation[i + j][3]]
+                        else:
+                            finalVal += hipTrajAndOrientation[i + j][2:]
                     finalVal += [str(i)]
 
                     finalContents.appendleft(",".join(finalVal))
-            with open(newfile_dir + name + "_unnormalized_outputs.txt", 'w') as outfile:
+            outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
+            with open(outfile_dir + name + "_unnormalized_outputs.txt", 'w') as outfile:
                 outfile.write("\n".join(finalContents))
 # compute the mean and std dev for each feature across every frame and then normalize each feature
 # independently by subtracting its mean and dividing by its std dev: (v(i) - v_mean) / v_std_dev
@@ -68,13 +75,14 @@ std_devs =  [0 for i in range(search_vec_len)]
 def get_mean_and_std_dev():
 
     means_helper =  [[0,0] for i in range(search_vec_len)] # maps index to (current_sum, num_seen)
+    outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
 
     for name in usable_frames.keys():
-        with open(newfile_dir + name + "_unnormalized_outputs.txt") as f:
+        with open(outfile_dir + name + "_unnormalized_outputs.txt") as f:
             contents = f.readlines()
             for line in contents:
                 vals = line.split(',')
-                if len(vals) != 31:
+                if  len(vals) != search_vec_len + 1:
                     raise Exception("WTF", len(vals))
                 for i in range(search_vec_len): # last val is index
                     means_helper[i][0] += float(vals[i])
@@ -85,12 +93,12 @@ def get_mean_and_std_dev():
 
     std_dev_helper = [[0,0] for i in range(search_vec_len)] # maps index to (sum so far of (x - mean(x)) , num seen)
     for name in usable_frames.keys():
-        with open(newfile_dir + name + "_unnormalized_outputs.txt") as f:
+        with open(outfile_dir + name + "_unnormalized_outputs.txt") as f:
             contents = f.readlines()
             for line in contents:
                 vals = line.split(',')
-                if len(vals) != 31:
-                    raise Exception("WTF")
+                if  len(vals) != search_vec_len + 1:
+                    raise Exception("WTF", len(vals))
                 for i in range(search_vec_len): # last val is index
                     std_dev_helper[i][0] += pow(float(vals[i]) - means[i] , 2)
                     std_dev_helper[i][1] += 1
@@ -100,19 +108,21 @@ def get_mean_and_std_dev():
         std_devs[i] = math.sqrt(stats[0] / (stats[1] - 1))
 
     maxXVel, maxZVel = get_max_hip_vel()
-    with open(newfile_dir + "stats.txt", 'w') as f:
+
+    with open(outfile_dir + "stats.txt", 'w') as f:
         f.write("Means: \n" + ",".join([str(val) for val in means]))
         f.write("\nStd_Devs: \n" + ",".join([str(val) for val in std_devs]))
-        f.write("\nMax X vel: " + str(maxXVel) + "  Max Z vel: " + str(maxZVel))
+        f.write("\nMax X vel / Max Z vel: \n" + str(maxXVel) + "," + str(maxZVel))
 
 
 def normalizeData():
     get_mean_and_std_dev()
+    outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
     for name, ranges in usable_frames.items():
-        with open(newfile_dir + name + "_unnormalized_outputs.txt") as infile:
+        with open(outfile_dir + name + "_unnormalized_outputs.txt") as infile:
             # get rid of opening line
             contents = infile.readlines()
-            with open(newfile_dir + name + "_normalized_outputs.txt", 'w') as outfile:
+            with open(outfile_dir + name + "_normalized_outputs.txt", 'w') as outfile:
                 for line in contents:
                     values = [ float(val) for val in line.split(',')]
                     for i in range(len(values) - 1):
@@ -122,8 +132,9 @@ def normalizeData():
 def get_max_hip_vel():
     maxXVel = 0
     maxZVel = 0
+    outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
     for name in usable_frames.keys():
-        with open(newfile_dir + name + "_unnormalized_outputs.txt") as f:
+        with open(outfile_dir + name + "_unnormalized_outputs.txt") as f:
             contents = f.readlines()
             for line in contents:
                 vals = line.split(',')
@@ -133,10 +144,20 @@ def get_max_hip_vel():
     print("Max Z vel: " + str(maxZVel))
     return maxXVel, maxZVel
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--yrotonly', default=False, action='store_true')
+    args = parser.parse_args()
+    global y_rot_only, search_vec_len
+    y_rot_only = args.yrotonly
+    search_vec_len = 24 if y_rot_only else 30
 
-# clean_data()
-# normalizeData()
-get_max_hip_vel()
+    # return
+    clean_data()
+    normalizeData()
+# get_max_hip_vel()
+if __name__ == "__main__":
+    main()
 
 # unity search vector code
 # return new float[] {
