@@ -68,11 +68,11 @@ public static class BVHUtils
     private static Vector3 getDifferenceInPosition(BVHParser.BVHBone bone, int frame)
     {
         float xPos = -(getAtFrame(bone, Channel.XPos, frame) - getAtFrame(bone, Channel.XPos, frame - 1));
-        float yPos = getAtFrame(bone, Channel.YPos, frame) - getAtFrame(bone, Channel.YPos, frame - 1);
+        float yPos = 0;// getAtFrame(bone, Channel.YPos, frame) - getAtFrame(bone, Channel.YPos, frame - 1);
         float zPos = getAtFrame(bone, Channel.ZPos, frame) - getAtFrame(bone, Channel.ZPos, frame - 1);
         return new Vector3(xPos, yPos, zPos);
     }
-    public static void playFrame(int frame, Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap, bool blender =true)
+    public static void playFrame(int frame, Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap, bool blender =true, bool applyMotion =true)
     {
         //Debug.Log("Playing frame: " + currentFrame);
         bool first = false;
@@ -82,7 +82,7 @@ public static class BVHUtils
             Transform curTransform = kvp.Value;
             first = bone.channels[0].enabled;
             // cheating here - we know that only hips will have pos data
-            if (first && frame > 0) // update position
+            if (applyMotion && first && frame > 0) // update position
             {
                 if (blender)
                 {
@@ -146,5 +146,8 @@ public static class BVHUtils
 
     }
 
-
+    public static void debugArray<T>(T[] data, string name)
+    {
+        Debug.Log(name + string.Join(",", data));
+    }
 }

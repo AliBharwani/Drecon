@@ -20,6 +20,7 @@ usable_frames = {
 outputs_dir = "D:/Unity/Unity 2021 Editor Test/Assets/outputs/" # sprint1_subject2_output.txt
 newfile_dir = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/"
 y_rot_only = False
+walk_only = False
 newfile_dir_yrotonly = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs_yrotonly/"
 # My serach vector length:
 # 12 + 3 (what they had)
@@ -66,6 +67,7 @@ def clean_data():
 
                     finalContents.appendleft(",".join(finalVal))
             outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
+            outfile_dir += "walk_only/" if walk_only else ""
             with open(outfile_dir + name + "_unnormalized_outputs.txt", 'w') as outfile:
                 outfile.write("\n".join(finalContents))
 # compute the mean and std dev for each feature across every frame and then normalize each feature
@@ -76,6 +78,7 @@ def get_mean_and_std_dev():
 
     means_helper =  [[0,0] for i in range(search_vec_len)] # maps index to (current_sum, num_seen)
     outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
+    outfile_dir += "walk_only/" if walk_only else ""
 
     for name in usable_frames.keys():
         with open(outfile_dir + name + "_unnormalized_outputs.txt") as f:
@@ -144,14 +147,21 @@ def get_max_hip_vel():
     print("Max Z vel: " + str(maxZVel))
     return maxXVel, maxZVel
 
+test_val_str = "0.0986326,7.096337,0.2465061,0.01537981,7.058707,-0.6282009,0.0007028888,-0.0004897094,-0.0005674235,0.001235168,-5.621925E-05,-0.0006092523,0.001626688,0.0007005898,-0.0008952615,0.002366892,-0.0003103769,1.418887,0.002559961,0.002792338,0.8308717,0.003218988,0.003839601,0.6938116"
+test_vals = test_val_str.split(',')
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--yrotonly', default=False, action='store_true')
-    args = parser.parse_args()
-    global y_rot_only, search_vec_len
-    y_rot_only = args.yrotonly
-    search_vec_len = 24 if y_rot_only else 30
+    parser.add_argument('--walkonly', default=False, action='store_true')
 
+    args = parser.parse_args()
+    global y_rot_only, search_vec_len, walk_only, usable_frames
+    walk_only = args.walkonly
+    y_rot_only = args.yrotonly
+    if walk_only:
+        for key in ["run1_subject2" , "run1_subject5", 'run2_subject1', 'sprint1_subject2' ]:
+            del usable_frames[key]
+    search_vec_len = 24 if y_rot_only else 30
     # return
     clean_data()
     normalizeData()

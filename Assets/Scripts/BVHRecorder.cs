@@ -50,6 +50,7 @@ public class BVHRecorder: MonoBehaviour
         // get left and right foot local positions and global velocities
         // 2 pairs (left and right) of 2 vectors in r^3, 3 numbers
         Vector3 leftFootLocalPos = leftFoot.transform.position - hip.transform.position;
+        //Debug.Log("Left foot local Pos: " + leftFootLocalPos.ToString());
         Vector3 rightFootLocalPos = rightFoot.transform.position - hip.transform.position;
         // velocity is the change in distance over time - if you went from 0m to 10m in 1 sec, your veloctiy is 10m/s 
         Vector3 leftFootGlobalVelocity = (leftFoot.transform.position - lastLeftFootGlobalPos) / frameTime;

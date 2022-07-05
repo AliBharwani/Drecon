@@ -68,6 +68,7 @@ public class KDTree
     public double[] nnSearch(float[] searchVector, int depth = 0 )
     {
         closest = null;
+        currentBestDist = double.PositiveInfinity;
         recursiveNNSearch(root, searchVector, depth);
         return closest.data;
     }
@@ -125,6 +126,8 @@ public class KDTree
     public double[] bruteForceSearch(float[] searchVector)
     {
         closest = null;
+        currentBestDist = double.PositiveInfinity;
+
         recursiveBruteForceSearch(root, searchVector);
         return closest.data;
     }

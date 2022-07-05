@@ -22,6 +22,8 @@ public class MotionMatching : MonoBehaviour
     public float gizmoSphereRad = .01f;
     public float hackyMaxVelReducer = 5f;
     public bool applyMM = false;
+    public bool applyMotion = false;
+    public bool walkOnly = true;
 
     private Vector3 hipRotOffset; 
     private Vector3 lastLeftFootGlobalPos;
@@ -33,7 +35,15 @@ public class MotionMatching : MonoBehaviour
     // private string pathToAnims = @"D:/Unity/Unity 2021 Editor Test/Assets/LAFLAN Data/Animations/";
     private float[] means;
     private float[] std_devs;
-    private string[] prefixes = {
+    private string[] prefixes;
+    private string[] walkPrefixes = {
+            "walk1_subject1",
+            "walk1_subject2",
+            "walk1_subject5",
+            "walk3_subject1",
+            "walk3_subject2",
+        };
+    private string[] allPrefixes = {
             "walk1_subject1",
             "walk1_subject2",
             "walk1_subject5",
@@ -50,14 +60,20 @@ public class MotionMatching : MonoBehaviour
     private float maxZVel; // = 6.021712f;
     //private Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap;
     private int frameCounter = 0;
-    private Vector3 animDebugStart, animDebugEnd, inputDebugStart, inputDebugEnd, finalDebugStart, finalDebugEnd;
-    private List<Vector3> gizmoSpheres1 = new List<Vector3>(); 
-    private List<Vector3> gizmoSpheres2 = new List<Vector3>();
-    private List<Vector3> gizmoSpheres3 = new List<Vector3>();
-    private List<string> textLabels = new List<string>();
+    private int curFileIdx;
+    private int curFrameIdx;
+    private int lastMMFrameIdx;
     private Dictionary<BVHParser.BVHBone, Transform>[] bvhMaps;
 
     private bool firstFrame = true;
+    // Debug stuff
+    private Vector3 animDebugStart, animDebugEnd, inputDebugStart, inputDebugEnd, finalDebugStart, finalDebugEnd;
+    public Transform toyPointer1, toyPointer2, toyPointer3;
+    private Vector3[] gizmoSpheres1;
+    private Vector3[] gizmoSpheres2;
+    private Vector3[] gizmoSpheres3;
+    private string[] textLabels;
+
     private void loadBVHFiles()
     {
         //boneToTransformMap = new Dictionary<BVHParser.BVHBone, Transform>();
@@ -172,20 +188,12 @@ public class MotionMatching : MonoBehaviour
         {
             Gizmos.DrawLine(finalDebugStart, finalDebugEnd);
         }
-        for (int i = 0; i < gizmoSpheres3.Count; i++)
+        for (int i = 0; i < 3; i++)
         {
             Vector3 spherePos = gizmoSpheres3[i];
             Gizmos.DrawSphere(spherePos, gizmoSphereRad);
             Handles.Label(spherePos, textLabels[i]);
         }
-        //foreach (Vector3 spherePos in gizmoSpheres3)
-        //{
-        //    Gizmos.DrawSphere(spherePos, .1f);
-        //}
-        //foreach (string label in textLabels)
-        //{
-        //    Handles.Label(transform.position, "Text");
-        //}
     }
     private float[] getCurrentSearchVector()
     {
@@ -197,8 +205,8 @@ public class MotionMatching : MonoBehaviour
 
         // get left and right foot local positions and global velocities
         // 2 pairs (left and right) of 2 vectors in r^3, 3 numbers
-        Vector3 leftFootLocalPos = leftFoot.transform.position - root.transform.position;
-        Vector3 rightFootLocalPos = rightFoot.transform.position - root.transform.position;
+        Vector3 leftFootLocalPos = leftFoot.transform.position - hip.transform.position;
+        Vector3 rightFootLocalPos = rightFoot.transform.position - hip.transform.position;
         // velocity is the change in distance over time - if you went from 0m to 10m in 1 sec, your veloctiy is 10m/s 
         Vector3 leftFootGlobalVelocity = (leftFoot.transform.position - lastLeftFootGlobalPos) / frameTime;
         Vector3 rightFootGlobalVelocity = (rightFoot.transform.position - lastRightFootGlobalPos) / frameTime;
@@ -232,13 +240,13 @@ public class MotionMatching : MonoBehaviour
             {
                 animDebugEnd = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
             }
-            gizmoSpheres1.Add(new Vector3(futureXPos, 0, futureZPos) + hip.transform.position);
+            gizmoSpheres1[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
             //if (userInputtingLeftStick())
             //{
                 int startIdx = (i - 1) * 2;
                 futureXPos = combineCurTrajWithUser(futureXPos, userTraj[startIdx], frameNum);
                 futureZPos = combineCurTrajWithUser(futureZPos, userTraj[startIdx + 1], frameNum);
-                gizmoSpheres3.Add(new Vector3(futureXPos, 0, futureZPos) + hip.transform.position);
+                gizmoSpheres3[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
             //}
 
             hipFutureTrajAndOrientations[idx] = futureXPos;
@@ -254,7 +262,14 @@ public class MotionMatching : MonoBehaviour
                 //Debug.Log("Targety: " + targetY.ToString() + " Outputed Y : " + hip.transform.rotation.eulerAngles.y.ToString());
 
                 futureYRot = combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum);
-                textLabels.Add(futureYRot.ToString());
+            Transform toyPointer;
+            if (i == 1) { toyPointer = toyPointer1; }
+            else if (i == 2) { toyPointer = toyPointer2; }
+            else  { toyPointer = toyPointer3; }
+            toyPointer.rotation = Quaternion.Euler(0, futureYRot, 270);
+            toyPointer.position = hip.transform.position + new Vector3(futureXPos, 0f, futureZPos);
+
+            textLabels[i-1] = futureYRot.ToString();
             //}
             hipFutureTrajAndOrientations[idx + 2] = futureYRot;
             //float futureXRot = hipAngularVelPerFrame.x * frameNum;
@@ -401,7 +416,7 @@ public class MotionMatching : MonoBehaviour
             float futureZPos = (desiredZVel  * frameTime) * frameNum;
             userTraj[idx] = futureXPos;
             userTraj[idx + 1] = futureZPos;
-            gizmoSpheres2.Add(new Vector3(futureXPos, 0, futureZPos) + hip.transform.position);
+            gizmoSpheres2[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
             if (i == 3)
             {
                 inputDebugEnd =new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
@@ -422,18 +437,32 @@ public class MotionMatching : MonoBehaviour
     {
         float[] currentSearchVector = getCurrentSearchVector();
         normalizeVector(currentSearchVector);
+        //Debug.Log("normalized Vector: " + string.Join(",", currentSearchVector));
         double[] bestMatchingAnimation = motionDB.bruteForceSearch(currentSearchVector);
-        int frameIdx = (int)bestMatchingAnimation[searchVecLen];
-        int fileIdx = (int)bestMatchingAnimation[searchVecLen + 1];
-        Debug.Log("Playing file: " + prefixes[fileIdx] + " Frame: " + frameIdx.ToString());
-        if (applyMM) { 
-        BVHUtils.playFrame(frameIdx, bvhMaps[fileIdx]);
+        //Debug.Log("bestMatchingAnimation: " + string.Join(",", bestMatchingAnimation));
+
+        curFrameIdx = (int)bestMatchingAnimation[searchVecLen];
+        curFileIdx = (int)bestMatchingAnimation[searchVecLen + 1];
+        Debug.Log("MM! Playing file: " + prefixes[curFileIdx] + " Frame: " + curFrameIdx.ToString());
+        if (applyMM)
+        {
+            BVHUtils.playFrame(curFrameIdx, bvhMaps[curFileIdx], true, applyMotion);
         }
+    }
+
+    private void playNextFrame()
+    {
+        curFrameIdx++;
+        BVHUtils.playFrame(curFrameIdx, bvhMaps[curFileIdx], true, applyMotion);
+        Debug.Log("Playing file: " + prefixes[curFileIdx] + " Frame: " + curFrameIdx.ToString());
+
     }
     void Start()
     {
         // + 2 for extra data 
         searchVecLen = yrotonly ? 24 : 30;
+        prefixes = walkOnly ? walkPrefixes : allPrefixes;
+
         motionDB = new KDTree(searchVecLen, 2);
         Application.targetFrameRate = targetFramerate;
         hipRotOffset = hip.transform.rotation.eulerAngles;
@@ -451,15 +480,22 @@ public class MotionMatching : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        gizmoSpheres1 = new List<Vector3>();  // MUST BE EVEN LENGTH
-        gizmoSpheres2 = new List<Vector3>();
-        gizmoSpheres3 = new List<Vector3>();
-        textLabels = new List<string>();
+        gizmoSpheres1 = new Vector3[3];  // MUST BE EVEN LENGTH
+        gizmoSpheres2 = new Vector3[3];
+        gizmoSpheres3 = new Vector3[3];
+        textLabels = new string[3];
 
-        //if (frameCounter % updateEveryNFrame == 0)
-        //{
-        //}
-        motionMatch();
+        if (frameCounter % updateEveryNFrame == 0)
+        {
+            motionMatch();
+        } else
+        {
+            // hack to call draw gizmos
+            getCurrentSearchVector();
+            playNextFrame();
+
+
+        }
         lastHipPos = hip.transform.position;
         lastHipQuat = hip.transform.rotation;
         lastLeftFootGlobalPos = leftFoot.transform.position;
