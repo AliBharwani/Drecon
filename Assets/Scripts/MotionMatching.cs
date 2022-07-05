@@ -24,7 +24,15 @@ public class MotionMatching : MonoBehaviour
     public bool applyMM = false;
     public bool applyMotion = false;
     public bool walkOnly = true;
+    public bool bruteforceSearch = false;
+    public Vector3 acc;
+    public float MoveSpeed = 2.0f;
+    [Tooltip("Sprint speed of the character in m/s")]
+    public float SprintSpeed = 5.335f;
+    [Tooltip("Acceleration and deceleration")]
+    public float SpeedChangeRate = 10.0f;
 
+    private Vector3 velocity;
     private Vector3 hipRotOffset; 
     private Vector3 lastLeftFootGlobalPos;
     private Vector3 lastRightFootGlobalPos;
@@ -60,9 +68,9 @@ public class MotionMatching : MonoBehaviour
     private float maxZVel; // = 6.021712f;
     //private Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap;
     private int frameCounter = 0;
-    private int curFileIdx;
-    private int curFrameIdx;
-    private int lastMMFrameIdx;
+    private int curFileIdx = -1;
+    private int curFrameIdx = -1 ;
+    private int lastMMFrameIdx = -1;
     private Dictionary<BVHParser.BVHBone, Transform>[] bvhMaps;
 
     private bool firstFrame = true;
@@ -214,13 +222,13 @@ public class MotionMatching : MonoBehaviour
         // hip global velocity (one number in r3, 3 numbers)
         Vector3 hipGlobalVelPerFrame = hip.transform.position - lastHipPos;
 
-        Vector3 hipGlobalVel = (hip.transform.position - lastHipPos) / frameTime;
+        Vector3 hipGlobalVel = velocity;// (hip.transform.position - lastHipPos) / frameTime;
 
         // based off bobsir's answer in https://forum.unity.com/threads/manually-calculate-angular-velocity-of-gameobject.289462/
-        Quaternion deltaRot = hip.transform.rotation * Quaternion.Inverse(lastHipQuat);
-        Vector3 eulerRot = new Vector3(Mathf.DeltaAngle(0, deltaRot.eulerAngles.x), Mathf.DeltaAngle(0, deltaRot.eulerAngles.y), Mathf.DeltaAngle(0, deltaRot.eulerAngles.z));
+        //Quaternion deltaRot = hip.transform.rotation * Quaternion.Inverse(lastHipQuat);
+        //Vector3 eulerRot = new Vector3(Mathf.DeltaAngle(0, deltaRot.eulerAngles.x), Mathf.DeltaAngle(0, deltaRot.eulerAngles.y), Mathf.DeltaAngle(0, deltaRot.eulerAngles.z));
 
-        Vector3 hipAngularVelPerFrame = eulerRot;// / Time.fixedDeltaTime;
+        //Vector3 hipAngularVelPerFrame = eulerRot;// / Time.fixedDeltaTime;
         //Vector3 hipAngularVel = (hip.transform.position - lastHipTransform.rotation.To) / frameTime;
 
         // (hip)trajectory positions and orientations  located at 20, 40, and 60 frames in the future which are projected onto the
@@ -241,27 +249,19 @@ public class MotionMatching : MonoBehaviour
                 animDebugEnd = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
             }
             gizmoSpheres1[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
-            //if (userInputtingLeftStick())
-            //{
-                int startIdx = (i - 1) * 2;
-                futureXPos = combineCurTrajWithUser(futureXPos, userTraj[startIdx], frameNum);
-                futureZPos = combineCurTrajWithUser(futureZPos, userTraj[startIdx + 1], frameNum);
-                gizmoSpheres3[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
-            //}
+
+            int startIdx = (i - 1) * 2;
+            futureXPos = combineCurTrajWithUser(futureXPos, userTraj[startIdx], frameNum);
+            futureZPos = combineCurTrajWithUser(futureZPos, userTraj[startIdx + 1], frameNum);
+            gizmoSpheres3[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
+            
 
             hipFutureTrajAndOrientations[idx] = futureXPos;
             hipFutureTrajAndOrientations[idx + 1] = futureZPos;
 
-            // Combine future Y rotation and current Y rotation
-            //float currentEulerY = hip.transform.rotation.eulerAngles.y;
-            //float difference = hip.transform.rotation.eulerAngles.y - targetY;
-            float futureYRot = hipAngularVelPerFrame.y * frameNum;
-            //if (userInputtingLeftStick())
-            //{
-                float targetY = userInputTargetY();
-                //Debug.Log("Targety: " + targetY.ToString() + " Outputed Y : " + hip.transform.rotation.eulerAngles.y.ToString());
-
-                futureYRot = combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum);
+            //float futureYRot = hipAngularVelPerFrame.y * frameNum;
+            float targetY = userInputTargetY();
+            float futureYRot = combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum);
             Transform toyPointer;
             if (i == 1) { toyPointer = toyPointer1; }
             else if (i == 2) { toyPointer = toyPointer2; }
@@ -270,14 +270,8 @@ public class MotionMatching : MonoBehaviour
             toyPointer.position = hip.transform.position + new Vector3(futureXPos, 0f, futureZPos);
 
             textLabels[i-1] = futureYRot.ToString();
-            //}
             hipFutureTrajAndOrientations[idx + 2] = futureYRot;
-            //float futureXRot = hipAngularVelPerFrame.x * frameNum;
-            //float futureYRot = hipAngularVelPerFrame.y * frameNum;
-            //float futureZRot = hipAngularVelPerFrame.z * frameNum;
-            //hipFutureTrajAndOrientations[idx + 2] = futureXRot;
-            //hipFutureTrajAndOrientations[idx + 3] = futureYRot;
-            //hipFutureTrajAndOrientations[idx + 4] = futureZRot;
+
             idx += additionalLen / 3;
         }
         return new float[] {
@@ -438,11 +432,24 @@ public class MotionMatching : MonoBehaviour
         float[] currentSearchVector = getCurrentSearchVector();
         normalizeVector(currentSearchVector);
         //Debug.Log("normalized Vector: " + string.Join(",", currentSearchVector));
-        double[] bestMatchingAnimation = motionDB.bruteForceSearch(currentSearchVector);
+        double[] bestMatchingAnimation = bruteforceSearch ? motionDB.bruteForceSearch(currentSearchVector) : motionDB.nnSearch(currentSearchVector);
         //Debug.Log("bestMatchingAnimation: " + string.Join(",", bestMatchingAnimation));
 
-        curFrameIdx = (int)bestMatchingAnimation[searchVecLen];
-        curFileIdx = (int)bestMatchingAnimation[searchVecLen + 1];
+        int bestFrameIdx  = (int)bestMatchingAnimation[searchVecLen];
+
+        int bestFileIdx = (int)bestMatchingAnimation[searchVecLen + 1];
+
+        if (bestFileIdx == curFileIdx && (bestFrameIdx == curFrameIdx || bestFrameIdx == lastMMFrameIdx ))
+        {
+            // just let it play
+            playNextFrame();
+            Debug.Log("MM not transitioning because: " + (bestFrameIdx == curFrameIdx ? "bestFrameIdx == curFrameIdx" : "bestFrameIdx == lastMMFrameIdx"));
+            return;
+        }
+        curFrameIdx = bestFrameIdx;
+        curFileIdx = bestFileIdx;
+        lastMMFrameIdx = bestFrameIdx;
+
         Debug.Log("MM! Playing file: " + prefixes[curFileIdx] + " Frame: " + curFrameIdx.ToString());
         if (applyMM)
         {
@@ -455,10 +462,44 @@ public class MotionMatching : MonoBehaviour
         curFrameIdx++;
         BVHUtils.playFrame(curFrameIdx, bvhMaps[curFileIdx], true, applyMotion);
         Debug.Log("Playing file: " + prefixes[curFileIdx] + " Frame: " + curFrameIdx.ToString());
+    }
 
+    private void updatePhysics()
+    {
+        float targetSpeed = MoveSpeed; // _input.sprint ? SprintSpeed : MoveSpeed;
+        Vector2 stickL = gamepad.leftStick.ReadValue();
+        // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+        // if there is no input, set the target speed to 0
+        if (stickL == Vector2.zero) targetSpeed = 0.0f;
+        float currentHorizontalSpeed = velocity.magnitude;
+
+        float speedOffset = 0.1f;
+        float inputMagnitude = stickL.magnitude;
+        // accelerate or decelerate to target speed
+        float _speed;
+        if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
+        {
+            // creates curved result rather than a linear one giving a more organic speed change
+            // note T in Lerp is clamped, so we don't need to clamp our speed
+            _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * SpeedChangeRate);
+
+            // round speed to 3 decimal places
+            _speed = Mathf.Round(_speed * 1000f) / 1000f;
+        }
+        else
+        {
+            _speed = targetSpeed;
+        }
+        Vector2 normalizedStickL = stickL.normalized;
+        Vector3 deltaPosition = new Vector3(normalizedStickL.x, 0f, normalizedStickL.y) * (_speed * Time.deltaTime);
+        velocity = deltaPosition / Time.deltaTime;
+        hip.transform.position += deltaPosition;
     }
     void Start()
     {
+        //maxXVel /= hackyMaxVelReducer;
+        //maxZVel /= hackyMaxVelReducer;
+        applyMotion = false;
         // + 2 for extra data 
         searchVecLen = yrotonly ? 24 : 30;
         prefixes = walkOnly ? walkPrefixes : allPrefixes;
@@ -471,8 +512,7 @@ public class MotionMatching : MonoBehaviour
             UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
         }
         ingestMotionMatchingDB();
-        maxXVel /= hackyMaxVelReducer;
-        maxZVel /= hackyMaxVelReducer;
+
         loadBVHFiles();
         gamepad = Gamepad.current;
     }
@@ -493,13 +533,12 @@ public class MotionMatching : MonoBehaviour
             // hack to call draw gizmos
             getCurrentSearchVector();
             playNextFrame();
-
-
         }
         lastHipPos = hip.transform.position;
         lastHipQuat = hip.transform.rotation;
         lastLeftFootGlobalPos = leftFoot.transform.position;
         lastRightFootGlobalPos = rightFoot.transform.position;
+        updatePhysics();
         frameCounter++;
     }
 

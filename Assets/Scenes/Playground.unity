@@ -1280,6 +1280,11 @@ MonoBehaviour:
   applyMM: 1
   applyMotion: 1
   walkOnly: 1
+  bruteforceSearch: 1
+  acc: {x: 0, y: 0, z: 0}
+  MoveSpeed: 2
+  SprintSpeed: 5.335
+  SpeedChangeRate: 10
   toyPointer1: {fileID: 866670245}
   toyPointer2: {fileID: 2128906490}
   toyPointer3: {fileID: 922896735}
