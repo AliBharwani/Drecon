@@ -17,12 +17,13 @@ public class MotionMatching : MonoBehaviour
     public GameObject hip;
     public int updateEveryNFrame = 10;
     public bool drawGizmos = true;
+    public bool drawAngles = false;
     public bool useQuadraticVel = true;
     public bool yrotonly = true;
     public float gizmoSphereRad = .01f;
     public float hackyMaxVelReducer = 5f;
     public bool applyMM = false;
-    public bool applyMotion = false;
+    public bool useAnimTransforms = false;
     public bool walkOnly = true;
     public bool bruteforceSearch = false;
     public Vector3 acc;
@@ -31,6 +32,8 @@ public class MotionMatching : MonoBehaviour
     public float SprintSpeed = 5.335f;
     [Tooltip("Acceleration and deceleration")]
     public float SpeedChangeRate = 10.0f;
+    [Tooltip("# of frames in a transition between clips")]
+    public float transitionTime = 3f;
 
     private Vector3 velocity;
     private Vector3 hipRotOffset; 
@@ -67,9 +70,12 @@ public class MotionMatching : MonoBehaviour
     private float maxXVel; //= 4.92068f;
     private float maxZVel; // = 6.021712f;
     //private Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap;
-    private int frameCounter = 0;
+    private int frameCounter = 0; 
+    private int nextFileIdx = -1;
+    private int nextFrameIdx = -1;
     private int curFileIdx = -1;
     private int curFrameIdx = -1 ;
+    private int curTransitionFrameNum = 1;
     private int lastMMFrameIdx = -1;
     private Dictionary<BVHParser.BVHBone, Transform>[] bvhMaps;
 
@@ -200,7 +206,8 @@ public class MotionMatching : MonoBehaviour
         {
             Vector3 spherePos = gizmoSpheres3[i];
             Gizmos.DrawSphere(spherePos, gizmoSphereRad);
-            Handles.Label(spherePos, textLabels[i]);
+            if (drawAngles)
+                Handles.Label(spherePos, textLabels[i]);
         }
     }
     private float[] getCurrentSearchVector()
@@ -220,7 +227,7 @@ public class MotionMatching : MonoBehaviour
         Vector3 rightFootGlobalVelocity = (rightFoot.transform.position - lastRightFootGlobalPos) / frameTime;
 
         // hip global velocity (one number in r3, 3 numbers)
-        Vector3 hipGlobalVelPerFrame = hip.transform.position - lastHipPos;
+        Vector3 hipGlobalVelPerFrame = velocity * frameTime; // hip.transform.position - lastHipPos;
 
         Vector3 hipGlobalVel = velocity;// (hip.transform.position - lastHipPos) / frameTime;
 
@@ -262,14 +269,18 @@ public class MotionMatching : MonoBehaviour
             //float futureYRot = hipAngularVelPerFrame.y * frameNum;
             float targetY = userInputTargetY();
             float futureYRot = combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum);
-            Transform toyPointer;
-            if (i == 1) { toyPointer = toyPointer1; }
-            else if (i == 2) { toyPointer = toyPointer2; }
-            else  { toyPointer = toyPointer3; }
-            toyPointer.rotation = Quaternion.Euler(0, futureYRot, 270);
-            toyPointer.position = hip.transform.position + new Vector3(futureXPos, 0f, futureZPos);
+            if (drawAngles)
+            {
+                Transform toyPointer;
+                if (i == 1) { toyPointer = toyPointer1; }
+                else if (i == 2) { toyPointer = toyPointer2; }
+                else { toyPointer = toyPointer3; }
+                toyPointer.rotation = Quaternion.Euler(0, futureYRot, 270);
+                toyPointer.position = hip.transform.position + new Vector3(futureXPos, 0f, futureZPos);
 
-            textLabels[i-1] = futureYRot.ToString();
+                textLabels[i - 1] = futureYRot.ToString();
+            }
+
             hipFutureTrajAndOrientations[idx + 2] = futureYRot;
 
             idx += additionalLen / 3;
@@ -390,16 +401,20 @@ public class MotionMatching : MonoBehaviour
         //    return new float[6];
         //}
         float desiredXVel, desiredZVel;
-        if (useQuadraticVel)
-        {
-            Vector2 normalized = stickL.normalized * stickL.sqrMagnitude;
-            desiredXVel = normalized.x * maxXVel;
-            desiredZVel = normalized.y * maxZVel;
-        } else
-        {
-            desiredXVel = stickL.x * maxXVel;
-            desiredZVel = stickL.y * maxZVel;
-        }
+        //if (useQuadraticVel)
+        //{
+        //    Vector2 normalized = stickL.normalized * stickL.sqrMagnitude;
+        //    desiredXVel = normalized.x * maxXVel;
+        //    desiredZVel = normalized.y * maxZVel;
+        //} else
+        //{
+        //    desiredXVel = stickL.x * maxXVel;
+        //    desiredZVel = stickL.y * maxZVel;
+        //}
+        float desiredSpeed = stickL.magnitude * MoveSpeed;
+        Vector2 desiredVel = stickL.normalized * desiredSpeed;
+        desiredXVel = desiredVel.x;
+        desiredZVel = desiredVel.y;
         inputDebugStart = hip.transform.position;
         float[] userTraj = new float[6];
         int idx = 0;
@@ -446,23 +461,53 @@ public class MotionMatching : MonoBehaviour
             Debug.Log("MM not transitioning because: " + (bestFrameIdx == curFrameIdx ? "bestFrameIdx == curFrameIdx" : "bestFrameIdx == lastMMFrameIdx"));
             return;
         }
-        curFrameIdx = bestFrameIdx;
-        curFileIdx = bestFileIdx;
+        //curFrameIdx = bestFrameIdx;
+        //curFileIdx = bestFileIdx;
+        if (curFileIdx == -1)
+        {
+            curFrameIdx = bestFrameIdx;
+            curFileIdx = bestFileIdx;
+        }
+        else
+        {
+            nextFrameIdx = bestFrameIdx;
+            nextFileIdx = bestFileIdx;
+            curTransitionFrameNum = 1;
+        }
         lastMMFrameIdx = bestFrameIdx;
 
-        Debug.Log("MM! Playing file: " + prefixes[curFileIdx] + " Frame: " + curFrameIdx.ToString());
         if (applyMM)
         {
-            BVHUtils.playFrame(curFrameIdx, bvhMaps[curFileIdx], true, applyMotion);
+            BVHUtils.playFrame(curFrameIdx, bvhMaps[curFileIdx], true, useAnimTransforms);
         }
     }
 
     private void playNextFrame()
     {
+        //curFrameIdx++;
+        if (nextFileIdx != -1 && curTransitionFrameNum <= transitionTime)
+        {
+            BVHUtils.lerp(curFrameIdx, bvhMaps[curFileIdx], nextFrameIdx, bvhMaps[nextFileIdx], (float) curTransitionFrameNum / transitionTime);
+            if (curTransitionFrameNum == transitionTime)
+            {
+                curFrameIdx = nextFrameIdx;
+                curFileIdx = nextFileIdx;
+                nextFileIdx = -1;
+                nextFrameIdx = -1;
+            } else
+            {
+                curTransitionFrameNum++;
+            }
+            nextFrameIdx++;
+        } else
+        {
+            BVHUtils.playFrame(curFrameIdx, bvhMaps[curFileIdx], true, useAnimTransforms);
+        }
+
         curFrameIdx++;
-        BVHUtils.playFrame(curFrameIdx, bvhMaps[curFileIdx], true, applyMotion);
         Debug.Log("Playing file: " + prefixes[curFileIdx] + " Frame: " + curFrameIdx.ToString());
     }
+
 
     private void updatePhysics()
     {
@@ -499,7 +544,7 @@ public class MotionMatching : MonoBehaviour
     {
         //maxXVel /= hackyMaxVelReducer;
         //maxZVel /= hackyMaxVelReducer;
-        applyMotion = false;
+        //useAnimTransforms = false;
         // + 2 for extra data 
         searchVecLen = yrotonly ? 24 : 30;
         prefixes = walkOnly ? walkPrefixes : allPrefixes;
@@ -538,7 +583,10 @@ public class MotionMatching : MonoBehaviour
         lastHipQuat = hip.transform.rotation;
         lastLeftFootGlobalPos = leftFoot.transform.position;
         lastRightFootGlobalPos = rightFoot.transform.position;
-        updatePhysics();
+        if (!useAnimTransforms)
+        {
+            updatePhysics();
+        }
         frameCounter++;
     }
 

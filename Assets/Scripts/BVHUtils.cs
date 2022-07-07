@@ -136,9 +136,37 @@ public static class BVHUtils
         }
     }
 
-    public static void lerp(BVHParser bp, Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap, Transform transform, int frameIdx)
+    public static void lerp(int a_frameIdx, Dictionary<BVHParser.BVHBone, Transform> a_boneToTransformMap, int b_frameIdx, Dictionary<BVHParser.BVHBone, Transform> b_boneToTransformMap, float transTime)
     {
+        bool first = false;
+        foreach (KeyValuePair<BVHParser.BVHBone, Transform> kvp in boneToTransformMap)
+        {
+            BVHParser.BVHBone bone = kvp.Key;
+            Transform curTransform = kvp.Value;
+            first = bone.channels[0].enabled;
+            // cheating here - we know that only hips will have pos data
+            if (applyMotion && first && frame > 0) // update position
+            {
+                if (blender)
+                {
+                    curTransform.position += getDifferenceInPosition(bone, frame);
+                }
+                else
+                {
+                    Vector3 bonePos = new Vector3(-getAtFrame(bone, Channel.XPos, frame), getAtFrame(bone, Channel.YPos, frame), getAtFrame(bone, Channel.ZPos, frame));
+                    Vector3 bvhPosition = curTransform.parent.InverseTransformPoint(bonePos + curTransform.parent.position);
+                    curTransform.localPosition = bvhPosition;
+                }
 
+            }
+            // Update rotation
+            float xRot = wrapAngle(getAtFrame(bone, Channel.XRot, frame));
+            float yRot = wrapAngle(getAtFrame(bone, Channel.YRot, frame));
+            float zRot = wrapAngle(getAtFrame(bone, Channel.ZRot, frame));
+            Vector3 eulerBVH = new Vector3(xRot, yRot, zRot);
+            Quaternion rot = fromEulerZXY(eulerBVH);
+            curTransform.localRotation = new Quaternion(rot.x, -rot.y, -rot.z, rot.w);
+        }
     }
 
     public static void interializationBlend(BVHParser bp, Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap, Transform transform, int frameIdx)
