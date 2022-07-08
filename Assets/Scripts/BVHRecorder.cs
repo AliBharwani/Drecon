@@ -30,12 +30,13 @@ public class BVHRecorder: MonoBehaviour
     private int currentFrame = 0;
     // the frametime from the BVH file 
     private float frameTime;
-    private Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap;
+    private Dictionary<string, Transform> nameToTransformMap;
+    private List<BVHParser.BVHBone> boneList;
     private bool firstFrame = true;
     private Vector3 lastLeftFootGlobalPos;
     private Vector3 lastRightFootGlobalPos;
     private Vector3 lastHipGlobalPos;
-
+    public int versionNum;
     private float[] getCurrentSearchVector()
     {
         if (firstFrame)
@@ -67,6 +68,16 @@ public class BVHRecorder: MonoBehaviour
         // hack - for right now just list trajectory position and orientation, then in cleanup we map the features 
         //Vector2 curTrajectoryOntoGroundPlane = new Vector2(hip.transform.position.x, hip.transform.position.z);
         //Vector2 curOrientationOntoGroundPlane = new Vector2(hip.transform.rotation.eulerAngles.x, hip.transform.rotation.eulerAngles.z);
+
+
+
+        // instead of recording hipGlobalVel and rotation angles, let's try getting the direction the hip is facing as the "heading", and the angle of the hip velocity
+        // relative to that and its magnitude, sort of like an r and theta in polar coords
+
+
+
+
+
         return new float[] {
                 leftFootLocalPos.x,
                 leftFootLocalPos.y,
@@ -93,7 +104,7 @@ public class BVHRecorder: MonoBehaviour
     private void outputMotionDBToFile()
     {
         string filenameWithoutExtension = filename.Substring(0, filename.Length - 4);
-        string newFilename = Application.dataPath + "/outputs/" + filenameWithoutExtension + "_output.txt";
+        string newFilename = Application.dataPath + "/outputs/" + "v" + versionNum.ToString() + "/" +  filenameWithoutExtension + "_output.txt";
         Debug.Log("Ouputting to : " + newFilename);
         if (File.Exists(newFilename) && clearFileNameOnStart)
         {
@@ -133,8 +144,8 @@ public class BVHRecorder: MonoBehaviour
         frameTime = bp.frameTime;
         motionDB = new float[bp.frames][];
         currentFrame = startAtFrame;
-        boneToTransformMap = new Dictionary<BVHParser.BVHBone, Transform>();
-        BVHUtils.loadTransforms(bp, boneToTransformMap, transform);
+        boneList = bp.boneList;
+        nameToTransformMap = BVHUtils.loadTransforms(transform);
     }
 
     // Update is called once per frame
@@ -142,7 +153,7 @@ public class BVHRecorder: MonoBehaviour
     {
         if (currentFrame < bp.frames)
         {
-            BVHUtils.playFrame(currentFrame, boneToTransformMap, blender);
+            BVHUtils.playFrame(currentFrame, boneList, nameToTransformMap, blender);
             motionDB[currentFrame] = getCurrentSearchVector();
             currentFrame++;
         } else if (currentFrame == bp.frames)

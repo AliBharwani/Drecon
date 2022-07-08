@@ -36,7 +36,7 @@ public class MotionMatching : MonoBehaviour
     public float transitionTime = 3f;
 
     private Vector3 velocity;
-    private Vector3 hipRotOffset; 
+    private Vector3 hipRotOffset;
     private Vector3 lastLeftFootGlobalPos;
     private Vector3 lastRightFootGlobalPos;
     private Vector3 lastHipPos;
@@ -70,14 +70,15 @@ public class MotionMatching : MonoBehaviour
     private float maxXVel; //= 4.92068f;
     private float maxZVel; // = 6.021712f;
     //private Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap;
-    private int frameCounter = 0; 
+    private int frameCounter = 0;
     private int nextFileIdx = -1;
     private int nextFrameIdx = -1;
     private int curFileIdx = -1;
-    private int curFrameIdx = -1 ;
+    private int curFrameIdx = -1;
     private int curTransitionFrameNum = 1;
     private int lastMMFrameIdx = -1;
-    private Dictionary<BVHParser.BVHBone, Transform>[] bvhMaps;
+    private List<BVHParser.BVHBone>[] boneLists;
+    Dictionary<string, Transform> nameToTransformMap;
 
     private bool firstFrame = true;
     // Debug stuff
@@ -91,14 +92,14 @@ public class MotionMatching : MonoBehaviour
     private void loadBVHFiles()
     {
         //boneToTransformMap = new Dictionary<BVHParser.BVHBone, Transform>();
-        bvhMaps = new Dictionary<BVHParser.BVHBone, Transform>[prefixes.Length];
+        boneLists = new List<BVHParser.BVHBone>[prefixes.Length];
         for (int i = 0; i < prefixes.Length; i++)
         {
             string prefix = prefixes[i];
             BVHParser bp = BVHUtils.parseFile(prefix + ".bvh");
-            bvhMaps[i] = new Dictionary<BVHParser.BVHBone, Transform>();
-            BVHUtils.loadTransforms(bp, bvhMaps[i], transform);
+            boneLists[i] = bp.boneList;
         }
+        nameToTransformMap = BVHUtils.loadTransforms(transform);
     }
     private void ingestMotionMatchingDB()
     {
@@ -107,8 +108,9 @@ public class MotionMatching : MonoBehaviour
         DateTime startTime = DateTime.Now;
         int counter = 0;
         string pathToData = yrotonly ? @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs_yrotonly/" : @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/";
+        pathToData += walkOnly ? @"walk_only/" : "" ;
         int j = 0;
-        foreach (string line in File.ReadLines(pathToData +  "stats.txt"))
+        foreach (string line in File.ReadLines(pathToData + "stats.txt"))
         {
             if (j == 0)
             {
@@ -147,7 +149,7 @@ public class MotionMatching : MonoBehaviour
         //Debug.Log("Means: " + string.Join(",", means));
         //Debug.Log("std_devs: " + string.Join(",", std_devs));
         //Debug.Log("maxXVel: " + maxXVel.ToString() + " maxZVel: " + maxZVel.ToString());
-        for (int i= 0; i < prefixes.Length; i++)
+        for (int i = 0; i < prefixes.Length; i++)
         {
             string prefix = prefixes[i];
             foreach (string line in File.ReadLines(pathToData + prefix + "_normalized_outputs.txt"))
@@ -169,7 +171,7 @@ public class MotionMatching : MonoBehaviour
 
     private void normalizeVector(float[] vec)
     {
-        for(int i = 0; i < searchVecLen; i ++)
+        for (int i = 0; i < searchVecLen; i++)
         {
             vec[i] = (vec[i] - means[i]) / std_devs[i];
         }
@@ -180,9 +182,9 @@ public class MotionMatching : MonoBehaviour
             return;
         // Draw a yellow sphere at the transform's position
         Gizmos.color = Color.blue;
-        foreach(Vector3 spherePos in gizmoSpheres1)
+        foreach (Vector3 spherePos in gizmoSpheres1)
         {
-            Gizmos.DrawSphere(spherePos, gizmoSphereRad);
+            Gizmos.DrawSphere(spherePos, gizmoSphereRad * 1.5f);
         }
         if (animDebugStart != null)
         {
@@ -227,10 +229,16 @@ public class MotionMatching : MonoBehaviour
         Vector3 rightFootGlobalVelocity = (rightFoot.transform.position - lastRightFootGlobalPos) / frameTime;
 
         // hip global velocity (one number in r3, 3 numbers)
-        Vector3 hipGlobalVelPerFrame = velocity * frameTime; // hip.transform.position - lastHipPos;
+        Vector3 hipGlobalVelPerFrame = useAnimTransforms ? hip.transform.position - lastHipPos : velocity * frameTime; // hip.transform.position - lastHipPos;
 
-        Vector3 hipGlobalVel = velocity;// (hip.transform.position - lastHipPos) / frameTime;
+        /* Idea: instead of using hipGlobalVelPerFrame to get trajectories, just look 20 frames ahead */
 
+
+
+
+        // I should combine hipGlolabVel with user input
+        Vector3 hipGlobalVel = useAnimTransforms ? (hip.transform.position - lastHipPos) / frameTime : velocity;// (hip.transform.position - lastHipPos) / frameTime;
+        Vector3 combinedHipGlobalVel = combineHipGlobalVel(hipGlobalVel);
         // based off bobsir's answer in https://forum.unity.com/threads/manually-calculate-angular-velocity-of-gameobject.289462/
         //Quaternion deltaRot = hip.transform.rotation * Quaternion.Inverse(lastHipQuat);
         //Vector3 eulerRot = new Vector3(Mathf.DeltaAngle(0, deltaRot.eulerAngles.x), Mathf.DeltaAngle(0, deltaRot.eulerAngles.y), Mathf.DeltaAngle(0, deltaRot.eulerAngles.z));
@@ -249,19 +257,23 @@ public class MotionMatching : MonoBehaviour
         for (int i = 1; i < 4; i++)
         {
             int frameNum = i * 20;
-            float futureXPos = hipGlobalVelPerFrame.x * frameNum;
-            float futureZPos = hipGlobalVelPerFrame.z * frameNum;
+            //float futureXPos = hipGlobalVelPerFrame.x * frameNum;
+            //float futureZPos = hipGlobalVelPerFrame.z * frameNum;
+            float curAnimFutureXPos, curAnimFutureZPos;
+            int fileIdxForTraj = nextFileIdx < 0 ? curFileIdx : nextFileIdx;
+            int frameIdxForTraj = nextFrameIdx < 0 ? curFrameIdx : nextFrameIdx;
+            BVHUtils.getTrajectoryNFramesFromNow(boneLists[fileIdxForTraj], frameIdxForTraj, frameNum ,out curAnimFutureXPos, out curAnimFutureZPos);
             if (i == 3)
             {
-                animDebugEnd = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
+                animDebugEnd = new Vector3(curAnimFutureXPos, 0, curAnimFutureZPos) + hip.transform.position;
             }
-            gizmoSpheres1[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
+            gizmoSpheres1[i - 1] = new Vector3(curAnimFutureXPos, 0, curAnimFutureZPos) + hip.transform.position;
 
             int startIdx = (i - 1) * 2;
-            futureXPos = combineCurTrajWithUser(futureXPos, userTraj[startIdx], frameNum);
-            futureZPos = combineCurTrajWithUser(futureZPos, userTraj[startIdx + 1], frameNum);
+            float futureXPos = combineCurTrajWithUser(curAnimFutureXPos, userTraj[startIdx], frameNum);
+            float futureZPos = combineCurTrajWithUser(curAnimFutureZPos, userTraj[startIdx + 1], frameNum);
             gizmoSpheres3[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
-            
+
 
             hipFutureTrajAndOrientations[idx] = futureXPos;
             hipFutureTrajAndOrientations[idx + 1] = futureZPos;
@@ -298,9 +310,12 @@ public class MotionMatching : MonoBehaviour
                 rightFootGlobalVelocity.x,
                 rightFootGlobalVelocity.y,
                 rightFootGlobalVelocity.z,
-                hipGlobalVel.x,
-                hipGlobalVel.y,
-                hipGlobalVel.z,
+                combinedHipGlobalVel.x,
+                combinedHipGlobalVel.y,
+                combinedHipGlobalVel.z,
+                //hipGlobalVel.x,
+                //hipGlobalVel.y,
+                //hipGlobalVel.z,
                 hipFutureTrajAndOrientations[0],
                 hipFutureTrajAndOrientations[1],
                 hipFutureTrajAndOrientations[2],
@@ -319,11 +334,15 @@ public class MotionMatching : MonoBehaviour
         };
     }
 
+
+    public float a = .2f;
+    public float b = .85f;
     private float combineCurTrajWithUser(float curTraj, float userTraj, int frameNum)
     {
         // values I like: (.2, .85); 
-        float a = .2f;
-        float b = .85f;
+
+        //float a = 1;
+        //float b = 1;
         if (frameNum == 60)
         {
             return userTraj;
@@ -340,8 +359,6 @@ public class MotionMatching : MonoBehaviour
     private float combineYRots(float curY, float userY, int frameNum)
     {
         // values I like: (.2, .85); 
-        float a = .2f;
-        float b = .85f;
         if (frameNum == 60)
         {
             return userY;
@@ -373,7 +390,7 @@ public class MotionMatching : MonoBehaviour
                 return val > 360 ? val - 360 : val;
             }
         }
-        
+
         throw new Exception("combineCurTrajWithUser called with invalid frameNum " + frameNum.ToString());
     }
 
@@ -382,7 +399,7 @@ public class MotionMatching : MonoBehaviour
         if (gamepad == null)
             gamepad = Gamepad.current;
         Vector2 stickL = gamepad.leftStick.ReadValue();
-        return  !(Mathf.Approximately(stickL.x, 0) && Mathf.Approximately(stickL.y, 0)) ;
+        return !(Mathf.Approximately(stickL.x, 0) && Mathf.Approximately(stickL.y, 0));
     }
 
     private float userInputTargetY()
@@ -422,18 +439,28 @@ public class MotionMatching : MonoBehaviour
         {
             int frameNum = i * 20;
             float futureXPos = (desiredXVel * frameTime) * frameNum;
-            float futureZPos = (desiredZVel  * frameTime) * frameNum;
+            float futureZPos = (desiredZVel * frameTime) * frameNum;
             userTraj[idx] = futureXPos;
             userTraj[idx + 1] = futureZPos;
             gizmoSpheres2[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
             if (i == 3)
             {
-                inputDebugEnd =new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
+                inputDebugEnd = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
             }
             idx += 2;
         }
         return userTraj;
         //Debug.Log("Desired x vel: " + desiredXVel.ToString() + " Desierd z vel: " + desiredZVel.ToString());
+    }
+    public float velCombineFactor = .5f;
+    private Vector3 combineHipGlobalVel(Vector3 hipGlobalVel)
+    {
+        Vector2 stickL = gamepad.leftStick.ReadValue();
+        float desiredSpeed = stickL.magnitude * MoveSpeed;
+        Vector2 desiredVel = stickL.normalized * desiredSpeed;
+        float newX = hipGlobalVel.x * (1 - velCombineFactor) + desiredVel.x * velCombineFactor;
+        float newZ = hipGlobalVel.z * (1 - velCombineFactor) + desiredVel.y * velCombineFactor;
+        return new Vector3(newX, hipGlobalVel.y, newZ);
     }
     /*
     To construct this feature vector, we take the joint positions and velocities from
@@ -445,20 +472,22 @@ public class MotionMatching : MonoBehaviour
     private void motionMatch()
     {
         float[] currentSearchVector = getCurrentSearchVector();
-        normalizeVector(currentSearchVector);
+         normalizeVector(currentSearchVector);
         //Debug.Log("normalized Vector: " + string.Join(",", currentSearchVector));
         double[] bestMatchingAnimation = bruteforceSearch ? motionDB.bruteForceSearch(currentSearchVector) : motionDB.nnSearch(currentSearchVector);
         //Debug.Log("bestMatchingAnimation: " + string.Join(",", bestMatchingAnimation));
 
-        int bestFrameIdx  = (int)bestMatchingAnimation[searchVecLen];
+        int bestFrameIdx = (int)bestMatchingAnimation[searchVecLen];
 
         int bestFileIdx = (int)bestMatchingAnimation[searchVecLen + 1];
+        bool cond_a = (bestFileIdx == curFileIdx && (bestFrameIdx == curFrameIdx || bestFrameIdx == lastMMFrameIdx));
+        bool cond_b = (bestFileIdx == nextFileIdx && (bestFrameIdx == nextFrameIdx || bestFrameIdx == lastMMFrameIdx));
 
-        if (bestFileIdx == curFileIdx && (bestFrameIdx == curFrameIdx || bestFrameIdx == lastMMFrameIdx ))
+        if (cond_a || cond_b)
         {
             // just let it play
             playNextFrame();
-            Debug.Log("MM not transitioning because: " + (bestFrameIdx == curFrameIdx ? "bestFrameIdx == curFrameIdx" : "bestFrameIdx == lastMMFrameIdx"));
+            Debug.Log("MM not transitioning because: " + (cond_a ? "cond_a" : "cond_b"));
             return;
         }
         //curFrameIdx = bestFrameIdx;
@@ -478,7 +507,8 @@ public class MotionMatching : MonoBehaviour
 
         if (applyMM)
         {
-            BVHUtils.playFrame(curFrameIdx, bvhMaps[curFileIdx], true, useAnimTransforms);
+            Debug.Log("MM  transitioning to: " + prefixes[bestFileIdx] + " Frame: " + bestFrameIdx.ToString());
+            playNextFrame();
         }
     }
 
@@ -487,7 +517,7 @@ public class MotionMatching : MonoBehaviour
         //curFrameIdx++;
         if (nextFileIdx != -1 && curTransitionFrameNum <= transitionTime)
         {
-            BVHUtils.lerp(curFrameIdx, bvhMaps[curFileIdx], nextFrameIdx, bvhMaps[nextFileIdx], (float) curTransitionFrameNum / transitionTime);
+            BVHUtils.lerp(curFrameIdx, boneLists[curFileIdx], nextFrameIdx, boneLists[nextFileIdx], nameToTransformMap, ((float) curTransitionFrameNum) / transitionTime, true, useAnimTransforms);
             if (curTransitionFrameNum == transitionTime)
             {
                 curFrameIdx = nextFrameIdx;
@@ -496,16 +526,16 @@ public class MotionMatching : MonoBehaviour
                 nextFrameIdx = -1;
             } else
             {
-                curTransitionFrameNum++;
+                nextFrameIdx++;
             }
-            nextFrameIdx++;
+            curTransitionFrameNum++;
         } else
         {
-            BVHUtils.playFrame(curFrameIdx, bvhMaps[curFileIdx], true, useAnimTransforms);
+            BVHUtils.playFrame(curFrameIdx, boneLists[curFileIdx], nameToTransformMap, true, useAnimTransforms);
         }
 
         curFrameIdx++;
-        Debug.Log("Playing file: " + prefixes[curFileIdx] + " Frame: " + curFrameIdx.ToString());
+        //Debug.Log("Playing file: " + prefixes[curFileIdx] + " Frame: " + curFrameIdx.ToString());
     }
 
 
@@ -569,6 +599,11 @@ public class MotionMatching : MonoBehaviour
         gizmoSpheres2 = new Vector3[3];
         gizmoSpheres3 = new Vector3[3];
         textLabels = new string[3];
+        if (!applyMM)
+        {
+            getCurrentSearchVector();
+            return;
+        }
 
         if (frameCounter % updateEveryNFrame == 0)
         {

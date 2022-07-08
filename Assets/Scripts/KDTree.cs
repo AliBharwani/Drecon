@@ -24,6 +24,7 @@ public class KDTree
     private Node root;
     private double currentBestDist;
     private Node closest;
+    private int[] trajectoryIndices = new int[] { 12, 24 };
     public KDTree (int _k = 30, int _extraData = 2)
     {
         k = _k;
@@ -108,19 +109,28 @@ public class KDTree
             }
         }
     }
+    int trajectoryPenalty = 5;
     private double distBetweenAtAxis(double[] a, float[] b, int axis)
     {
-        return Math.Pow(a[axis] - b[axis], 2);
+        int startIdx = trajectoryIndices[0];
+        int endIdx = trajectoryIndices[1];
+        int mult = axis >= startIdx && axis < endIdx ? trajectoryPenalty : 1;
+
+        return Math.Sqrt(Math.Pow(a[axis] - b[axis], 2) * mult) ;
     }
     private double distanceBetween(double[] a, float[] b)
     {
         // use squared euclidan distance to avoid having to calculate square roots
         double answer = 0;
+        int startIdx = trajectoryIndices[0];
+        int endIdx = trajectoryIndices[1];
         for (int i = 0; i < k; i++)
         {
-            answer += Math.Pow(a[i] - b[i], 2);
+            int mult = i >= startIdx && i < endIdx ? trajectoryPenalty : 1;
+            answer += mult * Math.Pow(a[i] - b[i], 2);
         }
-        return answer;
+        return Math.Sqrt(answer);
+
     }
 
     public double[] bruteForceSearch(float[] searchVector)

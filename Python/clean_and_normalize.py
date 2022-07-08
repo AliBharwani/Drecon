@@ -66,8 +66,7 @@ def clean_data():
                     finalVal += [str(i)]
 
                     finalContents.appendleft(",".join(finalVal))
-            outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
-            outfile_dir += "walk_only/" if walk_only else ""
+            outfile_dir = getOutfileDir()
             with open(outfile_dir + name + "_unnormalized_outputs.txt", 'w') as outfile:
                 outfile.write("\n".join(finalContents))
 # compute the mean and std dev for each feature across every frame and then normalize each feature
@@ -77,8 +76,7 @@ std_devs =  [0 for i in range(search_vec_len)]
 def get_mean_and_std_dev():
 
     means_helper =  [[0,0] for i in range(search_vec_len)] # maps index to (current_sum, num_seen)
-    outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
-    outfile_dir += "walk_only/" if walk_only else ""
+    outfile_dir = getOutfileDir()
 
     for name in usable_frames.keys():
         with open(outfile_dir + name + "_unnormalized_outputs.txt") as f:
@@ -117,10 +115,14 @@ def get_mean_and_std_dev():
         f.write("\nStd_Devs: \n" + ",".join([str(val) for val in std_devs]))
         f.write("\nMax X vel / Max Z vel: \n" + str(maxXVel) + "," + str(maxZVel))
 
+def getOutfileDir():
+    outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
+    outfile_dir += "walk_only/" if walk_only else ""
+    return outfile_dir
 
 def normalizeData():
     get_mean_and_std_dev()
-    outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
+    outfile_dir = getOutfileDir()
     for name, ranges in usable_frames.items():
         with open(outfile_dir + name + "_unnormalized_outputs.txt") as infile:
             # get rid of opening line
@@ -135,7 +137,7 @@ def normalizeData():
 def get_max_hip_vel():
     maxXVel = 0
     maxZVel = 0
-    outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
+    outfile_dir = getOutfileDir()
     for name in usable_frames.keys():
         with open(outfile_dir + name + "_unnormalized_outputs.txt") as f:
             contents = f.readlines()
@@ -158,6 +160,7 @@ def main():
     global y_rot_only, search_vec_len, walk_only, usable_frames
     walk_only = args.walkonly
     y_rot_only = args.yrotonly
+    print("Running with: walk_only: ", walk_only, " || y_rot_only: ", y_rot_only)
     if walk_only:
         for key in ["run1_subject2" , "run1_subject5", 'run2_subject1', 'sprint1_subject2' ]:
             del usable_frames[key]

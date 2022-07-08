@@ -72,14 +72,13 @@ public static class BVHUtils
         float zPos = getAtFrame(bone, Channel.ZPos, frame) - getAtFrame(bone, Channel.ZPos, frame - 1);
         return new Vector3(xPos, yPos, zPos);
     }
-    public static void playFrame(int frame, Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap, bool blender =true, bool applyMotion =true)
+    public static void playFrame(int frame, List<BVHParser.BVHBone> boneList, Dictionary<string, Transform> nameToTransformMap, bool blender =true, bool applyMotion =true)
     {
         //Debug.Log("Playing frame: " + currentFrame);
         bool first = false;
-        foreach (KeyValuePair<BVHParser.BVHBone, Transform> kvp in boneToTransformMap)
+        foreach (BVHParser.BVHBone bone in boneList)
         {
-            BVHParser.BVHBone bone = kvp.Key;
-            Transform curTransform = kvp.Value;
+            Transform curTransform = nameToTransformMap[bone.name];
             first = bone.channels[0].enabled;
             // cheating here - we know that only hips will have pos data
             if (applyMotion && first && frame > 0) // update position
@@ -114,7 +113,8 @@ public static class BVHUtils
         return bp;
     }
 
-    public static void loadTransforms(BVHParser bp, Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap, Transform transform)
+    // Names in BVH file for bones and model gameobject names need to match in order for this approach to work
+    public static Dictionary<string, Transform> loadTransforms(Transform transform)
     {
         Dictionary<string, Transform> nameToTransformMap = new Dictionary<string, Transform>();
         Queue<Transform> transforms = new Queue<Transform>();
@@ -129,46 +129,80 @@ public static class BVHUtils
                 transforms.Enqueue(curTransform.GetChild(i));
             }
         }
-        
-        foreach (BVHParser.BVHBone bone in bp.boneList)
-        {
-            boneToTransformMap.Add(bone, nameToTransformMap[bone.name]);
-        }
+        return nameToTransformMap;
     }
 
-    public static void lerp(int a_frameIdx, Dictionary<BVHParser.BVHBone, Transform> a_boneToTransformMap, int b_frameIdx, Dictionary<BVHParser.BVHBone, Transform> b_boneToTransformMap, float transTime)
+    public static void lerp(int a_frameIdx, List<BVHParser.BVHBone> a_boneList, int b_frameIdx, List<BVHParser.BVHBone> b_boneList, Dictionary<string, Transform> nameToTransformMap, float transTime, bool blender, bool applyMotion)
     {
         bool first = false;
-        foreach (KeyValuePair<BVHParser.BVHBone, Transform> kvp in boneToTransformMap)
+        for (int i = 0; i < a_boneList.Count; i++)
         {
-            BVHParser.BVHBone bone = kvp.Key;
-            Transform curTransform = kvp.Value;
-            first = bone.channels[0].enabled;
-            // cheating here - we know that only hips will have pos data
-            if (applyMotion && first && frame > 0) // update position
+            BVHParser.BVHBone a_bone = a_boneList[i];
+            BVHParser.BVHBone b_bone = b_boneList[i];
+            Transform curTransform = nameToTransformMap[a_bone.name];
+            if (a_bone.name != b_bone.name)
+            {
+                throw new Exception("NAMES DON'T MATCH! : " + a_bone.name + " : " + b_bone.name);
+            }
+            first = a_bone.channels[0].enabled;
+            if (applyMotion && first) // update position
             {
                 if (blender)
                 {
-                    curTransform.position += getDifferenceInPosition(bone, frame);
+                    Vector3 a_translation = getDifferenceInPosition(a_bone, a_frameIdx);
+                    Vector3 b_translation = getDifferenceInPosition(b_bone, b_frameIdx);
+                    curTransform.position += Vector3.Slerp(a_translation, b_translation, transTime);
                 }
                 else
                 {
-                    Vector3 bonePos = new Vector3(-getAtFrame(bone, Channel.XPos, frame), getAtFrame(bone, Channel.YPos, frame), getAtFrame(bone, Channel.ZPos, frame));
-                    Vector3 bvhPosition = curTransform.parent.InverseTransformPoint(bonePos + curTransform.parent.position);
-                    curTransform.localPosition = bvhPosition;
+                    //Vector3 bonePos = new Vector3(-getAtFrame(bone, Channel.XPos, frame), getAtFrame(bone, Channel.YPos, frame), getAtFrame(bone, Channel.ZPos, frame));
+                    //Vector3 bvhPosition = curTransform.parent.InverseTransformPoint(bonePos + curTransform.parent.position);
+                    //curTransform.localPosition = bvhPosition;
                 }
 
             }
+            // cheating here - we know that only hips will have pos data
             // Update rotation
-            float xRot = wrapAngle(getAtFrame(bone, Channel.XRot, frame));
-            float yRot = wrapAngle(getAtFrame(bone, Channel.YRot, frame));
-            float zRot = wrapAngle(getAtFrame(bone, Channel.ZRot, frame));
+            float xRot = wrapAngle(getAtFrame(a_bone, Channel.XRot, a_frameIdx));
+            float yRot = wrapAngle(getAtFrame(a_bone, Channel.YRot, a_frameIdx));
+            float zRot = wrapAngle(getAtFrame(a_bone, Channel.ZRot, a_frameIdx));
             Vector3 eulerBVH = new Vector3(xRot, yRot, zRot);
             Quaternion rot = fromEulerZXY(eulerBVH);
-            curTransform.localRotation = new Quaternion(rot.x, -rot.y, -rot.z, rot.w);
+            Quaternion a_rot = new Quaternion(rot.x, -rot.y, -rot.z, rot.w);
+
+            xRot = wrapAngle(getAtFrame(b_bone, Channel.XRot, b_frameIdx));
+            yRot = wrapAngle(getAtFrame(b_bone, Channel.YRot, b_frameIdx));
+            zRot = wrapAngle(getAtFrame(b_bone, Channel.ZRot, b_frameIdx));
+            eulerBVH = new Vector3(xRot, yRot, zRot);
+            rot = fromEulerZXY(eulerBVH);
+            Quaternion b_rot = new Quaternion(rot.x, -rot.y, -rot.z, rot.w);
+            curTransform.localRotation = Quaternion.Slerp(a_rot, b_rot, transTime);
         }
     }
 
+    private static Vector3 getPositionDiffAtFrame(BVHParser.BVHBone bone, int startFrame, int endFrame)
+    {
+        float xPos = -getAtFrame(bone, Channel.XPos, startFrame);
+        //float yPos =  getAtFrame(bone, Channel.YPos, startFrame);
+        float zPos = getAtFrame(bone, Channel.ZPos, startFrame);
+        float nextXPos = -getAtFrame(bone, Channel.XPos, endFrame);
+        //float nextYPos =  getAtFrame(bone, Channel.YPos, endFrame) ;
+        float nextZPos = getAtFrame(bone, Channel.ZPos, endFrame);
+        return new Vector3(nextXPos - xPos, 0, nextZPos - zPos);
+    }
+
+    public static void getTrajectoryNFramesFromNow(List<BVHParser.BVHBone> bones, int startFrame, int frameNum , out float curAnimFutureXPos, out float curAnimFutureZPos)
+    {
+        BVHParser.BVHBone hipBone = bones[0];
+        //if (hipBone.name != "hip")
+        //{
+        //    Debug.Log("Hip bone is actually : " + hipBone.name);
+        //}
+        Vector3 diff = getPositionDiffAtFrame(hipBone, startFrame, startFrame + frameNum);
+        curAnimFutureXPos = diff.x;
+        curAnimFutureZPos = diff.z;
+
+    }
     public static void interializationBlend(BVHParser bp, Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap, Transform transform, int frameIdx)
     {
 
