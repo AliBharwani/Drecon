@@ -254,6 +254,7 @@ public class MotionMatching : MonoBehaviour
         float[] userTraj = readUserInput();
         animDebugStart = hip.transform.position;
 
+        Vector3 alternativeHipGlobalVel = Vector3.zero;
         for (int i = 1; i < 4; i++)
         {
             int frameNum = i * 20;
@@ -266,6 +267,10 @@ public class MotionMatching : MonoBehaviour
             if (i == 3)
             {
                 animDebugEnd = new Vector3(curAnimFutureXPos, 0, curAnimFutureZPos) + hip.transform.position;
+                // because 60 frames is 2 seconds from now, and we need vel per second
+                float oneSecXPos, oneSecZPos;
+                BVHUtils.getTrajectoryNFramesFromNow(boneLists[fileIdxForTraj], frameIdxForTraj, 30, out oneSecXPos, out oneSecZPos);
+                alternativeHipGlobalVel = new Vector3(oneSecXPos, 0, oneSecZPos);
             }
             gizmoSpheres1[i - 1] = new Vector3(curAnimFutureXPos, 0, curAnimFutureZPos) + hip.transform.position;
 
@@ -297,6 +302,8 @@ public class MotionMatching : MonoBehaviour
 
             idx += additionalLen / 3;
         }
+        Vector3 altCombinedHipGlobalVel = combineHipGlobalVel(alternativeHipGlobalVel);
+
         return new float[] {
                 leftFootLocalPos.x,
                 leftFootLocalPos.y,
@@ -310,9 +317,9 @@ public class MotionMatching : MonoBehaviour
                 rightFootGlobalVelocity.x,
                 rightFootGlobalVelocity.y,
                 rightFootGlobalVelocity.z,
-                combinedHipGlobalVel.x,
-                combinedHipGlobalVel.y,
-                combinedHipGlobalVel.z,
+                altCombinedHipGlobalVel.x,
+                altCombinedHipGlobalVel.y,
+                altCombinedHipGlobalVel.z,
                 //hipGlobalVel.x,
                 //hipGlobalVel.y,
                 //hipGlobalVel.z,
@@ -402,6 +409,11 @@ public class MotionMatching : MonoBehaviour
         return !(Mathf.Approximately(stickL.x, 0) && Mathf.Approximately(stickL.y, 0));
     }
 
+    private bool intsApproxSame(int a, int b)
+    {
+        return Math.Abs(a - b) <= animTransitionTolerance;
+    }
+
     private float userInputTargetY()
     {
         Vector2 stickL = gamepad.leftStick.ReadValue();
@@ -418,20 +430,21 @@ public class MotionMatching : MonoBehaviour
         //    return new float[6];
         //}
         float desiredXVel, desiredZVel;
-        //if (useQuadraticVel)
-        //{
-        //    Vector2 normalized = stickL.normalized * stickL.sqrMagnitude;
-        //    desiredXVel = normalized.x * maxXVel;
-        //    desiredZVel = normalized.y * maxZVel;
-        //} else
-        //{
-        //    desiredXVel = stickL.x * maxXVel;
-        //    desiredZVel = stickL.y * maxZVel;
-        //}
-        float desiredSpeed = stickL.magnitude * MoveSpeed;
-        Vector2 desiredVel = stickL.normalized * desiredSpeed;
-        desiredXVel = desiredVel.x;
-        desiredZVel = desiredVel.y;
+        if (useQuadraticVel)
+        {
+            Vector2 normalized = stickL.normalized * stickL.sqrMagnitude;
+            desiredXVel = normalized.x * maxXVel;
+            desiredZVel = normalized.y * maxZVel;
+        }
+        else
+        {
+            desiredXVel = stickL.x * maxXVel;
+            desiredZVel = stickL.y * maxZVel;
+        }
+        //float desiredSpeed = stickL.magnitude * MoveSpeed;
+        //Vector2 desiredVel = stickL.normalized * desiredSpeed;
+        //desiredXVel = desiredVel.x;
+        //desiredZVel = desiredVel.y;
         inputDebugStart = hip.transform.position;
         float[] userTraj = new float[6];
         int idx = 0;
@@ -469,6 +482,7 @@ public class MotionMatching : MonoBehaviour
     critically damped spring damper, which essentially mixes the current
     character velocity with the desired user velocity
     */
+    public int animTransitionTolerance = 3;
     private void motionMatch()
     {
         float[] currentSearchVector = getCurrentSearchVector();
@@ -480,8 +494,8 @@ public class MotionMatching : MonoBehaviour
         int bestFrameIdx = (int)bestMatchingAnimation[searchVecLen];
 
         int bestFileIdx = (int)bestMatchingAnimation[searchVecLen + 1];
-        bool cond_a = (bestFileIdx == curFileIdx && (bestFrameIdx == curFrameIdx || bestFrameIdx == lastMMFrameIdx));
-        bool cond_b = (bestFileIdx == nextFileIdx && (bestFrameIdx == nextFrameIdx || bestFrameIdx == lastMMFrameIdx));
+        bool cond_a = bestFileIdx == curFileIdx && (intsApproxSame(bestFrameIdx , curFrameIdx ) || intsApproxSame(bestFrameIdx, lastMMFrameIdx));
+        bool cond_b = bestFileIdx == nextFileIdx && (intsApproxSame(bestFrameIdx, nextFrameIdx) || intsApproxSame(bestFrameIdx, lastMMFrameIdx));
 
         if (cond_a || cond_b)
         {

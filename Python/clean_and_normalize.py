@@ -1,6 +1,9 @@
 import os
 import math
 import argparse
+from datetime import datetime
+from pytz import timezone, utc
+
 from collections import deque
 ## Usable frames
 usable_frames = {
@@ -21,6 +24,7 @@ outputs_dir = "D:/Unity/Unity 2021 Editor Test/Assets/outputs/" # sprint1_subjec
 newfile_dir = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/"
 y_rot_only = False
 walk_only = False
+recalc_hip_vel = False
 newfile_dir_yrotonly = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs_yrotonly/"
 # My serach vector length:
 # 12 + 3 (what they had)
@@ -54,7 +58,13 @@ def clean_data():
                         continue
                     currentHipPosX = float(strValues[15])
                     currentHipPosZ = float(strValues[16])
-                    finalVal = strValues[:15] # + hipTrajAndOrientation[i + 20] + hipTrajAndOrientation[i + 40] + hipTrajAndOrientation[i + 60] + [str(i)]
+                    finalVal = strValues[:15]  # + hipTrajAndOrientation[i + 20] + hipTrajAndOrientation[i + 40] + hipTrajAndOrientation[i + 60] + [str(i)]
+                    if recalc_hip_vel:
+                        futureHipTraj = hipTrajAndOrientation[i + 30]
+                        futureHipPosX, futureHipPosZ = float(futureHipTraj[0]), float(futureHipTraj[1])
+                        finalVal[12] = str(futureHipPosX - currentHipPosX)
+                        finalVal[14] = str(futureHipPosZ - currentHipPosZ)
+
                     for j in [20, 40, 60]:
                         futureHipPosX = float(hipTrajAndOrientation[i + j][0])
                         futureHipPosZ = float(hipTrajAndOrientation[i + j][1])
@@ -151,16 +161,27 @@ def get_max_hip_vel():
 
 test_val_str = "0.0986326,7.096337,0.2465061,0.01537981,7.058707,-0.6282009,0.0007028888,-0.0004897094,-0.0005674235,0.001235168,-5.621925E-05,-0.0006092523,0.001626688,0.0007005898,-0.0008952615,0.002366892,-0.0003103769,1.418887,0.002559961,0.002792338,0.8308717,0.003218988,0.003839601,0.6938116"
 test_vals = test_val_str.split(',')
+
+def get_pst_time():
+    date_format='%m-%d-%Y %H:%M:%S %Z'
+    date = datetime.now(tz=utc)
+    date = date.astimezone(timezone('US/Pacific'))
+    pstDateTime=date.strftime(date_format)
+    return pstDateTime
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--yrotonly', default=False, action='store_true')
     parser.add_argument('--walkonly', default=False, action='store_true')
+    parser.add_argument('--recalc', default=False, action='store_true')
 
     args = parser.parse_args()
-    global y_rot_only, search_vec_len, walk_only, usable_frames
+    global y_rot_only, search_vec_len, walk_only, usable_frames, recalc_hip_vel
     walk_only = args.walkonly
     y_rot_only = args.yrotonly
-    print("Running with: walk_only: ", walk_only, " || y_rot_only: ", y_rot_only)
+    recalc_hip_vel = args.recalc
+    run_params_str = "Running with: walk_only: " + str(walk_only) + " | y_rot_only: " +  str(y_rot_only) + " | recalc_hip_vel: " + str(recalc_hip_vel)
+    print(run_params_str)
     if walk_only:
         for key in ["run1_subject2" , "run1_subject5", 'run2_subject1', 'sprint1_subject2' ]:
             del usable_frames[key]
@@ -168,6 +189,10 @@ def main():
     # return
     clean_data()
     normalizeData()
+    outfile_dir =  getOutfileDir()
+    with open(outfile_dir + "log.txt", 'a') as outfile:
+        outfile.write("\n" + get_pst_time())
+        outfile.write("\n" + run_params_str + "\n")
 # get_max_hip_vel()
 if __name__ == "__main__":
     main()

@@ -109,7 +109,7 @@ public class KDTree
             }
         }
     }
-    int trajectoryPenalty = 5;
+    int trajectoryPenalty = 3;
     private double distBetweenAtAxis(double[] a, float[] b, int axis)
     {
         int startIdx = trajectoryIndices[0];

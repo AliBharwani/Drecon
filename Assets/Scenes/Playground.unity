@@ -1253,6 +1253,7 @@ MonoBehaviour:
   dryRun: 1
   blender: 1
   startAtFrame: 300
+  versionNum: 0
 --- !u!114 &42338790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1273,21 +1274,27 @@ MonoBehaviour:
   hip: {fileID: 1812220947}
   updateEveryNFrame: 10
   drawGizmos: 1
+  drawAngles: 0
   useQuadraticVel: 1
   yrotonly: 1
   gizmoSphereRad: 0.1
-  hackyMaxVelReducer: 1
+  hackyMaxVelReducer: 2
   applyMM: 1
-  applyMotion: 1
+  useAnimTransforms: 1
   walkOnly: 1
-  bruteforceSearch: 1
+  bruteforceSearch: 0
   acc: {x: 0, y: 0, z: 0}
-  MoveSpeed: 2
+  MoveSpeed: 3
   SprintSpeed: 5.335
-  SpeedChangeRate: 10
+  SpeedChangeRate: 2
+  transitionTime: 5
   toyPointer1: {fileID: 866670245}
   toyPointer2: {fileID: 2128906490}
   toyPointer3: {fileID: 922896735}
+  a: 0.2
+  b: 0.85
+  velCombineFactor: 0.75
+  animTransitionTolerance: 5
 --- !u!4 &42338792
 Transform:
   m_ObjectHideFlags: 0
@@ -1812,6 +1819,7 @@ MonoBehaviour:
   dryRun: 1
   blender: 0
   startAtFrame: 0
+  versionNum: 0
 --- !u!95 &53912932
 Animator:
   serializedVersion: 3
@@ -2730,6 +2738,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &118338818
 Transform:
   m_ObjectHideFlags: 0
@@ -5210,6 +5219,7 @@ MonoBehaviour:
   dryRun: 1
   blender: 0
   startAtFrame: 0
+  versionNum: 0
 --- !u!95 &268823594
 Animator:
   serializedVersion: 3
@@ -17443,6 +17453,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &940244998
 Transform:
   m_ObjectHideFlags: 0
@@ -18245,6 +18256,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &975643430
 Transform:
   m_ObjectHideFlags: 0
@@ -18613,6 +18625,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &991519134
 Transform:
   m_ObjectHideFlags: 0
@@ -19817,6 +19830,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &1054313487
 Transform:
   m_ObjectHideFlags: 0
@@ -20059,6 +20073,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &1060757989
 Transform:
   m_ObjectHideFlags: 0
@@ -20459,6 +20474,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &1075125885
 Transform:
   m_ObjectHideFlags: 0
@@ -23258,7 +23274,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1248053378
 Transform:
   m_ObjectHideFlags: 0
@@ -28200,6 +28216,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &1504689704
 Transform:
   m_ObjectHideFlags: 0
@@ -29127,6 +29144,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &1536402603
 Transform:
   m_ObjectHideFlags: 0
@@ -29523,6 +29541,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &1565175987
 Transform:
   m_ObjectHideFlags: 0
@@ -32456,6 +32475,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &1747538417
 Transform:
   m_ObjectHideFlags: 0
@@ -34892,6 +34912,7 @@ MonoBehaviour:
   dryRun: 0
   blender: 1
   startAtFrame: 0
+  versionNum: 0
 --- !u!4 &1854564338
 Transform:
   m_ObjectHideFlags: 0
@@ -40266,6 +40287,7 @@ MonoBehaviour:
   dryRun: 1
   blender: 0
   startAtFrame: 0
+  versionNum: 0
 --- !u!1 &2114283753834967212
 GameObject:
   m_ObjectHideFlags: 0
