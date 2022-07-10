@@ -1274,7 +1274,7 @@ MonoBehaviour:
   hip: {fileID: 1812220947}
   updateEveryNFrame: 10
   drawGizmos: 1
-  drawAngles: 0
+  drawAngles: 1
   useQuadraticVel: 1
   yrotonly: 1
   gizmoSphereRad: 0.1
@@ -1283,8 +1283,9 @@ MonoBehaviour:
   useAnimTransforms: 1
   walkOnly: 1
   bruteforceSearch: 0
+  numNeigh: 7
   acc: {x: 0, y: 0, z: 0}
-  MoveSpeed: 3
+  MoveSpeed: 2
   SprintSpeed: 5.335
   SpeedChangeRate: 2
   transitionTime: 5
@@ -1294,7 +1295,7 @@ MonoBehaviour:
   a: 0.2
   b: 0.85
   velCombineFactor: 0.75
-  animTransitionTolerance: 5
+  animTransitionTolerance: 10
 --- !u!4 &42338792
 Transform:
   m_ObjectHideFlags: 0
@@ -23274,7 +23275,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1248053378
 Transform:
   m_ObjectHideFlags: 0

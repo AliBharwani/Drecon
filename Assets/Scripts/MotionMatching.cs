@@ -26,6 +26,7 @@ public class MotionMatching : MonoBehaviour
     public bool useAnimTransforms = false;
     public bool walkOnly = true;
     public bool bruteforceSearch = false;
+    public int numNeigh = 1;
     public Vector3 acc;
     public float MoveSpeed = 2.0f;
     [Tooltip("Sprint speed of the character in m/s")]
@@ -178,7 +179,7 @@ public class MotionMatching : MonoBehaviour
     }
     void OnDrawGizmos()
     {
-        if (!drawGizmos)
+        if (!drawGizmos || gizmoSpheres1 == null)
             return;
         // Draw a yellow sphere at the transform's position
         Gizmos.color = Color.blue;
@@ -593,7 +594,7 @@ public class MotionMatching : MonoBehaviour
         searchVecLen = yrotonly ? 24 : 30;
         prefixes = walkOnly ? walkPrefixes : allPrefixes;
 
-        motionDB = new KDTree(searchVecLen, 2);
+        motionDB = new KDTree(searchVecLen, 2, numNeigh);
         Application.targetFrameRate = targetFramerate;
         hipRotOffset = hip.transform.rotation.eulerAngles;
         if (this.KeepSceneViewActive && Application.isEditor)

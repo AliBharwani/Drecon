@@ -20,15 +20,24 @@ public class KDTree
     // extraData represents the num of floats at the end that should be ignored
     private int k;
     private int extraData;
+    private int numNeigh;
+
     private List<double[]> values;
     private Node root;
     private double currentBestDist;
     private Node closest;
     private int[] trajectoryIndices = new int[] { 12, 24 };
-    public KDTree (int _k = 30, int _extraData = 2)
+    //private SortedList<double, double[]> sortedNeigh;
+    private MaxHeap maxHeap;
+
+    public KDTree (int _k = 30, int _extraData = 2, int _numNeigh = 1)
     {
         k = _k;
         extraData = _extraData;
+        numNeigh = _numNeigh;
+        if (numNeigh > 1)
+            maxHeap = new MaxHeap(numNeigh);
+            //sortedNeigh = new SortedList<double, double[]>(numNeigh);
         values = new List<double[]>();
     }
    public void Add(double[] entry)
@@ -70,8 +79,21 @@ public class KDTree
     {
         closest = null;
         currentBestDist = double.PositiveInfinity;
+        maxHeap.reset();
+
         recursiveNNSearch(root, searchVector, depth);
-        return closest.data;
+        if (numNeigh == 1) {
+            return closest.data;
+        } else
+        {
+            // lets say we have 5 nearest neighbors
+            // pick 
+            double[] returnVal = maxHeap.getRandom();
+            //double[] returnVal = sortedNeigh.Values[UnityEngine.Random.Range(0, numNeigh)];
+            //Debug.Log("Sorted neigh count: " + sortedNeigh.Count.ToString());
+            //sortedNeigh.Clear();
+            return returnVal;
+        }
     }
 
     private void recursiveNNSearch(Node node, float[] searchVector, int depth) 
@@ -83,11 +105,24 @@ public class KDTree
         //if (closest != null && Math.Pow(node.data[axis] - searchVector[axis], 2) > currentBestDist)
         //    return;
         double dist = distanceBetween( node.data, searchVector);
-        if (closest == null || dist < currentBestDist)
+        if (numNeigh == 1)
         {
-            closest = node;
-            currentBestDist = dist;
+            if (closest == null || dist < currentBestDist)
+            {
+                closest = node;
+                currentBestDist = dist;
+            }
+        } else
+        {
+            // maxHeap of Mins
+            if (!maxHeap.isFull() || maxHeap.peek() > dist)
+                maxHeap.add(dist, node.data);
+            //if (sortedNeigh.Count < numNeigh || sortedNeigh.Keys[sortedNeigh.Count - 1] > dist)
+            //{
+            //    sortedNeigh.Add(dist, node.data);
+            //}
         }
+
         if (searchVector[axis] < node.data[axis])
         {
             // search left first
