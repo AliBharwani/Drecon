@@ -1,0 +1,6 @@
+
+07-09-2022 23:48:23 PDT
+Running with: walk_only: False | y_rot_only: True | recalc_hip_vel: True
+
+07-13-2022 23:48:38 PDT
+Running with: walk_only: False | y_rot_only: True | recalc_hip_vel: True | add_current_hip_rot: False

@@ -32,7 +32,7 @@ public class MotionMatching : MonoBehaviour
     [Tooltip("Sprint speed of the character in m/s")]
     public float SprintSpeed = 5.335f;
     [Tooltip("Acceleration and deceleration")]
-    public float SpeedChangeRate = 10.0f;
+    public float acceleration = 10.0f;
     [Tooltip("# of frames in a transition between clips")]
     public float transitionTime = 3f;
 
@@ -232,11 +232,6 @@ public class MotionMatching : MonoBehaviour
         // hip global velocity (one number in r3, 3 numbers)
         Vector3 hipGlobalVelPerFrame = useAnimTransforms ? hip.transform.position - lastHipPos : velocity * frameTime; // hip.transform.position - lastHipPos;
 
-        /* Idea: instead of using hipGlobalVelPerFrame to get trajectories, just look 20 frames ahead */
-
-
-
-
         // I should combine hipGlolabVel with user input
         Vector3 hipGlobalVel = useAnimTransforms ? (hip.transform.position - lastHipPos) / frameTime : velocity;// (hip.transform.position - lastHipPos) / frameTime;
         Vector3 combinedHipGlobalVel = combineHipGlobalVel(hipGlobalVel);
@@ -304,6 +299,11 @@ public class MotionMatching : MonoBehaviour
             idx += additionalLen / 3;
         }
         Vector3 altCombinedHipGlobalVel = combineHipGlobalVel(alternativeHipGlobalVel);
+        Vector3 velocitiesToUse = altCombinedHipGlobalVel;
+        if (!useAnimTransforms)
+        {
+            velocitiesToUse = new Vector3(currentVel.x, 0f, currentVel.y);
+        }
 
         return new float[] {
                 leftFootLocalPos.x,
@@ -318,12 +318,13 @@ public class MotionMatching : MonoBehaviour
                 rightFootGlobalVelocity.x,
                 rightFootGlobalVelocity.y,
                 rightFootGlobalVelocity.z,
-                altCombinedHipGlobalVel.x,
-                altCombinedHipGlobalVel.y,
-                altCombinedHipGlobalVel.z,
+                velocitiesToUse.x,
+                velocitiesToUse.y,
+                velocitiesToUse.z,
                 //hipGlobalVel.x,
                 //hipGlobalVel.y,
                 //hipGlobalVel.z,
+                 hip.transform.rotation.eulerAngles.y,
                 hipFutureTrajAndOrientations[0],
                 hipFutureTrajAndOrientations[1],
                 hipFutureTrajAndOrientations[2],
@@ -425,35 +426,50 @@ public class MotionMatching : MonoBehaviour
     }
     private float[] readUserInput()
     {
-        Vector2 stickL = gamepad.leftStick.ReadValue();
+        //Vector2 stickL = gamepad.leftStick.ReadValue();
         //if (Mathf.Approximately(stickL.x, 0) && Mathf.Approximately(stickL.y, 0))
         //{
         //    return new float[6];
         //}
-        float desiredXVel, desiredZVel;
-        if (useQuadraticVel)
-        {
-            Vector2 normalized = stickL.normalized * stickL.sqrMagnitude;
-            desiredXVel = normalized.x * maxXVel;
-            desiredZVel = normalized.y * maxZVel;
-        }
-        else
-        {
-            desiredXVel = stickL.x * maxXVel;
-            desiredZVel = stickL.y * maxZVel;
-        }
+        //float desiredXVel, desiredZVel;
+        //if (useQuadraticVel)
+        //{
+        //    Vector2 normalized = stickL.normalized * stickL.sqrMagnitude;
+        //    desiredXVel = normalized.x * maxXVel;
+        //    desiredZVel = normalized.y * maxZVel;
+        //}
+        //else
+        //{
+        //    desiredXVel = stickL.x * maxXVel;
+        //    desiredZVel = stickL.y * maxZVel;
+        //}
         //float desiredSpeed = stickL.magnitude * MoveSpeed;
         //Vector2 desiredVel = stickL.normalized * desiredSpeed;
         //desiredXVel = desiredVel.x;
         //desiredZVel = desiredVel.y;
+        float targetSpeed;
+        // Get desired velocity 
+        Vector2 stickL = gamepad.leftStick.ReadValue();
+        // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+        // if there is no input, set the target speed to 0
+        if (stickL == Vector2.zero) targetSpeed = 0.0f;
+        else
+        {
+            targetSpeed = stickL.magnitude * MoveSpeed;
+        }
+        Vector2 desiredVel = stickL.normalized * targetSpeed;
+        Vector2 desiredVelDir = desiredVel - currentVel;
+        if (desiredVelDir.magnitude > acceleration)
+            desiredVelDir = desiredVelDir.normalized * acceleration;
+        currentVel += desiredVelDir * Time.deltaTime;
         inputDebugStart = hip.transform.position;
         float[] userTraj = new float[6];
         int idx = 0;
         for (int i = 1; i < 4; i++)
         {
             int frameNum = i * 20;
-            float futureXPos = (desiredXVel * frameTime) * frameNum;
-            float futureZPos = (desiredZVel * frameTime) * frameNum;
+            float futureXPos = (currentVel.x * frameTime) * frameNum;
+            float futureZPos = (currentVel.y * frameTime) * frameNum;
             userTraj[idx] = futureXPos;
             userTraj[idx + 1] = futureZPos;
             gizmoSpheres2[i - 1] = new Vector3(futureXPos, 0, futureZPos) + hip.transform.position;
@@ -554,7 +570,7 @@ public class MotionMatching : MonoBehaviour
     }
 
 
-    private void updatePhysics()
+    private void updatePhysics_OLD()
     {
         float targetSpeed = MoveSpeed; // _input.sprint ? SprintSpeed : MoveSpeed;
         Vector2 stickL = gamepad.leftStick.ReadValue();
@@ -571,7 +587,7 @@ public class MotionMatching : MonoBehaviour
         {
             // creates curved result rather than a linear one giving a more organic speed change
             // note T in Lerp is clamped, so we don't need to clamp our speed
-            _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * SpeedChangeRate);
+            _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * acceleration);
 
             // round speed to 3 decimal places
             _speed = Mathf.Round(_speed * 1000f) / 1000f;
@@ -585,13 +601,34 @@ public class MotionMatching : MonoBehaviour
         velocity = deltaPosition / Time.deltaTime;
         hip.transform.position += deltaPosition;
     }
+    private Vector2 currentVel;
+    private void updatePhysics()
+    {
+        float targetSpeed;
+        // Get desired velocity 
+        Vector2 stickL = gamepad.leftStick.ReadValue();
+        // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
+        // if there is no input, set the target speed to 0
+        if (stickL == Vector2.zero) targetSpeed = 0.0f;
+        else
+        {
+            targetSpeed = stickL.magnitude * MoveSpeed;
+        }
+        Vector2 desiredVel = stickL.normalized * targetSpeed;
+        Vector2 desiredVelDir = desiredVel - currentVel;
+        if (desiredVelDir.magnitude > acceleration)
+            desiredVelDir = desiredVelDir.normalized * acceleration ;
+        currentVel += desiredVelDir * Time.deltaTime;
+        Vector3 deltaPosition = new Vector3(currentVel.x, 0f, currentVel.y) * Time.deltaTime;
+        hip.transform.position += deltaPosition;
+    }
     void Start()
     {
         //maxXVel /= hackyMaxVelReducer;
         //maxZVel /= hackyMaxVelReducer;
         //useAnimTransforms = false;
         // + 2 for extra data 
-        searchVecLen = yrotonly ? 24 : 30;
+        searchVecLen = yrotonly ? 25 : 30;
         prefixes = walkOnly ? walkPrefixes : allPrefixes;
 
         motionDB = new KDTree(searchVecLen, 2, numNeigh);

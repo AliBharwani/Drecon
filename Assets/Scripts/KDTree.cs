@@ -26,13 +26,15 @@ public class KDTree
     private Node root;
     private double currentBestDist;
     private Node closest;
-    private int[] trajectoryIndices = new int[] { 12, 24 };
+    private int[] trajectoryIndices = new int[] { 13, 25 };
     //private SortedList<double, double[]> sortedNeigh;
     private MaxHeap maxHeap;
 
-    public KDTree (int _k = 30, int _extraData = 2, int _numNeigh = 1)
+    public KDTree (int _k, int _extraData = 2, int _numNeigh = 1)
     {
         k = _k;
+        trajectoryIndices[0] = k - 12;
+        trajectoryIndices[1] = k;
         extraData = _extraData;
         numNeigh = _numNeigh;
         if (numNeigh > 1)
@@ -86,12 +88,8 @@ public class KDTree
             return closest.data;
         } else
         {
-            // lets say we have 5 nearest neighbors
-            // pick 
+
             double[] returnVal = maxHeap.getRandom();
-            //double[] returnVal = sortedNeigh.Values[UnityEngine.Random.Range(0, numNeigh)];
-            //Debug.Log("Sorted neigh count: " + sortedNeigh.Count.ToString());
-            //sortedNeigh.Clear();
             return returnVal;
         }
     }
@@ -117,10 +115,6 @@ public class KDTree
             // maxHeap of Mins
             if (!maxHeap.isFull() || maxHeap.peek() > dist)
                 maxHeap.add(dist, node.data);
-            //if (sortedNeigh.Count < numNeigh || sortedNeigh.Keys[sortedNeigh.Count - 1] > dist)
-            //{
-            //    sortedNeigh.Add(dist, node.data);
-            //}
         }
 
         if (searchVector[axis] < node.data[axis])

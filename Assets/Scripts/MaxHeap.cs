@@ -30,8 +30,6 @@ public class MaxHeap
 
     public double[] getRandom()
     {
-        Debug.Log("Arr size: " + size.ToString());
-        BVHUtils.debugArray(arr, " Max Heap: ");
         return arr[UnityEngine.Random.Range(1, capacity + 1)].Item2;
     }
 

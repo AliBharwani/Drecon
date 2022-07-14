@@ -151,7 +151,7 @@ public static class BVHUtils
                 {
                     Vector3 a_translation = getDifferenceInPosition(a_bone, a_frameIdx);
                     Vector3 b_translation = getDifferenceInPosition(b_bone, b_frameIdx);
-                    curTransform.position += Vector3.Slerp(a_translation, b_translation, transTime);
+                    curTransform.position += Vector3.Lerp(a_translation, b_translation, transTime);
                 }
                 else
                 {
@@ -176,7 +176,7 @@ public static class BVHUtils
             eulerBVH = new Vector3(xRot, yRot, zRot);
             rot = fromEulerZXY(eulerBVH);
             Quaternion b_rot = new Quaternion(rot.x, -rot.y, -rot.z, rot.w);
-            curTransform.localRotation = Quaternion.Slerp(a_rot, b_rot, transTime);
+            curTransform.localRotation = Quaternion.Lerp(a_rot, b_rot, transTime);
         }
     }
 
@@ -211,5 +211,16 @@ public static class BVHUtils
     public static void debugArray<T>(T[] data, string name)
     {
         Debug.Log(name + string.Join(",", data));
+    }
+
+    public static float SmoothCD(float deltaTime, float from, float to, float currentVel, out float vel, float smoothTime)
+    {
+        float omega = 2f / smoothTime;
+        float x = omega * deltaTime;
+        float exp = 1f / (1f + x + .48f * x * x + .235f * x * x * x);
+        float change = from - to;
+        float temp = (currentVel + omega * change) * deltaTime;
+        vel = (currentVel - omega * temp) * exp;
+        return to + (change + temp) * exp;
     }
 }
