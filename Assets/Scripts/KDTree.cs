@@ -27,16 +27,21 @@ public class KDTree
     private double currentBestDist;
     private Node closest;
     private int[] trajectoryIndices = new int[] { 13, 25 };
+
+    int startIdx,endIdx;
+    private float trajectoryPenalty = 3;
+
     //private SortedList<double, double[]> sortedNeigh;
     private MaxHeap maxHeap;
 
-    public KDTree (int _k, int _extraData = 2, int _numNeigh = 1)
+    public KDTree (int _k, int _extraData = 2, int _numNeigh = 1, float _trajectoryPenalty = 3)
     {
         k = _k;
-        trajectoryIndices[0] = k - 12;
-        trajectoryIndices[1] = k;
+        startIdx = k - 10;
+        endIdx = k;
         extraData = _extraData;
         numNeigh = _numNeigh;
+        trajectoryPenalty = _trajectoryPenalty;
         if (numNeigh > 1)
             maxHeap = new MaxHeap(numNeigh);
             //sortedNeigh = new SortedList<double, double[]>(numNeigh);
@@ -138,12 +143,9 @@ public class KDTree
             }
         }
     }
-    int trajectoryPenalty = 3;
     private double distBetweenAtAxis(double[] a, float[] b, int axis)
     {
-        int startIdx = trajectoryIndices[0];
-        int endIdx = trajectoryIndices[1];
-        int mult = axis >= startIdx && axis < endIdx ? trajectoryPenalty : 1;
+        float mult = axis >= startIdx && axis < endIdx ? trajectoryPenalty : 1;
 
         return Math.Sqrt(Math.Pow(a[axis] - b[axis], 2) * mult) ;
     }
@@ -151,11 +153,9 @@ public class KDTree
     {
         // use squared euclidan distance to avoid having to calculate square roots
         double answer = 0;
-        int startIdx = trajectoryIndices[0];
-        int endIdx = trajectoryIndices[1];
         for (int i = 0; i < k; i++)
         {
-            int mult = i >= startIdx && i < endIdx ? trajectoryPenalty : 1;
+            float mult = i >= startIdx && i < endIdx ? trajectoryPenalty : 1;
             answer += mult * Math.Pow(a[i] - b[i], 2);
         }
         return Math.Sqrt(answer);

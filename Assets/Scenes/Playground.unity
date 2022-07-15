@@ -1289,6 +1289,7 @@ MonoBehaviour:
   SprintSpeed: 5.335
   acceleration: 5
   transitionTime: 5
+  trajPenalty: 10
   toyPointer1: {fileID: 866670245}
   toyPointer2: {fileID: 2128906490}
   toyPointer3: {fileID: 922896735}

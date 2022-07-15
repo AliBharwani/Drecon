@@ -9,34 +9,46 @@ using UnityEditor;
 
 public class MotionMatching : MonoBehaviour
 {
+    [Header("==== SET ONCE AND FORGET ====")]
     public bool KeepSceneViewActive = true;
     public int targetFramerate = 30;
     public GameObject leftFoot;
     public GameObject rightFoot;
     public GameObject root;
     public GameObject hip;
-    public int updateEveryNFrame = 10;
+    public bool yrotonly = true;
+    public bool walkOnly = true;
+    public Transform toyPointer1, toyPointer2, toyPointer3;
+
+    [Header("====    DEBUG    ====")]
+    public bool applyMM = false;
     public bool drawGizmos = true;
     public bool drawAngles = false;
-    public bool useQuadraticVel = true;
-    public bool yrotonly = true;
     public float gizmoSphereRad = .01f;
-    public float hackyMaxVelReducer = 5f;
-    public bool applyMM = false;
-    public bool useAnimTransforms = false;
-    public bool walkOnly = true;
     public bool bruteforceSearch = false;
+
+    [Header("====   ANIMATION    ====")]
+    public int updateEveryNFrame = 10;
     public int numNeigh = 1;
-    public Vector3 acc;
-    public float MoveSpeed = 2.0f;
-    [Tooltip("Sprint speed of the character in m/s")]
-    public float SprintSpeed = 5.335f;
-    [Tooltip("Acceleration and deceleration")]
-    public float acceleration = 10.0f;
+    public int animTransitionTolerance = 3;
+    public bool useAnimTransforms = false;
     [Tooltip("# of frames in a transition between clips")]
     public float transitionTime = 3f;
+    public float trajPenalty = 5f;
+    public float velCombineFactor = .5f;
+    public float a = .2f;
+    public float b = .85f;
+    [Header("====   PHYSICS    ====")]
+    public bool useQuadraticVel = true;
+    //public float hackyMaxVelReducer = 5f;
+    public Vector3 acc;
+    public float MoveSpeed = 2.0f;
+    public float SprintSpeed = 5.335f;
+    public float acceleration = 10.0f;
 
     private Vector3 velocity;
+    private Vector2 currentVel;
+
     private Vector3 hipRotOffset;
     private Vector3 lastLeftFootGlobalPos;
     private Vector3 lastRightFootGlobalPos;
@@ -84,7 +96,6 @@ public class MotionMatching : MonoBehaviour
     private bool firstFrame = true;
     // Debug stuff
     private Vector3 animDebugStart, animDebugEnd, inputDebugStart, inputDebugEnd, finalDebugStart, finalDebugEnd;
-    public Transform toyPointer1, toyPointer2, toyPointer3;
     private Vector3[] gizmoSpheres1;
     private Vector3[] gizmoSpheres2;
     private Vector3[] gizmoSpheres3;
@@ -344,8 +355,6 @@ public class MotionMatching : MonoBehaviour
     }
 
 
-    public float a = .2f;
-    public float b = .85f;
     private float combineCurTrajWithUser(float curTraj, float userTraj, int frameNum)
     {
         // values I like: (.2, .85); 
@@ -482,7 +491,6 @@ public class MotionMatching : MonoBehaviour
         return userTraj;
         //Debug.Log("Desired x vel: " + desiredXVel.ToString() + " Desierd z vel: " + desiredZVel.ToString());
     }
-    public float velCombineFactor = .5f;
     private Vector3 combineHipGlobalVel(Vector3 hipGlobalVel)
     {
         Vector2 stickL = gamepad.leftStick.ReadValue();
@@ -499,7 +507,6 @@ public class MotionMatching : MonoBehaviour
     critically damped spring damper, which essentially mixes the current
     character velocity with the desired user velocity
     */
-    public int animTransitionTolerance = 3;
     private void motionMatch()
     {
         float[] currentSearchVector = getCurrentSearchVector();
@@ -548,7 +555,7 @@ public class MotionMatching : MonoBehaviour
         //curFrameIdx++;
         if (nextFileIdx != -1 && curTransitionFrameNum <= transitionTime)
         {
-            BVHUtils.lerp(curFrameIdx, boneLists[curFileIdx], nextFrameIdx, boneLists[nextFileIdx], nameToTransformMap, ((float) curTransitionFrameNum) / transitionTime, true, useAnimTransforms);
+            BVHUtils.lerp(curFrameIdx - (curTransitionFrameNum - 1), boneLists[curFileIdx], nextFrameIdx, boneLists[nextFileIdx], nameToTransformMap, ((float) curTransitionFrameNum) / transitionTime, true, useAnimTransforms);
             if (curTransitionFrameNum == transitionTime)
             {
                 curFrameIdx = nextFrameIdx;
@@ -601,7 +608,6 @@ public class MotionMatching : MonoBehaviour
         velocity = deltaPosition / Time.deltaTime;
         hip.transform.position += deltaPosition;
     }
-    private Vector2 currentVel;
     private void updatePhysics()
     {
         float targetSpeed;
@@ -631,7 +637,7 @@ public class MotionMatching : MonoBehaviour
         searchVecLen = yrotonly ? 25 : 30;
         prefixes = walkOnly ? walkPrefixes : allPrefixes;
 
-        motionDB = new KDTree(searchVecLen, 2, numNeigh);
+        motionDB = new KDTree(searchVecLen, 2, numNeigh, trajPenalty);
         Application.targetFrameRate = targetFramerate;
         hipRotOffset = hip.transform.rotation.eulerAngles;
         if (this.KeepSceneViewActive && Application.isEditor)
