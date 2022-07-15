@@ -32,6 +32,7 @@ public class MotionMatching : MonoBehaviour
     public int numNeigh = 1;
     public int animTransitionTolerance = 3;
     public bool useAnimTransforms = false;
+    public bool lerpFromFristFrame = true;
     [Tooltip("# of frames in a transition between clips")]
     public float transitionTime = 3f;
     public float trajPenalty = 5f;
@@ -555,7 +556,8 @@ public class MotionMatching : MonoBehaviour
         //curFrameIdx++;
         if (nextFileIdx != -1 && curTransitionFrameNum <= transitionTime)
         {
-            BVHUtils.lerp(curFrameIdx - (curTransitionFrameNum - 1), boneLists[curFileIdx], nextFrameIdx, boneLists[nextFileIdx], nameToTransformMap, ((float) curTransitionFrameNum) / transitionTime, true, useAnimTransforms);
+            int frameToLerpFrom = lerpFromFristFrame ? curFrameIdx - (curTransitionFrameNum - 1) : curFrameIdx;
+            BVHUtils.lerp(frameToLerpFrom, boneLists[curFileIdx], nextFrameIdx, boneLists[nextFileIdx], nameToTransformMap, ((float) curTransitionFrameNum) / transitionTime, true, useAnimTransforms);
             if (curTransitionFrameNum == transitionTime)
             {
                 curFrameIdx = nextFrameIdx;
