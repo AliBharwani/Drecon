@@ -180,7 +180,7 @@ public static class BVHUtils
         }
     }
 
-    private static Vector3 getPositionDiffAtFrame(BVHParser.BVHBone bone, int startFrame, int endFrame)
+    public static Vector3 getPositionDiffAtFrame(BVHParser.BVHBone bone, int startFrame, int endFrame)
     {
         float xPos = -getAtFrame(bone, Channel.XPos, startFrame);
         //float yPos =  getAtFrame(bone, Channel.YPos, startFrame);
@@ -222,5 +222,33 @@ public static class BVHUtils
         float temp = (currentVel + omega * change) * deltaTime;
         vel = (currentVel - omega * temp) * exp;
         return to + (change + temp) * exp;
+    }
+    public static double reverseAtan2ClockDirection(float y, float x)
+    {
+        return 360 + (Math.Atan2(y, x) * Mathf.Rad2Deg * -1);
+    }
+    public static float getAngleBetweenVelocityAndHip(List<BVHParser.BVHBone> bones, Transform hipTrans, int frameNum, out float velocityMag)
+    {
+        BVHParser.BVHBone hipBone = bones[0];
+        Vector3 velocityPerSecond = getPositionDiffAtFrame(hipBone, frameNum, frameNum + 30);
+        return getAngleBetweenVelocityAndHip(hipTrans, velocityPerSecond, out velocityMag);
+    }
+    public static float getAngleBetweenVelocityAndHip(Transform hipTrans, Vector3 velocity, out float velocityMag)
+    {
+        float hipEulerY = hipTrans.rotation.eulerAngles.y;
+        velocityMag = velocity.magnitude;
+        // have to multiple by -1 and add 360 because the Y angle unity gives goes CW from east, atan2 is CCW
+        double velocityAngle = reverseAtan2ClockDirection(velocity.z, velocity.x);
+        return getDifferenceInYRots(hipEulerY, (float)velocityAngle);
+    }
+    public static float getDifferenceInYRots(float a, float b)
+    {
+        if (Mathf.Abs(a - b) <= 180)
+            return a - b;
+        else if (a > b)
+            return (360 - a) + b;
+        else
+            return -a + (b - 360);
+
     }
 }

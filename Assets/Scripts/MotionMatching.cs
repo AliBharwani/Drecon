@@ -296,7 +296,9 @@ public class MotionMatching : MonoBehaviour
 
             //float futureYRot = hipAngularVelPerFrame.y * frameNum;
             float targetY = userInputTargetY();
-            float futureYRot = combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum);
+            //float futureYRot = combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum);
+            float futureYRot = BVHUtils.getDifferenceInYRots(hip.transform.rotation.eulerAngles.y, targetY);
+            futureYRot *= i == 3 ? 1 : i == 2 ? b : a;
             if (drawAngles)
             {
                 Transform toyPointer;
@@ -319,6 +321,8 @@ public class MotionMatching : MonoBehaviour
         {
             velocitiesToUse = new Vector3(currentVel.x, 0f, currentVel.y);
         }
+        float velocityMag;
+        float angleBetweenVelHips = BVHUtils.getAngleBetweenVelocityAndHip(hip.transform, velocitiesToUse, out velocityMag);
 
         return new float[] {
                 leftFootLocalPos.x,
@@ -333,13 +337,12 @@ public class MotionMatching : MonoBehaviour
                 rightFootGlobalVelocity.x,
                 rightFootGlobalVelocity.y,
                 rightFootGlobalVelocity.z,
-                velocitiesToUse.x,
-                velocitiesToUse.y,
-                velocitiesToUse.z,
-                //hipGlobalVel.x,
-                //hipGlobalVel.y,
-                //hipGlobalVel.z,
-                 hip.transform.rotation.eulerAngles.y,
+                //velocitiesToUse.x,
+                //velocitiesToUse.y,
+                //velocitiesToUse.z,
+                // hip.transform.rotation.eulerAngles.y,
+                velocityMag,
+                angleBetweenVelHips,
                 hipFutureTrajAndOrientations[0],
                 hipFutureTrajAndOrientations[1],
                 hipFutureTrajAndOrientations[2],
@@ -377,7 +380,6 @@ public class MotionMatching : MonoBehaviour
         }
         throw new Exception("combineCurTrajWithUser called with invalid frameNum " + frameNum.ToString());
     }
-
     private float combineYRots(float curY, float userY, int frameNum)
     {
         // values I like: (.2, .85); 
@@ -416,14 +418,6 @@ public class MotionMatching : MonoBehaviour
         throw new Exception("combineCurTrajWithUser called with invalid frameNum " + frameNum.ToString());
     }
 
-    private bool userInputtingLeftStick()
-    {
-        if (gamepad == null)
-            gamepad = Gamepad.current;
-        Vector2 stickL = gamepad.leftStick.ReadValue();
-        return !(Mathf.Approximately(stickL.x, 0) && Mathf.Approximately(stickL.y, 0));
-    }
-
     private bool intsApproxSame(int a, int b)
     {
         return Math.Abs(a - b) <= animTransitionTolerance;
@@ -432,10 +426,8 @@ public class MotionMatching : MonoBehaviour
     private float userInputTargetY()
     {
         Vector2 stickL = gamepad.leftStick.ReadValue();
-        float angle = Mathf.Atan2(stickL.y, stickL.x) * Mathf.Rad2Deg * -1;
-        angle = angle < 0f ? angle + 360 : angle;
-        // Have to rotate 90 deg
-        return angle;
+        double angle = BVHUtils.reverseAtan2ClockDirection(stickL.y, stickL.x);
+        return (float) angle;
     }
     private float[] readUserInput()
     {
@@ -498,10 +490,21 @@ public class MotionMatching : MonoBehaviour
     private Vector3 combineHipGlobalVel(Vector3 hipGlobalVel)
     {
         Vector2 stickL = gamepad.leftStick.ReadValue();
+        float targetSpeed;
         float desiredSpeed = stickL.magnitude * MoveSpeed;
-        Vector2 desiredVel = stickL.normalized * desiredSpeed;
-        float newX = hipGlobalVel.x * (1 - velCombineFactor) + desiredVel.x * velCombineFactor;
-        float newZ = hipGlobalVel.z * (1 - velCombineFactor) + desiredVel.y * velCombineFactor;
+        if (stickL == Vector2.zero) targetSpeed = 0.0f;
+        else
+        {
+            targetSpeed = stickL.magnitude * MoveSpeed;
+        }
+        Vector2 desiredVel = stickL.normalized * targetSpeed;
+        Vector2 desiredVelDir = desiredVel - currentVel;
+        if (desiredVelDir.magnitude > acceleration)
+            desiredVelDir = desiredVelDir.normalized * acceleration;
+        currentVel += desiredVelDir * Time.deltaTime;
+
+        float newX = hipGlobalVel.x * (1 - velCombineFactor) + currentVel.x * velCombineFactor;
+        float newZ = hipGlobalVel.z * (1 - velCombineFactor) + currentVel.y * velCombineFactor;
         return new Vector3(newX, hipGlobalVel.y, newZ);
     }
     /*
@@ -639,7 +642,7 @@ public class MotionMatching : MonoBehaviour
         //maxZVel /= hackyMaxVelReducer;
         //useAnimTransforms = false;
         // + 2 for extra data 
-        searchVecLen =25 ;
+        searchVecLen = 24;
         prefixes = walkOnly ? walkPrefixes : allPrefixes;
 
         motionDB = new KDTree(searchVecLen, 2, numNeigh, trajPenalty);

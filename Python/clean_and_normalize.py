@@ -23,15 +23,12 @@ usable_frames = {
 outputs_dir = "D:/Unity/Unity 2021 Editor Test/Assets/outputs/" # sprint1_subject2_output.txt
 newfile_dir = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/"
 walk_only = False
-recalc_hip_vel = False
-add_current_hip_rot = False
 
 # My serach vector length:
-# 12 + 3 (what they had)
-# 5 * 3 (they used 2 numbers for traj and orientation, I use 2 numbers for traj and 3 for orientation - I think I only need 1 for orientation but being extra safe
-# 3 * 3 if only using one for orientation (y_rot_only)
-# = 30
-search_vec_len = 24
+# first 12 are same as paper
+# then 2 - angleBetweenHipAndVel and magnitude of vel on x and z values
+# then 9 future trajectory points: (changeInXPos, changeInZPos, changeInYAngle)
+search_vec_len = 23
 
 def clean_data():
     # Final search vector should be:
@@ -60,28 +57,44 @@ def clean_data():
                         continue
                     currentHipPosX = float(strValues[15])
                     currentHipPosZ = float(strValues[16])
-                    currentHipRotY = strValues[18]
-                    finalVal = strValues[:15]  # + hipTrajAndOrientation[i + 20] + hipTrajAndOrientation[i + 40] + hipTrajAndOrientation[i + 60] + [str(i)]
+                    currentHipRotY = float(strValues[18])
+                    # finalVal = strValues[:15]  # + hipTrajAndOrientation[i + 20] + hipTrajAndOrientation[i + 40] + hipTrajAndOrientation[i + 60] + [str(i)]
+                    #
+                    # futureHipTraj = hipTrajAndOrientation[i + 30]
+                    # futureHipPosX, futureHipPosZ = float(futureHipTraj[0]), float(futureHipTraj[1])
+                    # finalVal[finalHipVelXIdx] = str(futureHipPosX - currentHipPosX)
+                    # finalVal[finalHipVelZIdx] = str(futureHipPosZ - currentHipPosZ)
+                    # finalVal.append(currentHipRotY)
 
-                    if recalc_hip_vel:
-                        futureHipTraj = hipTrajAndOrientation[i + 30]
-                        futureHipPosX, futureHipPosZ = float(futureHipTraj[0]), float(futureHipTraj[1])
-                        finalVal[finalHipVelXIdx] = str(futureHipPosX - currentHipPosX)
-                        finalVal[finalHipVelZIdx] = str(futureHipPosZ - currentHipPosZ)
-                    if add_current_hip_rot:
-                        finalVal.append(currentHipRotY)
+                    ### TRYING THE POLAR COORD STUFF ###
+                    finalVal = strValues[:12]
+                    finalVal.append(strValues[20])
+                    finalVal.append(strValues[21])
+
                     for j in [20, 40, 60]:
-                        futureHipPosX = float(hipTrajAndOrientation[i + j][0])
-                        futureHipPosZ = float(hipTrajAndOrientation[i + j][1])
+                        futureHipTraj = hipTrajAndOrientation[i + j]
+                        futureHipPosX = float( futureHipTraj[0])
+                        futureHipPosZ = float( futureHipTraj[1])
+                        futureHipY = float (futureHipTraj[3])
                         finalVal += [str(futureHipPosX - currentHipPosX) , str(futureHipPosZ - currentHipPosZ)]
-                        finalVal += [hipTrajAndOrientation[i + j][3]]
-
+                        # finalVal += [hipTrajAndOrientation[i + j][3]]
+                        finalVal += [diffInAngle(currentHipRotY, futureHipY)]
                     finalVal += [str(i)]
 
                     finalContents.appendleft(",".join(finalVal))
             outfile_dir = getOutfileDir()
             with open(outfile_dir + name + "_unnormalized_outputs.txt", 'w') as outfile:
                 outfile.write("\n".join(finalContents))
+
+def diffInAngle(a, b):
+    if abs(a - b) <= 180:
+        val = a - b
+    else:
+        if a > b:
+            val = (360 - a) + b
+        else
+            val = -a + (b - 360)
+    return str(val)
 # compute the mean and std dev for each feature across every frame and then normalize each feature
 # independently by subtracting its mean and dividing by its std dev: (v(i) - v_mean) / v_std_dev
 means =  [] # maps index to mean
@@ -178,16 +191,12 @@ def get_pst_time():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--walkonly', default=False, action='store_true')
-    parser.add_argument('--recalc', default=False, action='store_true')
-    parser.add_argument('--addrot', default=False, action='store_true')
 
     args = parser.parse_args()
-    global search_vec_len, walk_only, usable_frames, recalc_hip_vel, add_current_hip_rot
+    global search_vec_len, walk_only, usable_frames
     walk_only = args.walkonly
-    recalc_hip_vel = args.recalc
-    add_current_hip_rot = args.addrot
 
-    run_params_str = "Running with: walk_only: " + str(walk_only) + " | recalc_hip_vel: " + str(recalc_hip_vel) + " | add_current_hip_rot: " + str(add_current_hip_rot)
+    run_params_str = "Running with: walk_only: " + str(walk_only)
     print(run_params_str)
     if walk_only:
         for key in ["run1_subject2" , "run1_subject5", 'run2_subject1', 'sprint1_subject2' ]:
@@ -227,5 +236,7 @@ if __name__ == "__main__":
 #                 hip.transform.rotation.eulerAngles.x, 17
 #                 hip.transform.rotation.eulerAngles.y, 18
 #                 hip.transform.rotation.eulerAngles.z, 19
+#                 velocityMag,                          20
+#                 angleBetweenVelocityAndHip,           21
 #         };
 

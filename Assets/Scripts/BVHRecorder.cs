@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
+using UnityEditor;
 
 public class BVHRecorder: MonoBehaviour
 {
@@ -37,6 +38,18 @@ public class BVHRecorder: MonoBehaviour
     private Vector3 lastRightFootGlobalPos;
     private Vector3 lastHipGlobalPos;
     public int versionNum;
+    private Vector3 hipDebugEnd, velDebugEnd;
+    private string textLabel;
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(hip.transform.position, hipDebugEnd);
+  
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(hip.transform.position, velDebugEnd);
+        Handles.Label(hip.transform.position + new Vector3(0f, 1f), textLabel);
+
+    }
     private float[] getCurrentSearchVector()
     {
         if (firstFrame)
@@ -73,11 +86,15 @@ public class BVHRecorder: MonoBehaviour
 
         // instead of recording hipGlobalVel and rotation angles, let's try getting the direction the hip is facing as the "heading", and the angle of the hip velocity
         // relative to that and its magnitude, sort of like an r and theta in polar coords
-
-
-
-
-
+        float velocityMag;
+        float angleBetweenVelocityAndHip = BVHUtils.getAngleBetweenVelocityAndHip(bp.boneList, hip.transform , currentFrame, out velocityMag);
+        textLabel = angleBetweenVelocityAndHip.ToString();
+        Vector3 velocityPerSecond = BVHUtils.getPositionDiffAtFrame(boneList[0], currentFrame, currentFrame + 30);
+        double xComponent, yComponent;
+        xComponent = Math.Sin(angleBetweenVelocityAndHip);
+        yComponent = Math.Sin(angleBetweenVelocityAndHip);
+        hipDebugEnd = hip.transform.position + new Vector3((float)xComponent, 0, (float)yComponent) * 2f;
+        velDebugEnd = hip.transform.position + velocityPerSecond;
         return new float[] {
                 leftFootLocalPos.x,
                 leftFootLocalPos.y,
@@ -99,6 +116,8 @@ public class BVHRecorder: MonoBehaviour
                 hip.transform.rotation.eulerAngles.x,
                 hip.transform.rotation.eulerAngles.y,
                 hip.transform.rotation.eulerAngles.z,
+                velocityMag,
+                angleBetweenVelocityAndHip,
         };
     }
     private void outputMotionDBToFile()
