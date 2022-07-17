@@ -1272,31 +1272,31 @@ MonoBehaviour:
   rightFoot: {fileID: 674057683}
   root: {fileID: 42338788}
   hip: {fileID: 1812220947}
-  updateEveryNFrame: 10
-  drawGizmos: 1
-  drawAngles: 0
-  useQuadraticVel: 1
   yrotonly: 1
-  gizmoSphereRad: 0.1
-  hackyMaxVelReducer: 1
-  applyMM: 1
-  useAnimTransforms: 1
   walkOnly: 1
-  bruteforceSearch: 0
-  numNeigh: 5
-  acc: {x: 0, y: 0, z: 0}
-  MoveSpeed: 2
-  SprintSpeed: 5.335
-  acceleration: 5
-  transitionTime: 5
-  trajPenalty: 10
   toyPointer1: {fileID: 866670245}
   toyPointer2: {fileID: 2128906490}
   toyPointer3: {fileID: 922896735}
+  applyMM: 1
+  drawGizmos: 1
+  drawAngles: 0
+  gizmoSphereRad: 0.1
+  bruteforceSearch: 0
+  updateEveryNFrame: 5
+  transitionTime: 5
+  numNeigh: 3
+  animTransitionTolerance: 20
+  useAnimTransforms: 1
+  lerpFromFristFrame: 1
+  trajPenalty: 10
+  velCombineFactor: 0.75
   a: 0.2
   b: 0.85
-  velCombineFactor: 0.75
-  animTransitionTolerance: 20
+  useQuadraticVel: 1
+  acc: {x: 0, y: 0, z: 0}
+  MoveSpeed: 2
+  SprintSpeed: 5.335
+  acceleration: 8
 --- !u!4 &42338792
 Transform:
   m_ObjectHideFlags: 0

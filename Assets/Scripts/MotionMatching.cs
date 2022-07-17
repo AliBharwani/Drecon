@@ -16,7 +16,6 @@ public class MotionMatching : MonoBehaviour
     public GameObject rightFoot;
     public GameObject root;
     public GameObject hip;
-    public bool yrotonly = true;
     public bool walkOnly = true;
     public Transform toyPointer1, toyPointer2, toyPointer3;
 
@@ -29,12 +28,12 @@ public class MotionMatching : MonoBehaviour
 
     [Header("====   ANIMATION    ====")]
     public int updateEveryNFrame = 10;
+    [Tooltip("# of frames in a transition between clips")]
+    public float transitionTime = 3f;
     public int numNeigh = 1;
     public int animTransitionTolerance = 3;
     public bool useAnimTransforms = false;
     public bool lerpFromFristFrame = true;
-    [Tooltip("# of frames in a transition between clips")]
-    public float transitionTime = 3f;
     public float trajPenalty = 5f;
     public float velCombineFactor = .5f;
     public float a = .2f;
@@ -42,7 +41,7 @@ public class MotionMatching : MonoBehaviour
     [Header("====   PHYSICS    ====")]
     public bool useQuadraticVel = true;
     //public float hackyMaxVelReducer = 5f;
-    public Vector3 acc;
+    //public Vector3 acc;
     public float MoveSpeed = 2.0f;
     public float SprintSpeed = 5.335f;
     public float acceleration = 10.0f;
@@ -120,7 +119,7 @@ public class MotionMatching : MonoBehaviour
 
         DateTime startTime = DateTime.Now;
         int counter = 0;
-        string pathToData = yrotonly ? @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs_yrotonly/" : @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/";
+        string pathToData = @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/";
         pathToData += walkOnly ? @"walk_only/" : "" ;
         int j = 0;
         foreach (string line in File.ReadLines(pathToData + "stats.txt"))
@@ -217,6 +216,10 @@ public class MotionMatching : MonoBehaviour
         {
             Gizmos.DrawLine(finalDebugStart, finalDebugEnd);
         }
+        if (gizmoSpheres3.Length < 3)
+        {
+            return;
+        }
         for (int i = 0; i < 3; i++)
         {
             Vector3 spherePos = gizmoSpheres3[i];
@@ -256,7 +259,7 @@ public class MotionMatching : MonoBehaviour
 
         // (hip)trajectory positions and orientations  located at 20, 40, and 60 frames in the future which are projected onto the
         // groundplane(t-sub - i in R ^ 6, d - sub - i in R ^ 6, concatenating 3 xy pairs -> R ^ 6, total 12 numbers) 
-        int additionalLen = yrotonly ? 9 : 15;
+        int additionalLen = 9;
         float[] hipFutureTrajAndOrientations = new float[additionalLen];
         int idx = 0;
         float[] userTraj = readUserInput();
@@ -636,7 +639,7 @@ public class MotionMatching : MonoBehaviour
         //maxZVel /= hackyMaxVelReducer;
         //useAnimTransforms = false;
         // + 2 for extra data 
-        searchVecLen = yrotonly ? 25 : 30;
+        searchVecLen =25 ;
         prefixes = walkOnly ? walkPrefixes : allPrefixes;
 
         motionDB = new KDTree(searchVecLen, 2, numNeigh, trajPenalty);

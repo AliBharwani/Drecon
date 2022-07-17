@@ -22,18 +22,16 @@ usable_frames = {
 
 outputs_dir = "D:/Unity/Unity 2021 Editor Test/Assets/outputs/" # sprint1_subject2_output.txt
 newfile_dir = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/"
-y_rot_only = False
 walk_only = False
 recalc_hip_vel = False
 add_current_hip_rot = False
 
-newfile_dir_yrotonly = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs_yrotonly/"
 # My serach vector length:
 # 12 + 3 (what they had)
 # 5 * 3 (they used 2 numbers for traj and orientation, I use 2 numbers for traj and 3 for orientation - I think I only need 1 for orientation but being extra safe
 # 3 * 3 if only using one for orientation (y_rot_only)
 # = 30
-search_vec_len = 24 if y_rot_only else 30
+search_vec_len = 24
 
 def clean_data():
     # Final search vector should be:
@@ -76,10 +74,8 @@ def clean_data():
                         futureHipPosX = float(hipTrajAndOrientation[i + j][0])
                         futureHipPosZ = float(hipTrajAndOrientation[i + j][1])
                         finalVal += [str(futureHipPosX - currentHipPosX) , str(futureHipPosZ - currentHipPosZ)]
-                        if y_rot_only:
-                            finalVal += [hipTrajAndOrientation[i + j][3]]
-                        else:
-                            finalVal += hipTrajAndOrientation[i + j][2:]
+                        finalVal += [hipTrajAndOrientation[i + j][3]]
+
                     finalVal += [str(i)]
 
                     finalContents.appendleft(",".join(finalVal))
@@ -88,9 +84,12 @@ def clean_data():
                 outfile.write("\n".join(finalContents))
 # compute the mean and std dev for each feature across every frame and then normalize each feature
 # independently by subtracting its mean and dividing by its std dev: (v(i) - v_mean) / v_std_dev
-means =  [0 for i in range(search_vec_len)] # maps index to mean
-std_devs =  [0 for i in range(search_vec_len)]
+means =  [] # maps index to mean
+std_devs =  []
 def get_mean_and_std_dev():
+    global means, std_devs
+    means = [0 for i in range(search_vec_len)]  # maps index to mean
+    std_devs = [0 for i in range(search_vec_len)]
 
     means_helper =  [[0,0] for i in range(search_vec_len)] # maps index to (current_sum, num_seen)
     outfile_dir = getOutfileDir()
@@ -133,7 +132,7 @@ def get_mean_and_std_dev():
         f.write("\nMax X vel / Max Z vel: \n" + str(maxXVel) + "," + str(maxZVel))
 
 def getOutfileDir():
-    outfile_dir = newfile_dir_yrotonly if y_rot_only else newfile_dir
+    outfile_dir = newfile_dir
     outfile_dir += "walk_only/" if walk_only else ""
     return outfile_dir
 
@@ -178,24 +177,22 @@ def get_pst_time():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--yrotonly', default=False, action='store_true')
     parser.add_argument('--walkonly', default=False, action='store_true')
     parser.add_argument('--recalc', default=False, action='store_true')
     parser.add_argument('--addrot', default=False, action='store_true')
 
     args = parser.parse_args()
-    global y_rot_only, search_vec_len, walk_only, usable_frames, recalc_hip_vel, add_current_hip_rot
+    global search_vec_len, walk_only, usable_frames, recalc_hip_vel, add_current_hip_rot
     walk_only = args.walkonly
-    y_rot_only = args.yrotonly
     recalc_hip_vel = args.recalc
     add_current_hip_rot = args.addrot
 
-    run_params_str = "Running with: walk_only: " + str(walk_only) + " | y_rot_only: " +  str(y_rot_only) + " | recalc_hip_vel: " + str(recalc_hip_vel) + " | add_current_hip_rot: " + str(add_current_hip_rot)
+    run_params_str = "Running with: walk_only: " + str(walk_only) + " | recalc_hip_vel: " + str(recalc_hip_vel) + " | add_current_hip_rot: " + str(add_current_hip_rot)
     print(run_params_str)
     if walk_only:
         for key in ["run1_subject2" , "run1_subject5", 'run2_subject1', 'sprint1_subject2' ]:
             del usable_frames[key]
-    search_vec_len = 24 if y_rot_only else 30
+    search_vec_len = 24
     search_vec_len += 1 if add_current_hip_rot else 0
     # return
     clean_data()

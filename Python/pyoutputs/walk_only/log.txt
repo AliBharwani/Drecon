@@ -14,3 +14,6 @@ Running with: walk_only: True | y_rot_only: True | recalc_hip_vel: True | add_cu
 
 07-15-2022 00:53:22 PDT
 Running with: walk_only: True | y_rot_only: True | recalc_hip_vel: True | add_current_hip_rot: True
+
+07-16-2022 19:29:46 PDT
+Running with: walk_only: True | recalc_hip_vel: True | add_current_hip_rot: True
