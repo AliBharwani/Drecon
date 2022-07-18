@@ -227,24 +227,25 @@ public static class BVHUtils
     {
         return 360 + (Math.Atan2(y, x) * Mathf.Rad2Deg * -1);
     }
-    public static float getAngleBetweenVelocityAndHip(List<BVHParser.BVHBone> bones, Transform hipTrans, int frameNum, out float velocityMag)
+    public static float getAngleBetweenVelocityAndHip(List<BVHParser.BVHBone> bones, Transform hipTrans, int frameNum, out float velocityMag, out double velocityAngle)
     {
         BVHParser.BVHBone hipBone = bones[0];
         Vector3 velocityPerSecond = getPositionDiffAtFrame(hipBone, frameNum, frameNum + 30);
-        return getAngleBetweenVelocityAndHip(hipTrans, velocityPerSecond, out velocityMag);
+        return getAngleBetweenVelocityAndHip(hipTrans, velocityPerSecond, out velocityMag, out velocityAngle);
     }
-    public static float getAngleBetweenVelocityAndHip(Transform hipTrans, Vector3 velocity, out float velocityMag)
+    public static float getAngleBetweenVelocityAndHip(Transform hipTrans, Vector3 velocity, out float velocityMag, out double velocityAngle)
     {
         float hipEulerY = hipTrans.rotation.eulerAngles.y;
         velocityMag = velocity.magnitude;
         // have to multiple by -1 and add 360 because the Y angle unity gives goes CW from east, atan2 is CCW
-        double velocityAngle = reverseAtan2ClockDirection(velocity.z, velocity.x);
+        velocityAngle = reverseAtan2ClockDirection(velocity.z, velocity.x);
+        velocityAngle %= 360;
         return getDifferenceInYRots(hipEulerY, (float)velocityAngle);
     }
     public static float getDifferenceInYRots(float a, float b)
     {
         if (Mathf.Abs(a - b) <= 180)
-            return a - b;
+            return b - a;
         else if (a > b)
             return (360 - a) + b;
         else

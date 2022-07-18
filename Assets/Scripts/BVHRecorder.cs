@@ -87,14 +87,23 @@ public class BVHRecorder: MonoBehaviour
         // instead of recording hipGlobalVel and rotation angles, let's try getting the direction the hip is facing as the "heading", and the angle of the hip velocity
         // relative to that and its magnitude, sort of like an r and theta in polar coords
         float velocityMag;
-        float angleBetweenVelocityAndHip = BVHUtils.getAngleBetweenVelocityAndHip(bp.boneList, hip.transform , currentFrame, out velocityMag);
+        double velocityAngle;
+        float angleBetweenVelocityAndHip = BVHUtils.getAngleBetweenVelocityAndHip(bp.boneList, hip.transform , currentFrame, out velocityMag, out velocityAngle);
         textLabel = angleBetweenVelocityAndHip.ToString();
-        Vector3 velocityPerSecond = BVHUtils.getPositionDiffAtFrame(boneList[0], currentFrame, currentFrame + 30);
+        //Vector3 velocityPerSecond = BVHUtils.getPositionDiffAtFrame(boneList[0], currentFrame, currentFrame + 30);
         double xComponent, yComponent;
-        xComponent = Math.Sin(angleBetweenVelocityAndHip);
-        yComponent = Math.Sin(angleBetweenVelocityAndHip);
+        float hipAngle = hip.transform.rotation.eulerAngles.y;
+        xComponent = Math.Cos(-hipAngle * Mathf.Deg2Rad);
+        yComponent = Math.Sin(-hipAngle * Mathf.Deg2Rad);
+        //Debug.Log("hipAngle: " + hipAngle.ToString() + " xComponent : " + xComponent.ToString() + " | y component: " + yComponent.ToString());
         hipDebugEnd = hip.transform.position + new Vector3((float)xComponent, 0, (float)yComponent) * 2f;
-        velDebugEnd = hip.transform.position + velocityPerSecond;
+
+
+        xComponent = Math.Cos(-velocityAngle * Mathf.Deg2Rad);
+        yComponent = Math.Sin(-velocityAngle * Mathf.Deg2Rad);
+        //Debug.Log("velocityAngle: " + velocityAngle.ToString() + " xComponent : " + xComponent.ToString() + " | y component: " + yComponent.ToString());
+        velDebugEnd = hip.transform.position + new Vector3((float)xComponent, 0, (float)yComponent) * 2f;
+        //Debug.Log("angleBetweenVelocityAndHip: " + angleBetweenVelocityAndHip.ToString());
         return new float[] {
                 leftFootLocalPos.x,
                 leftFootLocalPos.y,
@@ -170,12 +179,12 @@ public class BVHRecorder: MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (currentFrame < bp.frames)
+        if (currentFrame < (bp.frames - 30))
         {
             BVHUtils.playFrame(currentFrame, boneList, nameToTransformMap, blender);
             motionDB[currentFrame] = getCurrentSearchVector();
             currentFrame++;
-        } else if (currentFrame == bp.frames)
+        } else if (currentFrame == (bp.frames - 30))
         {
             if (!dryRun)
             {

@@ -8,9 +8,9 @@ from collections import deque
 ## Usable frames
 usable_frames = {
     'walk1_subject1': [(100, 1250), (2200, 3685), (6000, 6460)],
-    'walk1_subject2': [(500, 1520), (1620, 7750)], # max: 7840
-    'walk1_subject5': [(80, 7779)], # max: 7840
-    'walk3_subject1': [(70, 1900), (6650, 7338)], # max: 7399
+    'walk1_subject2': [(500, 1520), (1620, 7740)], # max: 7840 # 7809
+    'walk1_subject5': [(80, 7740)], # max: 7840 # 7809
+    'walk3_subject1': [(70, 1900), (6650, 7300)], # max: 7399
     'walk3_subject2': [(900, 2900), (3650, 7300)],  # max: 7399
     'run1_subject2': [(95, 6600)], # 7135
     'run1_subject5': [(100, 7040)],  # 7135
@@ -20,7 +20,7 @@ usable_frames = {
 
 # cur_dir =  os.getcwdb()
 
-outputs_dir = "D:/Unity/Unity 2021 Editor Test/Assets/outputs/" # sprint1_subject2_output.txt
+outputs_dir = "D:/Unity/Unity 2021 Editor Test/Assets/outputs/v0/" # sprint1_subject2_output.txt
 newfile_dir = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/"
 walk_only = False
 
@@ -40,12 +40,14 @@ def clean_data():
         finalContents = deque()
         finalHipVelXIdx = 12
         finalHipVelZIdx = 14
+        print(name)
         with open(outputs_dir + name + "_output.txt") as f:
             # get rid of opening line
             f.readline()
             contents = f.readlines()
             hipTrajAndOrientation = {}
             for frameRange in reversed(ranges):
+                print(frameRange)
                 start, end = frameRange[0], frameRange[1]
                 for i in range(end + 60, start - 1, -1): # iterate backwards
                     rawData = contents[i]
@@ -70,15 +72,21 @@ def clean_data():
                     finalVal = strValues[:12]
                     finalVal.append(strValues[20])
                     finalVal.append(strValues[21])
-
+                    # we do this because in our "diff in Y angle" function, we always take the shortest turn to an angle:
+                    # either fully left (-180) or fully right (180). If that code saw a situation where the guy turns
+                    # 270 deg right, it would think it's a -90 degree turn. instead we keep a cumulative y rot
+                    cumYRot = 0
+                    lastYRot = currentHipRotY
                     for j in [20, 40, 60]:
                         futureHipTraj = hipTrajAndOrientation[i + j]
                         futureHipPosX = float( futureHipTraj[0])
                         futureHipPosZ = float( futureHipTraj[1])
                         futureHipY = float (futureHipTraj[3])
                         finalVal += [str(futureHipPosX - currentHipPosX) , str(futureHipPosZ - currentHipPosZ)]
-                        # finalVal += [hipTrajAndOrientation[i + j][3]]
-                        finalVal += [diffInAngle(currentHipRotY, futureHipY)]
+                        # finalVal += [hipTrajAndOrientation[i + j][3]]]
+                        cumYRot += diffInAngle(lastYRot, futureHipY)
+                        lastYRot - futureHipY
+                        finalVal += [str(cumYRot)]
                     finalVal += [str(i)]
 
                     finalContents.appendleft(",".join(finalVal))
@@ -88,13 +96,13 @@ def clean_data():
 
 def diffInAngle(a, b):
     if abs(a - b) <= 180:
-        val = a - b
+        val = b - a
     else:
         if a > b:
             val = (360 - a) + b
-        else
+        else:
             val = -a + (b - 360)
-    return str(val)
+    return val
 # compute the mean and std dev for each feature across every frame and then normalize each feature
 # independently by subtracting its mean and dividing by its std dev: (v(i) - v_mean) / v_std_dev
 means =  [] # maps index to mean
@@ -174,8 +182,8 @@ def get_max_hip_vel():
                 vals = line.split(',')
                 maxXVel = max(maxXVel, float(vals[12]))
                 maxZVel = max(maxZVel, float(vals[14]))
-    print("Max X vel: " + str(maxXVel))
-    print("Max Z vel: " + str(maxZVel))
+    # print("Max X vel: " + str(maxXVel))
+    # print("Max Z vel: " + str(maxZVel))
     return maxXVel, maxZVel
 
 test_val_str = "0.0986326,7.096337,0.2465061,0.01537981,7.058707,-0.6282009,0.0007028888,-0.0004897094,-0.0005674235,0.001235168,-5.621925E-05,-0.0006092523,0.001626688,0.0007005898,-0.0008952615,0.002366892,-0.0003103769,1.418887,0.002559961,0.002792338,0.8308717,0.003218988,0.003839601,0.6938116"
@@ -201,8 +209,7 @@ def main():
     if walk_only:
         for key in ["run1_subject2" , "run1_subject5", 'run2_subject1', 'sprint1_subject2' ]:
             del usable_frames[key]
-    search_vec_len = 24
-    search_vec_len += 1 if add_current_hip_rot else 0
+    search_vec_len = 23
     # return
     clean_data()
     normalizeData()

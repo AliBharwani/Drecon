@@ -322,7 +322,8 @@ public class MotionMatching : MonoBehaviour
             velocitiesToUse = new Vector3(currentVel.x, 0f, currentVel.y);
         }
         float velocityMag;
-        float angleBetweenVelHips = BVHUtils.getAngleBetweenVelocityAndHip(hip.transform, velocitiesToUse, out velocityMag);
+        double velocityAngle;
+        float angleBetweenVelHips = BVHUtils.getAngleBetweenVelocityAndHip(hip.transform, velocitiesToUse, out velocityMag, out velocityAngle);
 
         return new float[] {
                 leftFootLocalPos.x,
