@@ -23,12 +23,13 @@ usable_frames = {
 outputs_dir = "D:/Unity/Unity 2021 Editor Test/Assets/outputs/v0/" # sprint1_subject2_output.txt
 newfile_dir = "D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/"
 walk_only = False
+use_global_info = True
 
 # My serach vector length:
 # first 12 are same as paper
 # then 2 - angleBetweenHipAndVel and magnitude of vel on x and z values
 # then 9 future trajectory points: (changeInXPos, changeInZPos, changeInYAngle)
-search_vec_len = 23
+search_vec_len = 0
 
 def clean_data():
     # Final search vector should be:
@@ -40,14 +41,13 @@ def clean_data():
         finalContents = deque()
         finalHipVelXIdx = 12
         finalHipVelZIdx = 14
-        print(name)
         with open(outputs_dir + name + "_output.txt") as f:
             # get rid of opening line
             f.readline()
             contents = f.readlines()
             hipTrajAndOrientation = {}
+
             for frameRange in reversed(ranges):
-                print(frameRange)
                 start, end = frameRange[0], frameRange[1]
                 for i in range(end + 60, start - 1, -1): # iterate backwards
                     rawData = contents[i]
@@ -60,36 +60,37 @@ def clean_data():
                     currentHipPosX = float(strValues[15])
                     currentHipPosZ = float(strValues[16])
                     currentHipRotY = float(strValues[18])
-                    # finalVal = strValues[:15]  # + hipTrajAndOrientation[i + 20] + hipTrajAndOrientation[i + 40] + hipTrajAndOrientation[i + 60] + [str(i)]
-                    #
-                    # futureHipTraj = hipTrajAndOrientation[i + 30]
-                    # futureHipPosX, futureHipPosZ = float(futureHipTraj[0]), float(futureHipTraj[1])
-                    # finalVal[finalHipVelXIdx] = str(futureHipPosX - currentHipPosX)
-                    # finalVal[finalHipVelZIdx] = str(futureHipPosZ - currentHipPosZ)
-                    # finalVal.append(currentHipRotY)
-
-                    ### TRYING THE POLAR COORD STUFF ###
-                    finalVal = strValues[:12]
-                    finalVal.append(strValues[20])
-                    finalVal.append(strValues[21])
-                    # we do this because in our "diff in Y angle" function, we always take the shortest turn to an angle:
-                    # either fully left (-180) or fully right (180). If that code saw a situation where the guy turns
-                    # 270 deg right, it would think it's a -90 degree turn. instead we keep a cumulative y rot
-                    cumYRot = 0
-                    lastYRot = currentHipRotY
+                    futureHipTraj = hipTrajAndOrientation[i + 30]
+                    if  use_global_info:
+                        finalVal = strValues[:12]  # + hipTrajAndOrientation[i + 20] + hipTrajAndOrientation[i + 40] + hipTrajAndOrientation[i + 60] + [str(i)]
+                        futureHipPosX, futureHipPosZ = float(futureHipTraj[0]), float(futureHipTraj[1])
+                        finalVal += [str(futureHipPosX - currentHipPosX) ,  str(futureHipPosZ - currentHipPosZ)]
+                        finalVal.append(strValues[18])
+                    else:
+                        ### TRYING THE POLAR COORD STUFF ###
+                        finalVal = strValues[:12]
+                        finalVal.append(strValues[20])
+                        finalVal.append(strValues[21])
+                        # we do this because in our "diff in Y angle" function, we always take the shortest turn to an angle:
+                        # either fully left (-180) or fully right (180). If that code saw a situation where the guy turns
+                        # 270 deg right, it would think it's a -90 degree turn. instead we keep a cumulative y rot
+                        cumYRot = 0
+                        lastYRot = currentHipRotY
                     for j in [20, 40, 60]:
                         futureHipTraj = hipTrajAndOrientation[i + j]
                         futureHipPosX = float( futureHipTraj[0])
                         futureHipPosZ = float( futureHipTraj[1])
                         futureHipY = float (futureHipTraj[3])
-                        finalVal += [str(futureHipPosX - currentHipPosX) , str(futureHipPosZ - currentHipPosZ)]
-                        # finalVal += [hipTrajAndOrientation[i + j][3]]]
-                        cumYRot += diffInAngle(lastYRot, futureHipY)
-                        lastYRot - futureHipY
-                        finalVal += [str(cumYRot)]
+                        finalVal += [str(futureHipPosX - currentHipPosX), str(futureHipPosZ - currentHipPosZ)]
+                        if use_global_info:
+                            finalVal += [futureHipTraj[3]]
+                        else:
+                            cumYRot += diffInAngle(lastYRot, futureHipY)
+                            lastYRot = futureHipY
+                            finalVal += [str(cumYRot)]
                     finalVal += [str(i)]
-
                     finalContents.appendleft(",".join(finalVal))
+
             outfile_dir = getOutfileDir()
             with open(outfile_dir + name + "_unnormalized_outputs.txt", 'w') as outfile:
                 outfile.write("\n".join(finalContents))
@@ -153,7 +154,7 @@ def get_mean_and_std_dev():
         f.write("\nMax X vel / Max Z vel: \n" + str(maxXVel) + "," + str(maxZVel))
 
 def getOutfileDir():
-    outfile_dir = newfile_dir
+    outfile_dir = newfile_dir + ("global/" if use_global_info else "nonglobal/")
     outfile_dir += "walk_only/" if walk_only else ""
     return outfile_dir
 
@@ -199,17 +200,20 @@ def get_pst_time():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--walkonly', default=False, action='store_true')
+    parser.add_argument('--useglobal', default=False, action='store_true')
 
     args = parser.parse_args()
-    global search_vec_len, walk_only, usable_frames
+    global search_vec_len, walk_only, usable_frames, use_global_info
     walk_only = args.walkonly
+    use_global_info = args.useglobal
 
-    run_params_str = "Running with: walk_only: " + str(walk_only)
+
+    run_params_str = "Running with: walk_only: " + str(walk_only) + "| use_global_info: " + str(use_global_info)
     print(run_params_str)
     if walk_only:
         for key in ["run1_subject2" , "run1_subject5", 'run2_subject1', 'sprint1_subject2' ]:
             del usable_frames[key]
-    search_vec_len = 23
+    search_vec_len = 24 if use_global_info else 23
     # return
     clean_data()
     normalizeData()
@@ -221,7 +225,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-# unity search vector code
+# unity search vector code - what is output
 # return new float[] {
 #                 leftFootLocalPos.x, 0
 #                 leftFootLocalPos.y, 1
@@ -245,5 +249,33 @@ if __name__ == "__main__":
 #                 hip.transform.rotation.eulerAngles.z, 19
 #                 velocityMag,                          20
 #                 angleBetweenVelocityAndHip,           21
+#         };
+
+# unity search vector runtime - what is searched for
+# return new float[] {
+#                 leftFootLocalPos.x, 0
+#                 leftFootLocalPos.y, 1
+#                 leftFootLocalPos.z, 2
+#                 rightFootLocalPos.x, 3
+#                 rightFootLocalPos.y, 4
+#                 rightFootLocalPos.z, 5
+#                 leftFootGlobalVelocity.x, 6
+#                 leftFootGlobalVelocity.y, 7
+#                 leftFootGlobalVelocity.z, 8
+#                 rightFootGlobalVelocity.x, 9
+#                 rightFootGlobalVelocity.y, 10
+#                 rightFootGlobalVelocity.z, 11
+#                 hipGlobalVel.x, 12
+#                 hipGlobalVel.z, # 13
+#                 hip.transform.rotation.eulerAngles.y, 14
+#                 trajectory20FramesFromNowDiffInX 15
+#                 trajectory20FramesFromNowDiffInZ 16
+#                 trajectory20FramesFromNowYRot 17
+#                 trajectory20FramesFromNowDiffInX 18
+#                 trajectory20FramesFromNowDiffInZ 19
+#                 trajectory20FramesFromNowYRot 20
+#                 trajectory20FramesFromNowDiffInX 21
+#                 trajectory20FramesFromNowDiffInZ 22
+#                 trajectory20FramesFromNowYRot 23
 #         };
 

@@ -37,7 +37,7 @@ public class KDTree
     public KDTree (int _k, int _extraData = 2, int _numNeigh = 1, float _trajectoryPenalty = 3)
     {
         k = _k;
-        startIdx = k - 10;
+        startIdx = k - 12;
         endIdx = k;
         extraData = _extraData;
         numNeigh = _numNeigh;

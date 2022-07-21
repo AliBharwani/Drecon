@@ -1,0 +1,6 @@
+
+07-20-2022 01:13:49 PDT
+Running with: walk_only: True| use_global_info: True
+
+07-20-2022 01:29:30 PDT
+Running with: walk_only: True| use_global_info: True

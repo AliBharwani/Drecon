@@ -25,7 +25,7 @@ public class MotionMatching : MonoBehaviour
     public bool drawAngles = false;
     public float gizmoSphereRad = .01f;
     public bool bruteforceSearch = false;
-
+    public bool useGlobal = true;
     [Header("====   ANIMATION    ====")]
     public int updateEveryNFrame = 10;
     [Tooltip("# of frames in a transition between clips")]
@@ -46,7 +46,7 @@ public class MotionMatching : MonoBehaviour
     public float SprintSpeed = 5.335f;
     public float acceleration = 10.0f;
 
-    private Vector3 velocity;
+    private Vector2 acc = new Vector2(5f, 5f);
     private Vector2 currentVel;
 
     private Vector3 hipRotOffset;
@@ -119,7 +119,7 @@ public class MotionMatching : MonoBehaviour
 
         DateTime startTime = DateTime.Now;
         int counter = 0;
-        string pathToData = @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/";
+        string pathToData = @"D:/Unity/Unity 2021 Editor Test/Python/pyoutputs/" + (useGlobal ? @"global/" : @"nonglobal/");
         pathToData += walkOnly ? @"walk_only/" : "" ;
         int j = 0;
         foreach (string line in File.ReadLines(pathToData + "stats.txt"))
@@ -245,11 +245,11 @@ public class MotionMatching : MonoBehaviour
         Vector3 rightFootGlobalVelocity = (rightFoot.transform.position - lastRightFootGlobalPos) / frameTime;
 
         // hip global velocity (one number in r3, 3 numbers)
-        Vector3 hipGlobalVelPerFrame = useAnimTransforms ? hip.transform.position - lastHipPos : velocity * frameTime; // hip.transform.position - lastHipPos;
+        //Vector3 hipGlobalVelPerFrame = useAnimTransforms ? hip.transform.position - lastHipPos : currentVel * frameTime; // hip.transform.position - lastHipPos;
 
         // I should combine hipGlolabVel with user input
-        Vector3 hipGlobalVel = useAnimTransforms ? (hip.transform.position - lastHipPos) / frameTime : velocity;// (hip.transform.position - lastHipPos) / frameTime;
-        Vector3 combinedHipGlobalVel = combineHipGlobalVel(hipGlobalVel);
+        //Vector3 hipGlobalVel = useAnimTransforms ? (hip.transform.position - lastHipPos) / frameTime : currentVel;// (hip.transform.position - lastHipPos) / frameTime;
+        //Vector3 combinedHipGlobalVel = combineHipGlobalVel(hipGlobalVel);
         // based off bobsir's answer in https://forum.unity.com/threads/manually-calculate-angular-velocity-of-gameobject.289462/
         //Quaternion deltaRot = hip.transform.rotation * Quaternion.Inverse(lastHipQuat);
         //Vector3 eulerRot = new Vector3(Mathf.DeltaAngle(0, deltaRot.eulerAngles.x), Mathf.DeltaAngle(0, deltaRot.eulerAngles.y), Mathf.DeltaAngle(0, deltaRot.eulerAngles.z));
@@ -297,7 +297,7 @@ public class MotionMatching : MonoBehaviour
             //float futureYRot = hipAngularVelPerFrame.y * frameNum;
             float targetY = userInputTargetY();
             //float futureYRot = combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum);
-            float futureYRot = BVHUtils.getDifferenceInYRots(hip.transform.rotation.eulerAngles.y, targetY);
+            float futureYRot = useGlobal ? combineYRots(hip.transform.rotation.eulerAngles.y, targetY, frameNum) : BVHUtils.getDifferenceInYRots(hip.transform.rotation.eulerAngles.y, targetY);
             futureYRot *= i == 3 ? 1 : i == 2 ? b : a;
             if (drawAngles)
             {
@@ -315,6 +315,7 @@ public class MotionMatching : MonoBehaviour
 
             idx += additionalLen / 3;
         }
+        updateUserVelocity();
         Vector3 altCombinedHipGlobalVel = combineHipGlobalVel(alternativeHipGlobalVel);
         Vector3 velocitiesToUse = altCombinedHipGlobalVel;
         if (!useAnimTransforms)
@@ -325,7 +326,7 @@ public class MotionMatching : MonoBehaviour
         double velocityAngle;
         float angleBetweenVelHips = BVHUtils.getAngleBetweenVelocityAndHip(hip.transform, velocitiesToUse, out velocityMag, out velocityAngle);
 
-        return new float[] {
+        return useGlobal ? new float[] {
                 leftFootLocalPos.x,
                 leftFootLocalPos.y,
                 leftFootLocalPos.z,
@@ -338,10 +339,32 @@ public class MotionMatching : MonoBehaviour
                 rightFootGlobalVelocity.x,
                 rightFootGlobalVelocity.y,
                 rightFootGlobalVelocity.z,
-                //velocitiesToUse.x,
+                velocitiesToUse.x,
                 //velocitiesToUse.y,
-                //velocitiesToUse.z,
-                // hip.transform.rotation.eulerAngles.y,
+                velocitiesToUse.z,
+                 hip.transform.rotation.eulerAngles.y,
+                hipFutureTrajAndOrientations[0],
+                hipFutureTrajAndOrientations[1],
+                hipFutureTrajAndOrientations[2],
+                hipFutureTrajAndOrientations[3],
+                hipFutureTrajAndOrientations[4],
+                hipFutureTrajAndOrientations[5],
+                hipFutureTrajAndOrientations[6],
+                hipFutureTrajAndOrientations[7],
+                hipFutureTrajAndOrientations[8],
+        } : new float[] {
+                leftFootLocalPos.x,
+                leftFootLocalPos.y,
+                leftFootLocalPos.z,
+                rightFootLocalPos.x,
+                rightFootLocalPos.y,
+                rightFootLocalPos.z,
+                leftFootGlobalVelocity.x,
+                leftFootGlobalVelocity.y,
+                leftFootGlobalVelocity.z,
+                rightFootGlobalVelocity.x,
+                rightFootGlobalVelocity.y,
+                rightFootGlobalVelocity.z,
                 velocityMag,
                 angleBetweenVelHips,
                 hipFutureTrajAndOrientations[0],
@@ -353,12 +376,6 @@ public class MotionMatching : MonoBehaviour
                 hipFutureTrajAndOrientations[6],
                 hipFutureTrajAndOrientations[7],
                 hipFutureTrajAndOrientations[8],
-                //hipFutureTrajAndOrientations[9],
-                //hipFutureTrajAndOrientations[10],
-                //hipFutureTrajAndOrientations[11],
-                //hipFutureTrajAndOrientations[12],
-                //hipFutureTrajAndOrientations[13],
-                //hipFutureTrajAndOrientations[14],
         };
     }
 
@@ -427,49 +444,40 @@ public class MotionMatching : MonoBehaviour
     private float userInputTargetY()
     {
         Vector2 stickL = gamepad.leftStick.ReadValue();
-        double angle = BVHUtils.reverseAtan2ClockDirection(stickL.y, stickL.x);
-        return (float) angle;
+        float angle = Mathf.Atan2(stickL.y, stickL.x) * Mathf.Rad2Deg * -1;
+        angle = angle < 0f ? angle + 360 : angle;
+        // Have to rotate 90 deg
+        return angle;
+        //double angle = BVHUtils.reverseAtan2ClockDirection(stickL.y, stickL.x);
+        //return (float) angle;
     }
     private float[] readUserInput()
     {
-        //Vector2 stickL = gamepad.leftStick.ReadValue();
-        //if (Mathf.Approximately(stickL.x, 0) && Mathf.Approximately(stickL.y, 0))
-        //{
-        //    return new float[6];
-        //}
-        //float desiredXVel, desiredZVel;
-        //if (useQuadraticVel)
-        //{
-        //    Vector2 normalized = stickL.normalized * stickL.sqrMagnitude;
-        //    desiredXVel = normalized.x * maxXVel;
-        //    desiredZVel = normalized.y * maxZVel;
-        //}
-        //else
-        //{
-        //    desiredXVel = stickL.x * maxXVel;
-        //    desiredZVel = stickL.y * maxZVel;
-        //}
-        //float desiredSpeed = stickL.magnitude * MoveSpeed;
-        //Vector2 desiredVel = stickL.normalized * desiredSpeed;
-        //desiredXVel = desiredVel.x;
-        //desiredZVel = desiredVel.y;
-        float targetSpeed;
-        // Get desired velocity 
-        Vector2 stickL = gamepad.leftStick.ReadValue();
-        // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
-        // if there is no input, set the target speed to 0
-        if (stickL == Vector2.zero) targetSpeed = 0.0f;
-        else
+        float[] userTraj;
+        Vector2 desiredVel = getDesiredVelocity();
+        if (useSpringsForVel)
         {
-            targetSpeed = stickL.magnitude * MoveSpeed;
+            Vector2[] px = new Vector2[3];
+            Vector2[] pv = new Vector2[3];
+            Vector2[] pa = new Vector2[3];
+            BVHUtils.spring_character_predict(px, pv, pa, 3, Vector2.zero, currentVel, acc, desiredVel, halfLife, 20f * frameTime);
+            userTraj = new float[6];
+            for (int i = 0; i < 3; i++)
+            {
+                userTraj[i] = px[i].x;
+                userTraj[i + 1] =  px[i].y;
+                gizmoSpheres2[i] = new Vector3(px[i].x, 0, px[i].y) + hip.transform.position;
+            }
+            inputDebugEnd = gizmoSpheres2[2];
+            return userTraj;
         }
-        Vector2 desiredVel = stickL.normalized * targetSpeed;
+
         Vector2 desiredVelDir = desiredVel - currentVel;
         if (desiredVelDir.magnitude > acceleration)
             desiredVelDir = desiredVelDir.normalized * acceleration;
         currentVel += desiredVelDir * Time.deltaTime;
         inputDebugStart = hip.transform.position;
-        float[] userTraj = new float[6];
+        userTraj = new float[6];
         int idx = 0;
         for (int i = 1; i < 4; i++)
         {
@@ -488,11 +496,43 @@ public class MotionMatching : MonoBehaviour
         return userTraj;
         //Debug.Log("Desired x vel: " + desiredXVel.ToString() + " Desierd z vel: " + desiredZVel.ToString());
     }
-    private Vector3 combineHipGlobalVel(Vector3 hipGlobalVel)
+    public bool useSpringsForVel = true;
+    public float halfLife = .25f;
+
+    private Vector2 getDesiredVelocity()
     {
         Vector2 stickL = gamepad.leftStick.ReadValue();
         float targetSpeed;
-        float desiredSpeed = stickL.magnitude * MoveSpeed;
+        if (stickL == Vector2.zero) targetSpeed = 0.0f;
+        else
+        {
+            targetSpeed = stickL.magnitude * MoveSpeed;
+        }
+        Vector2 desiredVel = stickL.normalized * targetSpeed;
+        return desiredVel;
+    }
+    // This function takes the current user velocity and updates it using a critically dampened spring based on the current user inputs
+    private void updateUserVelocity()
+    {
+        Vector2 desiredVel = getDesiredVelocity();
+        BVHUtils.spring_character_update(
+               currentVel,
+               acc,
+               desiredVel,
+               halfLife,
+               Time.deltaTime,
+               out currentVel,
+               out acc);
+        return;
+    }
+    private Vector3 combineHipGlobalVel(Vector3 hipGlobalVel)
+    {
+        Vector2 stickL = gamepad.leftStick.ReadValue();
+        if (useSpringsForVel) {
+            return new Vector3(currentVel.x, hipGlobalVel.y, currentVel.y);
+        }
+
+        float targetSpeed;
         if (stickL == Vector2.zero) targetSpeed = 0.0f;
         else
         {
@@ -585,38 +625,6 @@ public class MotionMatching : MonoBehaviour
         //Debug.Log("Playing file: " + prefixes[curFileIdx] + " Frame: " + curFrameIdx.ToString());
     }
 
-
-    private void updatePhysics_OLD()
-    {
-        float targetSpeed = MoveSpeed; // _input.sprint ? SprintSpeed : MoveSpeed;
-        Vector2 stickL = gamepad.leftStick.ReadValue();
-        // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
-        // if there is no input, set the target speed to 0
-        if (stickL == Vector2.zero) targetSpeed = 0.0f;
-        float currentHorizontalSpeed = velocity.magnitude;
-
-        float speedOffset = 0.1f;
-        float inputMagnitude = stickL.magnitude;
-        // accelerate or decelerate to target speed
-        float _speed;
-        if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
-        {
-            // creates curved result rather than a linear one giving a more organic speed change
-            // note T in Lerp is clamped, so we don't need to clamp our speed
-            _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * acceleration);
-
-            // round speed to 3 decimal places
-            _speed = Mathf.Round(_speed * 1000f) / 1000f;
-        }
-        else
-        {
-            _speed = targetSpeed;
-        }
-        Vector2 normalizedStickL = stickL.normalized;
-        Vector3 deltaPosition = new Vector3(normalizedStickL.x, 0f, normalizedStickL.y) * (_speed * Time.deltaTime);
-        velocity = deltaPosition / Time.deltaTime;
-        hip.transform.position += deltaPosition;
-    }
     private void updatePhysics()
     {
         float targetSpeed;
@@ -643,7 +651,7 @@ public class MotionMatching : MonoBehaviour
         //maxZVel /= hackyMaxVelReducer;
         //useAnimTransforms = false;
         // + 2 for extra data 
-        searchVecLen = 24;
+        searchVecLen = useGlobal ? 24 : 23;
         prefixes = walkOnly ? walkPrefixes : allPrefixes;
 
         motionDB = new KDTree(searchVecLen, 2, numNeigh, trajPenalty);

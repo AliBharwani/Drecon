@@ -252,4 +252,89 @@ public static class BVHUtils
             return -a + (b - 360);
 
     }
+
+
+
+
+    // Daniel Holden related code
+    // use taylor series to calculate e^(-x)
+    public static float fast_negexp(float x)
+    {
+        return 1.0f / (1.0f + x + 0.48f * x * x + 0.235f * x * x * x);
+    }
+
+    public static float halflife_to_damping(float halflife, float eps = 1e-5f)
+    {
+        return (4.0f * 0.69314718056f) / (halflife + eps);
+    }
+
+    public static void spring_character_update(
+    //Vector2 x,
+    Vector2 v,
+    Vector2 a,
+    Vector2 v_goal,
+    float halflife,
+    float dt,
+    //out Vector2 x_out,
+    out Vector2 v_out,
+    out Vector2 a_out)
+    {
+        float y = halflife_to_damping(halflife) / 2.0f;
+        Vector2 j0 = v - v_goal;
+        Vector2 j1 = a + j0 * y;
+        float eydt = fast_negexp(y * dt);
+
+        //x_out = eydt * (((-j1) / (y * y)) + ((-j0 - j1 * dt) / y)) +
+        //    (j1 / (y * y)) + j0 / y + v_goal * dt + x;
+        v_out = eydt * (j0 + j1 * dt) + v_goal;
+        a_out = eydt * (a - j1 * y * dt);
+    }
+
+    public static void spring_character_update(
+        Vector2[] px,
+        Vector2[] pv,
+        Vector2[] pa,
+        int idx,
+        Vector2 v_goal,
+        float halflife,
+        float dt)
+    {
+        Vector2 x = px[idx];
+        Vector2 v = pv[idx];
+        Vector2 a = pa[idx];
+        float y = halflife_to_damping(halflife) / 2.0f;
+        Vector2 j0 = v - v_goal;
+        Vector2 j1 = a + j0 * y;
+        float eydt = fast_negexp(y * dt);
+
+        px[idx] = eydt * (((-j1) / (y * y)) + ((-j0 - j1 * dt) / y)) +
+            (j1 / (y * y)) + j0 / y + v_goal * dt + x;
+        pv[idx] = eydt * (j0 + j1 * dt) + v_goal;
+        pa[idx] = eydt * (a - j1 * y * dt);
+    }
+
+    public static void spring_character_predict(
+    Vector2[] px,
+    Vector2[] pv,
+    Vector2[] pa,
+    int count,
+    Vector2 x,
+    Vector2 v,
+    Vector2 a,
+    Vector2 v_goal,
+    float halflife,
+    float dt)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            px[i] = x;
+            pv[i] = v;
+            pa[i] = a;
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            spring_character_update(px, pv, pa, i, v_goal, halflife, i * dt);
+        }
+    }
 }

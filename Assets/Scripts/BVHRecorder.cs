@@ -42,6 +42,7 @@ public class BVHRecorder: MonoBehaviour
     private string textLabel;
     void OnDrawGizmos()
     {
+        return;
         Gizmos.color = Color.blue;
         Gizmos.DrawLine(hip.transform.position, hipDebugEnd);
   

@@ -1259,7 +1259,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &42338789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1312,20 +1312,21 @@ MonoBehaviour:
   drawAngles: 0
   gizmoSphereRad: 0.1
   bruteforceSearch: 0
-  updateEveryNFrame: 7
-  transitionTime: 5
-  numNeigh: 5
+  useGlobal: 1
+  updateEveryNFrame: 10
+  transitionTime: 8
+  numNeigh: 4
   animTransitionTolerance: 20
   useAnimTransforms: 1
   lerpFromFristFrame: 1
-  trajPenalty: 10
-  velCombineFactor: 0.75
-  a: 0.2
-  b: 0.85
+  trajPenalty: 20
+  velCombineFactor: 1
+  a: 1
+  b: 1
   useQuadraticVel: 1
   MoveSpeed: 2
   SprintSpeed: 5.335
-  acceleration: 100
+  acceleration: 10
 --- !u!4 &42338792
 Transform:
   m_ObjectHideFlags: 0
@@ -28872,6 +28873,7 @@ MonoBehaviour:
   drawAngles: 0
   gizmoSphereRad: 0.1
   bruteforceSearch: 0
+  useGlobal: 1
   updateEveryNFrame: 7
   transitionTime: 5
   numNeigh: 5
