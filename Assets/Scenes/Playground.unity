@@ -1323,10 +1323,13 @@ MonoBehaviour:
   velCombineFactor: 1
   a: 1
   b: 1
+  useInertializationBlending: 0
   useQuadraticVel: 1
-  MoveSpeed: 2
+  MoveSpeed: 1
   SprintSpeed: 5.335
   acceleration: 10
+  useSpringsForVel: 1
+  halfLife: 0.5
 --- !u!4 &42338792
 Transform:
   m_ObjectHideFlags: 0
@@ -28884,10 +28887,13 @@ MonoBehaviour:
   velCombineFactor: 0.75
   a: 0.2
   b: 0.85
+  useInertializationBlending: 1
   useQuadraticVel: 1
   MoveSpeed: 2
   SprintSpeed: 5.335
   acceleration: 100
+  useSpringsForVel: 1
+  halfLife: 0.25
 --- !u!114 &1427380199
 MonoBehaviour:
   m_ObjectHideFlags: 0

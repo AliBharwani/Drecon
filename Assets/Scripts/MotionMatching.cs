@@ -41,7 +41,6 @@ public class MotionMatching : MonoBehaviour
     public bool useInertializationBlending = true;
     [Header("====   PHYSICS    ====")]
     public bool useQuadraticVel = true;
-    //public float hackyMaxVelReducer = 5f;
     //public Vector3 acc;
     public float MoveSpeed = 2.0f;
     public float SprintSpeed = 5.335f;
@@ -465,7 +464,7 @@ public class MotionMatching : MonoBehaviour
             Vector2[] px = new Vector2[3];
             Vector2[] pv = new Vector2[3];
             Vector2[] pa = new Vector2[3];
-            BVHUtils.spring_character_predict(px, pv, pa, 3, Vector2.zero, currentVel, acc, desiredVel, halfLife, 20f * frameTime);
+            SpringUtils.spring_character_predict(px, pv, pa, 3, Vector2.zero, currentVel, acc, desiredVel, halfLife, 20f * frameTime);
             userTraj = new float[6];
             for (int i = 0; i < 3; i++)
             {
@@ -518,7 +517,7 @@ public class MotionMatching : MonoBehaviour
     private void updateUserVelocity()
     {
         Vector2 desiredVel = getDesiredVelocity();
-        BVHUtils.spring_character_update(
+        SpringUtils.spring_character_update(
                currentVel,
                acc,
                desiredVel,
@@ -530,18 +529,11 @@ public class MotionMatching : MonoBehaviour
     }
     private Vector3 combineHipGlobalVel(Vector3 hipGlobalVel)
     {
-        Vector2 stickL = gamepad.leftStick.ReadValue();
         if (useSpringsForVel) {
             return new Vector3(currentVel.x, hipGlobalVel.y, currentVel.y);
         }
 
-        float targetSpeed;
-        if (stickL == Vector2.zero) targetSpeed = 0.0f;
-        else
-        {
-            targetSpeed = stickL.magnitude * MoveSpeed;
-        }
-        Vector2 desiredVel = stickL.normalized * targetSpeed;
+        Vector2 desiredVel = getDesiredVelocity();
         Vector2 desiredVelDir = desiredVel - currentVel;
         if (desiredVelDir.magnitude > acceleration)
             desiredVelDir = desiredVelDir.normalized * acceleration;
@@ -606,18 +598,23 @@ public class MotionMatching : MonoBehaviour
         //curFrameIdx++;
         if (nextFileIdx != -1 && curTransitionFrameNum <= transitionTime)
         {
-            int frameToLerpFrom = lerpFromFristFrame ? curFrameIdx - (curTransitionFrameNum - 1) : curFrameIdx;
-            BVHUtils.lerp(frameToLerpFrom, boneLists[curFileIdx], nextFrameIdx, boneLists[nextFileIdx], nameToTransformMap, ((float) curTransitionFrameNum) / transitionTime, true, useAnimTransforms);
+            if (useInertializationBlending)
+            {
+
+
+            } else
+            {
+                int frameToLerpFrom = lerpFromFristFrame ? curFrameIdx - (curTransitionFrameNum - 1) : curFrameIdx;
+                BVHUtils.lerp(frameToLerpFrom, boneLists[curFileIdx], nextFrameIdx, boneLists[nextFileIdx], nameToTransformMap, ((float)curTransitionFrameNum) / transitionTime, useAnimTransforms);
+            }
             if (curTransitionFrameNum == transitionTime)
             {
                 curFrameIdx = nextFrameIdx;
                 curFileIdx = nextFileIdx;
                 nextFileIdx = -1;
                 nextFrameIdx = -1;
-            } else
-            {
-                nextFrameIdx++;
             }
+            nextFrameIdx++;
             curTransitionFrameNum++;
         } else
         {
@@ -648,12 +645,181 @@ public class MotionMatching : MonoBehaviour
         Vector3 deltaPosition = new Vector3(currentVel.x, 0f, currentVel.y) * Time.deltaTime;
         hip.transform.position += deltaPosition;
     }
+
+
+
+
+    private void inertialize_pose_transition(
+        Vector3[] bone_offset_positions,
+        Vector3[] bone_offset_velocities,
+        Quaternion[] bone_offset_rotations,
+        Vector3[] bone_offset_angular_velocities,
+        ref Vector3 transition_src_position,
+        ref Quaternion transition_src_rotation,
+        ref Vector3 transition_dst_position,
+        ref Quaternion transition_dst_rotation,
+        in Vector3 root_position,
+        in Vector3 root_velocity,
+        in Quaternion root_rotation,
+        in Vector3 root_angular_velocity,
+        in Vector3[] bone_src_positions,
+        in Vector3[] bone_src_velocities,
+        in Quaternion[] bone_src_rotations,
+        in Vector3[] bone_src_angular_velocities,
+        in Vector3[] bone_dst_positions,
+        in Vector3[] bone_dst_velocities,
+        in Quaternion[] bone_dst_rotations,
+        in Vector3[] bone_dst_angular_velocities)
+    {
+
+        // First we record the root position and rotation
+        // in the animation data for the source and destination
+        // animation
+        transition_dst_position = root_position;
+        transition_dst_rotation = root_rotation;
+        transition_src_position = bone_dst_positions[0];
+        transition_src_rotation = bone_dst_rotations[0];
+
+        // We then find the velocities so we can transition the 
+        // root inertiaizers
+
+        Vector3 world_space_dst_velocity = Utils.quat_mul_vec3(transition_dst_rotation,
+            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_dst_velocities[0]));
+
+        Vector3 world_space_dst_angular_velocity = Utils.quat_mul_vec3(transition_dst_rotation,
+            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_dst_angular_velocities[0]));
+
+        // Transition inertializers recording the offsets for 
+        // the root joint
+        SpringUtils.inertialize_transition(
+            ref bone_offset_positions[0],
+            ref bone_offset_velocities[0],
+            root_position,
+            root_velocity,
+            root_position,
+            world_space_dst_velocity);
+
+        SpringUtils.inertialize_transition(
+            ref bone_offset_rotations[0],
+            ref bone_offset_angular_velocities[0],
+            root_rotation,
+            root_angular_velocity,
+            root_rotation,
+            world_space_dst_angular_velocity);
+
+        // Transition all the inertializers for each other bone
+        for (int i = 1; i < bone_offset_positions.Length; i++)
+        {
+            SpringUtils.inertialize_transition(
+                ref bone_offset_positions[i],
+                ref bone_offset_velocities[i],
+                bone_src_positions[i],
+                bone_src_velocities[i],
+                bone_dst_positions[i],
+                bone_dst_velocities[i]);
+
+            SpringUtils.inertialize_transition(
+                ref bone_offset_rotations[i],
+                ref bone_offset_angular_velocities[i],
+                bone_src_rotations[i],
+                bone_src_angular_velocities[i],
+                bone_dst_rotations[i],
+                bone_dst_angular_velocities[i]);
+        }
+    }
+
+    // This function updates the inertializer states. Here 
+    // it outputs the smoothed animation (input plus offset) 
+    // as well as updating the offsets themselves. It takes 
+    // as input the current playing animation as well as the 
+    // root transition locations, a halflife, and a dt
+    private void inertialize_pose_update(
+        Vector3[] bone_positions,
+        Vector3[] bone_velocities,
+        Quaternion[] bone_rotations,
+        Vector3[] bone_angular_velocities,
+        Vector3[] bone_offset_positions,
+        Vector3[] bone_offset_velocities,
+        Quaternion[] bone_offset_rotations,
+        Vector3[] bone_offset_angular_velocities,
+        in Vector3[] bone_input_positions,
+        in Vector3[] bone_input_velocities,
+        in Quaternion[] bone_input_rotations,
+        in Vector3[] bone_input_angular_velocities,
+        in Vector3 transition_src_position,
+        in Quaternion transition_src_rotation,
+        in Vector3 transition_dst_position,
+        in Quaternion transition_dst_rotation,
+        in float halflife,
+        in float dt)
+    {
+        // First we find the next root position, velocity, rotation
+        // and rotational velocity in the world space by transforming 
+        // the input animation from it's animation space into the 
+        // space of the currently playing animation.
+        Vector3 world_space_position = Utils.quat_mul_vec3(transition_dst_rotation,
+        Utils.quat_inv_mul_vec3(transition_src_rotation,
+            bone_input_positions[0] - transition_src_position)) + transition_dst_position;
+
+        Vector3 world_space_velocity = Utils.quat_mul_vec3(transition_dst_rotation,
+        Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_velocities[0]));
+
+        // Normalize here because quat inv mul can sometimes produce 
+        // unstable returns when the two rotations are very close.
+        Quaternion world_space_rotation = Quaternion.Normalize(transition_dst_rotation * 
+            Utils.quat_inv_mul(transition_src_rotation, bone_input_rotations[0]));
+
+        Vector3 world_space_angular_velocity = Utils.quat_mul_vec3(transition_dst_rotation,
+            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_angular_velocities[0]));
+
+        // Then we update these two inertializers with these new world space inputs
+        SpringUtils.inertialize_update(
+            ref bone_positions[0],
+            ref bone_velocities[0],
+            ref bone_offset_positions[0],
+            ref bone_offset_velocities[0],
+            world_space_position,
+            world_space_velocity,
+            halflife,
+            dt);
+
+        SpringUtils.inertialize_update(
+            ref bone_rotations[0],
+            ref bone_angular_velocities[0],
+            ref bone_offset_rotations[0],
+            ref bone_offset_angular_velocities[0],
+            world_space_rotation,
+            world_space_angular_velocity,
+            halflife,
+            dt);        
+    
+        // Then we update the inertializers for the rest of the bones
+        for (int i = 1; i < bone_positions.Length; i++)
+        {
+            SpringUtils.inertialize_update(
+                ref bone_positions[i],
+                ref bone_velocities[i],
+                ref bone_offset_positions[i],
+                ref bone_offset_velocities[i],
+                bone_input_positions[i],
+                bone_input_velocities[i],
+                halflife,
+                dt);
+
+            SpringUtils.inertialize_update(
+                ref bone_rotations[i],
+                ref bone_angular_velocities[i],
+                ref bone_offset_rotations[i],
+                ref bone_offset_angular_velocities[i],
+                bone_input_rotations[i],
+                bone_input_angular_velocities[i],
+                halflife,
+                dt);
+        }
+    }
+
     void Start()
     {
-        //maxXVel /= hackyMaxVelReducer;
-        //maxZVel /= hackyMaxVelReducer;
-        //useAnimTransforms = false;
-        // + 2 for extra data 
         searchVecLen = useGlobal ? 24 : 23;
         prefixes = walkOnly ? walkPrefixes : allPrefixes;
 
