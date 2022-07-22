@@ -38,6 +38,7 @@ public class MotionMatching : MonoBehaviour
     public float velCombineFactor = .5f;
     public float a = .2f;
     public float b = .85f;
+    public bool useInertializationBlending = true;
     [Header("====   PHYSICS    ====")]
     public bool useQuadraticVel = true;
     //public float hackyMaxVelReducer = 5f;
@@ -45,6 +46,9 @@ public class MotionMatching : MonoBehaviour
     public float MoveSpeed = 2.0f;
     public float SprintSpeed = 5.335f;
     public float acceleration = 10.0f;
+    public bool useSpringsForVel = true;
+    public float halfLife = .25f;
+
 
     private Vector2 acc = new Vector2(5f, 5f);
     private Vector2 currentVel;
@@ -455,6 +459,7 @@ public class MotionMatching : MonoBehaviour
     {
         float[] userTraj;
         Vector2 desiredVel = getDesiredVelocity();
+        inputDebugStart = hip.transform.position;
         if (useSpringsForVel)
         {
             Vector2[] px = new Vector2[3];
@@ -464,8 +469,9 @@ public class MotionMatching : MonoBehaviour
             userTraj = new float[6];
             for (int i = 0; i < 3; i++)
             {
-                userTraj[i] = px[i].x;
-                userTraj[i + 1] =  px[i].y;
+                int startIdx = i * 2;
+                userTraj[startIdx] = px[i].x;
+                userTraj[startIdx + 1] =  px[i].y;
                 gizmoSpheres2[i] = new Vector3(px[i].x, 0, px[i].y) + hip.transform.position;
             }
             inputDebugEnd = gizmoSpheres2[2];
@@ -476,7 +482,6 @@ public class MotionMatching : MonoBehaviour
         if (desiredVelDir.magnitude > acceleration)
             desiredVelDir = desiredVelDir.normalized * acceleration;
         currentVel += desiredVelDir * Time.deltaTime;
-        inputDebugStart = hip.transform.position;
         userTraj = new float[6];
         int idx = 0;
         for (int i = 1; i < 4; i++)
@@ -496,8 +501,6 @@ public class MotionMatching : MonoBehaviour
         return userTraj;
         //Debug.Log("Desired x vel: " + desiredXVel.ToString() + " Desierd z vel: " + desiredZVel.ToString());
     }
-    public bool useSpringsForVel = true;
-    public float halfLife = .25f;
 
     private Vector2 getDesiredVelocity()
     {

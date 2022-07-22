@@ -203,11 +203,6 @@ public static class BVHUtils
         curAnimFutureZPos = diff.z;
 
     }
-    public static void interializationBlend(BVHParser bp, Dictionary<BVHParser.BVHBone, Transform> boneToTransformMap, Transform transform, int frameIdx)
-    {
-
-    }
-
     public static void debugArray<T>(T[] data, string name)
     {
         Debug.Log(name + string.Join(",", data));
@@ -252,9 +247,6 @@ public static class BVHUtils
             return -a + (b - 360);
 
     }
-
-
-
 
     // Daniel Holden related code
     // use taylor series to calculate e^(-x)
@@ -334,7 +326,12 @@ public static class BVHUtils
 
         for (int i = 0; i < count; i++)
         {
-            spring_character_update(px, pv, pa, i, v_goal, halflife, i * dt);
+            spring_character_update(px, pv, pa, i, v_goal, halflife, (i+1) * dt);
         }
     }
+
+
+
+
+
 }
