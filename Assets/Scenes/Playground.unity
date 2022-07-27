@@ -1253,6 +1253,7 @@ GameObject:
   - component: {fileID: 42338792}
   - component: {fileID: 42338789}
   - component: {fileID: 42338790}
+  - component: {fileID: 42338791}
   m_Layer: 0
   m_Name: model_skeleton (Blender)
   m_TagString: Untagged
@@ -1330,6 +1331,18 @@ MonoBehaviour:
   acceleration: 10
   useSpringsForVel: 1
   halfLife: 0.5
+--- !u!114 &42338791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 42338788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &42338792
 Transform:
   m_ObjectHideFlags: 0
