@@ -49,6 +49,10 @@ public static class Utils
         }
     }
 
+    public static Quaternion to_unity_rot(Quaternion q)
+    {
+        return new Quaternion(q.x, -q.y, -q.z, q.w);
+    }
     public static Vector3 quat_log(Quaternion q, float eps = 1e-8f)
     {
         float length = Mathf.Sqrt(q.x * q.x + q.y * q.y + q.z * q.z);

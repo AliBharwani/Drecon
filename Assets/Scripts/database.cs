@@ -11,7 +11,7 @@ public class database
     Vector3[][] bone_velocities;
     Quaternion[][] bone_rotations;
     Vector3[][] bone_angular_velocities;
-    int[] bone_parents;
+    public int[] bone_parents;
 
     int[] range_starts;
     int[] range_stops;
@@ -25,7 +25,21 @@ public class database
         load_db(filename);
     }
 
-    private void load2Darray(BinaryReader reader, Vector3[][] arr)
+    public void setDataToFrame(ref Vector3[] local_bone_positions, ref Quaternion[] local_bone_rotations, int frameIdx)
+    {
+        for(int i = 0; i < nbones(); i++)
+        {
+            local_bone_positions[i] = bone_positions[i][frameIdx];
+            local_bone_rotations[i] = bone_rotations[i][frameIdx];
+        }
+
+    }
+    public int nframes() { return bone_positions[0].Length; }
+    public int nbones() { return bone_positions.Length; }
+    public int nranges() { return range_starts.Length; }
+    public int nfeatures() { return features.Length; }
+
+    private void load2Darray(BinaryReader reader, ref Vector3[][] arr, bool invertY = false)
     {
         // rows = num_frames, cols = num_bones
         uint rows, cols;
@@ -44,6 +58,7 @@ public class database
                 float x, y, z;
                 x = reader.ReadSingle();
                 y = reader.ReadSingle();
+                y *= invertY ? -1 : 1;
                 z = reader.ReadSingle();
                 arr[j][i] = new Vector3(x, y, z);
                 //if (i < 3)
@@ -54,7 +69,8 @@ public class database
         }
     }
 
-    private void load2Darray(BinaryReader reader, Quaternion[][] arr)
+
+    private void load2Darray(BinaryReader reader, ref Quaternion[][] arr)
     {
         // rows = num_frames, cols = num_bones
         uint rows, cols;
@@ -71,11 +87,13 @@ public class database
                     arr[j] = new Quaternion[rows];
                 }
                 float w, x, y, z;
+                w = reader.ReadSingle();
                 x = reader.ReadSingle();
                 y = reader.ReadSingle();
                 z = reader.ReadSingle();
-                w = reader.ReadSingle();
+                //w = reader.ReadSingle();
                 arr[j][i] = new Quaternion(x, y, z, w);
+                //arr[j][i] = Utils.to_unity_rot(new Quaternion(x, y, z, w));
                 //if (i < 3)
                 //{
                 //    Debug.Log($"[ {x}, {y}, {z}, {w}]");
@@ -84,18 +102,19 @@ public class database
         }
     }
 
-    private void loadArray(BinaryReader reader, int[] arr)
+    private void loadArray(BinaryReader reader, ref int[] arr)
     {
         // rows = num_frames, cols = num_bones
         uint size;
         size = reader.ReadUInt32();
+        //Debug.Log(size);
         //Debug.Log($"Rows: {rows} , Cols: {cols}");
         arr = new int[size];
         for (int i = 0; i < size; i++)
         {
             uint val = reader.ReadUInt32();
             arr[i] = (int) val;
-            Debug.Log(val);
+            //Debug.Log(val);
         }
     }
 
@@ -105,27 +124,21 @@ public class database
         {
             using (var reader = new BinaryReader(stream, Encoding.UTF8))
             {
-                load2Darray(reader, bone_positions);
-                load2Darray(reader, bone_velocities);
-                load2Darray(reader, bone_rotations);
-                load2Darray(reader, bone_angular_velocities);
-                loadArray(reader, bone_parents);
+                load2Darray(reader, ref bone_positions, false);
+                load2Darray(reader, ref bone_velocities);
+                load2Darray(reader, ref bone_rotations);
+                load2Darray(reader, ref bone_angular_velocities);
+                loadArray(reader, ref bone_parents);
                 // in the original generate database code, bone_parents is written in binary
                 // as an unsigned int, need to convert it
-                bone_parents[0] = -1; 
-                loadArray(reader, range_starts);
-                loadArray(reader, range_stops);
-
-                //array2d_read(db.bone_positions, f);
-                //array2d_read(db.bone_velocities, f);
-                //array2d_read(db.bone_rotations, f);
-                //array2d_read(db.bone_angular_velocities, f);
-                //array1d_read(db.bone_parents, f);
-
-                //array1d_read(db.range_starts, f);
-                //array1d_read(db.range_stops, f);
-
+                loadArray(reader, ref  range_starts);
+                loadArray(reader, ref range_stops);
             }
         }
+        bone_parents[0] = -1;
+
     }
+
+
+
 }

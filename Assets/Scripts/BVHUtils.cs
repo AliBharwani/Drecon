@@ -101,6 +101,10 @@ public static class BVHUtils
             float zRot = wrapAngle(getAtFrame(bone, Channel.ZRot, frame));
             Vector3 eulerBVH = new Vector3(xRot, yRot, zRot);
             Quaternion rot = fromEulerZXY(eulerBVH);
+            if (first && frame < 204 && frame >= 194)
+            {
+                Debug.Log($"Frame {frame}: {rot.w}, {rot.x} , {rot.y} , {rot.z}");
+            }
             curTransform.localRotation = new Quaternion(rot.x, -rot.y, -rot.z, rot.w);
         }
 
