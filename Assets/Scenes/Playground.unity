@@ -1405,7 +1405,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  databaseFilepath: database_test2
+  databaseFilepath: database
   boneToTransform:
   - {fileID: 42338792}
   - {fileID: 1812220948}
