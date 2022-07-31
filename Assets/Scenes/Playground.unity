@@ -1405,7 +1405,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  feature_weight_foot_position: 0.75
+  feature_weight_foot_velocity: 1
+  feature_weight_hip_velocity: 1
+  feature_weight_trajectory_positions: 1
+  feature_weight_trajectory_directions: 1.5
+  inertialize_blending_halflife: 0.2
+  simulation_rotation_halflife: 0.1
+  useBlending: 1
   databaseFilepath: database
+  numNeigh: 1
+  searchEveryNFrames: 5
+  frameCounter: 1
   boneToTransform:
   - {fileID: 42338792}
   - {fileID: 1812220948}
@@ -1430,6 +1441,8 @@ MonoBehaviour:
   - {fileID: 591433368}
   - {fileID: 2062545585}
   - {fileID: 1289606169}
+  MoveSpeed: 3
+  simulation_velocity_halflife: 0.27
 --- !u!4 &42338792
 Transform:
   m_ObjectHideFlags: 0
@@ -1438,7 +1451,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 42338788}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.939, y: 0, z: 18.79}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 973682127}
@@ -21715,7 +21728,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  feature_weight_foot_position: 0.75
+  feature_weight_foot_velocity: 1
+  feature_weight_hip_velocity: 1
+  feature_weight_trajectory_positions: 1
+  feature_weight_trajectory_directions: 1.5
+  inertialize_blending_halflife: 0.1
+  simulation_rotation_halflife: 0.1
+  useBlending: 1
   databaseFilepath: database_v3
+  numNeigh: 1
+  searchEveryNFrames: 1
+  frameCounter: 0
   boneToTransform:
   - {fileID: 1612368837}
   - {fileID: 975563056}
@@ -21739,6 +21763,8 @@ MonoBehaviour:
   - {fileID: 1040496763}
   - {fileID: 1732309203}
   - {fileID: 1714199308}
+  MoveSpeed: 3
+  simulation_velocity_halflife: 0.27
 --- !u!114 &978776387
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -86,7 +86,8 @@ public class KDTree
     {
         closest = null;
         currentBestDist = double.PositiveInfinity;
-        maxHeap.reset();
+        if (numNeigh > 1)
+            maxHeap.reset();
 
         recursiveNNSearch(root, searchVector, depth);
         if (numNeigh == 1) {
@@ -145,9 +146,9 @@ public class KDTree
     }
     private double distBetweenAtAxis(double[] a, float[] b, int axis)
     {
-        float mult = axis >= startIdx && axis < endIdx ? trajectoryPenalty : 1;
-
-        return Math.Sqrt(Math.Pow(a[axis] - b[axis], 2) * mult) ;
+        return Math.Sqrt(Math.Pow(a[axis] - b[axis], 2));
+        //float mult = axis >= startIdx && axis < endIdx ? trajectoryPenalty : 1;
+        //return Math.Sqrt(Math.Pow(a[axis] - b[axis], 2) * mult) ;
     }
     private double distanceBetween(double[] a, float[] b)
     {
@@ -155,8 +156,9 @@ public class KDTree
         double answer = 0;
         for (int i = 0; i < k; i++)
         {
-            float mult = i >= startIdx && i < endIdx ? trajectoryPenalty : 1;
-            answer += mult * Math.Pow(a[i] - b[i], 2);
+            answer += Math.Pow(a[i] - b[i], 2);
+            //float mult = i >= startIdx && i < endIdx ? trajectoryPenalty : 1;
+            //answer += mult * Math.Pow(a[i] - b[i], 2);
         }
         return Math.Sqrt(answer);
 

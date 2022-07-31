@@ -18,11 +18,11 @@ public static class Utils
 
     public static Quaternion quat_inv(Quaternion q)
     {
-        return new Quaternion(-q.w, q.x, q.y, q.z);
+        return new Quaternion(q.x, q.y, q.z, -q.w);
     }
     public static Quaternion quat_neg(Quaternion q)
     {
-        return new Quaternion(-q.w, -q.x, -q.y, -q.z);
+        return new Quaternion(-q.x, -q.y, -q.z, -q.w);
     }
     public static Quaternion quat_abs(Quaternion x)
     {
@@ -39,13 +39,13 @@ public static class Utils
 
         if (halfangle < eps)
         {
-            return Quaternion.Normalize(new Quaternion(1.0f, v.x, v.y, v.z));
+            return Quaternion.Normalize(new Quaternion(v.x, v.y, v.z, 1.0f));
         }
         else
         {
             float c = Mathf.Cos(halfangle);
             float s = Mathf.Sin(halfangle) / halfangle;
-            return new Quaternion(c, s * v.x, s * v.y, s * v.z);
+            return new Quaternion(s * v.x, s * v.y, s * v.z, c);
         }
     }
 
@@ -77,4 +77,10 @@ public static class Utils
     {
         return 2.0f * quat_log(q, eps);
     }
+
+    public static Quaternion quat_mul_inv(Quaternion q, Quaternion p)
+    {
+        return q * quat_inv(p);
+    }
+
 }
