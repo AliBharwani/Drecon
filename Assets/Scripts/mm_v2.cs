@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.InputSystem;
@@ -39,7 +40,8 @@ public class mm_v2 : MonoBehaviour
     public float feature_weight_trajectory_directions = 1.5f;
     public float inertialize_blending_halflife = 0.1f;
     public float simulation_rotation_halflife = .1f;
-    public bool useBlending = true;
+    public bool abTest = true;
+    public float MoveSpeed = 3;
 
     public string databaseFilepath = "database_v1";
     public int numNeigh = 1;
@@ -168,7 +170,7 @@ public class mm_v2 : MonoBehaviour
         );
         //inertialize_root_adjust(ref bone_offset_positions[0], ref bone_positions[0], ref bone_rotations[0], simulation_position, simulation_rotation);
 
-        //intertialize_pose_transition(
+        //inertialize_pose_transition(
         //    motionDB.bone_positions[frameIdx],
         //    motionDB.bone_velocities[frameIdx],
         //    motionDB.bone_rotations[frameIdx],
@@ -199,15 +201,29 @@ public class mm_v2 : MonoBehaviour
     {
         if (!Application.isPlaying)
             return;
+        Gizmos.color = Color.blue;
         for (int i = 0; i < 4; i++)
         {
             Gizmos.DrawSphere(trajectory_positions[i], .1f);
         }
+
+        //Gizmos.color = Color.green;
+        //Vector3 root_position = bone_positions[0];
+        //Quaternion root_rotation = bone_rotations[0];
+
+        //Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
+        //Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
+        //Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[3] - root_position);
+        //Gizmos.DrawSphere(traj0, .1f);
+        //Gizmos.DrawSphere(traj1, .1f);
+        //Gizmos.DrawSphere(traj2, .1f);
+
+
     }
 
     private void playFrameIdx()
     {
-        Debug.Log($"Playing frame {frameIdx}");
+        //Debug.Log($"Playing frame {frameIdx}");
         curr_bone_positions = motionDB.bone_positions[frameIdx];
         curr_bone_velocities = motionDB.bone_velocities[frameIdx];
         curr_bone_rotations = motionDB.bone_rotations[frameIdx];
@@ -283,13 +299,23 @@ public class mm_v2 : MonoBehaviour
             + 3 // Left Foot velocity
             + 3 // Right Foot velocity
             + 3; //Hip Velocity
+        int debug_ignore = num_features_to_copy;
         for (int i = 0; i < num_features_to_copy; i++)
         {
             query[i] = query_features[i];
         }
         query_compute_trajectory_position_feature(num_features_to_copy, query);
         query_compute_trajectory_direction_feature(num_features_to_copy + 6, query);
-
+        StringBuilder sb = new StringBuilder("Query: [ ");
+        for (int i = 0; i < query.Length; i++)
+        {
+            if (i == debug_ignore)
+                sb.Append(" || ");
+            sb.Append(" , " + query[i].ToString());
+        }
+        //foreach (float f in query)
+        //    sb.Append(" , " + f.ToString());
+        Debug.Log(sb.ToString());
         best_idx = motionDB.motionMatch(query);
         Debug.Log($"Best idx: {best_idx}");
 
@@ -344,9 +370,9 @@ public class mm_v2 : MonoBehaviour
     {
         Quaternion root_rotation = bone_rotations[0];
 
-        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[1], Vector3.forward));
-        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[2], Vector3.forward));
-        Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[3], Vector3.forward));
+        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[1], abTest ? Vector3.up : Vector3.forward));
+        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[2], abTest ? Vector3.up : Vector3.forward));
+        Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[3], abTest ? Vector3.up : Vector3.forward));
 
         query[offset + 0] = traj0.x;
         query[offset + 1] = traj0.z;
@@ -355,7 +381,6 @@ public class mm_v2 : MonoBehaviour
         query[offset + 4] = traj2.x;
         query[offset + 5] = traj2.z;
     }
-    public float MoveSpeed = 3;
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)
     {
@@ -489,9 +514,9 @@ public class mm_v2 : MonoBehaviour
             Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position))
                 + transition_dst_position;
         Vector3 debugTerm = Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position);
-        Debug.Log($"bone_input_positions[0] - transition_src_position: {bone_input_positions[0] - transition_src_position} \n" +
-            $"quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position): {debugTerm} \n" +
-            $"world_space_position: {world_space_position}");
+        //Debug.Log($"bone_input_positions[0] - transition_src_position: {bone_input_positions[0] - transition_src_position} \n" +
+        //    $"quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position): {debugTerm} \n" +
+        //    $"world_space_position: {world_space_position}");
 
         Vector3 world_space_velocity = Utils.quat_mul_vec3(transition_dst_rotation,
             Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_velocities[0]));
@@ -517,7 +542,7 @@ public class mm_v2 : MonoBehaviour
             world_space_velocity,
             halflife,
             dt);
-        Debug.Log($"Bone position after update: { bone_positions[0]}");
+        //Debug.Log($"Bone position after update: { bone_positions[0]}");
 
         SpringUtils.inertialize_update(
             ref bone_rotations[0],
@@ -626,9 +651,9 @@ public class mm_v2 : MonoBehaviour
             root_velocity,
             root_position,
             world_space_dst_velocity);
-        Debug.Log($"Transitioning - transition_dst_position: {transition_dst_position}\n" +
-                    $"transition_src_position: {transition_src_position}\n" +
-                    $"bone_offset_positions: {bone_offset_positions[0]}");
+        //Debug.Log($"Transitioning - transition_dst_position: {transition_dst_position}\n" +
+        //            $"transition_src_position: {transition_src_position}\n" +
+        //            $"bone_offset_positions: {bone_offset_positions[0]}");
         SpringUtils.inertialize_transition(
             ref bone_offset_rotations[0],
             ref bone_offset_angular_velocities[0],

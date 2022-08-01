@@ -36,21 +36,21 @@ public class database
     public int motionMatch(float[] query)
     {
         // Assume query is already normalized
-        double[] bestEntry = tree.nnSearch(query);
+        float[] bestEntry = tree.nnSearch(query);
         int best_idx = (int) bestEntry[bestEntry.Length - 1];
         return best_idx;
     }
 
-    public int database_trajectory_index_clamp(int frame, int offset)
+    public int database_trajectory_index_clamp(int frame, int _offset)
     {
         for (int i = 0; i < nranges(); i++)
         {
             if (frame >= range_starts[i] && frame < range_stops[i])
             {
-                return Mathf.Clamp(frame + offset, range_starts[i], range_stops[i] - 1);
+                return Mathf.Clamp(frame + _offset, range_starts[i], range_stops[i] - 1);
             }
         }
-        throw new Exception($"Index clamp out of range frame {frame} offset {offset}");
+        throw new Exception($"Index clamp out of range frame {frame} offset {_offset}");
     }
 
     public database(string filename, int _num_neigh)
@@ -100,6 +100,8 @@ public class database
         compute_bone_velocity_feature( (int)Bone_Hips, feature_weight_hip_velocity);
         compute_trajectory_position_feature( feature_weight_trajectory_positions);
         compute_trajectory_direction_feature(feature_weight_trajectory_directions);
+        BVHUtils.debugArray(features_offset, "Features offset: ");
+        BVHUtils.debugArray(features_scale, "Features scale: ");
 
         UnityEngine.Assertions.Assert.IsTrue(offset == nfeatures);
 
@@ -112,12 +114,14 @@ public class database
                     is_stop = true;
             if (is_stop)
                 continue;
-            double[] entry = new double[nfeatures + 1];
+            float[] entry = new float[nfeatures + 1];
             for (int j = 0; j < nfeatures; j++)
             {
                 entry[j] = features[i][j];
             }
             entry[nfeatures] = i;
+            if (i < 11)
+                BVHUtils.debugArray(entry, $"Entry {i}: ");
             tree.Add(entry);
         }
 
@@ -192,7 +196,7 @@ public class database
                 bone_angular_velocities[i],
                 bone);
 
-            bone_velocity = Utils.quat_mul_vec3(Utils.quat_inv(bone_rotations[i][0]), bone_velocity);
+            bone_velocity = Utils.quat_mul_vec3(inv_sim_rot(i), bone_velocity);
 
             features[i][offset + 0] = bone_velocity.x;
             features[i][offset + 1] = bone_velocity.y;
@@ -221,15 +225,20 @@ public class database
                 bone);
 
             // multiply by inverse of simulation bone 
-            bone_position = Utils.quat_mul_vec3(Utils.quat_inv(bone_rotations[i][0]), bone_position - bone_positions[i][0]);
+            bone_position = Utils.quat_mul_vec3(inv_sim_rot(i), bone_position - bone_positions[i][0]);
             //Debug.Log(features[i]);
 
             features[i][offset + 0] = bone_position.x;
             features[i][offset + 1] = bone_position.y;
             features[i][offset + 2] = bone_position.z;
         }
-
+        //for (int i = 0; i < 11; i++)
+        //{
+        Debug.Log($"Offset: {offset}");
+        Debug.Log($"Bone id {bone} local position before normalize: x: {features[0][offset + 0]} , y: {features[0][offset + 1]}, z: {features[0][offset + 2]}");
+        //}
         normalize_feature(3, weight);
+        Debug.Log($"Bone id {bone} local position after normalize: x: {features[0][offset + 0]} , y: {features[0][offset + 1]}, z: {features[0][offset + 2]}");
 
         offset += 3;
     }
@@ -330,7 +339,7 @@ public class database
         {
             for (int j = 0; j < size; j++)
             {
-                vars[j] += Mathf.Pow((features[i][offset + j] - features_offset[offset + j]) / numframes, 2);
+                vars[j] += Mathf.Pow(features[i][offset + j] - features_offset[offset + j], 2) / numframes;
             }
         }
 
@@ -376,7 +385,7 @@ public class database
     public int nframes() { return bone_positions.Length;  }
     public int nbones() { return bone_positions[0].Length; }
     public int nranges() { return range_starts.Length; }
-    public int nfeatures() { return features.Length; }
+    public int nfeatures() { return features[0].Length; }
 
     private void load2Darray(BinaryReader reader, ref Vector3[][] arr, bool invertY = false)
     {

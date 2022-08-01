@@ -1412,7 +1412,8 @@ MonoBehaviour:
   feature_weight_trajectory_directions: 1.5
   inertialize_blending_halflife: 0.2
   simulation_rotation_halflife: 0.1
-  useBlending: 1
+  abTest: 0
+  MoveSpeed: 2
   databaseFilepath: database
   numNeigh: 1
   searchEveryNFrames: 5
@@ -1441,7 +1442,6 @@ MonoBehaviour:
   - {fileID: 591433368}
   - {fileID: 2062545585}
   - {fileID: 1289606169}
-  MoveSpeed: 3
   simulation_velocity_halflife: 0.27
 --- !u!4 &42338792
 Transform:
@@ -21735,7 +21735,8 @@ MonoBehaviour:
   feature_weight_trajectory_directions: 1.5
   inertialize_blending_halflife: 0.1
   simulation_rotation_halflife: 0.1
-  useBlending: 1
+  abTest: 1
+  MoveSpeed: 3
   databaseFilepath: database_v3
   numNeigh: 1
   searchEveryNFrames: 1
@@ -21763,7 +21764,6 @@ MonoBehaviour:
   - {fileID: 1040496763}
   - {fileID: 1732309203}
   - {fileID: 1714199308}
-  MoveSpeed: 3
   simulation_velocity_halflife: 0.27
 --- !u!114 &978776387
 MonoBehaviour:

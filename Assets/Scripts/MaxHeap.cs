@@ -5,15 +5,15 @@ using UnityEngine;
 
 public class MaxHeap 
 {
-    public Tuple<double, double[]>[] arr;
+    public Tuple<float, float[]>[] arr;
     private int capacity;
     private int size;
-    private Tuple<double, double[]> dummy = new Tuple<double, double[]>(-1, null);
+    private Tuple<float, float[]> dummy = new Tuple<float, float[]>(-1, null);
    public MaxHeap(int _size )
     {
         size = 0;
         capacity = _size;
-        arr = new Tuple<double, double[]>[_size + 1];
+        arr = new Tuple<float, float[]>[_size + 1];
         reset();
     }
 
@@ -28,16 +28,16 @@ public class MaxHeap
         size = 0;
     }
 
-    public double[] getRandom()
+    public float[] getRandom()
     {
         return arr[UnityEngine.Random.Range(1, capacity + 1)].Item2;
     }
 
-    public double peek()
+    public float peek()
     {
         if (size == 0)
         {
-            return double.PositiveInfinity;
+            return float.PositiveInfinity;
         }
         return arr[1].Item1;
     }
@@ -84,9 +84,9 @@ public class MaxHeap
         }
 
     }
-    public void add(double value, double[] data)
+    public void add(float value, float[] data)
     {
-        var entry = new Tuple<double, double[]>(value, data);
+        var entry = new Tuple<float, float[]>(value, data);
         if (size == capacity)
         {
             arr[1] = entry;

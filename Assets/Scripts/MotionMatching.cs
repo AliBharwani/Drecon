@@ -171,7 +171,7 @@ public class MotionMatching : MonoBehaviour
             {
                 List<string> stringValues = line.Split(',').ToList();
                 stringValues.Add(i.ToString());
-                motionDB.Add(stringValues.Select(double.Parse).ToArray());
+                motionDB.Add(stringValues.Select(float.Parse).ToArray());
                 counter++;
             }
         }
@@ -555,7 +555,7 @@ public class MotionMatching : MonoBehaviour
         float[] currentSearchVector = getCurrentSearchVector();
          normalizeVector(currentSearchVector);
         //Debug.Log("normalized Vector: " + string.Join(",", currentSearchVector));
-        double[] bestMatchingAnimation = bruteforceSearch ? motionDB.bruteForceSearch(currentSearchVector) : motionDB.nnSearch(currentSearchVector);
+        float[] bestMatchingAnimation = bruteforceSearch ? motionDB.bruteForceSearch(currentSearchVector) : motionDB.nnSearch(currentSearchVector);
         //Debug.Log("bestMatchingAnimation: " + string.Join(",", bestMatchingAnimation));
 
         int bestFrameIdx = (int)bestMatchingAnimation[searchVecLen];

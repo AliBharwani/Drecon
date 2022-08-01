@@ -9,9 +9,9 @@ public class KDTree
     {
         public Node left;
         public Node right;
-        public double[] data;
+        public float[] data;
         public bool isLeaf;
-        public Node(double[] _data)
+        public Node(float[] _data)
         {
             data = _data;
         }
@@ -22,16 +22,16 @@ public class KDTree
     private int extraData;
     private int numNeigh;
 
-    private List<double[]> values;
+    private List<float[]> values;
     private Node root;
-    private double currentBestDist;
+    private float currentBestDist;
     private Node closest;
     private int[] trajectoryIndices = new int[] { 13, 25 };
 
     int startIdx,endIdx;
     private float trajectoryPenalty = 3;
 
-    //private SortedList<double, double[]> sortedNeigh;
+    //private SortedList<float, float[]> sortedNeigh;
     private MaxHeap maxHeap;
 
     public KDTree (int _k, int _extraData = 2, int _numNeigh = 1, float _trajectoryPenalty = 3)
@@ -44,10 +44,10 @@ public class KDTree
         trajectoryPenalty = _trajectoryPenalty;
         if (numNeigh > 1)
             maxHeap = new MaxHeap(numNeigh);
-            //sortedNeigh = new SortedList<double, double[]>(numNeigh);
-        values = new List<double[]>();
+            //sortedNeigh = new SortedList<float, float[]>(numNeigh);
+        values = new List<float[]>();
     }
-   public void Add(double[] entry)
+   public void Add(float[] entry)
     {
         values.Add(entry);
     }
@@ -58,20 +58,20 @@ public class KDTree
         root = recursiveBuild(0, values);
         values = null;
     }
-    private Node recursiveBuild(int depth , List<double[]> values)
+    private Node recursiveBuild(int depth , List<float[]> values)
     {
         if (values.Count == 0)
             return null;
         int axis = depth % k;
-        values.Sort(delegate (double[] x, double[] y)
+        values.Sort(delegate (float[] x, float[] y)
         {
             return x[axis].CompareTo(y[axis]);
         });
         int median_idx = values.Count / 2;
         Node newNode = new Node(values[median_idx]);
         int numValuesAfterMedian = values.Count - (median_idx + 1);
-        List<double[]> valuesLeft = values.GetRange(0, median_idx);
-        List<double[]> valuesRight = values.GetRange(median_idx + 1, numValuesAfterMedian);
+        List<float[]> valuesLeft = values.GetRange(0, median_idx);
+        List<float[]> valuesRight = values.GetRange(median_idx + 1, numValuesAfterMedian);
         newNode.left = recursiveBuild(depth + 1, valuesLeft);
         newNode.right = recursiveBuild(depth + 1, valuesRight);
         // newNode.isLeaf = newNode.left == null && newNode.right == null;
@@ -82,10 +82,10 @@ public class KDTree
         return newNode;
     }
 
-    public double[] nnSearch(float[] searchVector, int depth = 0 )
+    public float[] nnSearch(float[] searchVector, int depth = 0 )
     {
         closest = null;
-        currentBestDist = double.PositiveInfinity;
+        currentBestDist = float.PositiveInfinity;
         if (numNeigh > 1)
             maxHeap.reset();
 
@@ -95,7 +95,7 @@ public class KDTree
         } else
         {
 
-            double[] returnVal = maxHeap.getRandom();
+            float[] returnVal = maxHeap.getRandom();
             return returnVal;
         }
     }
@@ -108,7 +108,7 @@ public class KDTree
         // if the bounding box is too far, do nothing 
         //if (closest != null && Math.Pow(node.data[axis] - searchVector[axis], 2) > currentBestDist)
         //    return;
-        double dist = distanceBetween( node.data, searchVector);
+        float dist = distanceBetween( node.data, searchVector);
         if (numNeigh == 1)
         {
             if (closest == null || dist < currentBestDist)
@@ -144,30 +144,32 @@ public class KDTree
             }
         }
     }
-    private double distBetweenAtAxis(double[] a, float[] b, int axis)
+    private float distBetweenAtAxis(float[] a, float[] b, int axis)
     {
-        return Math.Sqrt(Math.Pow(a[axis] - b[axis], 2));
+        return Mathf.Pow(a[axis] - b[axis], 2);
+        //return Math.Sqrt(Math.Pow(a[axis] - b[axis], 2));
         //float mult = axis >= startIdx && axis < endIdx ? trajectoryPenalty : 1;
         //return Math.Sqrt(Math.Pow(a[axis] - b[axis], 2) * mult) ;
     }
-    private double distanceBetween(double[] a, float[] b)
+    private float distanceBetween(float[] a, float[] b)
     {
         // use squared euclidan distance to avoid having to calculate square roots
-        double answer = 0;
+        float answer = 0;
         for (int i = 0; i < k; i++)
         {
-            answer += Math.Pow(a[i] - b[i], 2);
+            answer += Mathf.Pow(a[i] - b[i], 2);
             //float mult = i >= startIdx && i < endIdx ? trajectoryPenalty : 1;
             //answer += mult * Math.Pow(a[i] - b[i], 2);
         }
-        return Math.Sqrt(answer);
+        return  answer;
+        //return Math.Sqrt(answer);
 
     }
 
-    public double[] bruteForceSearch(float[] searchVector)
+    public float[] bruteForceSearch(float[] searchVector)
     {
         closest = null;
-        currentBestDist = double.PositiveInfinity;
+        currentBestDist = float.PositiveInfinity;
 
         recursiveBruteForceSearch(root, searchVector);
         return closest.data;
@@ -176,7 +178,7 @@ public class KDTree
     {
         if (node == null)
             return;
-        double dist = distanceBetween( node.data, searchVector);
+        float dist = distanceBetween( node.data, searchVector);
         if (closest == null || dist < currentBestDist)
         {
             closest = node;

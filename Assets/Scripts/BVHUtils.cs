@@ -199,7 +199,7 @@ public static class BVHUtils
     }
     public static void debugArray<T>(T[] data, string name)
     {
-        Debug.Log(name + string.Join(",", data));
+        Debug.Log(name + string.Join(" , ", data));
     }
 
     public static float SmoothCD(float deltaTime, float from, float to, float currentVel, out float vel, float smoothTime)
