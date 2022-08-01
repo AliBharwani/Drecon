@@ -27,14 +27,14 @@ public class KDTree
     private float currentBestDist;
     private Node closest;
     private int[] trajectoryIndices = new int[] { 13, 25 };
-
+    private int ignore_surrounding;
     int startIdx,endIdx;
     private float trajectoryPenalty = 3;
 
     //private SortedList<float, float[]> sortedNeigh;
     private MaxHeap maxHeap;
 
-    public KDTree (int _k, int _extraData = 2, int _numNeigh = 1, float _trajectoryPenalty = 3)
+    public KDTree(int _k, int _extraData = 2, int _numNeigh = 1, float _trajectoryPenalty = 3, int _ignore_surrounding = 10)
     {
         k = _k;
         startIdx = k - 12;
@@ -42,6 +42,7 @@ public class KDTree
         extraData = _extraData;
         numNeigh = _numNeigh;
         trajectoryPenalty = _trajectoryPenalty;
+        ignore_surrounding = _ignore_surrounding;
         if (numNeigh > 1)
             maxHeap = new MaxHeap(numNeigh);
             //sortedNeigh = new SortedList<float, float[]>(numNeigh);
@@ -88,19 +89,18 @@ public class KDTree
         currentBestDist = float.PositiveInfinity;
         if (numNeigh > 1)
             maxHeap.reset();
-
-        recursiveNNSearch(root, searchVector, depth);
+        int frame_idx = (int)searchVector[searchVector.Length - 1];
+        recursiveNNSearch(root, searchVector, depth, frame_idx);
         if (numNeigh == 1) {
             return closest.data;
         } else
         {
-
             float[] returnVal = maxHeap.getRandom();
             return returnVal;
         }
     }
 
-    private void recursiveNNSearch(Node node, float[] searchVector, int depth) 
+    private void recursiveNNSearch(Node node, float[] searchVector, int depth, int frame_idx) 
     {
         if (node == null)
             return;
@@ -108,39 +108,46 @@ public class KDTree
         // if the bounding box is too far, do nothing 
         //if (closest != null && Math.Pow(node.data[axis] - searchVector[axis], 2) > currentBestDist)
         //    return;
+        int node_frame_idx = (int) node.data[k + extraData - 1];
         float dist = distanceBetween( node.data, searchVector);
-        if (numNeigh == 1)
+        bool ignore = Mathf.Abs(node_frame_idx - frame_idx) < ignore_surrounding;
+        if (!ignore)
         {
-            if (closest == null || dist < currentBestDist)
+            if (numNeigh == 1)
             {
-                closest = node;
-                currentBestDist = dist;
+                if (closest == null || dist < currentBestDist)
+                {
+                    closest = node;
+                    currentBestDist = dist;
+                }
             }
-        } else
-        {
-            // maxHeap of Mins
-            if (!maxHeap.isFull() || maxHeap.peek() > dist)
-                maxHeap.add(dist, node.data);
+            else
+            {
+                // maxHeap of Mins
+                if (!maxHeap.isFull() || maxHeap.peek() > dist)
+                    maxHeap.add(dist, node.data);
+            }
         }
+
 
         if (searchVector[axis] < node.data[axis])
         {
             // search left first
-            recursiveNNSearch(node.left, searchVector, depth + 1);
+            recursiveNNSearch(node.left, searchVector, depth + 1, frame_idx);
             // do the weird hypersphere thing wikipedia talked about lol
             // ok but really: 
             // If the distance between the node's value at the splitting dimension and the search vector's va
             if (distBetweenAtAxis(node.data, searchVector, axis) < currentBestDist)
             {
-                recursiveNNSearch(node.right, searchVector, depth + 1);
+                recursiveNNSearch(node.right, searchVector, depth + 1, frame_idx);
             }
         } else
         {
             // search right first
-            recursiveNNSearch(node.right, searchVector, depth + 1);
+            recursiveNNSearch(node.right, searchVector, depth + 1, frame_idx);
             if (distBetweenAtAxis(node.data, searchVector, axis) < currentBestDist)
             {
-                recursiveNNSearch(node.left, searchVector, depth + 1);
+                recursiveNNSearch(node.left, searchVector, depth + 1, frame_idx);
             }
         }
     }

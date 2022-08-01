@@ -55,9 +55,11 @@ public class database
     bool abTest = false;
     int frame_increments;
     int ignore_range_end = 20;
-    public database(string filename, int _num_neigh, bool _abTest, int _frame_increments)
+    int ignore_surrounding;
+    public database(string filename, int _num_neigh, bool _abTest, int _frame_increments, int _ignore_surrounding)
     {
         frame_increments = _frame_increments;
+        ignore_surrounding = _ignore_surrounding;
         num_neigh = _num_neigh;
         abTest = _abTest;
         load_db(filename);
@@ -109,7 +111,7 @@ public class database
 
         UnityEngine.Assertions.Assert.IsTrue(offset == nfeatures);
 
-        tree = new KDTree(nfeatures, 1, num_neigh);
+        tree = new KDTree(nfeatures, 1, num_neigh, 1, ignore_surrounding);
         for (int i = 0; i < numframes; i++)
         {
             bool is_stop = false;

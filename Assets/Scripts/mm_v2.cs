@@ -43,6 +43,7 @@ public class mm_v2 : MonoBehaviour
     public bool abTest = true;
     public float MoveSpeed = 3;
     public int frame_increments = 10;
+    public int ignore_surrounding = 10;
 
     public string databaseFilepath = "database_v1";
     public int numNeigh = 1;
@@ -114,7 +115,7 @@ public class mm_v2 : MonoBehaviour
         }
         gamepad = Gamepad.current;
         Application.targetFrameRate = 30;
-        motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, abTest, frame_increments);
+        motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, abTest, frame_increments, ignore_surrounding);
         motionDB.database_build_matching_features(
             feature_weight_foot_position,
             feature_weight_foot_velocity,
@@ -205,19 +206,19 @@ public class mm_v2 : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             Gizmos.DrawSphere(trajectory_positions[i], .1f);
-            if (i > 0)
-            {
-                toy_pointers[i - 1].position = trajectory_positions[i];
-                toy_pointers[i - 1].rotation = trajectory_rotations[i];
-            }
+            //if (i > 0)
+            //{
+            //    toy_pointers[i - 1].position = trajectory_positions[i];
+            //    toy_pointers[i - 1].rotation = trajectory_rotations[i];
+            //}
         }
         
         //toy_pointers[1].rotation = simulation_rotation;
         //toy_pointers[2].rotation = desired_rotation;
 
-        Gizmos.color = Color.green;
-        Vector3 root_position = bone_positions[0];
-        Quaternion root_rotation = bone_rotations[0];
+        //Gizmos.color = Color.green;
+        //Vector3 root_position = bone_positions[0];
+        //Quaternion root_rotation = bone_rotations[0];
 
         //Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
         //Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
@@ -308,21 +309,19 @@ public class mm_v2 : MonoBehaviour
             + 3 // Left Foot velocity
             + 3 // Right Foot velocity
             + 3; //Hip Velocity
-        int debug_ignore = num_features_to_copy;
+        //int debug_ignore = num_features_to_copy;
         for (int i = 0; i < num_features_to_copy; i++)
-        {
             query[i] = query_features[i];
-        }
         query_compute_trajectory_position_feature(num_features_to_copy, query);
         query_compute_trajectory_direction_feature(num_features_to_copy + 6, query);
         best_idx = motionDB.motionMatch(query);
-        Debug.Log($"Best idx: {best_idx}");
-        StringBuilder sb = new StringBuilder("Query: ");
-        for (int i = num_features_to_copy; i < query.Length; i++)
-        {
-            sb.Append(query[i].ToString() + " , " );
-        }
-        Debug.Log(sb.ToString());
+        //Debug.Log($"Best idx: {best_idx}");
+        //StringBuilder sb = new StringBuilder("Query: ");
+        //for (int i = num_features_to_copy; i < query.Length; i++)
+        //{
+        //    sb.Append(query[i].ToString() + " , " );
+        //}
+        //Debug.Log(sb.ToString());
 
         trns_bone_positions = motionDB.bone_positions[best_idx];
         trns_bone_velocities = motionDB.bone_velocities[best_idx];
@@ -583,12 +582,6 @@ public class mm_v2 : MonoBehaviour
         // Then we update the inertializers for the rest of the bones
         for (int i = 1; i < bone_positions.Length; i++)
         {
-            //if (i == 1)
-            //{
-            //    Debug.Log($"bone_rotations before: {bone_rotations[i]}");
-            //    Debug.Log($"bone_input_angular_velocities: {bone_input_angular_velocities[i]}");
-            //    Debug.Log($"bone_offset_rotations before: {bone_offset_rotations[i]}");
-            //}
             SpringUtils.inertialize_update(
                 ref bone_positions[i],
                 ref bone_velocities[i],
@@ -608,15 +601,6 @@ public class mm_v2 : MonoBehaviour
                 bone_input_angular_velocities[i],
                 halflife,
                 dt);
-            //if (i == 1)
-            //{
-            //    Debug.Log($"bone_rotations after: {bone_rotations[i]}");
-            //    Debug.Log($"bone_angular_velocities after: {bone_angular_velocities[i]}");
-
-            //    Debug.Log($"bone_offset_rotations after: {bone_offset_rotations[i]}");
-            //    Debug.Log($"Hip rotation should be: {bone_input_rotations[i]}");
-            //    Debug.Log($"Hip rotation actual: {bone_rotations[i]}");
-            //}
         }
     }
     private void inertialize_pose_reset(Vector3 root_position, Quaternion root_rotation)
@@ -748,13 +732,13 @@ public class mm_v2 : MonoBehaviour
         for (int i = 0; i < numBones; i++)
         {
             Transform t = boneToTransform[i];
-            if (i == 1)
-            {
+            //if (i == 1)
+            //{
                 //Quaternion rot = local_bone_rotations[i];
                 //Debug.Log($"Frame {frameIdx}: {rot.w}, {rot.x} , {rot.y} , {rot.z}");
                 //t.localPosition = local_bone_positions[i];
                 //t.position = global_bone_positions[i];
-            }
+            //}
             //t.localRotation = local_bone_rotations[i];
             //t.localRotation = Utils.to_unity_rot(local_bone_rotations[i]);
             t.position = global_bone_positions[i];
