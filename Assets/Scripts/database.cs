@@ -52,10 +52,14 @@ public class database
         }
         throw new Exception($"Index clamp out of range frame {frame} offset {_offset}");
     }
-
-    public database(string filename, int _num_neigh)
+    bool abTest = false;
+    int frame_increments;
+    int ignore_range_end = 20;
+    public database(string filename, int _num_neigh, bool _abTest, int _frame_increments)
     {
+        frame_increments = _frame_increments;
         num_neigh = _num_neigh;
+        abTest = _abTest;
         load_db(filename);
 
     }
@@ -66,10 +70,10 @@ public class database
         in float feature_weight_trajectory_positions,
         in float feature_weight_trajectory_directions)
     {
-        //for (int i = 0; i < nranges(); i++)
-        //{
-        //    Debug.Log($"Idx {i} range start: {range_starts[i]} | range stop: {range_stops[i]}");
-        //}
+        for (int i = 0; i < nranges(); i++)
+        {
+            Debug.Log($"Idx {i} range start: {range_starts[i]} | range stop: {range_stops[i]}");
+        }
         int nfeatures =
             3 + // Left Foot Position
             3 + // Right Foot Position 
@@ -100,8 +104,8 @@ public class database
         compute_bone_velocity_feature( (int)Bone_Hips, feature_weight_hip_velocity);
         compute_trajectory_position_feature( feature_weight_trajectory_positions);
         compute_trajectory_direction_feature(feature_weight_trajectory_directions);
-        BVHUtils.debugArray(features_offset, "Features offset: ");
-        BVHUtils.debugArray(features_scale, "Features scale: ");
+        //BVHUtils.debugArray(features_offset, "Features offset: ");
+        //BVHUtils.debugArray(features_scale, "Features scale: ");
 
         UnityEngine.Assertions.Assert.IsTrue(offset == nfeatures);
 
@@ -110,7 +114,8 @@ public class database
         {
             bool is_stop = false;
             foreach (int stop in range_stops)
-                if (i == stop)
+                if ( i <= stop && i > stop - ignore_range_end)
+                    //continue;
                     is_stop = true;
             if (is_stop)
                 continue;
@@ -120,8 +125,8 @@ public class database
                 entry[j] = features[i][j];
             }
             entry[nfeatures] = i;
-            if (i < 11)
-                BVHUtils.debugArray(entry, $"Entry {i}: ");
+            //if (i < 11)
+            //    BVHUtils.debugArray(entry, $"Entry {i}: ");
             tree.Add(entry);
         }
 
@@ -132,9 +137,9 @@ public class database
     {
         for (int i = 0; i < numframes; i++)
         {
-            int t0 = database_trajectory_index_clamp(i, 20);
-            int t1 = database_trajectory_index_clamp(i, 40);
-            int t2 = database_trajectory_index_clamp(i, 60);
+            int t0 = database_trajectory_index_clamp(i, frame_increments);
+            int t1 = database_trajectory_index_clamp(i, frame_increments * 2);
+            int t2 = database_trajectory_index_clamp(i, frame_increments * 3);
             //Debug.Log($"unclamped: {i + 60} clamped: {t2}");
 
             Vector3 trajectory_pos0 = Utils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t0][0] - bone_positions[i][0]);
@@ -157,9 +162,9 @@ public class database
     {
         for (int i = 0; i < numframes; i++)
         {
-            int t0 = database_trajectory_index_clamp(i, 20);
-            int t1 = database_trajectory_index_clamp(i, 40);
-            int t2 = database_trajectory_index_clamp(i, 60);
+            int t0 = database_trajectory_index_clamp(i, frame_increments);
+            int t1 = database_trajectory_index_clamp(i, frame_increments * 2);
+            int t2 = database_trajectory_index_clamp(i, frame_increments * 3);
 
             Vector3 trajectory_pos0 = Utils.quat_mul_vec3(inv_sim_rot(i), Utils.quat_mul_vec3(bone_rotations[t0][0], Vector3.forward));
             Vector3 trajectory_pos1 = Utils.quat_mul_vec3(inv_sim_rot(i), Utils.quat_mul_vec3(bone_rotations[t1][0], Vector3.forward));
@@ -234,11 +239,11 @@ public class database
         }
         //for (int i = 0; i < 11; i++)
         //{
-        Debug.Log($"Offset: {offset}");
-        Debug.Log($"Bone id {bone} local position before normalize: x: {features[0][offset + 0]} , y: {features[0][offset + 1]}, z: {features[0][offset + 2]}");
+        //Debug.Log($"Offset: {offset}");
+        //Debug.Log($"Bone id {bone} local position before normalize: x: {features[0][offset + 0]} , y: {features[0][offset + 1]}, z: {features[0][offset + 2]}");
         //}
         normalize_feature(3, weight);
-        Debug.Log($"Bone id {bone} local position after normalize: x: {features[0][offset + 0]} , y: {features[0][offset + 1]}, z: {features[0][offset + 2]}");
+        //Debug.Log($"Bone id {bone} local position after normalize: x: {features[0][offset + 0]} , y: {features[0][offset + 1]}, z: {features[0][offset + 2]}");
 
         offset += 3;
     }

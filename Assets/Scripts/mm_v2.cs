@@ -32,7 +32,7 @@ public class mm_v2 : MonoBehaviour
         Bone_RightForeArm = 21,
         Bone_RightHand = 22,
     };
-
+    public Transform[] toy_pointers = new Transform[3];
     public float feature_weight_foot_position = 0.75f;
     public float feature_weight_foot_velocity = 1.0f;
     public float feature_weight_hip_velocity = 1.0f;
@@ -42,6 +42,7 @@ public class mm_v2 : MonoBehaviour
     public float simulation_rotation_halflife = .1f;
     public bool abTest = true;
     public float MoveSpeed = 3;
+    public int frame_increments = 10;
 
     public string databaseFilepath = "database_v1";
     public int numNeigh = 1;
@@ -113,7 +114,7 @@ public class mm_v2 : MonoBehaviour
         }
         gamepad = Gamepad.current;
         Application.targetFrameRate = 30;
-        motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh);
+        motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, abTest, frame_increments);
         motionDB.database_build_matching_features(
             feature_weight_foot_position,
             feature_weight_foot_velocity,
@@ -168,23 +169,22 @@ public class mm_v2 : MonoBehaviour
             inertialize_blending_halflife,
             0f
         );
-        //inertialize_root_adjust(ref bone_offset_positions[0], ref bone_positions[0], ref bone_rotations[0], simulation_position, simulation_rotation);
 
-        //inertialize_pose_transition(
-        //    motionDB.bone_positions[frameIdx],
-        //    motionDB.bone_velocities[frameIdx],
-        //    motionDB.bone_rotations[frameIdx],
-        //    motionDB.bone_angular_velocities[frameIdx],
-        //    inertialize_blending_halflife,
-        //    Time.deltaTime
-        //);
-
-        //int walkFrameIdx = (351 - 194) + (7086 - 90);
-        //frameIdx = walkFrameIdx;
     }
 
-    void Update()
+    void FixedUpdate()
     {
+        desired_velocity = desired_velocity_update(simulation_rotation);
+        //Debug.Log(desired_velocity);
+        desired_rotation = desired_rotation_update(desired_rotation, desired_velocity);
+
+
+        // Get the desired velocity
+
+        trajectory_desired_rotations_predict();
+        trajectory_rotations_predict(((float)frame_increments) * Time.fixedDeltaTime);
+        trajectory_desired_velocities_predict();
+        trajectory_positions_predict(((float)frame_increments) * Time.fixedDeltaTime);
         bool end_of_anim = motionDB.database_trajectory_index_clamp(frameIdx, 1) == frameIdx;
         if (end_of_anim || (frameCounter % searchEveryNFrames) == 0)
         {
@@ -205,15 +205,31 @@ public class mm_v2 : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             Gizmos.DrawSphere(trajectory_positions[i], .1f);
+            if (i > 0)
+            {
+                toy_pointers[i - 1].position = trajectory_positions[i];
+                toy_pointers[i - 1].rotation = trajectory_rotations[i];
+            }
         }
+        
+        //toy_pointers[1].rotation = simulation_rotation;
+        //toy_pointers[2].rotation = desired_rotation;
 
-        //Gizmos.color = Color.green;
-        //Vector3 root_position = bone_positions[0];
-        //Quaternion root_rotation = bone_rotations[0];
+        Gizmos.color = Color.green;
+        Vector3 root_position = bone_positions[0];
+        Quaternion root_rotation = bone_rotations[0];
+
+        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
+        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
+        Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation,  trajectory_positions[3] - root_position);
 
         //Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
-        //Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
-        //Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[3] - root_position);
+        //traj0 = Utils.quat_mul_vec3(root_rotation, traj0) + root_position;
+        ////Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
+        //traj1 = Utils.quat_mul_vec3(root_rotation, traj1) + root_position;
+        ////Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[3] - root_position);
+        //traj2 = Utils.quat_mul_vec3(root_rotation, traj2) + root_position;
+
         //Gizmos.DrawSphere(traj0, .1f);
         //Gizmos.DrawSphere(traj1, .1f);
         //Gizmos.DrawSphere(traj2, .1f);
@@ -283,13 +299,6 @@ public class mm_v2 : MonoBehaviour
     }
     private void motionMatch()
     {
-        // Get the desired velocity
-        desired_velocity = desired_velocity_update(simulation_rotation);
-        desired_rotation = desired_rotation_update(desired_rotation, desired_velocity);
-        trajectory_desired_rotations_predict();
-        trajectory_rotations_predict(20f * Time.deltaTime);
-        trajectory_desired_velocities_predict();
-        trajectory_positions_predict(20f * Time.deltaTime);
 
         float[] query = new float[motionDB.nfeatures()];
         float[] query_features = motionDB.features[frameIdx];
@@ -306,16 +315,6 @@ public class mm_v2 : MonoBehaviour
         }
         query_compute_trajectory_position_feature(num_features_to_copy, query);
         query_compute_trajectory_direction_feature(num_features_to_copy + 6, query);
-        StringBuilder sb = new StringBuilder("Query: [ ");
-        for (int i = 0; i < query.Length; i++)
-        {
-            if (i == debug_ignore)
-                sb.Append(" || ");
-            sb.Append(" , " + query[i].ToString());
-        }
-        //foreach (float f in query)
-        //    sb.Append(" , " + f.ToString());
-        Debug.Log(sb.ToString());
         best_idx = motionDB.motionMatch(query);
         Debug.Log($"Best idx: {best_idx}");
 
@@ -355,7 +354,7 @@ public class mm_v2 : MonoBehaviour
         Quaternion root_rotation = bone_rotations[0];
 
         Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
-        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
+        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation,  trajectory_positions[2] - root_position);
         Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[3] - root_position);
 
         query[offset + 0] = traj0.x;
@@ -370,9 +369,9 @@ public class mm_v2 : MonoBehaviour
     {
         Quaternion root_rotation = bone_rotations[0];
 
-        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[1], abTest ? Vector3.up : Vector3.forward));
-        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[2], abTest ? Vector3.up : Vector3.forward));
-        Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[3], abTest ? Vector3.up : Vector3.forward));
+        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[1],  Vector3.forward));
+        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[2],  Vector3.forward));
+        Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[3], Vector3.forward));
 
         query[offset + 0] = traj0.x;
         query[offset + 1] = traj0.z;
@@ -381,6 +380,9 @@ public class mm_v2 : MonoBehaviour
         query[offset + 4] = traj2.x;
         query[offset + 5] = traj2.z;
     }
+    float fwrd_speed = 1.75f;
+    float side_speed= 1.5f;
+    float back_speed= 1.25f;
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)
     {
@@ -388,8 +390,14 @@ public class mm_v2 : MonoBehaviour
 
         // Find stick position local to current facing direction
         Vector3 local_stick_dir = Utils.quat_inv_mul_vec3(sim_rotation, new Vector3(lstick.x, 0, lstick.y));
-        Vector3 local_desired_vel = (MoveSpeed * local_stick_dir.magnitude) * local_stick_dir.normalized;
-        return Utils.quat_mul_vec3(sim_rotation, local_desired_vel);
+        local_stick_dir.x *= side_speed;
+        local_stick_dir.z *= local_stick_dir.z > 0.0 ? fwrd_speed : back_speed;
+        //Vector3 local_desired_vel = local_stick_dir.z > 0.0 ?
+        //        new Vector3(side_speed, 0.0f, fwrd_speed):
+        //        new Vector3(side_speed, 0.0f, back_speed) ;
+        //Vector3 local_desired_vel = local_stick_dir.Scale(scale_vec);
+        //Vector3 local_desired_vel = (MoveSpeed * local_stick_dir.magnitude) * local_stick_dir.normalized;
+        return Utils.quat_mul_vec3(sim_rotation, local_stick_dir);
     }
 
     public float simulation_velocity_halflife = .27f;
@@ -486,7 +494,8 @@ public class mm_v2 : MonoBehaviour
         if (userIsInputting())
         {
             Vector3 desired_dir = velocity.normalized;
-            return Quaternion.AngleAxis(Mathf.Atan2(desired_dir.x, desired_dir.z), Vector3.up);
+            //Debug.Log(Mathf.Atan2(desired_dir.x, desired_dir.z));
+            return Quaternion.AngleAxis(Mathf.Atan2(desired_dir.x, desired_dir.z) * Mathf.Rad2Deg, Vector3.up);
         }
         else
         {
@@ -513,7 +522,7 @@ public class mm_v2 : MonoBehaviour
         Vector3 world_space_position = Utils.quat_mul_vec3(transition_dst_rotation,
             Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position))
                 + transition_dst_position;
-        Vector3 debugTerm = Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position);
+        //Vector3 debugTerm = Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position);
         //Debug.Log($"bone_input_positions[0] - transition_src_position: {bone_input_positions[0] - transition_src_position} \n" +
         //    $"quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position): {debugTerm} \n" +
         //    $"world_space_position: {world_space_position}");
@@ -631,8 +640,8 @@ public class mm_v2 : MonoBehaviour
         // animation
         transition_dst_position = root_position;
         transition_dst_rotation = root_rotation;
-        transition_src_position = motionDB.bone_positions[best_idx][0];
-        transition_src_rotation = motionDB.bone_rotations[best_idx][0];
+        transition_src_position = bone_dst_positions[0];
+        transition_src_rotation = bone_dst_rotations[0];
 
 
         // We then find the velocities so we can transition the 
