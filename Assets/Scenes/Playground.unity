@@ -1416,7 +1416,7 @@ MonoBehaviour:
   feature_weight_trajectory_directions: 1.5
   inertialize_blending_halflife: 0.2
   simulation_rotation_halflife: 0.1
-  abTest: 0
+  abTest: 1
   MoveSpeed: 2
   frame_increments: 10
   databaseFilepath: database

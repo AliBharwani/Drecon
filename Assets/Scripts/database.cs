@@ -23,8 +23,8 @@ public class database
     int[] range_stops;
 
     public float[][] features;
-    float[]  features_offset;
-    float[] features_scale;
+    public float[]  features_offset;
+    public float[] features_scale;
     int offset;
     int num_neigh;
     KDTree tree;

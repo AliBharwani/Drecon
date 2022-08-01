@@ -219,9 +219,9 @@ public class mm_v2 : MonoBehaviour
         Vector3 root_position = bone_positions[0];
         Quaternion root_rotation = bone_rotations[0];
 
-        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
-        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
-        Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation,  trajectory_positions[3] - root_position);
+        //Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
+        //Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
+        //Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation,  trajectory_positions[3] - root_position);
 
         //Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
         //traj0 = Utils.quat_mul_vec3(root_rotation, traj0) + root_position;
@@ -317,6 +317,12 @@ public class mm_v2 : MonoBehaviour
         query_compute_trajectory_direction_feature(num_features_to_copy + 6, query);
         best_idx = motionDB.motionMatch(query);
         Debug.Log($"Best idx: {best_idx}");
+        StringBuilder sb = new StringBuilder("Query: ");
+        for (int i = num_features_to_copy; i < query.Length; i++)
+        {
+            sb.Append(query[i].ToString() + " , " );
+        }
+        Debug.Log(sb.ToString());
 
         trns_bone_positions = motionDB.bone_positions[best_idx];
         trns_bone_velocities = motionDB.bone_velocities[best_idx];
@@ -363,14 +369,16 @@ public class mm_v2 : MonoBehaviour
         query[offset + 3] = traj1.z;
         query[offset + 4] = traj2.x;
         query[offset + 5] = traj2.z;
+
+        normalize(query, offset, 6);
     }
 
     private void query_compute_trajectory_direction_feature(int offset, float[] query)
     {
         Quaternion root_rotation = bone_rotations[0];
 
-        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[1],  Vector3.forward));
-        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[2],  Vector3.forward));
+        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[1], Vector3.forward));
+        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[2], Vector3.forward));
         Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[3], Vector3.forward));
 
         query[offset + 0] = traj0.x;
@@ -379,6 +387,16 @@ public class mm_v2 : MonoBehaviour
         query[offset + 3] = traj1.z;
         query[offset + 4] = traj2.x;
         query[offset + 5] = traj2.z;
+
+        normalize(query, offset, 6);
+    }
+
+    private void normalize(float[] query, int offset, int size)
+    {
+        for (int i = offset; i < offset + size; i++)
+        {
+            query[i] = (query[i] - motionDB.features_offset[i]) / motionDB.features_scale[i];
+        }
     }
     float fwrd_speed = 1.75f;
     float side_speed= 1.5f;
