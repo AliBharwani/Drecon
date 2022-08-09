@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 
 using System;
+using System.Text;
 
 public class MeshTester : MonoBehaviour
 {
@@ -19,6 +20,11 @@ public class MeshTester : MonoBehaviour
     {
         verticesToHighlight = null;
         closest_verts = null;
+    }
+    [ContextMenu("Output to text files")]
+    public void writeToTxtFiles()
+    {
+        outputBoneVertices();
     }
 #endif
 
@@ -36,7 +42,7 @@ public class MeshTester : MonoBehaviour
     public int num_closest = 100;
     public int num_bones = 70;
     public bool gizmos_on = true;
-    public int[] bone_ids_to_ignore;
+    public int[] bone_ids_to_use;
 
     public int left_hand_bone_id = 9;
     public int right_hand_bone_id = 36;
@@ -142,6 +148,7 @@ public class MeshTester : MonoBehaviour
                 bone_id = left_hand_bone_id;
             else if (right_hand_ids.Contains(bone_id))
                 bone_id = right_hand_bone_id;
+
             if (!boneToColorSet[bone_id])
             {
                 boneToColorSet[bone_id] = true;
@@ -152,6 +159,29 @@ public class MeshTester : MonoBehaviour
 
 
         }
+    }
+    private void outputBoneVertices()
+    {
+        foreach (int bone_id in bone_ids_to_use)
+        {
+            string newFilename = Application.dataPath + $"/outputs/vertex_data/bone{bone_id}_verts.txt";
+            TextWriter tw = new StreamWriter(newFilename, true);
+            tw.WriteLine("[" + System.DateTime.Now + "]");
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < m_vertexCount; i++)
+            {
+                if (!verticesToHighlight[i])
+                    continue;
+                int cur_bone_id = vert_bones[i];
+                if (cur_bone_id != bone_id)
+                    continue;
+                Vector3 vert = m_vertices[i];
+                sb.Append($"{vert.x} , {vert.y} , {vert.z}\n");
+            }
+            tw.Write(sb.ToString());
+            tw.Close();
+        }
+        
     }
     public float vert_size = .005f;
     public int percent_to_use = 3;
@@ -168,7 +198,7 @@ public class MeshTester : MonoBehaviour
             for (int i = 0; i < num_bones; i++)
             {
                 bool use = false;
-                foreach (int id in bone_ids_to_ignore)
+                foreach (int id in bone_ids_to_use)
                     use = use || i == id;
                 if (!use)
                     continue;
@@ -193,7 +223,7 @@ public class MeshTester : MonoBehaviour
                 continue;
             int bone_id = vert_bones[i];
             bool use = false;
-            foreach (int id in bone_ids_to_ignore)
+            foreach (int id in bone_ids_to_use)
                 use = use || bone_id == id;
             if (!use)
                 continue;
