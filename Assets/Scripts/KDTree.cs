@@ -32,7 +32,7 @@ public class KDTree
     private float trajectoryPenalty = 3;
 
     //private SortedList<float, float[]> sortedNeigh;
-    private MaxHeap maxHeap;
+    private MaxHeap<float> maxHeap;
 
     public KDTree(int _k, int _extraData = 2, int _numNeigh = 1, float _trajectoryPenalty = 3, int _ignore_surrounding = 10)
     {
@@ -44,7 +44,7 @@ public class KDTree
         trajectoryPenalty = _trajectoryPenalty;
         ignore_surrounding = _ignore_surrounding;
         if (numNeigh > 1)
-            maxHeap = new MaxHeap(numNeigh);
+            maxHeap = new MaxHeap<float>(numNeigh);
             //sortedNeigh = new SortedList<float, float[]>(numNeigh);
         values = new List<float[]>();
     }

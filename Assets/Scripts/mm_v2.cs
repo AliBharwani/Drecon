@@ -397,9 +397,9 @@ public class mm_v2 : MonoBehaviour
             query[i] = (query[i] - motionDB.features_offset[i]) / motionDB.features_scale[i];
         }
     }
-    float fwrd_speed = 1.75f;
-    float side_speed= 1.5f;
-    float back_speed= 1.25f;
+    float fwrd_speed = 3f;// 1.75f;
+    float side_speed = 2.5f;//1.5f;
+    float back_speed = 2f;//1.25f;
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)
     {

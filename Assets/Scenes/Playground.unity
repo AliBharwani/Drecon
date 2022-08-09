@@ -1400,7 +1400,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 42338788}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
   m_Name: 
@@ -1414,11 +1414,12 @@ MonoBehaviour:
   feature_weight_hip_velocity: 1
   feature_weight_trajectory_positions: 1
   feature_weight_trajectory_directions: 1.5
-  inertialize_blending_halflife: 0.2
+  inertialize_blending_halflife: 0.1
   simulation_rotation_halflife: 0.1
   abTest: 1
   MoveSpeed: 2
   frame_increments: 10
+  ignore_surrounding: 20
   databaseFilepath: database
   numNeigh: 1
   searchEveryNFrames: 5
@@ -1455,15 +1456,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 42338788}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: -0, w: -0.7071068}
+  m_LocalPosition: {x: -0.01, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 973682127}
   - {fileID: 1812220948}
   m_Father: {fileID: 0}
   m_RootOrder: 8
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
 --- !u!1 &43066238
 GameObject:
   m_ObjectHideFlags: 0
@@ -4441,6 +4442,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 181066940}
+  - component: {fileID: 181066941}
   m_Layer: 0
   m_Name: RightUpLeg
   m_TagString: Untagged
@@ -4463,6 +4465,20 @@ Transform:
   m_Father: {fileID: 1812220948}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 3.4279678, y: -178.78683, z: -12.632568}
+--- !u!136 &181066941
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181066939}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  m_Radius: 0.08
+  m_Height: 0.49
+  m_Direction: 0
+  m_Center: {x: -0.31, y: -0.02, z: 0}
 --- !u!1 &184106931
 GameObject:
   m_ObjectHideFlags: 0
@@ -21404,6 +21420,7 @@ GameObject:
   m_Component:
   - component: {fileID: 973682127}
   - component: {fileID: 973682128}
+  - component: {fileID: 973682129}
   m_Layer: 0
   m_Name: Model:Mesh
   m_TagString: Untagged
@@ -21551,6 +21568,28 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.05949256, y: 0.113856375, z: 0.000031024218}
     m_Extent: {x: 0.9747118, y: 0.43250328, z: 0.9114076}
   m_DirtyAABB: 0
+--- !u!114 &973682129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973682126}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 913ed73af4814264893f4163f239c6b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  abTest: 0
+  vert_threshold: 0.5
+  num_closest: 600
+  num_bones: 70
+  gizmos_on: 0
+  bone_ids_to_ignore: 00000000010000000200000003000000040000000500000006000000070000000800000009000000210000002200000023000000240000003c0000003d0000003e0000003f000000400000004100000042000000430000004400000045000000
+  left_hand_bone_id: 9
+  right_hand_bone_id: 36
+  vert_size: 0.005
+  percent_to_use: 3
 --- !u!1 &975563055
 GameObject:
   m_ObjectHideFlags: 0
@@ -21747,6 +21786,7 @@ MonoBehaviour:
   abTest: 1
   MoveSpeed: 3
   frame_increments: 10
+  ignore_surrounding: 10
   databaseFilepath: database_v3
   numNeigh: 1
   searchEveryNFrames: 1

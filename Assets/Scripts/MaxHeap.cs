@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-public class MaxHeap 
+public class MaxHeap <T>
 {
-    public Tuple<float, float[]>[] arr;
+    public Tuple<float, T[]>[] arr;
     private int capacity;
-    private int size;
-    private Tuple<float, float[]> dummy = new Tuple<float, float[]>(-1, null);
+    public int size;
+    private Tuple<float, T[]> dummy = new Tuple<float, T[]>(-1, null);
    public MaxHeap(int _size )
     {
         size = 0;
         capacity = _size;
-        arr = new Tuple<float, float[]>[_size + 1];
+        arr = new Tuple<float, T[]>[_size + 1];
         reset();
     }
 
@@ -28,7 +28,7 @@ public class MaxHeap
         size = 0;
     }
 
-    public float[] getRandom()
+    public T[] getRandom()
     {
         return arr[UnityEngine.Random.Range(1, capacity + 1)].Item2;
     }
@@ -84,9 +84,9 @@ public class MaxHeap
         }
 
     }
-    public void add(float value, float[] data)
+    public void add(float value, T[] data)
     {
-        var entry = new Tuple<float, float[]>(value, data);
+        var entry = new Tuple<float, T[]>(value, data);
         if (size == capacity)
         {
             arr[1] = entry;
