@@ -65,6 +65,7 @@ public static class BVHUtils
         throw new InvalidOperationException("getAtCurrentFrame called with invalid params: " + bone.ToString() + " , Channel: " + c);
     }
 
+
     private static Vector3 getDifferenceInPosition(BVHParser.BVHBone bone, int frame)
     {
         float xPos = -(getAtFrame(bone, Channel.XPos, frame) - getAtFrame(bone, Channel.XPos, frame - 1));
@@ -242,6 +243,24 @@ public static class BVHUtils
 
     }
 
+    public static Vector3 convertToVec(string s)
+    {
+        string[] nums  = s.Split(',');
 
+        float x = float.Parse(nums[0]);
+        float y = float.Parse(nums[1]);
+        float z = float.Parse(nums[2]);
+        return new Vector3(x, y, z);
+    }
 
+    public static Quaternion convertToQuat(string s)
+    {
+        string[] nums = s.Split(',');
+
+        float x = float.Parse(nums[0]);
+        float y = float.Parse(nums[1]);
+        float z = float.Parse(nums[2]);
+        float w = float.Parse(nums[3]);
+        return new Quaternion(x, y, z, w);
+    }
 }

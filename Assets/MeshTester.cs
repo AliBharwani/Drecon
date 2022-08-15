@@ -42,6 +42,7 @@ public class MeshTester : MonoBehaviour
     public int num_closest = 100;
     public int num_bones = 70;
     public bool gizmos_on = true;
+    public bool debug = true;
     public int[] bone_ids_to_use;
 
     public int left_hand_bone_id = 9;
@@ -164,22 +165,25 @@ public class MeshTester : MonoBehaviour
     {
         foreach (int bone_id in bone_ids_to_use)
         {
-            string newFilename = Application.dataPath + $"/outputs/vertex_data/bone{bone_id}_verts.txt";
-            TextWriter tw = new StreamWriter(newFilename, true);
-            tw.WriteLine("[" + System.DateTime.Now + "]");
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < m_vertexCount; i++)
+            string newFilename = Application.dataPath + $"/outputs/vertex_data/bone{bone_id}_verts.bin";
+            using (FileStream file = File.Create(newFilename))
             {
-                if (!verticesToHighlight[i])
-                    continue;
-                int cur_bone_id = vert_bones[i];
-                if (cur_bone_id != bone_id)
-                    continue;
-                Vector3 vert = m_vertices[i];
-                sb.Append($"{vert.x} , {vert.y} , {vert.z}\n");
+                using (BinaryWriter writer = new BinaryWriter(file))
+                {
+                    for (int i = 0; i < m_vertexCount; i++)
+                    {
+                        if (!verticesToHighlight[i])
+                            continue;
+                        int cur_bone_id = vert_bones[i];
+                        if (cur_bone_id != bone_id)
+                            continue;
+                        Vector3 vert = m_vertices[i];
+                        writer.Write(vert.x);
+                        writer.Write(vert.y);
+                        writer.Write(vert.z);
+                    }
+                }
             }
-            tw.Write(sb.ToString());
-            tw.Close();
         }
         
     }
@@ -193,6 +197,11 @@ public class MeshTester : MonoBehaviour
         //    return;
         //if (abTest && closest_verts == null)
         //    return;
+
+        //string test = "-1.00000000e+00, -4.37139506e-10, -2.27232949e-08";
+        //Vector3 testVec = BVHUtils.convertToVec(test);
+        //Gizmos.color = Color.blue;
+        //Gizmos.DrawLine(Vector3.zero , testVec);
         if (abTest)
         {
             for (int i = 0; i < num_bones; i++)
@@ -222,6 +231,8 @@ public class MeshTester : MonoBehaviour
             if (!verticesToHighlight[i])
                 continue;
             int bone_id = vert_bones[i];
+            if (debug && bone_id != 8) // 8 == right forearm 
+                continue;
             bool use = false;
             foreach (int id in bone_ids_to_use)
                 use = use || bone_id == id;
