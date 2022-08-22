@@ -61,7 +61,7 @@ def get_cost_of_radius(mean, largest_eigen, verts, radius):
     should_break = True
     for i in xrange(verts.shape[0]):
         vert = verts[i]
-        dist_to_axis = magnitude(vert - ClosestPointOnLine(mean, largest_eigen, vert))
+        dist_to_axis = magnitude(vert - ClosestPointOnLine(mean, mean + largest_eigen, vert))
         should_break = should_break and dist_to_axis > radius
         cur_cost += (dist_to_axis - radius)**2
     return cur_cost, should_break
@@ -72,14 +72,18 @@ def calc_height_and_rad(verts):
     mean = np.mean(verts, axis=0)
     pca = PCA(n_components = 3, svd_solver='full')
     pca.fit(verts)
+    print("Covar:" , pca.get_covariance())
     largest_eigen = pca.components_[0]
+    print("largest_eigen" ,largest_eigen)
+    print("largest_eigen normalized" ,normalize(largest_eigen))
+
     second_eigen = pca.components_[1]
 
-    proj_verts = project_verts_onto_axis(verts, mean, largest_eigen)
+    proj_verts = project_verts_onto_axis(verts, mean, mean + largest_eigen)
     height = get_max_dist_apart(proj_verts)
 
     # Calculate radius using iterative refinement
-    proj_verts = project_verts_onto_axis(verts, mean, second_eigen)
+    proj_verts = project_verts_onto_axis(verts, mean, mean + second_eigen)
     max_radius = get_max_dist_apart(proj_verts)
     cur_rad = max_radius
     best_radius = (max_radius, get_cost_of_radius(mean, largest_eigen, verts, max_radius))
@@ -122,12 +126,13 @@ def sqr_mag(vec):
 
 def test():
     verts = get_np_array(8)
-    # calc_height_and_rad(verts)
+    print(calc_height_and_rad(verts))
     mean = np.mean(verts, axis=0)
+    print("Mean: ", mean)
     pca = PCA(n_components = 3, svd_solver='full')
     pca.fit(verts)
     largest_eigen = pca.components_[0]
-    print(get_direction_and_orientation(mean,largest_eigen))
+    print("Orientation: " , get_direction_and_orientation(mean,largest_eigen))
 
 def normalize(vec):
     mag = magnitude(vec)
@@ -136,9 +141,11 @@ def normalize(vec):
 def get_direction_and_orientation(mean, largest_eigen):
     dir = 0
     # orient = (0, 0, 0, 1)
-    dir_vec = normalize(largest_eigen - mean)
+    dir_vec = normalize(largest_eigen)
     right_vec = (1, 0 , 0)
-    a = cross(dir_vec, right_vec)
+    a = cross(right_vec , dir_vec)
+    # print("a", a)
+    # a = cross(right_vec , dir_vec )
     orient = [a[0], a[1], a[2], 0]
     # orient[3] = dot(dir_vec, right_vec)
     orient[3] = math.sqrt(sqr_mag(dir_vec) * sqr_mag(right_vec)) + dot(dir_vec, right_vec)
@@ -152,8 +159,9 @@ def get_direction_and_orientation(mean, largest_eigen):
     # return dir, orient
 
 def main():
-    for bone_id in bone_ids:
-        bone_verts = get_np_array(bone_id)
+    test()
+    # for bone_id in bone_ids:
+    #     bone_verts = get_np_array(bone_id)
 
 
 if __name__ == "__main__":

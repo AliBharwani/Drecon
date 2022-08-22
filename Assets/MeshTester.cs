@@ -18,26 +18,31 @@ public class MeshTester : MonoBehaviour
     [ContextMenu("Delete gizmos")]
     public void deleteGizmos()
     {
-        verticesToHighlight = null;
-        closest_verts = null;
+        bone_verts_lists = null;
+        //closest_verts = null;
     }
     [ContextMenu("Output to text files")]
     public void writeToTxtFiles()
     {
         outputBoneVertices();
     }
+    [ContextMenu("testCalculateBoundingCapsule")]
+    public void testCalculateBoundingCapsule()
+    {
+        testMesh();
+        debugObj.calculateBoundingCapsule(bone_verts_lists[RIGHT_FOREARM_ID].ToArray());
+    }
 #endif
-
-    bool[] verticesToHighlight;
-    int[] vert_bones;
+    public debugScript debugObj;
+    //bool[] verticesToHighlight;
+    //int[] vert_bones;
     Color[] boneToColor;
     bool[] boneToColorSet;
     int m_vertexCount;
     Vector3[] m_vertices;
-    Vector3[][] closest_verts;
-    List<Tuple<float, int>>[] closest_verts_dyn;
-    int[] num_verts_found; // maps bone_id to num verts to draw for it
-    public bool abTest = false;
+    //Vector3[][] closest_verts;
+    //List<Tuple<float, int>>[] closest_verts_dyn;
+    //int[] num_verts_found; // maps bone_id to num verts to draw for it
     public float vert_threshold = .9f;
     public int num_closest = 100;
     public int num_bones = 70;
@@ -49,15 +54,16 @@ public class MeshTester : MonoBehaviour
     public int right_hand_bone_id = 36;
     private HashSet<int> left_hand_ids;
     private HashSet<int> right_hand_ids;
-    void Start()
-    {
-        testMesh();
 
-    }
+    // bone_verts_lists[i] = a list of vertices associated with bone i
+    private List<Vector3>[] bone_verts_lists;
 
     // Update is called once per frame
     void testMesh()
     {
+        bone_verts_lists = new List<Vector3>[70];
+        for (int i = 0; i < 70; i++)
+            bone_verts_lists[i] = new List<Vector3>();
         left_hand_ids = new HashSet<int>();
         right_hand_ids = new HashSet<int>();
 
@@ -72,64 +78,10 @@ public class MeshTester : MonoBehaviour
         BoneWeight[] bws = mesh.boneWeights;
         boneToColor = new Color[100];
         boneToColorSet = new bool[100];
-        vert_bones = new int[mesh.vertexCount];
+        //vert_bones = new int[mesh.vertexCount];
         m_vertexCount = mesh.vertexCount;
         m_vertices = mesh.vertices;
-        verticesToHighlight = new bool[mesh.vertexCount];
-        //foreach (BoneWeight b in bw)
-        //{
-        //    Debug.Log($"{b.boneIndex0} : {b.weight0} | {b.boneIndex1} : {b.weight1} | {b.boneIndex2} : {b.weight2} | {b.boneIndex3} : {b.weight3}");
-        //}
-        if (abTest)
-        {
-            num_verts_found = new int[num_bones];
-            closest_verts = new Vector3[num_bones][];
-            closest_verts_dyn = new List<Tuple<float, int>>[num_bones];
-            for (int i = 0; i < num_bones; i++)
-            {
-                boneToColor[i] = new Color(UnityEngine.Random.Range(0, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), 1f);
-                closest_verts[i] = new Vector3[num_closest];
-                closest_verts_dyn[i] = new List<Tuple<float, int>>();
-                // find the n closest vertices
-                // Use min heap of maxes 
-                // since I don't have a min heap I'll just negate all the values instead
-                MaxHeap<int> minHeap = new MaxHeap<int>(num_closest);
-                for (int j = 0; j < mesh.vertexCount; j++)
-                {
-                    BoneWeight bw = bws[j];
-                    if (i != bw.boneIndex0 && i != bw.boneIndex1 && i != bw.boneIndex2 && i != bw.boneIndex3)
-                        continue;
-                    //Debug.Log($"Processing bone {i} and vertex {j}");
-                    float bone_w = -1f;
-                    if (i == bw.boneIndex0)
-                        bone_w = bw.weight0;
-                    else if (i == bw.boneIndex1)
-                        bone_w = bw.weight1;
-                    else if (i == bw.boneIndex2)
-                        bone_w = bw.weight2;
-                    else if (i == bw.boneIndex3)
-                        bone_w = bw.weight3;
-
-                    if (!minHeap.isFull() || -minHeap.peek() < bone_w)
-                    {
-                        int[] v = new int []{ j };
-                        minHeap.add(-bone_w, v);
-                    }
-                    closest_verts_dyn[i].Add(new Tuple<float, int>(bone_w, j));
-                }
-                closest_verts_dyn[i].Sort((x, y) => y.Item1.CompareTo(x.Item1));
-
-                for (int j = 0; j < minHeap.size; j++)
-                {
-                    var val = minHeap.arr[j + 1];
-                    //Debug.Log(val.Item2);
-                    int vert_idx = val.Item2[0];
-                    closest_verts[i][j] = m_vertices[vert_idx];
-                }
-                num_verts_found[i] = minHeap.size;
-            }
-            return;
-        }
+        //verticesToHighlight = new bool[mesh.vertexCount];
         for (int i = 0; i < mesh.vertexCount; i++)
         {
             BoneWeight bw = bws[i];
@@ -155,10 +107,9 @@ public class MeshTester : MonoBehaviour
                 boneToColorSet[bone_id] = true;
                 boneToColor[bone_id] = new Color(UnityEngine.Random.Range(0, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), 1f);
             }
-            vert_bones[i] = bone_id;
-            verticesToHighlight[i] = true;
-
-
+            bone_verts_lists[bone_id].Add(m_vertices[i]);
+            //vert_bones[i] = bone_id;
+            //verticesToHighlight[i] = true;
         }
     }
     private void outputBoneVertices()
@@ -170,14 +121,14 @@ public class MeshTester : MonoBehaviour
             {
                 using (BinaryWriter writer = new BinaryWriter(file))
                 {
-                    for (int i = 0; i < m_vertexCount; i++)
+                    foreach(Vector3 vert in bone_verts_lists[bone_id])
                     {
-                        if (!verticesToHighlight[i])
-                            continue;
-                        int cur_bone_id = vert_bones[i];
-                        if (cur_bone_id != bone_id)
-                            continue;
-                        Vector3 vert = m_vertices[i];
+                        //if (!verticesToHighlight[i])
+                        //    continue;
+                        //int cur_bone_id = vert_bones[i];
+                        //if (cur_bone_id != bone_id)
+                        //    continue;
+                        //Vector3 vert = m_vertices[i];
                         writer.Write(vert.x);
                         writer.Write(vert.y);
                         writer.Write(vert.z);
@@ -188,10 +139,10 @@ public class MeshTester : MonoBehaviour
         
     }
     public float vert_size = .005f;
-    public int percent_to_use = 3;
+    public int RIGHT_FOREARM_ID = 8;
     private void OnDrawGizmos()
     {
-        if (!gizmos_on)
+        if (!gizmos_on || bone_verts_lists == null)
             return;
         //if (!abTest && (verticesToHighlight == null || verticesToHighlight.Length == 0))
         //    return;
@@ -202,44 +153,34 @@ public class MeshTester : MonoBehaviour
         //Vector3 testVec = BVHUtils.convertToVec(test);
         //Gizmos.color = Color.blue;
         //Gizmos.DrawLine(Vector3.zero , testVec);
-        if (abTest)
+        foreach (int bone_id in bone_ids_to_use)
         {
-            for (int i = 0; i < num_bones; i++)
-            {
-                bool use = false;
-                foreach (int id in bone_ids_to_use)
-                    use = use || i == id;
-                if (!use)
-                    continue;
-                Gizmos.color = boneToColor[i];
-                //for (int j = 0; j < num_verts_found[i]; j++)
-                //{
-                //    Gizmos.DrawSphere(closest_verts[i][j], .008f);
-                //}
-                List<Tuple<float, int>> foo = closest_verts_dyn[i];
-                for (int j = 0; j < foo.Count / percent_to_use; j++)
-                {
-                    int v_idx = foo[j].Item2;
-                    Gizmos.DrawSphere(m_vertices[v_idx], vert_size);
-                }
-
-            }
-            return;
-        }
-        for (int i = 0; i < m_vertexCount; i++)
-        {
-            if (!verticesToHighlight[i])
-                continue;
-            int bone_id = vert_bones[i];
-            if (debug && bone_id != 8) // 8 == right forearm 
-                continue;
-            bool use = false;
-            foreach (int id in bone_ids_to_use)
-                use = use || bone_id == id;
-            if (!use)
+            if (debug && bone_id != RIGHT_FOREARM_ID) // 8 == right forearm 
                 continue;
             Gizmos.color = boneToColor[bone_id];
-            Gizmos.DrawSphere(m_vertices[i], vert_size);
+            foreach (Vector3 vert in bone_verts_lists[bone_id])
+                Gizmos.DrawSphere(vert, vert_size);
         }
+        //for (int i = 0; i < m_vertexCount; i++)
+        //{
+        //    if (!verticesToHighlight[i])
+        //        continue;
+        //    int bone_id = vert_bones[i];
+        //    if (debug && bone_id != 8) // 8 == right forearm 
+        //        continue;
+        //    bool use = false;
+        //    foreach (int id in bone_ids_to_use)
+        //        use = use || bone_id == id;
+        //    if (!use)
+        //        continue;
+        //    Gizmos.color = boneToColor[bone_id];
+        //    Gizmos.DrawSphere(m_vertices[i], vert_size);
+        //    string mean = "0.647868  ,  1.44229543, -0.03082059";
+        //    Vector3 meanPoint = BVHUtils.convertToVec(mean);
+        //    string test = "-0.99862385, -0.01221036,  0.05100307";
+        //    Vector3 testVec = BVHUtils.convertToVec(test).normalized;
+        //    Gizmos.color = Color.green;
+        //    Gizmos.DrawSphere(BVHUtils.closestPoint(meanPoint, meanPoint + testVec, m_vertices[i]), vert_size);
+        //}
     }
 }

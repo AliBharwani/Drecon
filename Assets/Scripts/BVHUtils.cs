@@ -217,6 +217,15 @@ public static class BVHUtils
     {
         return 360 + (Math.Atan2(y, x) * Mathf.Rad2Deg * -1);
     }
+
+    internal static Vector3 closestPoint(Vector3 a, Vector3 b, Vector3 point)
+    {
+        Vector3 ap = point - a;
+        Vector3 ab = b - a;
+        Vector3 result = a + Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
+        return result;
+        }
+
     public static float getAngleBetweenVelocityAndHip(List<BVHParser.BVHBone> bones, Transform hipTrans, int frameNum, out float velocityMag, out double velocityAngle)
     {
         BVHParser.BVHBone hipBone = bones[0];
