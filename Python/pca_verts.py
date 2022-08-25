@@ -82,24 +82,8 @@ def calc_height_and_rad(verts):
     proj_verts = project_verts_onto_axis(verts, mean, mean + largest_eigen)
     height = get_max_dist_apart(proj_verts)
 
-    # Calculate radius using iterative refinement
-    proj_verts = project_verts_onto_axis(verts, mean, mean + second_eigen)
-    max_radius = get_max_dist_apart(proj_verts)
-    cur_rad = max_radius
-    best_radius = (max_radius, get_cost_of_radius(mean, largest_eigen, verts, max_radius))
-    num_rad_iter_completed = 0
-    while True:
-        cur_rad -= RADIUS_ITERATOR
-        cost, should_break = get_cost_of_radius(mean, largest_eigen, verts, cur_rad)
-        num_rad_iter_completed += 1
-        if should_break:
-            break
-        if cost < best_radius[1]:
-            best_radius = (cur_rad, cost)
-
-    print("max rad: " + str(max_radius))
-    print("num_rad_iter_completed: " + str(num_rad_iter_completed))
-    return height, best_radius[0]
+    radius =  sum([magnitude(v - ClosestPointOnLine(mean, mean + largest_eigen, v)) for v in verts]) / len(verts)
+    return height, radius
 
 # https://gamedev.stackexchange.com/questions/72528/how-can-i-project-a-3d-point-onto-a-3d-line
 def ClosestPointOnLine(a, b, p):

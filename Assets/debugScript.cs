@@ -115,6 +115,7 @@ public class debugScript : MonoBehaviour
     //[ContextMenu("CALCULATE bounding capsule")]
     public void calculateBoundingCapsule(Vector3[] verts)
     {
+        int n = verts.Length;
         Vector3 mean = calculateMean(verts);
         Debug.Log("Mean: " + mean.ToString("f6"));
         double[,] covar = calculateCovarMat(verts);
@@ -128,39 +129,11 @@ public class debugScript : MonoBehaviour
         float height = getMaxDistApart(proj_verts);
         return;
         // Calculate radius using iterative refinement
-        proj_verts = projectVertsOntoAxis(verts, mean, mean + second_eigen);
-        float best_rad = getMaxDistApart(proj_verts);
-        float cur_rad = best_rad;
-        bool should_break;
-        float best_cost = getCostOfRadius(mean, largest_eigen, verts, best_rad, out should_break);
-        while (true)
-        {
-            cur_rad -= RADIUS_ITERATOR;
-            float cost = getCostOfRadius(mean, largest_eigen, verts, cur_rad, out should_break);
-            if (should_break)
-                break;
-            if (cost < best_cost)
-            {
-                best_rad = cur_rad;
-                best_cost = cost;
-            }
-        }
-        createBoundingCapsule_2(height, best_rad, getRotationBetween(Vector3.right, largest_eigen));
-    }
-
-    public float RADIUS_ITERATOR = .001f;
-    private float getCostOfRadius(Vector3 mean, Vector3 largest_eigen, Vector3[] verts, float radius, out bool should_break)
-    {
-        float cur_cost = 0;
-        should_break = true;
-        foreach(Vector3 vert in verts)
-        {
-            Vector3 dist_vector = vert - closestPointOnLine(mean, mean + largest_eigen, vert);
-            // Checks if every point is outside the radius
-            should_break = should_break && dist_vector.magnitude > radius;
-            cur_cost += dist_vector.sqrMagnitude;
-        }
-        return cur_cost;
+        double dist_from_main_axis_sum = 0;
+        foreach (Vector3 v in verts)
+            dist_from_main_axis_sum += (v - closestPointOnLine(mean, mean + largest_eigen, v)).magnitude;
+        float radius = (float) dist_from_main_axis_sum / n;
+        createBoundingCapsule_2(height, radius, getRotationBetween(Vector3.right, largest_eigen));
     }
 
     private float getMaxDistApart(Vector3[] verts)
