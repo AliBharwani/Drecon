@@ -16,15 +16,19 @@ MonoBehaviour:
   title: Third Person Template
   sections:
   - heading: About this template
-    text: This template provides the foundation to build a project in the third person perspective, making use of the Starter Assets. It is powered by the Universal Render Pipeline (URP).
+    text: This template provides the foundation to build a project in the third person
+      perspective, making use of the Starter Assets. It is powered by the Universal
+      Render Pipeline (URP).
     linkText: 
     url: 
-  - heading:
-    text: Enter <b>Play</b> mode to experience the default settings of the character controller and camera.
+  - heading: 
+    text: Enter <b>Play</b> mode to experience the default settings of the character
+      controller and camera.
     linkText: 
-    url:
+    url: 
   - heading: About Starter Assets
-    text: Starter Assets include first and third person character controllers, built in a modular way to provide a solid foundation for any game genre.
+    text: Starter Assets include first and third person character controllers, built
+      in a modular way to provide a solid foundation for any game genre.
     linkText: 
     url: 
   - heading: 
@@ -36,17 +40,19 @@ MonoBehaviour:
     linkText: "Starter Assets: Third Person Character Controller"
     url: http://u3d.as/2z1r
   - heading: 
-    text: The Starter Asset packages are compatible with Unity 2020.3 LTS and leverage the Unity's CharacterController component.
+    text: The Starter Asset packages are compatible with Unity 2020.3 LTS and leverage
+      the Unity's CharacterController component.
     linkText: 
     url: 
   - heading: Important note
     text: The Starter Asset packages require both Input System and Cinemachine packages
-      to work. See the documentation (Assets/StarterAssets_Documentation.pdf) for more details.
+      to work. See the documentation (Assets/StarterAssets_Documentation.pdf) for
+      more details.
     linkText: 
     url: 
   - heading: Documentation
-    text: See the full documentation (Assets/StarterAssets_Documentation.pdf)
-      for more information on how to set up the Starter Assets in a new Scene, in either
+    text: See the full documentation (Assets/StarterAssets_Documentation.pdf) for
+      more information on how to set up the Starter Assets in a new Scene, in either
       HDRP/URP or for mobile devices.
     linkText: 
     url: 

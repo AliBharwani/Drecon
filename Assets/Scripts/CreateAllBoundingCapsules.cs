@@ -1,0 +1,72 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CreateAllBoundingCapsules : MonoBehaviour
+{
+    public GameObject[] boneObjects;
+    // maps idx -> corresponding bone ID 
+    public int[] bone_ids;
+    public int left_hand_bone_id = 9;
+    public int right_hand_bone_id = 36;
+    public int num_bones = 70;
+    private HashSet<int> left_hand_ids;
+    private HashSet<int> right_hand_ids;
+    private int left_hand_ids_start = 10;
+    private int left_hand_ids_end = 32;
+    private int right_hand_ids_start = 37;
+    private int right_hand_ids_end = 59;
+    // bone_verts_lists[i] = a list of vertices associated with bone i
+    private List<Vector3>[] bone_verts_lists;
+    Vector3[] m_vertices;
+
+    [ContextMenu("Build all bone capsulse")]
+    private void buildBoneCapsules()
+    {
+        for (int i = 0; i < num_bones; i++)
+        {
+
+        }
+    }
+
+    private void getBoneVerts()
+    {
+        bone_verts_lists = new List<Vector3>[num_bones];
+        for (int i = 0; i < 70; i++)
+            bone_verts_lists[i] = new List<Vector3>();
+        left_hand_ids = new HashSet<int>();
+        right_hand_ids = new HashSet<int>();
+
+        for (int i = left_hand_ids_start; i < left_hand_ids_end + 1; i++)
+            left_hand_ids.Add(i);
+        for (int i = right_hand_ids_start; i < right_hand_ids_end + 1; i++)
+            right_hand_ids.Add(i);
+        SkinnedMeshRenderer rend = GetComponent<SkinnedMeshRenderer>();
+
+        Mesh mesh = rend.sharedMesh;
+        BoneWeight[] bws = mesh.boneWeights;
+        m_vertices = mesh.vertices;
+
+        for (int i = 0; i < mesh.vertexCount; i++)
+        {
+            BoneWeight bw = bws[i];
+            int bone_id = -1;
+            if (bw.weight0 > Mathf.Max(bw.weight1, bw.weight2, bw.weight3))
+                bone_id = bw.boneIndex0;
+            else if (bw.weight1 > Mathf.Max(bw.weight0, bw.weight2, bw.weight3))
+                bone_id = bw.boneIndex1;
+            else if (bw.weight2 > Mathf.Max(bw.weight1, bw.weight0, bw.weight3))
+                bone_id = bw.boneIndex2;
+            else if (bw.weight3 > Mathf.Max(bw.weight1, bw.weight2, bw.weight0))
+                bone_id = bw.boneIndex3;
+            if (bone_id == -1)
+                continue;
+
+            if (left_hand_ids.Contains(bone_id))
+                bone_id = left_hand_bone_id;
+            else if (right_hand_ids.Contains(bone_id))
+                bone_id = right_hand_bone_id;
+            bone_verts_lists[bone_id].Add(m_vertices[i]);
+        }
+    }
+}
