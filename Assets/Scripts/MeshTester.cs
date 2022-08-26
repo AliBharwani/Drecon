@@ -47,7 +47,7 @@ public class MeshTester : MonoBehaviour
     public bool gizmos_on = true;
     public bool debug = true;
     public int[] bone_ids_to_use;
-
+    public int[] bone_ids_debug;
     public int left_hand_bone_id = 9;
     public int right_hand_bone_id = 36;
     private HashSet<int> left_hand_ids;
@@ -143,7 +143,8 @@ public class MeshTester : MonoBehaviour
             return;
         foreach (int bone_id in bone_ids_to_use)
         {
-            if (debug && bone_id != RIGHT_FOREARM_ID) // 8 == right forearm 
+            bool bone_id_in_debug = bone_ids_debug.Contains(bone_id);
+            if (debug && !bone_id_in_debug) // 8 == right forearm 
                 continue;
             Gizmos.color = boneToColor[bone_id];
             foreach (Vector3 vert in bone_verts_lists[bone_id])
@@ -151,3 +152,35 @@ public class MeshTester : MonoBehaviour
         }
     }
 }
+
+
+/*
+ 0 hip
+1 spine
+2 spine1
+3 spine2
+4 neck (contains all head verts basically)
+5 head
+6 right shoulder
+7 right arm
+8 right forearm
+9 right hand
+[10, 32] right fingers
+33 left shoulder
+34 left arm 
+35 left forearm
+36 left hand
+[37, 59] left fingers
+60 right up leg
+61 right leg 
+62 right foot
+63 right toe
+64 right toe end
+65 left up leg
+66 left leg 
+67 left foot
+68 left toe 
+69 left toe end
+
+ 
+ */
