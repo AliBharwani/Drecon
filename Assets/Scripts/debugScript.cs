@@ -25,7 +25,7 @@ public class debugScript : MonoBehaviour
         Gizmos.color = Color.blue;
         Vector3 start = meanPoint;//Vector3.zero; // transform.TransformPoint(Vector3.zero);
         Vector3 end = transform.position + testVec2; // transform.TransformPoint(testVec);
-        Gizmos.DrawLine(start, meanPoint + testVec);
+        //Gizmos.DrawLine(start, meanPoint + testVec);
         //Gizmos.DrawLine(start, meanPoint + testVec2);
 
         Gizmos.DrawSphere(start, .01f);
@@ -99,21 +99,56 @@ public class debugScript : MonoBehaviour
         //Debug.Log("covar: " + matToString(covar));
         double[] eigenvalues = GeoUtils.getEigenvalues(covar);
         BVHUtils.debugArray(eigenvalues, "Eigenvalues: ");
+        Vector3 center = Vector3.zero;
         Vector3 largest_eigen = GeoUtils.getEigenvectorFromValue(covar, eigenvalues[0]).normalized;
         //Debug.Log("largest_eigen : " + largest_eigen.ToString("f6"));
         //return;
         Vector3[] proj_verts = GeoUtils.projectVertsOntoAxis(verts, mean, mean + largest_eigen);
-        float height = GeoUtils.getMaxDistApart(proj_verts);
+
+        // center should be at middle of the two furthest points
+        float height = GeoUtils.getMaxDistApart(proj_verts, ref center);
         // Calculate radius using mean
-        double dist_from_main_axis_sum = 0;
+        //double dist_from_main_axis_sum = 0;
+        //foreach (Vector3 v in verts)
+        //    dist_from_main_axis_sum += (v - GeoUtils.closestPointOnLine(mean, mean + largest_eigen, v)).magnitude;
+        //float radius = (float) dist_from_main_axis_sum / n;
+        double max_dist_from_main_axis = 0;
         foreach (Vector3 v in verts)
-            dist_from_main_axis_sum += (v - GeoUtils.closestPointOnLine(mean, mean + largest_eigen, v)).magnitude;
-        float radius = (float) dist_from_main_axis_sum / n;
+            max_dist_from_main_axis = Math.Max(max_dist_from_main_axis , (v - GeoUtils.closestPointOnLine(mean, mean + largest_eigen, v)).magnitude);
+        float radius = (float)max_dist_from_main_axis;
 
 
-        createBoundingCapsule_2(height, radius, GeoUtils.getRotationBetween(Vector3.right, largest_eigen), mean);
-    }
-
-
-    
+        createBoundingCapsule_2(height, radius, GeoUtils.getRotationBetween(Vector3.right, largest_eigen), center);
+    }    
 }
+
+/*
+ 0 hip
+1 spine
+2 spine1
+3 spine2
+4 neck (contains all head verts basically)
+5 head
+6 right shoulder
+7 right arm
+8 right forearm
+9 right hand
+[10, 32] right fingers
+33 left shoulder
+34 left arm 
+35 left forearm
+36 left hand
+[37, 59] left fingers
+60 right up leg
+61 right leg 
+62 right foot
+63 right toe
+64 right toe end
+65 left up leg
+66 left leg 
+67 left foot
+68 left toe 
+69 left toe end
+
+ 
+ */

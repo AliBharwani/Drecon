@@ -56,7 +56,6 @@ public class MeshTester : MonoBehaviour
     // bone_verts_lists[i] = a list of vertices associated with bone i
     private List<Vector3>[] bone_verts_lists;
 
-    // Update is called once per frame
     void testMesh()
     {
         bone_verts_lists = new List<Vector3>[70];
@@ -139,8 +138,18 @@ public class MeshTester : MonoBehaviour
     public int RIGHT_FOREARM_ID = 8;
     private void OnDrawGizmos()
     {
-        if (!gizmos_on || bone_verts_lists == null)
+        if (!gizmos_on)
             return;
+        if (bone_verts_lists == null)
+            testMesh();
+        string mean = "0.647868  ,  1.44229543, -0.03082059";
+        Vector3 meanPoint = BVHUtils.convertToVec(mean);
+        string test = "-0.99862385, -0.01221036,  0.05100307";
+        Vector3 testVec = BVHUtils.convertToVec(test).normalized;
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(meanPoint, meanPoint + testVec);
+        Gizmos.DrawLine(meanPoint, meanPoint - testVec);
+
         foreach (int bone_id in bone_ids_to_use)
         {
             bool bone_id_in_debug = bone_ids_debug.Contains(bone_id);
@@ -149,6 +158,12 @@ public class MeshTester : MonoBehaviour
             Gizmos.color = boneToColor[bone_id];
             foreach (Vector3 vert in bone_verts_lists[bone_id])
                 Gizmos.DrawSphere(vert, vert_size);
+            Vector3[] verts = bone_verts_lists[bone_id].ToArray();
+            Vector3[] proj_verts = GeoUtils.projectVertsOntoAxis(verts, meanPoint, meanPoint + testVec);
+            Gizmos.color = Color.green;
+            foreach (Vector3 vert in proj_verts)
+                Gizmos.DrawSphere(vert, vert_size);
+
         }
     }
 }

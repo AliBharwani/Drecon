@@ -41,16 +41,23 @@ public static class GeoUtils
         }
         return s;
     }
-    public static float getMaxDistApart(Vector3[] verts)
+
+    public static float getMaxDistApart(Vector3[] verts,  ref Vector3 center)
     {
         // O(n) method to test: since we know they'll be on a line determined by a and b,
         // we can set a to go through the origin and shift all other points by subtracting a 
         // from them. Then, we know that that the min and max magnitudes represent the furthest
         // apart points
         float ans = float.NegativeInfinity;
+        //center = Vector3.zero;
         for (int i = 0; i < verts.Length; i++)
             for (int j = i + 1; j < verts.Length; j++)
-                ans = Math.Max(ans, (verts[i] - verts[j]).magnitude);
+                if ((verts[i] - verts[j]).magnitude > ans) {
+                    ans = (verts[i] - verts[j]).magnitude;
+                    center = (verts[i] + verts[j]) / 2;
+                }
+        //ans = Math.Max(ans, (verts[i] - verts[j]).magnitude);
+        //Debug.Log("center" + center.ToString());
         return ans;
 
     }
