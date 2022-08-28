@@ -6,6 +6,31 @@ using UnityEngine;
 
 public class CreateAllBoundingCapsules : MonoBehaviour
 {
+    public enum Bones
+    {
+        Bone_Hips = 0,
+        Bone_LeftUpLeg = 65,
+        Bone_LeftLeg = 66,
+        Bone_LeftFoot = 67,
+        Bone_LeftToe = 68,
+        Bone_RightUpLeg = 60,
+        Bone_RightLeg = 61,
+        Bone_RightFoot = 62,
+        Bone_RightToe = 63,
+        Bone_Spine = 1,
+        Bone_Spine1 = 2,
+        Bone_Spine2 = 3,
+        Bone_Neck = 4,
+        Bone_Head = 5,
+        Bone_LeftShoulder = 33,
+        Bone_LeftArm = 34,
+        Bone_LeftForeArm = 35,
+        Bone_LeftHand = 36,
+        Bone_RightShoulder = 6,
+        Bone_RightArm = 7,
+        Bone_RightForeArm = 8,
+        Bone_RightHand = 9,
+    };
     public GameObject[] boneObjects;
     // maps idx -> corresponding bone ID 
     public int[] bone_ids;
@@ -27,6 +52,9 @@ public class CreateAllBoundingCapsules : MonoBehaviour
     private List<Vector3>[] bone_verts_lists;
     public bool debug;
     public int[] debug_bone_ids;
+    public Bones[] bones_that_use_next_joints_verts = new Bones[] { Bones.Bone_LeftUpLeg, Bones.Bone_RightUpLeg };
+    public Bones[] bones_that_use_prev_joints_verts = new Bones[] { Bones.Bone_LeftForeArm, Bones.Bone_RightForeArm};
+
     public float min_rad = .005f;
     Vector3[] m_vertices;
 
@@ -43,14 +71,22 @@ public class CreateAllBoundingCapsules : MonoBehaviour
                 continue;
             GameObject boneObject = boneObjects[i];
             bool[] trash = new bool[0];
-            Vector3[] verts = filterVertices(bone_verts_lists[bone_ids[i]].ToArray(), min_rad, ref trash);
+            Vector3[] verts = getVerts(bone_ids[i] , ref trash);
             debug_points.AddRange(verts);
             GameObject capsuleObject = calculateBoundingCapsule(verts, bone_ids[i]);
             capsuleObject.transform.parent = boneObject.transform;
         }
     }
-
-    public int[] bone_ids_use_small_rad;
+    private Vector3[] getVerts(int bone_id, ref bool[] kept)
+    {
+        return filterVertices(bone_verts_lists[bone_id].ToArray(), min_rad, ref kept);
+    }
+    private Vector3[] getVerts(int bone_id)
+    {
+        bool[] kept = new bool[0];
+        return filterVertices(bone_verts_lists[bone_id].ToArray(), min_rad, ref kept);
+    }
+    public Bones[] bone_ids_use_small_rad;
 
     private List<Vector3[]> debug_lines;
     private List<Vector3> debug_points;
@@ -59,16 +95,25 @@ public class CreateAllBoundingCapsules : MonoBehaviour
     {
 
         int n = verts.Length;
-        Vector3 mean = GeoUtils.calculateMean(verts);
-        double[,] covar = GeoUtils.calculateCovarMat(verts);
+        Vector3[] full_verts = verts;
+
+        if (bones_that_use_next_joints_verts.Contains((Bones) bone_id))
+            full_verts = verts.Concat(getVerts(bone_id + 1)).ToArray(); 
+        else if (bones_that_use_prev_joints_verts.Contains((Bones) bone_id))
+            full_verts = verts.Concat(getVerts(bone_id - 1)).ToArray();
+
+        Vector3 mean = GeoUtils.calculateMean(full_verts);
+
+        double[,] covar = GeoUtils.calculateCovarMat(full_verts);
         double[] eigenvalues = GeoUtils.getEigenvalues(covar);
         Vector3 largest_eigen = GeoUtils.getEigenvectorFromValue(covar, eigenvalues[0]).normalized;
+
         Vector3[] proj_verts = GeoUtils.projectVertsOntoAxis(verts, mean, mean + largest_eigen);
-        //debug_points.AddRange(proj_verts);
+        debug_points.AddRange(proj_verts);
         Vector3 center = Vector3.zero;
         float height = GeoUtils.getMaxDistApart(proj_verts, ref center);
         float radius;
-        if (bone_ids_use_small_rad.Contains(bone_id))
+        if (bone_ids_use_small_rad.Contains((Bones)bone_id))
         {
             double dist_from_main_axis_sum = 0;
             foreach (Vector3 v in verts)
