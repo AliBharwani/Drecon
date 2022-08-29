@@ -13,10 +13,12 @@ public class CreateAllBoundingCapsules : MonoBehaviour
         Bone_LeftLeg = 66,
         Bone_LeftFoot = 67,
         Bone_LeftToe = 68,
+        Bone_LeftToeEnd = 69,
         Bone_RightUpLeg = 60,
         Bone_RightLeg = 61,
         Bone_RightFoot = 62,
         Bone_RightToe = 63,
+        Bone_RightToeEnd = 64,
         Bone_Spine = 1,
         Bone_Spine1 = 2,
         Bone_Spine2 = 3,
@@ -51,11 +53,15 @@ public class CreateAllBoundingCapsules : MonoBehaviour
     // bone_verts_lists[i] = a list of vertices associated with bone i
     private List<Vector3>[] bone_verts_lists;
     public bool debug;
-    public int[] debug_bone_ids;
+    public Bones[] debug_bone_ids;
     public Bones[] bones_that_use_next_joints_verts = new Bones[] { Bones.Bone_LeftUpLeg, Bones.Bone_RightUpLeg };
     public Bones[] bones_that_use_prev_joints_verts = new Bones[] { Bones.Bone_LeftForeArm, Bones.Bone_RightForeArm};
 
+    public Bones[] bone_ids_use_small_rad;
+    public Bones[] boxed_bones;
     public float min_rad = .005f;
+    public bool draw_gizmos;
+    private float AVG_HUMAN_DENSITY = 90; // 90 kg / m^3
     Vector3[] m_vertices;
 
     [ContextMenu("Build all bone capsulse")]
@@ -63,18 +69,23 @@ public class CreateAllBoundingCapsules : MonoBehaviour
     {
         debug_lines = new List<Vector3[]>();
         debug_points = new List<Vector3>();
-        getBoneVerts();
+        initializeBoneVerts();
 
         for (int i = 0; i < bone_ids.Length; i++)
         {
-            if (debug && !debug_bone_ids.Contains(bone_ids[i]))
+            Bones cur_bone = (Bones) bone_ids[i];
+            if (debug && !debug_bone_ids.Contains(cur_bone))
                 continue;
             GameObject boneObject = boneObjects[i];
             bool[] trash = new bool[0];
             Vector3[] verts = getVerts(bone_ids[i] , ref trash);
             debug_points.AddRange(verts);
-            GameObject capsuleObject = calculateBoundingCapsule(verts, bone_ids[i]);
-            capsuleObject.transform.parent = boneObject.transform;
+            float volume = 0f;
+            GameObject colliderObject = boxed_bones.Contains(cur_bone) ? calculateBoundingBox(verts, out volume) : calculateBoundingCapsule(verts, bone_ids[i], out volume);
+            colliderObject.transform.parent = boneObject.transform;
+            // rigidbody mass in unity is kilos by default
+            float mass = volume * AVG_HUMAN_DENSITY;
+
         }
     }
     private Vector3[] getVerts(int bone_id, ref bool[] kept)
@@ -86,12 +97,27 @@ public class CreateAllBoundingCapsules : MonoBehaviour
         bool[] kept = new bool[0];
         return filterVertices(bone_verts_lists[bone_id].ToArray(), min_rad, ref kept);
     }
-    public Bones[] bone_ids_use_small_rad;
-
     private List<Vector3[]> debug_lines;
     private List<Vector3> debug_points;
+    private GameObject calculateBoundingBox(Vector3[] verts, out float volume)
+    {
+        Vector3 mins = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+        Vector3 maxes = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+        foreach(Vector3 vert in verts)
+        {
+            mins = new Vector3(Math.Min(mins.x, vert.x), Math.Min(mins.y, vert.y), Math.Min(mins.z, vert.z));
+            maxes = new Vector3(Math.Max(maxes.x, vert.x), Math.Max(maxes.y, vert.y), Math.Max(maxes.z, vert.z));
+        }
 
-    private GameObject calculateBoundingCapsule(Vector3[] verts, int bone_id)
+        GameObject boxObject = new GameObject();
+        boxObject.transform.position = (mins + maxes) / 2;
+        boxObject.transform.rotation = Quaternion.identity;
+        BoxCollider box = boxObject.AddComponent<BoxCollider>();
+        box.size = maxes - mins;
+        volume = box.size.x * box.size.y * box.size.z;
+        return boxObject;
+    }
+    private GameObject calculateBoundingCapsule(Vector3[] verts, int bone_id, out float volume)
     {
 
         int n = verts.Length;
@@ -137,9 +163,13 @@ public class CreateAllBoundingCapsules : MonoBehaviour
         capsule.height = height;
         capsule.direction = 0;
         capsule.radius = radius;
+
+        // volume of capsule: pi * r^2 * ((4/3) * r * a)
+        // a = side len
+        float a = height - 2 * radius;
+        volume = (float) Math.PI * radius * radius * ((4f/3f) * radius * a);
         return capsuleObject;
     }
-    public bool draw_gizmos;
     private void OnDrawGizmos()
     {
         if (!draw_gizmos || debug_lines == null || debug_points == null) 
@@ -191,7 +221,7 @@ public class CreateAllBoundingCapsules : MonoBehaviour
         kept = keep;
         return new_verts.ToArray();
     }
-    private void getBoneVerts()
+    private void initializeBoneVerts()
     {
         bone_verts_lists = new List<Vector3>[num_bones];
         for (int i = 0; i < 70; i++)
