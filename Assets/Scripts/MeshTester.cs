@@ -25,14 +25,14 @@ public class MeshTester : MonoBehaviour
     {
         outputBoneVertices();
     }
-    [ContextMenu("testCalculateBoundingCapsule")]
-    public void testCalculateBoundingCapsule()
-    {
-        testMesh();
-        debugObj.calculateBoundingCapsule(bone_verts_lists[RIGHT_FOREARM_ID].ToArray());
-    }
+    //    [ContextMenu("testCalculateBoundingCapsule")]
+    //    public void testCalculateBoundingCapsule()
+    //    {
+    //        testMesh();
+    //        debugObj.calculateBoundingCapsule(bone_verts_lists[RIGHT_FOREARM_ID].ToArray());
+    //    }
 #endif
-    public debugScript debugObj;
+    public UpdateJointPositions debugObj;
     //bool[] verticesToHighlight;
     //int[] vert_bones;
     Color[] boneToColor;
