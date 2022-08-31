@@ -6,6 +6,31 @@ using UnityEngine;
 
 public class UpdateJointPositions : MonoBehaviour
 {
+    public bool scene_view_on_start = true;
+    private void Start()
+    {
+        if (Application.isEditor && scene_view_on_start)
+        {
+            UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
+        }
+        if (!debug)
+            return;
+        List<Transform> all = getAllChildren();
+        foreach(Transform t in all)
+        {
+            var obj = t.gameObject;
+            ArticulationBody ab = obj.GetComponent<ArticulationBody>();
+            if (ab != null)
+            {
+                if (ab.enabled)
+                    Debug.Log($"{obj.name} Has articulation body enabled");
+                ab.mass = .25f;
+                //ab.enabled = !ab.enabled;
+                //Rigidbody rb = obj.AddComponent< Rigidbody>();
+                //rb.mass = .25f;
+            }
+        } 
+    }
     public string child_str;
     public bool draw_gizmos;
     public float gizmoSphereRad = .01f;
@@ -92,6 +117,21 @@ public class UpdateJointPositions : MonoBehaviour
         }
         Debug.Log($"Could not find {child_str}");
         return null;
+    }
+
+    public List<Transform> getAllChildren()
+    {
+        List<Transform> all = new List<Transform>();
+        Queue<Transform> queue = new Queue<Transform>();
+        queue.Enqueue(transform);
+        while (queue.Count > 0)
+        {
+            var c = queue.Dequeue();
+            all.Add(c);
+            foreach (Transform t in c)
+                queue.Enqueue(t);
+        }
+        return all;
     }
 
     private GameObject getChildCapsuleCollider(GameObject child)
