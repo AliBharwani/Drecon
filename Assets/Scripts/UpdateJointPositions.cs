@@ -3,12 +3,17 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class UpdateJointPositions : MonoBehaviour
 {
+    public int target_fr = 5;
+    public bool set_target_fr = false;
     public bool scene_view_on_start = true;
     private void Start()
     {
+        if (set_target_fr)
+            Application.targetFrameRate = target_fr;
         if (Application.isEditor && scene_view_on_start)
         {
             UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
@@ -30,6 +35,17 @@ public class UpdateJointPositions : MonoBehaviour
                 //rb.mass = .25f;
             }
         } 
+    }
+    private Keyboard kboard = Keyboard.current;
+    public GameObject hips;
+    private void Update()
+    {
+        if (kboard.spaceKey.wasPressedThisFrame)
+        {
+            ArticulationBody ab = hips.GetComponent<ArticulationBody>();
+            if (ab != null && ab.enabled)
+                ab.AddForce(Vector3.up);
+        }
     }
     public string child_str;
     public bool draw_gizmos;
