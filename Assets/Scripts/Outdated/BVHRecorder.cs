@@ -40,17 +40,17 @@ public class BVHRecorder: MonoBehaviour
     public int versionNum;
     private Vector3 hipDebugEnd, velDebugEnd;
     private string textLabel;
-    void OnDrawGizmos()
-    {
-        return;
-        Gizmos.color = Color.blue;
-        Gizmos.DrawLine(hip.transform.position, hipDebugEnd);
+    //void OnDrawGizmos()
+    //{
+    //    return;
+    //    Gizmos.color = Color.blue;
+    //    Gizmos.DrawLine(hip.transform.position, hipDebugEnd);
   
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(hip.transform.position, velDebugEnd);
-        Handles.Label(hip.transform.position + new Vector3(0f, 1f), textLabel);
+    //    Gizmos.color = Color.red;
+    //    Gizmos.DrawLine(hip.transform.position, velDebugEnd);
+    //    Handles.Label(hip.transform.position + new Vector3(0f, 1f), textLabel);
 
-    }
+    //}
     private float[] getCurrentSearchVector()
     {
         if (firstFrame)
