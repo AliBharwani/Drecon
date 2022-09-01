@@ -10,7 +10,6 @@ public class UpdateJointPositions : MonoBehaviour
     public int target_fr = 5;
     public bool set_target_fr = false;
     public bool scene_view_on_start = true;
-    public float total_mass = 0f;
     private void Start()
     {
         if (set_target_fr)
@@ -27,7 +26,8 @@ public class UpdateJointPositions : MonoBehaviour
             return;
         }
         List<Transform> all = getAllChildren();
-        foreach(Transform t in all)
+        float total_mass = 0f;
+        foreach (Transform t in all)
         {
             var obj = t.gameObject;
             ArticulationBody ab = obj.GetComponent<ArticulationBody>();
@@ -43,6 +43,8 @@ public class UpdateJointPositions : MonoBehaviour
     public void testfunc()
     {
         List<Transform> all = getAllChildren();
+        float total_mass = 0f;
+
         foreach (Transform t in all)
         {
             var obj = t.gameObject;
@@ -58,7 +60,7 @@ public class UpdateJointPositions : MonoBehaviour
                     ab.jointType = ArticulationJointType.FixedJoint;
                 }
                 ab.mass = Mathf.Approximately(ab.mass, 1f) ? .15f : ab.mass;
-
+                total_mass += ab.mass;
             }
         }
         Debug.Log($"Total mass : {total_mass}");
@@ -94,7 +96,7 @@ public class UpdateJointPositions : MonoBehaviour
         {
             ArticulationBody ab = hips.GetComponent<ArticulationBody>();
             if (ab != null && ab.enabled)
-                ab.AddForce(Vector3.up * total_mass);
+                ab.AddForce(Vector3.up * 90f);
         }
     }
     public string child_str;
@@ -159,6 +161,7 @@ public class UpdateJointPositions : MonoBehaviour
             }
             if (volume < 0)
                 Debug.Log($"{t.gameObject.name} has negative volume");
+            //Debug.Log($"{t.gameObject.name} has volume {volume}");
             ab.mass = volume * AVG_HUMAN_DENSITY;
             total_mass += ab.mass;
         }
