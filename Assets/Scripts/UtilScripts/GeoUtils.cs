@@ -265,4 +265,14 @@ public static class GeoUtils
         covar[2, 1] = covar[1, 2];
         return covar;
     }
+
+    public static float GetCapsuleVolume(CapsuleCollider cap)
+    {
+        // check if it's a sphere
+        if (cap.height <= 2 * cap.radius)
+            return (4f/3f) * (float)Math.PI * (float)Math.Pow(cap.radius, 3);
+        float a = cap.height - 2 * cap.radius;
+        float volume = (float)Math.PI * cap.radius * cap.radius * ((4f / 3f) * cap.radius * a);
+        return volume;
+    }
 }

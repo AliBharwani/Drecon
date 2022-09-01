@@ -19,8 +19,8 @@ public class UpdateJointPositions : MonoBehaviour
         {
             UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
         }
-        if (debug == 0)
-            return;
+        //if (debug == 0)
+        //    return;
         if (debug == 2)
         {
             testfunc();
@@ -33,13 +33,11 @@ public class UpdateJointPositions : MonoBehaviour
             ArticulationBody ab = obj.GetComponent<ArticulationBody>();
             if (ab != null)
             {
-                if (ab.enabled)
-                    Debug.Log($"{obj.name} Has articulation body enabled");
-                ab.mass = Mathf.Approximately(ab.mass, 1f) ?  .15f : ab.mass;
+                //ab.mass = Mathf.Approximately(ab.mass, 1f) ?  .15f : ab.mass;
                 total_mass += ab.mass;
             }
         }
-        Debug.Log($"Total mass : {total_mass} , /.3f : {total_mass / .3f}");
+        Debug.Log($"Total mass : {total_mass}");
     }
     public GameObject test_obj;
     public void testfunc()
@@ -63,8 +61,9 @@ public class UpdateJointPositions : MonoBehaviour
 
             }
         }
-        Debug.Log($"Total mass : {total_mass} , /.3f : {total_mass / .3f}");
+        Debug.Log($"Total mass : {total_mass}");
     }
+    // -15 15 -15 15
     private Keyboard kboard = Keyboard.current;
     public GameObject hips;
     public float torque = .1f;
@@ -95,7 +94,7 @@ public class UpdateJointPositions : MonoBehaviour
         {
             ArticulationBody ab = hips.GetComponent<ArticulationBody>();
             if (ab != null && ab.enabled)
-                ab.AddForce(Vector3.up * total_mass * .75f);
+                ab.AddForce(Vector3.up * total_mass);
         }
     }
     public string child_str;
@@ -105,21 +104,24 @@ public class UpdateJointPositions : MonoBehaviour
 
 
     public GameObject[] bones;
-    // bones_joint_add[i] = true means anchor position goes to capsule.center + halfheight, false means minus
-    public bool[] bones_joints_add;
     public int debug;
-
+    public int AVG_HUMAN_DENSITY = 985; // kg / m^3
     [ContextMenu("Update all articulation bodies centers")]
     private void setAllArticulationBodies()
     {
+        resetGizmos();
         for (int i = 0; i < bones.Length; i++)
         {
             GameObject bone = bones[i];
-            bool add = bones_joints_add[i];
             GameObject child = getChildCapsuleCollider(bone);
             CapsuleCollider cap = child.GetComponent<CapsuleCollider>();
             float halfHeight = cap.height / 2;
-            var world_pos = child.transform.TransformPoint(cap.center + halfHeight * Vector3.right * (add ? 1 : -1));
+            var world_pos_add = child.transform.TransformPoint(cap.center + halfHeight * Vector3.right );
+            var world_pos_sub = child.transform.TransformPoint(cap.center + halfHeight * Vector3.right * -1);
+            // We want to use the position that is closest to the parent 
+            Transform parent = bone.transform.parent;
+            var world_pos = Vector3.Distance(world_pos_add, parent.position) < Vector3.Distance(world_pos_sub, parent.position) ? world_pos_add : world_pos_sub;
+            addGizmoSphere(world_pos);
             var local_pos = bone.transform.InverseTransformPoint(world_pos);
             var artic_body = bone.GetComponent<ArticulationBody>();
             if (artic_body == null)
@@ -131,6 +133,39 @@ public class UpdateJointPositions : MonoBehaviour
         }
     }
 
+    [ContextMenu("Update all articulation bodies masses")]
+
+    private void setAllMasses()
+    {
+        List<Transform> all = getAllChildren();
+        float total_mass = 0;
+        foreach(Transform t in all)
+        {
+            ArticulationBody ab = t.gameObject.GetComponent<ArticulationBody>();
+            if (ab == null)
+                continue;
+            float volume;
+            GameObject capsule_obj = getChildCapsuleCollider(t.gameObject);
+            if (capsule_obj != null)
+            {
+                volume = GeoUtils.GetCapsuleVolume(capsule_obj.GetComponent<CapsuleCollider>());
+            } else
+            {
+                GameObject box_obj = getChildBoxCollider(t.gameObject);
+                if (box_obj == null)
+                    continue;
+                BoxCollider bc = box_obj.GetComponent<BoxCollider>();
+                volume = bc.size.x * bc.size.y * bc.size.z;
+            }
+            if (volume < 0)
+                Debug.Log($"{t.gameObject.name} has negative volume");
+            ab.mass = volume * AVG_HUMAN_DENSITY;
+            total_mass += ab.mass;
+        }
+        Debug.Log($"Total mass: {total_mass}");
+    }
+
+    public Transform debug_to_local_pos;
 
     [ContextMenu("Print tippy top of Capsule")]
     private void printCapsuleTippyTop()
@@ -142,9 +177,11 @@ public class UpdateJointPositions : MonoBehaviour
         var top = child.transform.TransformPoint(center + halfHeight * Vector3.right);
         var bottom = child.transform.TransformPoint(center - halfHeight * Vector3.right);
         Debug.Log($"Top: {top.ToString("f6")} | Bottom: {bottom.ToString("f6")}");
-        resetGizmos();
+        var local_top = debug_to_local_pos.InverseTransformPoint(top);
+        var local_bot = debug_to_local_pos.InverseTransformPoint(bottom);
+        Debug.Log($"In local coords: top: {local_top.ToString("f6")} bottom: {local_bot.ToString("f6")}");
         addGizmoSphere(top);
-        addGizmoSphere(bottom);
+        //addGizmoSphere(bottom);
     }
 
     [ContextMenu("Reset gizmos")]
@@ -206,6 +243,16 @@ public class UpdateJointPositions : MonoBehaviour
         foreach (Transform grandchild in child.transform)
         {
             if (grandchild.GetComponent<CapsuleCollider>() != null)
+                return grandchild.gameObject;
+        }
+        return null;
+    }
+
+    private GameObject getChildBoxCollider(GameObject child)
+    {
+        foreach (Transform grandchild in child.transform)
+        {
+            if (grandchild.GetComponent<BoxCollider>() != null)
                 return grandchild.gameObject;
         }
         return null;
