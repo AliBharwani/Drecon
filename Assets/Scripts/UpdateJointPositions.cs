@@ -16,42 +16,28 @@ public class UpdateJointPositions : MonoBehaviour
             Application.targetFrameRate = target_fr;
         if (Application.isEditor && scene_view_on_start)
         {
-            UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
+            UnityEditor.EditorWindow.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
         }
         //if (debug == 0)
         //    return;
-        if (debug == 2)
-        {
-            testfunc();
-            return;
-        }
-        List<Transform> all = getAllChildren();
-        float total_mass = 0f;
-        foreach (Transform t in all)
-        {
-            var obj = t.gameObject;
-            ArticulationBody ab = obj.GetComponent<ArticulationBody>();
-            if (ab != null)
-            {
-                //ab.mass = Mathf.Approximately(ab.mass, 1f) ?  .15f : ab.mass;
-                total_mass += ab.mass;
-            }
-        }
-        Debug.Log($"Total mass : {total_mass}");
+        //if (debug == 2)
+        //{
+        //    testfunc();
+        //    return;
+        //}
     }
     public GameObject test_obj;
-    public void testfunc()
+    [ContextMenu("Disable all articulation bodies except debug object")]
+    public void disable_all_art_bodies_except_debug()
     {
         List<Transform> all = getAllChildren();
-        float total_mass = 0f;
-
         foreach (Transform t in all)
         {
             var obj = t.gameObject;
             ArticulationBody ab = obj.GetComponent<ArticulationBody>();
             if (ab != null && ab.enabled)
             {
-                bool is_debug_obj = t.gameObject.name == test_obj.name;
+                bool is_debug_obj = test_obj != null && t.gameObject.name == test_obj.name;
                 if (!is_debug_obj)
                 {
                     if (ab.isRoot)
@@ -59,11 +45,8 @@ public class UpdateJointPositions : MonoBehaviour
                     ab.useGravity = false;
                     ab.jointType = ArticulationJointType.FixedJoint;
                 }
-                ab.mass = Mathf.Approximately(ab.mass, 1f) ? .15f : ab.mass;
-                total_mass += ab.mass;
             }
         }
-        Debug.Log($"Total mass : {total_mass}");
     }
     // -15 15 -15 15
     private Keyboard kboard = Keyboard.current;
@@ -73,8 +56,7 @@ public class UpdateJointPositions : MonoBehaviour
     {
         if (debug == 2)
         {
-            
-              ArticulationBody ab = test_obj.GetComponent<ArticulationBody>();
+            ArticulationBody ab = test_obj.GetComponent<ArticulationBody>();
             Vector3 force = Vector3.zero;
             if (kboard.qKey.wasPressedThisFrame)
                 force = test_obj.transform.up;
@@ -186,6 +168,22 @@ public class UpdateJointPositions : MonoBehaviour
         addGizmoSphere(top);
         //addGizmoSphere(bottom);
     }
+
+    [ContextMenu("Log random debug stuff")]
+    private void log_random_debug()
+    {
+        List<Transform> all = getAllChildren();
+        foreach (Transform t in all)
+        {
+            var obj = t.gameObject;
+            bool is_debug_obj = test_obj != null && t.gameObject.name == test_obj.name;
+            ArticulationBody ab = obj.GetComponent<ArticulationBody>();
+            if (ab != null || !is_debug_obj)
+                continue;
+            //Debug.Log($"GetDOFindices: {ab.GetDofStartIndices()}")
+        }
+    }
+
 
     [ContextMenu("Reset gizmos")]
     private void resetGizmos()
