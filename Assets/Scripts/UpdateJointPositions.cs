@@ -20,11 +20,11 @@ public class UpdateJointPositions : MonoBehaviour
         }
         //if (debug == 0)
         //    return;
-        //if (debug == 2)
-        //{
-        //    testfunc();
-        //    return;
-        //}
+        if (debug == 2)
+        {
+            disable_all_art_bodies_except_debug();
+            return;
+        }
     }
     public GameObject test_obj;
     [ContextMenu("Disable all articulation bodies except debug object")]
@@ -48,6 +48,16 @@ public class UpdateJointPositions : MonoBehaviour
             }
         }
     }
+    [ContextMenu("Disable all articulation bodies")]
+    public void disable_all_art_bodies()
+    {
+        foreach (Transform t in getAllChildren())
+        {
+            ArticulationBody ab = t.gameObject.GetComponent<ArticulationBody>();
+            if (ab != null && ab.enabled)
+                ab.enabled = false;
+        }
+    }
     // -15 15 -15 15
     private Keyboard kboard = Keyboard.current;
     public GameObject hips;
@@ -58,17 +68,17 @@ public class UpdateJointPositions : MonoBehaviour
         {
             ArticulationBody ab = test_obj.GetComponent<ArticulationBody>();
             Vector3 force = Vector3.zero;
-            if (kboard.qKey.wasPressedThisFrame)
+            if (kboard.qKey.isPressed)
                 force = test_obj.transform.up;
-            else if (kboard.aKey.wasPressedThisFrame)
+            else if (kboard.aKey.isPressed)
                 force = -test_obj.transform.up;
-            else if (kboard.wKey.wasPressedThisFrame)
+            else if (kboard.wKey.isPressed)
                 force = test_obj.transform.right;
-            else if (kboard.sKey.wasPressedThisFrame)
+            else if (kboard.sKey.isPressed)
                 force = -test_obj.transform.right;
-            else if (kboard.eKey.wasPressedThisFrame)
+            else if (kboard.eKey.isPressed)
                 force = test_obj.transform.forward;
-            else if (kboard.dKey.wasPressedThisFrame)
+            else if (kboard.dKey.isPressed)
                 force = -test_obj.transform.forward;
             if (ab != null && ab.enabled)
                 ab.AddTorque(force * torque);

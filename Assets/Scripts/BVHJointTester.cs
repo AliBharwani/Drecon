@@ -56,7 +56,7 @@ public class BVHJointTester : MonoBehaviour
 
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (start_delay > 0)
         {
@@ -93,6 +93,8 @@ public class BVHJointTester : MonoBehaviour
                 continue;
             Transform t = boneToTransform[i];
             Quaternion local_rot = curr_bone_rotations[i];
+            bool print_debug = bone == debug_bone;
+
             if (!set_art_bodies)
             {
                 t.localPosition = curr_bone_positions[i];
@@ -102,7 +104,6 @@ public class BVHJointTester : MonoBehaviour
             ArticulationBody ab = bone_to_art_body[i];
             if (ab == null || !bones_to_apply.Contains(bone))
                 continue;
-            bool print_debug = bone == debug_bone;
             //if (print_debug)
                 //if (set_target_velocities)
                     //Debug.Log($"Local target velocity: {cur_angular_vel[i].ToString("f6")}");
@@ -121,10 +122,14 @@ public class BVHJointTester : MonoBehaviour
                 Vector3 rot_in_reduced_space = ab.ToTargetRotationInReducedSpace(q);
                 Vector3 final_vel =  q.ToEulerAnglesInRange180();  // rot_in_reduced_space * 30; //  multiply by 30 because 30fps
                 if (set_target_velocities) {
-                    //Debug.Log($"Local target velocity: {rot_in_reduced_space.ToString("f6")}");
-                    Debug.Log($"Joint velocity: {ab.jointVelocity[0]} , {ab.jointVelocity[1]} , {ab.jointVelocity[2]}");
+                    Debug.Log($"Local target velocity: {final_vel.ToString("f6")}");
+                    Debug.Log($"Joint velocity: {ab.jointVelocity[0] * Mathf.Rad2Deg} , {ab.jointVelocity[1] * Mathf.Rad2Deg} , {ab.jointVelocity[2] * Mathf.Rad2Deg}");
                 }
-                ab.SetDriveTargetVelocity(final_vel, print_debug);
+                Vector3 old_vel = new Vector3(ab.jointVelocity[0] , ab.jointVelocity[1] , ab.jointVelocity[2]) * Mathf.Rad2Deg;
+                //ForceMode.VelocityChange: Interprets the parameter as a direct angular velocity change (measured in degrees per second),
+                // and changes the angular velocity by the value of torque. The effect doesn't depend on the mass of the body and the simulation step length.
+                ab.AddRelativeTorque(final_vel , ForceMode.VelocityChange);
+                //ab.SetDriveTargetVelocity(final_vel, print_debug);
             }
             else
                 ab.SetDriveRotation(local_rot, print_debug);
