@@ -83,4 +83,8 @@ public static class Utils
         return q * quat_inv(p);
     }
 
+    public static Quaternion quat_from_stick_dir(float x, float y)
+    {
+        return Quaternion.AngleAxis(Mathf.Atan2(x, y) * Mathf.Rad2Deg, Vector3.up);
+    }
 }

@@ -6,6 +6,8 @@ using UnityEngine.InputSystem;
 
 public class mm_v2 : MonoBehaviour
 {
+    public bool gen_inputs = true;
+    public float prob_to_change_inputs = 60f;
     public enum Bones
     {
         Bone_Entity = 0,
@@ -107,6 +109,10 @@ public class mm_v2 : MonoBehaviour
     int best_idx;
     int numBones;
     Gamepad gamepad;
+
+    // ====================== Stuff added for ML
+    Vector2 random_lstick_input;
+    bool is_strafing;
     void Start()
     {
         if (Application.isEditor)
@@ -160,6 +166,8 @@ public class mm_v2 : MonoBehaviour
         trajectory_accelerations = new Vector3[4];
         trajectory_rotations = identityQuatArray(4);
         trajectory_angular_velocities = new Vector3[4];
+        random_lstick_input = Random.insideUnitCircle;
+        prob_to_change_inputs = 1f / prob_to_change_inputs;
 
         inertialize_pose_reset(bone_positions[0], bone_rotations[0]);
         inertialize_pose_update(
@@ -175,9 +183,19 @@ public class mm_v2 : MonoBehaviour
 
     void FixedUpdate()
     {
+        // Update if we are reading from user input (ie not generating random rotations) or we are
+        // generating random inputs and every frame the user changes desires with P(.001)
+        if (gen_inputs && Random.value <= prob_to_change_inputs) {
+            Debug.Log("Genning new inputs!");
+            random_lstick_input = Random.insideUnitCircle;
+            // Random chance of making desired rotation face direction of velocity  
+            is_strafing = Random.value <= .5f;
+            Vector2 rotation_vec = is_strafing ?  Random.insideUnitCircle : random_lstick_input;
+            desired_rotation =  Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y) ;
+        }
         desired_velocity = desired_velocity_update(simulation_rotation);
         //Debug.Log(desired_velocity);
-        desired_rotation = desired_rotation_update(desired_rotation, desired_velocity);
+        desired_rotation = !gen_inputs ? desired_rotation_update(desired_rotation, desired_velocity) : desired_rotation;
 
 
         // Get the desired velocity
@@ -403,7 +421,7 @@ public class mm_v2 : MonoBehaviour
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)
     {
-        Vector2 lstick = gamepad.leftStick.ReadValue();
+        Vector2 lstick = gen_inputs ? random_lstick_input : gamepad.leftStick.ReadValue();
 
         // Find stick position local to current facing direction
         Vector3 local_stick_dir = Utils.quat_inv_mul_vec3(sim_rotation, new Vector3(lstick.x, 0, lstick.y));
@@ -508,11 +526,13 @@ public class mm_v2 : MonoBehaviour
     }
     private Quaternion desired_rotation_update(Quaternion rotation, Vector3 velocity)
     {
-        if (userIsInputting())
+        if (gen_inputs && is_strafing)
+            return desired_rotation;
+        if (gen_inputs || userIsInputting())
         {
             Vector3 desired_dir = velocity.normalized;
             //Debug.Log(Mathf.Atan2(desired_dir.x, desired_dir.z));
-            return Quaternion.AngleAxis(Mathf.Atan2(desired_dir.x, desired_dir.z) * Mathf.Rad2Deg, Vector3.up);
+            return Utils.quat_from_stick_dir(desired_dir.x, desired_dir.z);// Quaternion.AngleAxis(Mathf.Atan2(desired_dir.x, desired_dir.z) * Mathf.Rad2Deg, Vector3.up);
         }
         else
         {
