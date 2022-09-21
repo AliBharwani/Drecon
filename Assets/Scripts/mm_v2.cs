@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 public class mm_v2 : MonoBehaviour
 {
     public bool gen_inputs = true;
+    public float MAX_WANDERING_RADIUS = 10f;
     public float prob_to_change_inputs = 60f;
     public enum Bones
     {
@@ -112,6 +113,7 @@ public class mm_v2 : MonoBehaviour
 
     // ====================== Stuff added for ML
     Vector2 random_lstick_input;
+    Vector3 origin;
     bool is_strafing;
     void Start()
     {
@@ -120,7 +122,13 @@ public class mm_v2 : MonoBehaviour
             UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
         }
         gamepad = Gamepad.current;
+        if (gamepad == null)
+        {
+            Debug.LogWarning("Warning: Gamepad not found");
+        }
         Application.targetFrameRate = 30;
+        origin = transform.position;
+        Debug.Log($"Origin: {origin}");
         motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, abTest, frame_increments, ignore_surrounding);
         motionDB.database_build_matching_features(
             feature_weight_foot_position,
@@ -168,7 +176,7 @@ public class mm_v2 : MonoBehaviour
         trajectory_angular_velocities = new Vector3[4];
         random_lstick_input = Random.insideUnitCircle;
         prob_to_change_inputs = 1f / prob_to_change_inputs;
-
+        simulation_position = origin;
         inertialize_pose_reset(bone_positions[0], bone_rotations[0]);
         inertialize_pose_update(
             motionDB.bone_positions[frameIdx],
@@ -194,18 +202,26 @@ public class mm_v2 : MonoBehaviour
             desired_rotation =  Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y) ;
         }
         desired_velocity = desired_velocity_update(simulation_rotation);
-        //Debug.Log(desired_velocity);
+        //Debug.Log($"Gamepad: {gamepad.leftStick.ReadValue()}");
         desired_rotation = !gen_inputs ? desired_rotation_update(desired_rotation, desired_velocity) : desired_rotation;
 
 
+        Vector3 world_space_position = bone_positions[0];
+        bool end_of_anim = motionDB.database_trajectory_index_clamp(frameIdx, 1) == frameIdx;
+        bool search = end_of_anim || (frameCounter % searchEveryNFrames) == 0;
+        if (is_out_of_bounds(world_space_position))
+        {
+            bone_positions[0] = origin;
+            simulation_position =  origin;
+            search = true;
+        }
         // Get the desired velocity
 
         trajectory_desired_rotations_predict();
-        trajectory_rotations_predict(((float)frame_increments) * Time.fixedDeltaTime);
+        trajectory_rotations_predict(frame_increments * Time.fixedDeltaTime);
         trajectory_desired_velocities_predict();
-        trajectory_positions_predict(((float)frame_increments) * Time.fixedDeltaTime);
-        bool end_of_anim = motionDB.database_trajectory_index_clamp(frameIdx, 1) == frameIdx;
-        if (end_of_anim || (frameCounter % searchEveryNFrames) == 0)
+        trajectory_positions_predict(frame_increments * Time.fixedDeltaTime);
+        if (search)
         {
             // Search database and update frame idx 
             motionMatch();
@@ -544,6 +560,11 @@ public class mm_v2 : MonoBehaviour
     {
         return gamepad.leftStick.ReadValue().magnitude > .01f;
     }
+
+    private bool is_out_of_bounds(Vector3 pos)
+    {
+        return Vector3.Distance(origin, pos) > MAX_WANDERING_RADIUS;
+    }
     private void inertialize_pose_update(
         in Vector3[] bone_input_positions,
         in Vector3[] bone_input_velocities,
@@ -559,6 +580,7 @@ public class mm_v2 : MonoBehaviour
         Vector3 world_space_position = Utils.quat_mul_vec3(transition_dst_rotation,
             Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position))
                 + transition_dst_position;
+
         //Vector3 debugTerm = Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position);
         //Debug.Log($"bone_input_positions[0] - transition_src_position: {bone_input_positions[0] - transition_src_position} \n" +
         //    $"quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position): {debugTerm} \n" +
@@ -632,7 +654,7 @@ public class mm_v2 : MonoBehaviour
 
         transition_src_position = root_position;
         transition_src_rotation = root_rotation;
-        transition_dst_position = new Vector3();
+        transition_dst_position = new Vector3() + origin;
         transition_dst_rotation = Quaternion.identity;
     }
     // This function transitions the inertializer for 

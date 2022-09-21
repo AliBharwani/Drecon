@@ -1724,6 +1724,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gen_inputs: 1
+  MAX_WANDERING_RADIUS: 10
   prob_to_change_inputs: 60
   toy_pointers:
   - {fileID: 1747538417}
@@ -31762,6 +31763,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gen_inputs: 1
+  MAX_WANDERING_RADIUS: 10
   prob_to_change_inputs: 60
   toy_pointers:
   - {fileID: 1747538417}
@@ -37590,18 +37592,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1436747331686144353, guid: b06b43344035ab34e8ea0b5c8675aff5, type: 3}
   m_PrefabInstance: {fileID: 1494136823}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1494136858
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1494136824}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa64938a953cbb141afa0be876723e42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1494136859
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37660,6 +37650,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gen_inputs: 1
+  MAX_WANDERING_RADIUS: 10
   prob_to_change_inputs: 60
   toy_pointers:
   - {fileID: 0}
@@ -50597,6 +50588,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gen_inputs: 1
+  MAX_WANDERING_RADIUS: 10
   prob_to_change_inputs: 500
   toy_pointers:
   - {fileID: 1747538417}

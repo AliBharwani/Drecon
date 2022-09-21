@@ -72,10 +72,10 @@ public class database
         in float feature_weight_trajectory_positions,
         in float feature_weight_trajectory_directions)
     {
-        for (int i = 0; i < nranges(); i++)
-        {
-            Debug.Log($"Idx {i} range start: {range_starts[i]} | range stop: {range_stops[i]}");
-        }
+        //for (int i = 0; i < nranges(); i++)
+        //{
+        //    Debug.Log($"Idx {i} range start: {range_starts[i]} | range stop: {range_stops[i]}");
+        //}
         int nfeatures =
             3 + // Left Foot Position
             3 + // Right Foot Position 
