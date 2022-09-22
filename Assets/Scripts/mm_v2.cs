@@ -53,7 +53,7 @@ public class mm_v2 : MonoBehaviour
     public int searchEveryNFrames = 1;
     public int frameCounter = 1;
 
-    public Transform[] boneToTransform = new Transform[21];
+    public Transform[] boneToTransform = new Transform[23];
     database motionDB;
     int frameIdx = 0;
 
