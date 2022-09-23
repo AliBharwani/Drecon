@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class BVHJointTester : MonoBehaviour
+public class SimCharController : MonoBehaviour
 {
     public bool apply_all_local_rots;
     public bool set_art_bodies;
@@ -13,7 +13,8 @@ public class BVHJointTester : MonoBehaviour
     public mm_v2.Bones[] bones_to_apply;
     public mm_v2.Bones debug_bone;
     public Transform[] boneToTransform = new Transform[23];
-    private ArticulationBody[] bone_to_art_body = new ArticulationBody[23];
+    [HideInInspector]
+    public ArticulationBody[] bone_to_art_body = new ArticulationBody[23];
     public int start_delay = 60;
     Gamepad gamepad;
     database motionDB;

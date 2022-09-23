@@ -53374,6 +53374,10 @@ PrefabInstance:
       propertyPath: m_ParentAnchorPosition.z
       value: 0.00000004600428
       objectReference: {fileID: 0}
+    - target: {fileID: 364380266375844084, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1693676771373342448, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
       propertyPath: m_ParentAnchorPosition.y
       value: -0.009929431
@@ -53392,7 +53396,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3183205843433044323, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
       propertyPath: m_RootOrder
-      value: 22
+      value: 21
       objectReference: {fileID: 0}
     - target: {fileID: 3183205843433044323, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
       propertyPath: m_LocalPosition.x

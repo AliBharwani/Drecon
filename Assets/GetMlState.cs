@@ -2,24 +2,45 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static mm_v2.Bones;
 
 public class GetMlState : MonoBehaviour
 {
     // Start is called before the first frame update
     public GameObject kinematic_char;
+    private Transform kinematic_char_trans;
     public GameObject sim_char;
+    private Transform sim_char_trans;
+
     private Transform[] kin_bone_to_transform;
     private Transform[] sim_bone_to_transform;
+    private mm_v2 MMScript;
+    private SimCharController SimCharController; 
 
+    private ArticulationBody sim_hip_bone; // root of ArticulationBody
 
     private Vector3 prev_kin_cm;
     private Vector3 prev_sim_cm;
+    private Vector3 prev_sim_pos;
+    private mm_v2.Bones[] state_bones = new mm_v2.Bones[] {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
+    private Vector3[] prev_kin_bone_local_pos;
+    private Vector3[] prev_sim_bone_local_pos;
+
 
     void Start()
     {
 
-        kin_bone_to_transform = sim_char.GetComponent<mm_v2>().boneToTransform;
-        sim_bone_to_transform = sim_char.GetComponent<BVHJointTester>().boneToTransform;
+        MMScript = kinematic_char.GetComponent<mm_v2>();
+        kinematic_char_trans = kinematic_char.transform;
+        kin_bone_to_transform = MMScript.boneToTransform;
+
+        SimCharController = sim_char.GetComponent<SimCharController>();
+        sim_char_trans = sim_char.transform;
+        sim_bone_to_transform = SimCharController.boneToTransform;
+        sim_hip_bone = SimCharController.bone_to_art_body[(int) Bone_Hips];
+
+        prev_kin_bone_local_pos = new Vector3[state_bones.Length];
+        prev_sim_bone_local_pos = new Vector3[state_bones.Length];
     }
 
     /*
@@ -51,17 +72,100 @@ public class GetMlState : MonoBehaviour
     velocities, except with a frame F(sim), which is identical to F(kin) in
     orientation but positioned at the simulated character’s CM position.
         -> Means multiply by inverse of kin root bone rotation but keep sim position 
-     
+
+    Note that when velocities are decomposed into F(kin) or F(sim), the
+    reference frames are considered to have no angular or linear velocity
+    and acceleration so that global velocity features are measurable in
+    the state.
      
      */
-    void get_state()
+    double[] get_state()
     {
+        double[] state = new double[110];
+        int state_idx = 0;
+
         // kinematic character center of mass
+        Vector3 kin_cm = get_kinematic_cm();
+        Vector3 kin_cm_vel = (kin_cm - prev_kin_cm) / Time.deltaTime;
+        kin_cm_vel = resolve_vel_in_kim_ref_frame(kin_cm_vel);
+        prev_kin_cm = kin_cm;
+        copy_vector_into_state(ref state, ref state_idx, kin_cm_vel);
 
         // simulated character center of mass
-        
+        Vector3 sim_cm = sim_hip_bone.worldCenterOfMass;
+        Vector3 sim_cm_vel = (sim_cm - prev_sim_cm) / Time.deltaTime;
+        sim_cm_vel = resolve_vel_in_kim_ref_frame(sim_cm_vel);
+        prev_sim_cm = sim_cm;
+        copy_vector_into_state(ref state, ref state_idx, sim_cm_vel);
+
+        // Copy v(sim) - v(kin)
+        copy_vector_into_state(ref state, ref state_idx, sim_cm_vel - kin_cm_vel);
+
+
+        // The desired horizontal CM velocity from user-input is also considered v(des) - R^2
+        Vector2 desired_vel = new Vector2(MMScript.desired_velocity.x, MMScript.desired_velocity.z);
+        desired_vel = resolve_vel_in_kim_ref_frame(desired_vel);
+
+        copy_vector_into_state(ref state, ref state_idx, desired_vel);
+
+
+        //The diff between current simulated character horizontal
+        //CM velocity and v(des) = v(diff) R ^ 2
+        Vector3 cur_sim_vel = (sim_char_trans.position - prev_sim_pos) / Time.deltaTime;
+        cur_sim_vel = resolve_vel_in_kim_ref_frame(cur_sim_vel);
+        Vector2 v_diff = new Vector2(desired_vel.x - cur_sim_vel.x, desired_vel.y - cur_sim_vel.z);
+        prev_sim_pos = sim_char_trans.position;
+        copy_vector_into_state(ref state, ref state_idx, v_diff);
+
+        // we do it once for kin char and once for sim char
+        Transform[] bone_to_transform = kin_bone_to_transform;
+        Vector3 relative_cm = kin_cm;
+        Quaternion relative_rot = kinematic_char_trans.rotation;
+        Vector3[] prev_bone_local_pos = prev_kin_bone_local_pos;
+        double[] s_sim, s_kin;
+        s_sim = new double[36];
+        s_kin = new double[36];
+        int copy_idx = 0;
+        double[] copy_into = s_kin;
+        for (int i = 0; i < 2; i++) {
+            for(int j = 0; j < state_bones.Length; j++)
+            {
+                mm_v2.Bones bone = state_bones[j];
+                // Compute position of bone
+                Vector3 bone_world_pos = bone_to_transform[(int)bone].position;
+                Vector3 bone_local_pos = bone_world_pos - relative_cm;
+                Vector3 bone_relative_pos = Utils.quat_inv_mul_vec3(relative_rot, bone_local_pos);
+                Vector3 prev_bone_pos = prev_bone_local_pos[j];
+                Vector3 bone_vel = (bone_relative_pos - prev_bone_pos) / Time.deltaTime;
+                copy_vector_into_state(ref copy_into, ref copy_idx, bone_relative_pos);
+                copy_vector_into_state(ref copy_into, ref copy_idx, bone_vel);
+                prev_bone_local_pos[j] = bone_relative_pos;
+
+            }
+            // Reset for second loop run with sim car
+            bone_to_transform = sim_bone_to_transform;
+            relative_cm = sim_cm;
+            //relative_rot = sim_char_trans.rotation;
+            prev_bone_local_pos = prev_sim_bone_local_pos;
+            copy_into = s_sim;
+            copy_idx = 0;
+        }
+
+        // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then s(kin)
+        for (int i = 0; i < 36; i++)
+            state[state_idx++] = s_sim[i];
+        for (int i = 0; i < 36; i++)
+            state[state_idx++] = s_sim[i] - s_kin[i];
+
+        if (state_idx != 90)
+            throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything but smootehd actions");
+
+        // TODO: Add actions here once actions are being output 
+        return state;
+
     }
 
+    // Gets CoM in world position
     Vector3 get_kinematic_cm()
     {
 
@@ -80,6 +184,29 @@ public class GetMlState : MonoBehaviour
 
         }
         return CoM / total_mass;
+    }
+
+    // Velocity is different in that we only need to make its rotation
+    // local to the kinematic character, whereas with pos we also need to
+    // position at the character's CM position
+    Vector3 resolve_vel_in_kim_ref_frame(Vector3 vel)
+    {
+        // using same logic as in desired_velocity_update
+        return Utils.quat_inv_mul_vec3(kinematic_char_trans.rotation, vel);
+    }
+
+    void copy_vector_into_state(ref double[] state, ref int start_idx, Vector3 v)
+    {
+        state[start_idx] = v.x;
+        state[start_idx + 1] = v.y;
+        state[start_idx + 2] = v.z;
+        start_idx += 3;
+    }
+    void copy_vector_into_state(ref double[] state, ref int start_idx, Vector2 v)
+    {
+        state[start_idx] = v.x;
+        state[start_idx + 1] = v.y;
+        start_idx += 2;
     }
 
     private Vector3 getChildColliderCenter(GameObject child)

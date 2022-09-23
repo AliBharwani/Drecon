@@ -100,8 +100,8 @@ public class mm_v2 : MonoBehaviour
     Vector3 simulation_acceleration;
     Quaternion simulation_rotation;
     Vector3 simulation_angular_velocity;
-
-    Vector3 desired_velocity;
+    [HideInInspector]
+    public Vector3 desired_velocity;
     Quaternion desired_rotation = Quaternion.identity;
 
     Vector3[] local_bone_positions;
