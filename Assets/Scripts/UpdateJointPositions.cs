@@ -127,6 +127,8 @@ public class UpdateJointPositions : MonoBehaviour
         }
     }
 
+
+
     [ContextMenu("Update all articulation bodies masses")]
 
     private void setAllMasses()
@@ -249,7 +251,7 @@ public class UpdateJointPositions : MonoBehaviour
         return all;
     }
 
-    private GameObject getChildCapsuleCollider(GameObject child)
+    private static GameObject getChildCapsuleCollider(GameObject child)
     {
         foreach (Transform grandchild in child.transform)
         {

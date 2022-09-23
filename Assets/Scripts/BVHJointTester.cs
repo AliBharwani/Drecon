@@ -30,7 +30,7 @@ public class BVHJointTester : MonoBehaviour
         for (int i = 0; i < 23; i++)
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
-            if (!bones_to_apply.Contains(bone))
+            if (!apply_all_local_rots && !bones_to_apply.Contains(bone))
                 continue;
             ArticulationBody ab = boneToTransform[i].GetComponent<ArticulationBody>();
             bone_to_art_body[i] = ab;
@@ -44,9 +44,12 @@ public class BVHJointTester : MonoBehaviour
                 ab.SetDriveRotation(curr_bone_rotations[i]);
 
             }
-            else {    
+            else if (set_art_bodies) {    
                 ab.SetAllDriveStiffness(stiffness);
                 ab.SetAllDriveDamping(damping);
+            } else
+            {
+                ab.enabled = false;
             }
             
         
@@ -86,7 +89,7 @@ public class BVHJointTester : MonoBehaviour
         Vector3[] curr_bone_positions = motionDB.bone_positions[frameIdx];
         Quaternion[] curr_bone_rotations = motionDB.bone_rotations[frameIdx];
         Vector3[] cur_angular_vel = motionDB.bone_angular_velocities[frameIdx];
-        for (int i = 0; i < 23; i++)
+        for (int i = 1; i < 23; i++)
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
             if (!apply_all_local_rots && !bones_to_apply.Contains(bone))
@@ -137,5 +140,32 @@ public class BVHJointTester : MonoBehaviour
         }
 
     }
+    [ContextMenu("Find max rotations for each dimension for a bone")]
+    private void find_rot_limits()
+    {
+        motionDB = new database(Application.dataPath + @"/outputs/database.bin", 1, true, 10, 10);
+        int num_frames = motionDB.nframes();
+        int j = (int)debug_bone;
+        ArticulationBody ab = boneToTransform[j].GetComponent<ArticulationBody>();
+        float min_x, min_y, min_z;
+        min_x = min_y = min_z = float.PositiveInfinity;
+        float max_x, max_y, max_z;
+        max_x = max_y = max_z = float.NegativeInfinity;
+        for (int i = 0; i < num_frames; i++)
+        {
+            Quaternion debug_bone_rot = motionDB.bone_rotations[i][j];
+            Vector3 target_rot = ab.ToTargetRotationInReducedSpace(debug_bone_rot);
+            //Debug.Log(target_rot.ToString("f6"));
+            min_x = Mathf.Min(min_x, target_rot.x);
+            min_y = Mathf.Min(min_y, target_rot.y);
+            min_z = Mathf.Min(min_z, target_rot.z);
 
+            max_x = Mathf.Max(max_x, target_rot.x);
+            max_y = Mathf.Max(max_y, target_rot.y);
+            max_z = Mathf.Max(max_z, target_rot.z);
+        }
+        Debug.Log($"Mins: x: {min_x} , y: {min_y} , z: {min_z}");
+
+        Debug.Log($"Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
+    }
 }
