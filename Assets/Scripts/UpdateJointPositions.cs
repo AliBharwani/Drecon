@@ -196,6 +196,23 @@ public class UpdateJointPositions : MonoBehaviour
         }
     }
 
+    [ContextMenu("Print tippy top of Capsule")]
+    private void debug_capsule_surface_points()
+    {
+        GameObject child = getChildCapsuleCollider(FindDeepChild());
+        CapsuleCollider cap = child.GetComponent<CapsuleCollider>();
+        Vector3 center = cap.center;
+        float halfHeight = cap.height / 2;
+        var top = child.transform.TransformPoint(center + halfHeight * Vector3.right);
+        var bottom = child.transform.TransformPoint(center - halfHeight * Vector3.right);
+        Debug.Log($"Top: {top.ToString("f6")} | Bottom: {bottom.ToString("f6")}");
+        var local_top = debug_to_local_pos.InverseTransformPoint(top);
+        var local_bot = debug_to_local_pos.InverseTransformPoint(bottom);
+        Debug.Log($"In local coords: top: {local_top.ToString("f6")} bottom: {local_bot.ToString("f6")}");
+        addGizmoSphere(top);
+        //addGizmoSphere(bottom);
+    }
+
 
     [ContextMenu("Reset gizmos")]
     private void resetGizmos()
