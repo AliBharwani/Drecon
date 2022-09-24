@@ -251,7 +251,7 @@ public class UpdateJointPositions : MonoBehaviour
         return all;
     }
 
-    private static GameObject getChildCapsuleCollider(GameObject child)
+    public static GameObject getChildCapsuleCollider(GameObject child)
     {
         foreach (Transform grandchild in child.transform)
         {
@@ -261,7 +261,7 @@ public class UpdateJointPositions : MonoBehaviour
         return null;
     }
 
-    private GameObject getChildBoxCollider(GameObject child)
+    public static GameObject getChildBoxCollider(GameObject child)
     {
         foreach (Transform grandchild in child.transform)
         {

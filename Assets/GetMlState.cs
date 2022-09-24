@@ -14,6 +14,8 @@ public class GetMlState : MonoBehaviour
 
     private Transform[] kin_bone_to_transform;
     private Transform[] sim_bone_to_transform;
+    private GameObject[] kin_bone_to_collider;
+    private GameObject[] sim_bone_to_collider;
     private mm_v2 MMScript;
     private SimCharController SimCharController; 
 
@@ -26,10 +28,8 @@ public class GetMlState : MonoBehaviour
     private Vector3[] prev_kin_bone_local_pos;
     private Vector3[] prev_sim_bone_local_pos;
 
-
-    void Start()
+    void initalize()
     {
-
         MMScript = kinematic_char.GetComponent<mm_v2>();
         kinematic_char_trans = kinematic_char.transform;
         kin_bone_to_transform = MMScript.boneToTransform;
@@ -37,10 +37,28 @@ public class GetMlState : MonoBehaviour
         SimCharController = sim_char.GetComponent<SimCharController>();
         sim_char_trans = sim_char.transform;
         sim_bone_to_transform = SimCharController.boneToTransform;
-        sim_hip_bone = SimCharController.bone_to_art_body[(int) Bone_Hips];
+        sim_hip_bone = SimCharController.bone_to_art_body[(int)Bone_Hips];
 
         prev_kin_bone_local_pos = new Vector3[state_bones.Length];
         prev_sim_bone_local_pos = new Vector3[state_bones.Length];
+
+        for (int i = 0; i < kin_bone_to_transform.Length; i++)
+        {
+            if (i == (int)Bone_LeftFoot || i == (int)Bone_RightFoot)
+            {
+
+                kin_bone_to_collider[i] = UpdateJointPositions.getChildBoxCollider(kin_bone_to_transform[i].gameObject);
+                sim_bone_to_collider[i] = UpdateJointPositions.getChildBoxCollider(sim_bone_to_transform[i].gameObject);
+            }
+            kin_bone_to_collider[i] = UpdateJointPositions.getChildCapsuleCollider(kin_bone_to_transform[i].gameObject);
+            sim_bone_to_collider[i] = UpdateJointPositions.getChildCapsuleCollider(sim_bone_to_transform[i].gameObject);
+
+        }
+    }
+
+    void Start()
+    {
+        initalize();
     }
 
     /*
@@ -226,9 +244,121 @@ public class GetMlState : MonoBehaviour
         return Vector3.zero;
     }
 
+    void calculate_position_reward()
+    {
+        // Position reward
+        for (int i = 1; i < 23; i++)
+        {
+            // Get bone, transform, child capsule object
+            mm_v2.Bones bone = (mm_v2.Bones)i;
+            Transform kin_bone = kin_bone_to_transform[i];
+            Transform sim_bone = sim_bone_to_transform[i];
+            if (bone == Bone_LeftFoot || bone == Bone_RightFoot)
+            {
+                // do special stuff
+            }
+            GameObject kin_capsule_obj = kin_bone_to_collider[i];
+            GameObject sim_capsule_obj = sim_bone_to_collider[i];
+
+            // Get 6 points on capsule object
+            // first we start off at the center, and the 6 points are given by
+            // center plus-minus radius on y dimension
+            // center plus-minus radius on z dimension
+            // and since capsule is oriented on x dimension, the tippy tops are,
+            // as we previously calculated,
+            // center plus minus height/2 on x dimension 
+        }
+    }
+    public static void get_six_points_on_capsule(GameObject obj, ref Vector3[] outputs)
+    {
+        CapsuleCollider cap = obj.GetComponent<CapsuleCollider>();
+        if (cap == null)
+            throw new Exception($"Object you're trying to get six points of capsule on does not have capsule: {obj.name}");
+        if (outputs.Length != 6)
+            throw new Exception($"outputs should have length 6, actual length: {outputs.Length}");
+
+        Vector3 center = cap.center;
+        float rad = cap.radius;
+        float half_height = cap.height / 2;
+        for (int i = 0; i < 3; i++)
+        {
+            Vector3 axis = Vector3.zero;
+            if (i == 0)
+                axis = Vector3.right;
+            else if (i == 1)
+                axis = Vector3.up;
+            else if (i == 2)
+                axis = Vector3.forward;
+
+            // Cap direction corresponds to which dimension it has its height along and is important 
+            // Use half height with Vector3.right because capsules are aligned on X axis
+            float variable = i == cap.direction ? half_height : rad;
+            outputs[i * 2] = obj.transform.TransformPoint(center + variable * axis);
+            outputs[i * 2 + 1] = obj.transform.TransformPoint(center - variable * axis);
+        }
+
+    }
+
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    // Testing and internal stuff
+    [ContextMenu("Create gizmos for capsule position points")]
+    private void debug_capsule_surface_points()
+    {
+        initalize();
+        for (int i = 1; i < 23; i++)
+        {
+            // Get bone, transform, child capsule object
+            mm_v2.Bones bone = (mm_v2.Bones)i;
+            Transform kin_bone = kin_bone_to_transform[i];
+            if (bone == Bone_LeftFoot || bone == Bone_RightFoot)
+            {
+                continue;
+                // do special stuff
+            }
+            GameObject kin_capsule_obj = kin_bone_to_collider[i];
+            CapsuleCollider caps = kin_capsule_obj.GetComponent<CapsuleCollider>();
+            Vector3[] gizmos = new Vector3[6];
+            get_six_points_on_capsule(kin_capsule_obj, ref gizmos);
+            foreach (Vector3 v in gizmos)
+                add_gizmo_sphere(v);
+            // Get 6 points on capsule object
+            // first we start off at the center, and the 6 points are given by
+            // center plus-minus radius on y dimension
+            // center plus-minus radius on z dimension
+            // and since capsule is oriented on x dimension, the tippy tops are,
+            // as we previously calculated,
+            // center plus minus height/2 on x dimension 
+        }
+    }
+
+    public float gizmoSphereRad = .01f;
+    private List<Vector3> gizmo_spheres;
+
+    [ContextMenu("Reset gizmos")]
+    private void reset_gizmos()
+    {
+        gizmo_spheres = null;
+    }
+    private void add_gizmo_sphere(Vector3 center)
+    {
+        if (gizmo_spheres == null)
+            gizmo_spheres = new List<Vector3>();
+        gizmo_spheres.Add(center);
+    }
+    private void OnDrawGizmos()
+    {
+        if (gizmo_spheres == null)
+            return;
+        Gizmos.color = Color.cyan;
+        foreach (Vector3 sphere in gizmo_spheres)
+        {
+            Gizmos.DrawSphere(sphere, gizmoSphereRad);
+        }
+
     }
 }

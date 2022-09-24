@@ -13,16 +13,12 @@ public static class GeoUtils
         Quaternion q = new Quaternion(a.x, a.y, a.z, w);
         return q.normalized;
     }
+
     public static Vector3 calculateMean(Vector3[] verts)
     {
-        int n = verts.Length;
-        Vector3 mean = new Vector3();
+        Vector3 mean = Vector3.zero;
         foreach (Vector3 vert in verts)
-        {
-            mean.x += vert.x / n;
-            mean.y += vert.y / n;
-            mean.z += vert.z / n;
-        }
+            mean += vert / verts.Length;
         return mean;
     }
     public static string matToString(double[,] mat)
@@ -237,6 +233,7 @@ public static class GeoUtils
     {
         return mat[0, 0] + mat[1, 1] + mat[2, 2];
     }
+
     public static double[,] calculateCovarMat(Vector3[] verts)
     {
         Vector3 mean = calculateMean(verts);
@@ -266,6 +263,79 @@ public static class GeoUtils
         return covar;
     }
 
+    public static double[,] calculate_continous_covar(Mesh mesh)
+    {
+        int[] triangles = mesh.triangles;
+        Vector3[] verts = mesh.vertices;
+        double[,] covar = new double[3, 3];
+        float total_area = 0f;
+        Vector3 mesh_centroid = Vector3.zero;
+        Vector3 a, b, c;
+        for (int i = 0; i < triangles.Length; i += 3)
+        {
+            a = verts[triangles[i]];
+            b = verts[triangles[i + 1]];
+            c = verts[triangles[i + 2]];
+            float area = triangle_area(a, b, c);
+            total_area += area  / triangles.Length;
+            mesh_centroid += triangle_centroid(a, b, c) * area;
+        }
+        mesh_centroid /= total_area;
+
+        float get_vector_idx(Vector3 v, int idx)
+        {
+            if (idx == 0)
+                return v.x;
+            else if (idx == 1)
+                return v.y;
+            else if (idx == 2)
+                return v.z;
+            throw new Exception($"Interal function incorrectly accesssed - get_centroid_idx: {idx}" );
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                float covar_ij = 0;
+                for (int k = 0; i < triangles.Length; k += 3)
+                {
+                    a = verts[triangles[k]]; b = verts[triangles[k + 1]]; c = verts[triangles[k + 2]];
+                    float area = triangle_area(a, b, c);
+                    Vector3 centroid = triangle_centroid(a, b, c);
+                    float term_1 = 9 * get_vector_idx(centroid, i) * get_vector_idx(centroid, j);
+                    float term_2 = get_vector_idx(a, i) * get_vector_idx(a, j) + get_vector_idx(b, i) * get_vector_idx(b, j) + get_vector_idx(c, i) * get_vector_idx(c, j);
+                    covar_ij += (1f / total_area) * (area / 12f) * (term_1 + term_2);
+                }
+                covar_ij -= get_vector_idx(mesh_centroid, i) * get_vector_idx(mesh_centroid, j);
+                covar[i, j] = covar_ij;
+            }
+        }
+
+        return covar;
+    }
+
+    public static float triangle_area(Vector3 a, Vector3 b, Vector3 c)
+    {
+        Vector3 ba = b - a;
+        Vector3 ca = c - a;
+        Vector3 cross = Vector3.Cross(ba, ca);
+        return cross.magnitude / 2;
+    }
+
+    public static Vector3 triangle_centroid(Vector3 a, Vector3 b, Vector3 c)
+    {
+        return (a + b + c) / 3;
+    }
+    // if we have a set's Principal Components, the mean can be the point on the plane and the normal can be the axis 
+    public static Vector3 project_point_onto_plane(Vector3 point, Vector3 point_on_plane, Vector3 plane_normal)
+    {
+        // The projection of a point q = (x, y, z) onto a plane given by a point p = (a, b, c) and a normal n = (d, e, f) is
+        // q_proj = q - dot(q - p, n) * n
+        // This calculation assumes that n is a unit vector.
+        // Since our plane is perpindcular to the axis 
+        Vector3 proj_point = point - Vector3.Dot(point - point_on_plane, plane_normal.normalized) * plane_normal.normalized;
+        return proj_point;
+    }
     public static float GetCapsuleVolume(CapsuleCollider cap)
     {
         // check if it's a sphere

@@ -1769,6 +1769,7 @@ MonoBehaviour:
   - {fileID: 591433368}
   - {fileID: 2062545585}
   - {fileID: 1289606169}
+  desired_velocity: {x: 0, y: 0, z: 0}
   simulation_velocity_halflife: 0.27
 --- !u!4 &42338792
 Transform:
@@ -6669,6 +6670,36 @@ Transform:
   m_Father: {fileID: 1796385875}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &297290902 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+  m_PrefabInstance: {fileID: 3282222037220238298}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &297290907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 297290902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9089d05dab71b204db6d2bd560345ed3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boneObjects: []
+  bone_ids: 
+  left_hand_bone_id: 9
+  right_hand_bone_id: 36
+  num_bones: 70
+  debug: 0
+  debug_bone_ids: 
+  bones_that_use_next_joints_verts: 410000003c000000
+  bones_that_use_prev_joints_verts: 2300000008000000
+  bone_ids_use_small_rad: 
+  boxed_bones: 
+  min_rad: 0.005
+  draw_gizmos: 0
 --- !u!1 &298257455
 GameObject:
   m_ObjectHideFlags: 0
@@ -8204,6 +8235,30 @@ MonoBehaviour:
   - {fileID: 331822393}
   - {fileID: 331822391}
   - {fileID: 331822389}
+  bone_to_art_body:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   start_delay: 0
   stiffness: 100
   damping: 20
@@ -15409,6 +15464,30 @@ MonoBehaviour:
   - {fileID: 1258446079}
   - {fileID: 1094164157}
   - {fileID: 435599902}
+  bone_to_art_body:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   start_delay: 0
   stiffness: 100
   damping: 15
@@ -19067,7 +19146,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &767361688
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19080,8 +19159,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38613307e25bf4af8afeae13fd7627f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kinematic_char: {fileID: 0}
-  sim_char: {fileID: 0}
+  kinematic_char: {fileID: 297290902}
+  sim_char: {fileID: 297290902}
+  gizmoSphereRad: 0.01
 --- !u!4 &767361689
 Transform:
   m_ObjectHideFlags: 0
@@ -31862,6 +31942,7 @@ MonoBehaviour:
   - {fileID: 1293797493}
   - {fileID: 362433987}
   - {fileID: 137423670}
+  desired_velocity: {x: 0, y: 0, z: 0}
   simulation_velocity_halflife: 0.27
 --- !u!114 &1312371144
 MonoBehaviour:
@@ -35228,6 +35309,30 @@ MonoBehaviour:
   - {fileID: 1418051389}
   - {fileID: 1418051388}
   - {fileID: 1418051387}
+  bone_to_art_body:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   start_delay: 60
   stiffness: 100
   damping: 20
@@ -49382,6 +49487,7 @@ MonoBehaviour:
   - {fileID: 1519837745}
   - {fileID: 1945112299}
   - {fileID: 2028831202}
+  desired_velocity: {x: 0, y: 0, z: 0}
   simulation_velocity_halflife: 0.27
 --- !u!114 &2021730154
 MonoBehaviour:
