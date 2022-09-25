@@ -334,13 +334,17 @@ public class GetMlState : MonoBehaviour
             // From Stack Overflow:
             //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
             // diff * q1 = q2  --->  diff = q2 * inverse(q1)
-            //Quaternion diff = sim_bone.localRotation * Quaternion.Inverse(kin_bone.localRotation);
+            Quaternion diff = sim_bone.localRotation * Quaternion.Inverse(kin_bone.localRotation);
             //Vector3 axis;
             // https://stackoverflow.com/questions/21513637/dot-product-of-two-quaternion-rotations
             // angle = 2*atan2(q.vec.length(), q.w)
-            double sqrd_dot =  Math.Pow(Quaternion.Dot(kin_bone.localRotation, sim_bone.localRotation), 2);
-            double angle = Math.Acos(2 * sqrd_dot - 1);
+            //double sqrd_dot =  Math.Pow(Quaternion.Dot(kin_bone.localRotation, sim_bone.localRotation), 2);
+            //double angle = Math.Acos(2 * sqrd_dot - 1);
             //diff.ToAngleAxis(out angle, out axis);
+
+            Vector3 diff_vec = new Vector3(diff.x, diff.y, diff.z);
+            double angle = 2 * Math.Atan2(diff_vec.magnitude, diff.w) * Mathf.Rad2Deg;
+            double unity_angle = Quaternion.Angle(sim_bone.localRotation, kin_bone.localRotation);
             pose_reward_sum += angle;
         }
         pose_reward = Math.Exp((-10 / nbodies) * pose_reward_sum);
@@ -482,6 +486,17 @@ public class GetMlState : MonoBehaviour
         {
             Gizmos.DrawSphere(sphere, gizmoSphereRad);
         }
+
+    }
+
+
+    [ContextMenu("Testing")]
+    private void test_func()
+    {
+        Quaternion q1 = Quaternion.AngleAxis(180f, Vector3.right);
+        Quaternion q2 = Quaternion.AngleAxis(0f, Vector3.right);
+        Debug.Log($"{Quaternion.Dot(q1, q2)}");
+        Debug.Log($"{Quaternion.Dot(q1, q2)}");
 
     }
 }
