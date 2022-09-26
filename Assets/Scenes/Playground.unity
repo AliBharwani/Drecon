@@ -54656,6 +54656,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: model skeleton with visualizers
       objectReference: {fileID: 0}
+    - target: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3183205843433044323, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
       propertyPath: m_RootOrder
       value: 21

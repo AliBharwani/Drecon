@@ -5,6 +5,8 @@ using Unity.MLAgents.Actuators;
 using System.Collections.Generic;
 using UnityEngine;
 using static mm_v2.Bones;
+using System.Collections;
+
 struct char_info
 {
     public Transform[]  bone_to_transform;
@@ -22,7 +24,7 @@ struct char_info
 public class GetMlState : Agent
 {
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
-
+    private bool is_initalized;
     public bool normalize_observations = false;
     char_info kin_char, sim_char;
     public GameObject kinematic_char;
@@ -50,6 +52,8 @@ public class GetMlState : Agent
     Vector3[] bone_pos_mins, bone_pos_maxes, bone_vel_mins, bone_vel_maxes;
     public override void CollectObservations(VectorSensor sensor)
     {
+        if (!is_initalized)
+            return;
         double[] cur_state = get_state();
         foreach (double d in cur_state)
             sensor.AddObservation((float) d);
@@ -59,7 +63,9 @@ public class GetMlState : Agent
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-       float[] cur_actions = actionBuffers.ContinuousActions.Array;
+        if (!is_initalized)
+            return;
+        float[] cur_actions = actionBuffers.ContinuousActions.Array;
        float[] final_actions = new float[25];
        for (int i = 0; i < 25; i++)
            final_actions[i] = ACTION_STIFFNESS_HYPERPARAM * cur_actions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prev_action_output[i];
@@ -74,6 +80,7 @@ public class GetMlState : Agent
             angle = (angle - 1.5f) * 120;
             scaled_angleaxis.Normalize();
             Quaternion offset = Quaternion.AngleAxis(angle, scaled_angleaxis);
+            Debug.Log($"Cur bone rotations length - {cur_rotations.Length} - bone_idx : {bone_idx}");
             Quaternion final = cur_rotations[bone_idx] * offset;
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
             ab.SetDriveRotation(final);
@@ -142,6 +149,7 @@ public class GetMlState : Agent
         }
         origin = kin_char.char_trans.position;
         origin_hip_rot = sim_char.bone_to_transform[(int)Bone_Hips].rotation;
+        is_initalized = true;
     }
 
     void Start()
@@ -151,16 +159,25 @@ public class GetMlState : Agent
 
     public override void OnEpisodeBegin()
     {
+        is_initalized = false;
         if (kinematic_char != null)
             Destroy(kinematic_char);
         if (simulated_char != null)
             Destroy(simulated_char);
         // Setup the kinematic character
         kinematic_char = Instantiate(char_prefab, Vector3.zero, Quaternion.identity);
-        kinematic_char.GetComponent<mm_v2>().enabled = true;
+        mm_v2 mm_script = kinematic_char.GetComponent<mm_v2>();
+        mm_script.enabled = true;
         kinematic_char.GetComponent<UpdateJointPositions>().set_all_material_colors(Color.white);
         // Setup the sim character
         simulated_char = Instantiate(char_prefab, Vector3.zero, Quaternion.identity);
+        StartCoroutine(Example(mm_script));
+        
+    }
+    IEnumerator Example(mm_v2 mm_script)
+    {
+        Debug.Log("Starting coroutine...");
+        yield return new WaitUntil(() => mm_script.is_initalized);
         initalize();
     }
     Vector3 origin;
@@ -168,6 +185,8 @@ public class GetMlState : Agent
 
     private void FixedUpdate()
     {
+        if (!is_initalized)
+            return;
         // Make sure to teleport sim character if kin character teleported
         bool teleport_sim = MMScript.teleported_last_frame;
         if (teleport_sim)

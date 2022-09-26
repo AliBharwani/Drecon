@@ -118,7 +118,10 @@ public class mm_v2 : MonoBehaviour
     bool is_strafing;
     [HideInInspector]
     public bool teleported_last_frame = false;
-    void Start()
+    [HideInInspector]
+    public bool is_initalized = false;
+
+    void Awake()
     {
         if (Application.isEditor)
         {
