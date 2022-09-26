@@ -1,10 +1,8 @@
 using System.Linq;
-using Unity.MLAgents;
-using Unity.MLAgents.Sensors;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class SimCharController : Agent
+public class SimCharController : MonoBehaviour
 {
     public bool apply_all_local_rots;
     public bool set_art_bodies;
@@ -226,7 +224,7 @@ public class SimCharController : Agent
             Vector3 cm_vel = (cm - last_cm) / frame_time;
             // probably a glitch
             if (cm_vel.magnitude < 10f)
-                update_maxes_and_mins(cm_vel, ref cm_vel_min, ref cm_vel_max);
+                updated_mins_and_maxes(cm_vel, ref cm_vel_min, ref cm_vel_max);
 
             last_cm = cm;
             for (int j = 0; j < num_state_bones; j++)
@@ -237,8 +235,8 @@ public class SimCharController : Agent
                 Vector3 local_bone_pos = Utils.quat_inv_mul_vec3(global_rots[0], bone_pos - cm);
                 Vector3 bone_vel = (local_bone_pos - state_bone_pos[j]) / frame_time;
                 // Compare min maxes
-                update_maxes_and_mins(local_bone_pos,ref  bone_pos_mins[j], ref bone_pos_maxes[j]);
-                update_maxes_and_mins(bone_vel, ref bone_vel_mins[j], ref bone_vel_maxes[j]);
+                updated_mins_and_maxes(local_bone_pos,ref  bone_pos_mins[j], ref bone_pos_maxes[j]);
+                updated_mins_and_maxes(bone_vel, ref bone_vel_mins[j], ref bone_vel_maxes[j]);
                 state_bone_pos[j] = local_bone_pos;
             }
         }
@@ -262,7 +260,7 @@ public class SimCharController : Agent
         return CoM / total_mass;
     }
 
-    private static void update_maxes_and_mins(Vector3 val, ref Vector3 mins, ref Vector3 maxes)
+    private static void updated_mins_and_maxes(Vector3 val, ref Vector3 mins, ref Vector3 maxes)
     {
         maxes = update_maxes(maxes, val);
         mins = update_mins(mins, val);

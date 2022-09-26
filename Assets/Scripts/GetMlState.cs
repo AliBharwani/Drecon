@@ -1,6 +1,7 @@
 using System;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
+using Unity.MLAgents.Actuators;
 using System.Collections.Generic;
 using UnityEngine;
 using static mm_v2.Bones;
@@ -16,6 +17,7 @@ struct char_info
     public Vector3 pos;
     public Vector3[] bone_local_pos;
     public Vector3[][] bone_surface_pts;
+    public ArticulationBody[] bone_to_art_body;
 }
 public class GetMlState : Agent
 {
@@ -27,18 +29,68 @@ public class GetMlState : Agent
     private mm_v2 MMScript;
     private SimCharController SimCharController;
     private int nbodies;
+    float[] prev_action_output = new float[25];
 
     //private ArticulationBody sim_hip_bone; // root of ArticulationBody
 
 
     [HideInInspector]
-    public static mm_v2.Bones[] state_bones = new mm_v2.Bones[] {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
+    public static mm_v2.Bones[] state_bones = new mm_v2.Bones[] 
+    {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
+    [HideInInspector]
+    public static mm_v2.Bones[] full_dof_bones = new mm_v2.Bones[]
+    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Spine};
+    [HideInInspector]
+    public static mm_v2.Bones[] limited_dof_bones = new mm_v2.Bones[]
+    {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftToe, Bone_RightToe };
+
     Vector3[] bone_pos_mins, bone_pos_maxes, bone_vel_mins, bone_vel_maxes;
     public override void CollectObservations(VectorSensor sensor)
     {
         double[] cur_state = get_state();
         foreach (double d in cur_state)
             sensor.AddObservation((float) d);
+    }
+
+    // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
+    // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
+    public override void OnActionReceived(ActionBuffers actionBuffers)
+    {
+       prev_action_output = actionBuffers.ContinuousActions.Array;
+       Quaternion[] cur_rotations = MMScript.bone_rotations;
+       for (int i = 0; i < full_dof_bones.Length; i ++)
+       {
+            int bone_idx = (int)full_dof_bones[i];
+            Vector3 scaled_angleaxis = new Vector3(prev_action_output[i*3], prev_action_output[i*3 + 1], prev_action_output[i*3 + 2]);
+            float angle = scaled_angleaxis.magnitude;
+            // Angle is in range (0,3) => map to (-180, 180)
+            angle = (angle - 1.5f) * 120;
+            scaled_angleaxis.Normalize();
+            Quaternion offset = Quaternion.AngleAxis(angle, scaled_angleaxis);
+            Quaternion final = cur_rotations[bone_idx] * offset;
+            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ab.SetDriveRotation(final);
+       }
+        for (int i = 21; i < limited_dof_bones.Length; i++)
+        {
+            int bone_idx = (int)limited_dof_bones[i];
+            // Angle is in range (-1, 1) => map to (-180, 180)
+            float angle = prev_action_output[i] * 180;
+            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
+            bool use_xdrive = limited_dof_bones[i] ==  Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
+            if (use_xdrive)
+            {
+                ArticulationDrive drive = ab.xDrive;
+                drive.target = target.x + angle;
+                ab.xDrive = drive;
+            } else
+            {
+                ArticulationDrive drive = ab.zDrive;
+                drive.target = target.z + angle;
+                ab.zDrive = drive;
+            }
+        }
     }
     void initalize()
     {
@@ -57,6 +109,7 @@ public class GetMlState : Agent
         sim_char.hip_bone = SimCharController.bone_to_art_body[(int)Bone_Hips];
         sim_char.char_obj = simulated_char;
         sim_char.bone_surface_pts = new Vector3[nbodies][];
+        sim_char.bone_to_art_body = SimCharController.bone_to_art_body;
 
         kin_char.bone_local_pos = new Vector3[state_bones.Length];
         sim_char.bone_local_pos = new Vector3[state_bones.Length];
@@ -80,6 +133,8 @@ public class GetMlState : Agent
         {
             SimCharController.find_mins_and_maxes(kin_char.bone_to_transform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
         }
+        origin = kin_char.char_trans.position;
+        origin_hip_rot = sim_char.bone_to_transform[(int)Bone_Hips].rotation;
     }
 
     void Start()
@@ -87,6 +142,34 @@ public class GetMlState : Agent
         initalize();
     }
 
+    public override void OnEpisodeBegin()
+    {
+        // Setup the kinematic character 
+        // Setup the sim character
+    }
+    Vector3 origin;
+    Quaternion origin_hip_rot;
+
+    private void FixedUpdate()
+    {
+        // Make sure to teleport sim character if kin character teleported
+        bool teleport_sim = MMScript.teleported_last_frame;
+        if (teleport_sim)
+        {
+            sim_char.char_trans.rotation = kin_char.char_trans.rotation;
+            sim_char.hip_bone.TeleportRoot(origin, origin_hip_rot);
+        }
+        // request Decision
+        RequestDecision();
+        double pos_reward, vel_reward, local_pose_reward, cm_vel_reward, fall_factor;
+        calculate_pos_and_vel_reward(out pos_reward, out vel_reward);
+        calc_local_pose_reward(out local_pose_reward);
+        calc_cm_vel_reward(out cm_vel_reward);
+        calc_fall_factor(out fall_factor);
+        // generated reward
+        float final_reward = (float) (fall_factor * (pos_reward + vel_reward + local_pose_reward + cm_vel_reward));
+        SetReward(final_reward);
+    }
     /*
      At each control step the policy is provided with a state s in R^110
     The state contains:
@@ -487,12 +570,6 @@ public class GetMlState : Agent
 
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     // Testing and internal stuff
     [ContextMenu("Create gizmos for capsule position points")]
     private void debug_capsule_surface_points()
@@ -538,7 +615,6 @@ public class GetMlState : Agent
         }
 
     }
-
 
     [ContextMenu("Testing")]
     private void test_func()

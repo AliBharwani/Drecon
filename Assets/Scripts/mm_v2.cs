@@ -69,7 +69,8 @@ public class mm_v2 : MonoBehaviour
 
     Vector3[] bone_positions;
     Vector3[] bone_velocities;
-    Quaternion[] bone_rotations;
+    [HideInInspector]
+    public Quaternion[] bone_rotations;
     Vector3[] bone_angular_velocities;
 
     Vector3[] bone_offset_positions;
@@ -115,6 +116,8 @@ public class mm_v2 : MonoBehaviour
     Vector2 random_lstick_input;
     Vector3 origin;
     bool is_strafing;
+    [HideInInspector]
+    public bool teleported_last_frame = false;
     void Start()
     {
         if (Application.isEditor)
@@ -128,7 +131,6 @@ public class mm_v2 : MonoBehaviour
         }
         Application.targetFrameRate = 30;
         origin = transform.position;
-        Debug.Log($"Origin: {origin}");
         motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, abTest, frame_increments, ignore_surrounding);
         motionDB.database_build_matching_features(
             feature_weight_foot_position,
@@ -191,6 +193,7 @@ public class mm_v2 : MonoBehaviour
 
     void FixedUpdate()
     {
+        teleported_last_frame = false;
         // Update if we are reading from user input (ie not generating random rotations) or we are
         // generating random inputs and every frame the user changes desires with P(.001)
         if (gen_inputs && Random.value <= prob_to_change_inputs) {
@@ -214,6 +217,7 @@ public class mm_v2 : MonoBehaviour
             bone_positions[0] = origin;
             simulation_position =  origin;
             search = true;
+            teleported_last_frame = true;
         }
         // Get the desired velocity
 
