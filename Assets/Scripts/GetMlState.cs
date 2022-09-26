@@ -1,5 +1,6 @@
 using System;
-using System.Collections;
+using Unity.MLAgents;
+using Unity.MLAgents.Sensors;
 using System.Collections.Generic;
 using UnityEngine;
 using static mm_v2.Bones;
@@ -16,32 +17,29 @@ struct char_info
     public Vector3[] bone_local_pos;
     public Vector3[][] bone_surface_pts;
 }
-public class GetMlState : MonoBehaviour
+public class GetMlState : Agent
 {
-    // Start is called before the first frame update
+    public bool normalize_observations = false;
     char_info kin_char, sim_char;
     public GameObject kinematic_char;
-    //private Transform kinematic_char_trans;
     public GameObject simulated_char;
-    //private Transform sim_char_trans;
 
-    //private Transform[] kin_bone_to_transform;
-    //private Transform[] sim_bone_to_transform;
-    //private GameObject[] kin_bone_to_collider;
-    //private GameObject[] sim_bone_to_collider;
     private mm_v2 MMScript;
     private SimCharController SimCharController;
     private int nbodies;
 
     //private ArticulationBody sim_hip_bone; // root of ArticulationBody
 
-    //private Vector3 prev_kin_cm;
-    //private Vector3 prev_sim_cm;
-    //private Vector3 prev_sim_pos;
-    private mm_v2.Bones[] state_bones = new mm_v2.Bones[] {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
-    //private Vector3[] prev_kin_bone_local_pos;
-    //private Vector3[] prev_sim_bone_local_pos;
 
+    [HideInInspector]
+    public static mm_v2.Bones[] state_bones = new mm_v2.Bones[] {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
+    Vector3[] bone_pos_mins, bone_pos_maxes, bone_vel_mins, bone_vel_maxes;
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        double[] cur_state = get_state();
+        foreach (double d in cur_state)
+            sensor.AddObservation((float) d);
+    }
     void initalize()
     {
         MMScript = kinematic_char.GetComponent<mm_v2>();
@@ -77,6 +75,10 @@ public class GetMlState : MonoBehaviour
             }
             kin_char.bone_surface_pts[i] = new Vector3[6];
             sim_char.bone_surface_pts[i] = new Vector3[6];
+        }
+        if (normalize_observations)
+        {
+            SimCharController.find_mins_and_maxes(kin_char.bone_to_transform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
         }
     }
 
@@ -121,15 +123,54 @@ public class GetMlState : MonoBehaviour
     the state.
      
      */
+    // Roughly 6.81 m/s
+    public Vector3 MAX_VELOCITY = new Vector3(4.351938f, 1.454015f, 5.032811f);
+    public Vector3 MIN_VELOCITY = new Vector3(-4.351710f, -1.688771f, -4.900798f);
+    Vector3 normalize_vel_vector(Vector3 vel)
+    {
+        float new_x = normalize_float(vel.x, MIN_VELOCITY.x, MAX_VELOCITY.x);
+        float new_y = normalize_float(vel.y, MIN_VELOCITY.y, MAX_VELOCITY.y);
+        float new_z = normalize_float(vel.z, MIN_VELOCITY.z, MAX_VELOCITY.z);
+        return new Vector3(new_x, new_y, new_z);
+    }
+    Vector2 MIN_DESIRED_SPEED = new Vector2(-2.5f, -2f);
+    Vector2 MAX_DESIRED_SPEED = new Vector2(2.5f, 3f);
+
+    Vector2 normalize_desired_vel_vector(Vector2 vel)
+    {
+        float new_x = normalize_float(vel.x, MIN_DESIRED_SPEED.x, MAX_DESIRED_SPEED.x);
+        float new_y = normalize_float(vel.y, MIN_DESIRED_SPEED.y, MAX_DESIRED_SPEED.y);
+        return new Vector2(new_x, new_y);
+    }
+    Vector3 normalize_bone_pos(Vector3 pos, int idx)
+    {
+        float new_x = normalize_float(pos.x, bone_pos_mins[idx].x, bone_pos_maxes[idx].x);
+        float new_y = normalize_float(pos.y, bone_pos_mins[idx].y, bone_pos_maxes[idx].y);
+        float new_z = normalize_float(pos.z, bone_pos_mins[idx].z, bone_pos_maxes[idx].z);
+        return new Vector3(new_x, new_y, new_z);
+    }
+    Vector3 normalize_bone_vel(Vector3 vel, int idx)
+    {
+        float new_x = normalize_float(vel.x, bone_vel_mins[idx].x, bone_vel_maxes[idx].x);
+        float new_y = normalize_float(vel.y, bone_vel_mins[idx].y, bone_vel_maxes[idx].y);
+        float new_z = normalize_float(vel.z, bone_vel_mins[idx].z, bone_vel_maxes[idx].z);
+        return new Vector3(new_x, new_y, new_z);
+    }
+    float normalize_float(float f, float min, float max)
+    {
+        return (f - min) / (max - min + float.Epsilon);
+    }
     double[] get_state()
     {
         double[] state = new double[110];
         int state_idx = 0;
 
         // kinematic character center of mass
-        Vector3 new_kin_cm = get_kinematic_cm();
+        Vector3 new_kin_cm = get_kinematic_cm(kin_char.bone_to_transform);
         Vector3 kin_cm_vel = (new_kin_cm - kin_char.cm) / Time.deltaTime;
         kin_cm_vel = resolve_vel_in_kin_ref_frame(kin_cm_vel);
+        if (normalize_observations)
+            kin_cm_vel = normalize_vel_vector(kin_cm_vel);
         kin_char.cm_vel = kin_cm_vel;
         kin_char.cm = new_kin_cm;
         copy_vector_into_state(ref state, ref state_idx, kin_cm_vel);
@@ -137,6 +178,8 @@ public class GetMlState : MonoBehaviour
         // simulated character center of mass
         Vector3 new_sim_cm = sim_char.hip_bone.worldCenterOfMass;
         Vector3 sim_cm_vel = (new_sim_cm - sim_char.cm) / Time.deltaTime;
+        if (normalize_observations)
+            sim_cm_vel = normalize_vel_vector(sim_cm_vel);
         sim_cm_vel = resolve_vel_in_kin_ref_frame(sim_cm_vel);
         sim_char.cm_vel = sim_cm_vel;
 
@@ -150,7 +193,8 @@ public class GetMlState : MonoBehaviour
         // The desired horizontal CM velocity from user-input is also considered v(des) - R^2
         Vector2 desired_vel = new Vector2(MMScript.desired_velocity.x, MMScript.desired_velocity.z);
         desired_vel = resolve_vel_in_kin_ref_frame(desired_vel);
-
+        if (normalize_observations)
+            desired_vel = normalize_desired_vel_vector(desired_vel);
         copy_vector_into_state(ref state, ref state_idx, desired_vel);
 
 
@@ -158,6 +202,8 @@ public class GetMlState : MonoBehaviour
         //CM velocity and v(des) = v(diff) R ^ 2
         Vector3 cur_sim_vel = (sim_char.char_trans.position - sim_char.pos) / Time.deltaTime;
         cur_sim_vel = resolve_vel_in_kin_ref_frame(cur_sim_vel);
+        if (normalize_observations)
+            cur_sim_vel = normalize_vel_vector(cur_sim_vel);
         Vector2 v_diff = new Vector2(desired_vel.x - cur_sim_vel.x, desired_vel.y - cur_sim_vel.z);
         sim_char.pos = sim_char.char_trans.position;
         copy_vector_into_state(ref state, ref state_idx, v_diff);
@@ -183,6 +229,11 @@ public class GetMlState : MonoBehaviour
                 //Vector3 bone_relative_pos = Utils.quat_inv_mul_vec3(relative_rot, bone_local_pos);
                 Vector3 prev_bone_pos = cur_char.bone_local_pos[j];
                 Vector3 bone_vel = (bone_local_pos - prev_bone_pos) / Time.deltaTime;
+                if (normalize_observations)
+                {
+                    bone_local_pos = normalize_bone_pos(bone_local_pos, j);
+                    bone_vel = normalize_bone_vel(bone_vel, j);
+                }
                 copy_vector_into_state(ref copy_into, ref copy_idx, bone_local_pos);
                 copy_vector_into_state(ref copy_into, ref copy_idx, bone_vel);
                 cur_char.bone_local_pos[j] = bone_local_pos;
@@ -209,17 +260,16 @@ public class GetMlState : MonoBehaviour
     }
 
     // Gets CoM in world position
-    Vector3 get_kinematic_cm()
+    Vector3 get_kinematic_cm(Transform[] bone_to_transform)
     {
-
         // We start at 1 because 0 is the root bone with no colliders
         // to calculate CM, we get the masses and centers of each capsule and
         // sum them together and divide by the total mass
         float total_mass = 0f;
         Vector3 CoM = Vector3.zero;
-        for (int i = 1; i < nbodies; i++)
+        for (int i = 1; i < bone_to_transform.Length; i++)
         {
-            Transform t = kin_char.bone_to_transform[i];
+            Transform t = bone_to_transform[i];
             float mass = t.GetComponent<ArticulationBody>().mass;
             Vector3 child_center = get_child_collider_center(t.gameObject);
             CoM += mass * child_center;
@@ -262,7 +312,7 @@ public class GetMlState : MonoBehaviour
         start_idx += 2;
     }
 
-    private Vector3 get_child_collider_center(GameObject child)
+    public static Vector3 get_child_collider_center(GameObject child)
     {
         foreach (Transform grandchild in child.transform)
         {
@@ -345,7 +395,7 @@ public class GetMlState : MonoBehaviour
             Vector3 diff_vec = new Vector3(diff.x, diff.y, diff.z);
             double angle = 2 * Math.Atan2(diff_vec.magnitude, diff.w) * Mathf.Rad2Deg;
             double unity_angle = Quaternion.Angle(sim_bone.localRotation, kin_bone.localRotation);
-            pose_reward_sum += angle;
+            pose_reward_sum += GeoUtils.wrap_angle(angle);
         }
         pose_reward = Math.Exp((-10 / nbodies) * pose_reward_sum);
     }

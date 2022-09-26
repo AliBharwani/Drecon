@@ -6700,6 +6700,20 @@ MonoBehaviour:
   boxed_bones: 
   min_rad: 0.005
   draw_gizmos: 0
+--- !u!114 &297290908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 297290902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DecisionPeriod: 5
+  TakeActionsBetweenDecisions: 1
 --- !u!1 &298257455
 GameObject:
   m_ObjectHideFlags: 0
@@ -8205,6 +8219,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40d7fb855e3667d4088259aa8f907fa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
   apply_all_local_rots: 0
   set_art_bodies: 0
   set_target_velocities: 0
@@ -15434,6 +15452,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40d7fb855e3667d4088259aa8f907fa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
   apply_all_local_rots: 0
   set_art_bodies: 1
   set_target_velocities: 0
@@ -19159,8 +19181,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38613307e25bf4af8afeae13fd7627f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
   kinematic_char: {fileID: 297290902}
-  sim_char: {fileID: 297290902}
+  simulated_char: {fileID: 0}
+  normalize_observations: 0
+  MAX_VELOCITY: {x: 0, y: 0, z: 0}
+  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   gizmoSphereRad: 0.01
 --- !u!4 &767361689
 Transform:
@@ -35279,6 +35308,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40d7fb855e3667d4088259aa8f907fa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
   apply_all_local_rots: 0
   set_art_bodies: 0
   set_target_velocities: 0
@@ -53565,8 +53598,28 @@ PrefabInstance:
       value: -0.00000008612653
       objectReference: {fileID: 0}
     - target: {fileID: 5998023246039213648, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+      propertyPath: m_ParentAnchorPosition.y
+      value: -0.01593287
+      objectReference: {fileID: 0}
+    - target: {fileID: 5998023246039213648, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
       propertyPath: m_ParentAnchorPosition.z
-      value: 0.00836646
+      value: 0.008366461
+      objectReference: {fileID: 0}
+    - target: {fileID: 5998023246039213648, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+      propertyPath: m_ParentAnchorRotation.w
+      value: 0.9988486
+      objectReference: {fileID: 0}
+    - target: {fileID: 5998023246039213648, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+      propertyPath: m_ParentAnchorRotation.x
+      value: -0.0000005825277
+      objectReference: {fileID: 0}
+    - target: {fileID: 5998023246039213648, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+      propertyPath: m_ParentAnchorRotation.y
+      value: -0.000000014901161
+      objectReference: {fileID: 0}
+    - target: {fileID: 5998023246039213648, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+      propertyPath: m_ParentAnchorRotation.z
+      value: 0.0479784
       objectReference: {fileID: 0}
     - target: {fileID: 7346238717094191731, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
       propertyPath: m_ParentAnchorPosition.z

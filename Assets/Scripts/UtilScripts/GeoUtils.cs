@@ -345,4 +345,14 @@ public static class GeoUtils
         float volume = (float)Math.PI * cap.radius * cap.radius * ((4f / 3f) * cap.radius * a);
         return volume;
     }
+    public static double wrap_angle(double angle)
+    {
+        angle %= 360;
+        return angle > 180 ? angle - 360 : angle;
+    }
+    public static float wrap_anglef (float angle) // f for float
+    {
+        angle %= 360;
+        return angle > 180 ? angle - 360 : angle;
+    }
 }
