@@ -90,6 +90,21 @@ public static class ArtBodyUtils
         zDrive.damping = damping;
         body.zDrive = zDrive;
     }
+    public static void SetAllForceLimit(this ArticulationBody body, float damping)
+    {
+        // assign to the drive targets...
+        ArticulationDrive xDrive = body.xDrive;
+        xDrive.forceLimit = 200;
+        body.xDrive = xDrive;
+
+        ArticulationDrive yDrive = body.yDrive;
+        yDrive.forceLimit = 200;
+        body.yDrive = yDrive;
+
+        ArticulationDrive zDrive = body.zDrive;
+        zDrive.forceLimit = 200;
+        body.zDrive = zDrive;
+    }
     /// <summary>
     /// Converts targetLocalRotation into reduced space of this articulation body.
     /// </summary>

@@ -21,10 +21,13 @@ struct char_info
 }
 public class GetMlState : Agent
 {
+    public float ACTION_STIFFNESS_HYPERPARAM = .2f;
+
     public bool normalize_observations = false;
     char_info kin_char, sim_char;
     public GameObject kinematic_char;
     public GameObject simulated_char;
+    public GameObject char_prefab;
 
     private mm_v2 MMScript;
     private SimCharController SimCharController;
@@ -56,12 +59,16 @@ public class GetMlState : Agent
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-       prev_action_output = actionBuffers.ContinuousActions.Array;
+       float[] cur_actions = actionBuffers.ContinuousActions.Array;
+       float[] final_actions = new float[25];
+       for (int i = 0; i < 25; i++)
+           final_actions[i] = ACTION_STIFFNESS_HYPERPARAM * cur_actions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prev_action_output[i];
+       prev_action_output = final_actions;
        Quaternion[] cur_rotations = MMScript.bone_rotations;
        for (int i = 0; i < full_dof_bones.Length; i ++)
        {
             int bone_idx = (int)full_dof_bones[i];
-            Vector3 scaled_angleaxis = new Vector3(prev_action_output[i*3], prev_action_output[i*3 + 1], prev_action_output[i*3 + 2]);
+            Vector3 scaled_angleaxis = new Vector3(final_actions[i*3], final_actions[i*3 + 1], final_actions[i*3 + 2]);
             float angle = scaled_angleaxis.magnitude;
             // Angle is in range (0,3) => map to (-180, 180)
             angle = (angle - 1.5f) * 120;
@@ -75,7 +82,7 @@ public class GetMlState : Agent
         {
             int bone_idx = (int)limited_dof_bones[i];
             // Angle is in range (-1, 1) => map to (-180, 180)
-            float angle = prev_action_output[i] * 180;
+            float angle = final_actions[i] * 180;
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
             Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
             bool use_xdrive = limited_dof_bones[i] ==  Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
@@ -139,13 +146,22 @@ public class GetMlState : Agent
 
     void Start()
     {
-        initalize();
+        // initalize();
     }
 
     public override void OnEpisodeBegin()
     {
-        // Setup the kinematic character 
+        if (kinematic_char != null)
+            Destroy(kinematic_char);
+        if (simulated_char != null)
+            Destroy(simulated_char);
+        // Setup the kinematic character
+        kinematic_char = Instantiate(char_prefab, Vector3.zero, Quaternion.identity);
+        kinematic_char.GetComponent<mm_v2>().enabled = true;
+        kinematic_char.GetComponent<UpdateJointPositions>().set_all_material_colors(Color.white);
         // Setup the sim character
+        simulated_char = Instantiate(char_prefab, Vector3.zero, Quaternion.identity);
+        initalize();
     }
     Vector3 origin;
     Quaternion origin_hip_rot;
@@ -161,11 +177,14 @@ public class GetMlState : Agent
         }
         // request Decision
         RequestDecision();
+        bool heads_1m_apart;
         double pos_reward, vel_reward, local_pose_reward, cm_vel_reward, fall_factor;
         calculate_pos_and_vel_reward(out pos_reward, out vel_reward);
         calc_local_pose_reward(out local_pose_reward);
         calc_cm_vel_reward(out cm_vel_reward);
-        calc_fall_factor(out fall_factor);
+        calc_fall_factor(out fall_factor, out heads_1m_apart);
+        if (heads_1m_apart)
+            EndEpisode();
         // generated reward
         float final_reward = (float) (fall_factor * (pos_reward + vel_reward + local_pose_reward + cm_vel_reward));
         SetReward(final_reward);
@@ -256,7 +275,7 @@ public class GetMlState : Agent
             kin_cm_vel = normalize_vel_vector(kin_cm_vel);
         kin_char.cm_vel = kin_cm_vel;
         kin_char.cm = new_kin_cm;
-        copy_vector_into_state(ref state, ref state_idx, kin_cm_vel);
+        copy_vector_into_arr(ref state, ref state_idx, kin_cm_vel);
 
         // simulated character center of mass
         Vector3 new_sim_cm = sim_char.hip_bone.worldCenterOfMass;
@@ -267,10 +286,10 @@ public class GetMlState : Agent
         sim_char.cm_vel = sim_cm_vel;
 
         sim_char.cm = new_sim_cm;
-        copy_vector_into_state(ref state, ref state_idx, sim_cm_vel);
+        copy_vector_into_arr(ref state, ref state_idx, sim_cm_vel);
 
         // Copy v(sim) - v(kin)
-        copy_vector_into_state(ref state, ref state_idx, sim_cm_vel - kin_cm_vel);
+        copy_vector_into_arr(ref state, ref state_idx, sim_cm_vel - kin_cm_vel);
 
 
         // The desired horizontal CM velocity from user-input is also considered v(des) - R^2
@@ -278,7 +297,7 @@ public class GetMlState : Agent
         desired_vel = resolve_vel_in_kin_ref_frame(desired_vel);
         if (normalize_observations)
             desired_vel = normalize_desired_vel_vector(desired_vel);
-        copy_vector_into_state(ref state, ref state_idx, desired_vel);
+        copy_vector_into_arr(ref state, ref state_idx, desired_vel);
 
 
         //The diff between current simulated character horizontal
@@ -289,7 +308,7 @@ public class GetMlState : Agent
             cur_sim_vel = normalize_vel_vector(cur_sim_vel);
         Vector2 v_diff = new Vector2(desired_vel.x - cur_sim_vel.x, desired_vel.y - cur_sim_vel.z);
         sim_char.pos = sim_char.char_trans.position;
-        copy_vector_into_state(ref state, ref state_idx, v_diff);
+        copy_vector_into_arr(ref state, ref state_idx, v_diff);
 
         // we do it once for kin char and once for sim char
         char_info cur_char = kin_char;
@@ -317,8 +336,8 @@ public class GetMlState : Agent
                     bone_local_pos = normalize_bone_pos(bone_local_pos, j);
                     bone_vel = normalize_bone_vel(bone_vel, j);
                 }
-                copy_vector_into_state(ref copy_into, ref copy_idx, bone_local_pos);
-                copy_vector_into_state(ref copy_into, ref copy_idx, bone_vel);
+                copy_vector_into_arr(ref copy_into, ref copy_idx, bone_local_pos);
+                copy_vector_into_arr(ref copy_into, ref copy_idx, bone_vel);
                 cur_char.bone_local_pos[j] = bone_local_pos;
 
             }
@@ -333,11 +352,12 @@ public class GetMlState : Agent
             state[state_idx++] = s_sim[i];
         for (int i = 0; i < 36; i++)
             state[state_idx++] = s_sim[i] - s_kin[i];
+        for (int i = 0; i < 25; i++)
+            state[state_idx++] = prev_action_output[i];
 
-        if (state_idx != 90)
+        if (state_idx != 110)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything but smootehd actions");
 
-        // TODO: Add actions here once actions are being output 
         return state;
 
     }
@@ -381,14 +401,14 @@ public class GetMlState : Agent
         return Utils.quat_inv_mul_vec3(kin_char.char_trans.rotation, pos - sim_char.cm);
     }
 
-    void copy_vector_into_state(ref double[] state, ref int start_idx, Vector3 v)
+    void copy_vector_into_arr(ref double[] state, ref int start_idx, Vector3 v)
     {
         state[start_idx] = v.x;
         state[start_idx + 1] = v.y;
         state[start_idx + 2] = v.z;
         start_idx += 3;
     }
-    void copy_vector_into_state(ref double[] state, ref int start_idx, Vector2 v)
+    void copy_vector_into_arr(ref double[] state, ref int start_idx, Vector2 v)
     {
         state[start_idx] = v.x;
         state[start_idx + 1] = v.y;
@@ -489,11 +509,13 @@ public class GetMlState : Agent
         cm_vel_reward = Math.Exp(-1 * (kin_char.cm_vel - sim_char.cm_vel).magnitude);
     }
 
-    void calc_fall_factor(out double fall_factor)
+    void calc_fall_factor(out double fall_factor, out bool heads_1m_apart)
     {
         Vector3 kin_head_pos = kin_char.bone_to_transform[(int)Bone_Head].position;
         Vector3 sim_head_pos = sim_char.bone_to_transform[(int)Bone_Head].position;
-        fall_factor = Math.Clamp(1.3 - 1.4 * (kin_head_pos - sim_head_pos).magnitude , 0, 1);
+        float head_distance = (kin_head_pos - sim_head_pos).magnitude;
+        heads_1m_apart = head_distance > 1f;
+        fall_factor = Math.Clamp(1.3 - 1.4 * head_distance, 0, 1);
     }
 
     // Get 6 points on capsule object

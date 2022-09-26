@@ -11,21 +11,17 @@ public class SimCharController : MonoBehaviour
     public mm_v2.Bones[] bones_to_apply;
     public mm_v2.Bones debug_bone;
     public Transform[] boneToTransform = new Transform[23];
-    [HideInInspector]
     public ArticulationBody[] bone_to_art_body = new ArticulationBody[23];
     public int start_delay = 60;
     Gamepad gamepad;
     database motionDB;
     public float stiffness = 120f;
     public float damping = 3f;
+    public float force_limit = 200f;
 
-    void Start()
+    [ContextMenu("Setup art bodies")]
+    void setup_art_bodies()
     {
-        if (Application.isEditor)
-            UnityEditor.EditorWindow.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
-        gamepad = Gamepad.current;
-        Application.targetFrameRate = 30;
-        motionDB = new database(Application.dataPath + @"/outputs/database.bin", 1, true, 10, 10);
         for (int i = 0; i < 23; i++)
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
@@ -35,52 +31,15 @@ public class SimCharController : MonoBehaviour
             bone_to_art_body[i] = ab;
             if (ab == null)
                 continue;
-            if (set_target_velocities)
-            {
-                ab.SetAllDriveStiffness(1f);
-                //ab.SetAllDriveDamping(0f);
-                Quaternion[] curr_bone_rotations = motionDB.bone_rotations[frameIdx];
-                ab.SetDriveRotation(curr_bone_rotations[i]);
+            ab.SetAllDriveStiffness(stiffness);
+            ab.SetAllDriveDamping(damping);
+            ab.SetAllForceLimit(force_limit);
 
-            }
-            else if (set_art_bodies) {    
-                ab.SetAllDriveStiffness(stiffness);
-                ab.SetAllDriveDamping(damping);
-            } else
-            {
-                ab.enabled = false;
-            }
-            
-        
+
         }
         // we need to make sure the body starts the right angles, because after this we will only be applying 
         // velocities
 
-    }
-
-    void FixedUpdate()
-    {
-        if (start_delay > 0)
-        {
-            if (start_delay == 1 && set_target_velocities)
-            {
-                for (int i = 0; i < 23; i++)
-                {
-                    mm_v2.Bones bone = (mm_v2.Bones)i;
-                    if (!bones_to_apply.Contains(bone))
-                        continue;
-                    ArticulationBody ab = bone_to_art_body[i];
-                    if (ab == null)
-                        continue;
-                    ab.SetAllDriveStiffness(0f);
-                    ab.SetAllDriveDamping(1f);
-                }
-            }
-            start_delay--;
-            return;
-        }
-        frameIdx++;
-        playFrameIdx();
     }
 
     private void playFrameIdx()
