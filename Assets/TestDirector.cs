@@ -4,9 +4,7 @@ using static mm_v2.Bones;
 
 public class TestDirector : MonoBehaviour
 {
-    public float ACTION_STIFFNESS_HYPERPARAM = .2f;
     private bool is_initalized;
-    public bool normalize_observations = false;
     char_info kin_char, sim_char;
     public GameObject kinematic_char;
     public GameObject simulated_char;
@@ -16,7 +14,6 @@ public class TestDirector : MonoBehaviour
     private mm_v2 MMScript;
     private SimCharController SimCharController;
     private int nbodies;
-    float[] prev_action_output = new float[25];
 
     //private ArticulationBody sim_hip_bone; // root of ArticulationBody
 
@@ -45,6 +42,26 @@ public class TestDirector : MonoBehaviour
             return;
         }
         Quaternion[] cur_rotations = MMScript.bone_rotations;
+        for (int i = 0; i < limited_dof_bones.Length; i++)
+        {
+            int bone_idx = (int)limited_dof_bones[i];
+            // Angle is in range (-1, 1) => map to (-180, 180)
+            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
+            bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
+            if (use_xdrive)
+            {
+                ArticulationDrive drive = ab.xDrive;
+                drive.target = target.x;
+                ab.xDrive = drive;
+            }
+            else
+            {
+                ArticulationDrive drive = ab.zDrive;
+                drive.target = target.z;
+                ab.zDrive = drive;
+            }
+        }
         for (int i = 0; i < full_dof_bones.Length; i++)
         {
             int bone_idx = (int)full_dof_bones[i];
@@ -54,14 +71,7 @@ public class TestDirector : MonoBehaviour
             Debug.Log($"Setting drive rotation for ab: {ab.gameObject.name}");
             ab.SetDriveRotation(final);
         }
-        for (int i = 0; i < limited_dof_bones.Length; i++)
-        {
-            int bone_idx = (int)limited_dof_bones[i];
-            Quaternion final = cur_rotations[bone_idx];
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
-            Debug.Log($"Setting drive rotation for ab: {ab.gameObject.name}");
-            ab.SetDriveRotation(final);
-        }
+
         for (int i = 0; i < openloop_bones.Length; i++)
         {
             int bone_idx = (int)openloop_bones[i];
@@ -134,41 +144,6 @@ public class TestDirector : MonoBehaviour
             sim_char.hip_bone.TeleportRoot(origin, origin_hip_rot);
         }
         return;
-        // request Decision
-        bool heads_1m_apart;
-        double  fall_factor;
-
-        calc_fall_factor(out fall_factor, out heads_1m_apart);
-        if (heads_1m_apart)
-        {
-            Destroy(simulated_char);
-            simulated_char = Instantiate(simulated_char_prefab, kin_char.char_trans.position, Quaternion.identity);
-            my_initalize();
-        }
-        // generated reward
-    }
-
-    void copy_vector_into_arr(ref double[] state, ref int start_idx, Vector3 v)
-    {
-        state[start_idx] = v.x;
-        state[start_idx + 1] = v.y;
-        state[start_idx + 2] = v.z;
-        start_idx += 3;
-    }
-    void copy_vector_into_arr(ref double[] state, ref int start_idx, Vector2 v)
-    {
-        state[start_idx] = v.x;
-        state[start_idx + 1] = v.y;
-        start_idx += 2;
-    }
-
-    void calc_fall_factor(out double fall_factor, out bool heads_1m_apart)
-    {
-        Vector3 kin_head_pos = kin_char.bone_to_transform[(int)Bone_Head].position;
-        Vector3 sim_head_pos = sim_char.bone_to_transform[(int)Bone_Head].position;
-        float head_distance = (kin_head_pos - sim_head_pos).magnitude;
-        heads_1m_apart = head_distance > 1f;
-        fall_factor = Math.Clamp(1.3 - 1.4 * head_distance, 0, 1);
     }
 
 }

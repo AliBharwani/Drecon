@@ -6,6 +6,8 @@ using UnityEngine.InputSystem;
 
 public class mm_v2 : MonoBehaviour
 {
+    public bool use_deltatime = false;
+    private float frametime = 1f / 30f;
     public bool gen_inputs = true;
     public float MAX_WANDERING_RADIUS = 10f;
     public float prob_to_change_inputs = 60f;
@@ -54,7 +56,8 @@ public class mm_v2 : MonoBehaviour
     public int frameCounter = 1;
 
     public Transform[] boneToTransform = new Transform[23];
-    database motionDB;
+    [HideInInspector]
+    public database motionDB;
     int frameIdx = 0;
 
     Vector3[] curr_bone_positions;
@@ -123,19 +126,15 @@ public class mm_v2 : MonoBehaviour
 
     void Awake()
     {
-        Debug.Log("Called awwake!");
-        if (Application.isEditor)
-        {
-            UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
-        }
         gamepad = Gamepad.current;
-        if (gamepad == null)
-        {
-            Debug.LogWarning("Warning: Gamepad not found");
-        }
         Application.targetFrameRate = 30;
         origin = transform.position;
-        motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, abTest, frame_increments, ignore_surrounding);
+        if (motionDB == null)
+        {
+            Debug.Log("mm_v2 sees motion DB is null");
+            motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, frame_increments, ignore_surrounding);
+
+        }
         motionDB.database_build_matching_features(
             feature_weight_foot_position,
             feature_weight_foot_velocity,
@@ -226,9 +225,9 @@ public class mm_v2 : MonoBehaviour
         // Get the desired velocity
 
         trajectory_desired_rotations_predict();
-        trajectory_rotations_predict(frame_increments * Time.fixedDeltaTime);
+        trajectory_rotations_predict(frame_increments * (use_deltatime ? Time.fixedDeltaTime : frametime));
         trajectory_desired_velocities_predict();
-        trajectory_positions_predict(frame_increments * Time.fixedDeltaTime);
+        trajectory_positions_predict(frame_increments * (use_deltatime ? Time.fixedDeltaTime : frametime));
         if (search)
         {
             // Search database and update frame idx 
@@ -294,7 +293,7 @@ public class mm_v2 : MonoBehaviour
             curr_bone_angular_velocities,
             inertialize_blending_halflife,
             //1f/30f
-            Time.deltaTime
+            (use_deltatime ? Time.deltaTime : frametime)
             );
         simulation_positions_update(
             ref simulation_position,
@@ -302,13 +301,13 @@ public class mm_v2 : MonoBehaviour
             ref simulation_acceleration,
             desired_velocity,
             simulation_velocity_halflife,
-            Time.deltaTime);
+            (use_deltatime ? Time.deltaTime : frametime));
         simulation_rotations_update(
             ref simulation_rotation,
             ref simulation_angular_velocity,
             desired_rotation,
             simulation_rotation_halflife,
-            Time.deltaTime);
+            (use_deltatime ? Time.deltaTime : frametime));
         //inertialize_root_adjust(ref bone_offset_positions[0], ref bone_positions[0], ref bone_rotations[0], simulation_position, simulation_rotation);
         forward_kinematics_full();
         apply_global_pos_and_rot();

@@ -19,6 +19,92 @@ public class SimCharController : MonoBehaviour
     public float damping = 3f;
     public float force_limit = 200f;
 
+
+    void Start()
+    {
+        if (Application.isEditor)
+            UnityEditor.EditorWindow.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
+        Application.targetFrameRate = 30;
+        motionDB = new database(Application.dataPath + @"/outputs/database.bin");
+        for (int i = 0; i < 23; i++)
+        {
+            mm_v2.Bones bone = (mm_v2.Bones)i;
+            bool disable_bone = false;
+            if (!apply_all_local_rots && !bones_to_apply.Contains(bone))
+                disable_bone = true;
+            ArticulationBody ab = boneToTransform[i].GetComponent<ArticulationBody>();
+            bone_to_art_body[i] = ab;
+            if (ab == null)
+                continue;
+            if (disable_bone)
+            {
+                if (ab.isRoot)
+                    ab.immovable = true;
+                ab.useGravity = false;
+                ab.jointType = ArticulationJointType.FixedJoint;
+            }
+            else if (set_art_bodies)
+            {
+
+            }
+            else
+            {
+                ab.enabled = false;
+            }
+        }
+    }
+        void FixedUpdate()
+    {
+        frameIdx++;
+        playFrameIdx();
+    }
+
+    private void playFrameIdx()
+    {
+        Vector3[] curr_bone_positions = motionDB.bone_positions[frameIdx];
+        Quaternion[] curr_bone_rotations = motionDB.bone_rotations[frameIdx];
+        for (int i = 1; i < 23; i++)
+        {
+            mm_v2.Bones bone = (mm_v2.Bones)i;
+            if (!apply_all_local_rots && !bones_to_apply.Contains(bone))
+                continue;
+            Transform t = boneToTransform[i];
+            Quaternion local_rot = curr_bone_rotations[i];
+            bool print_debug = bone == debug_bone;
+
+            if (!set_art_bodies)
+            {
+                t.localPosition = curr_bone_positions[i];
+                t.localRotation = local_rot;
+                continue;
+            }
+            ArticulationBody ab = bone_to_art_body[i];
+            if (ab == null || !bones_to_apply.Contains(bone))
+                continue;
+
+            if (!set_target_velocities)
+            {
+                // Angle is in range (-1, 1) => map to (-180, 180)
+                Vector3 target = ab.ToTargetRotationInReducedSpace(local_rot);
+                bool use_xdrive = bone == mm_v2.Bones.Bone_LeftLeg || bone == mm_v2.Bones.Bone_RightLeg;
+                if (use_xdrive)
+                {
+                    ArticulationDrive drive = ab.xDrive;
+                    drive.target = target.x;
+                    ab.xDrive = drive;
+                }
+                else
+                {
+                    ArticulationDrive drive = ab.zDrive;
+                    drive.target = target.z;
+                    ab.zDrive = drive;
+                }
+                ab.SetDriveRotation(local_rot, print_debug);
+            }
+
+        }
+
+    }
     [ContextMenu("Setup art bodies")]
     void setup_art_bodies()
     {
@@ -39,67 +125,10 @@ public class SimCharController : MonoBehaviour
         // velocities
 
     }
-
-    private void playFrameIdx()
-    {
-        Vector3[] curr_bone_positions = motionDB.bone_positions[frameIdx];
-        Quaternion[] curr_bone_rotations = motionDB.bone_rotations[frameIdx];
-        Vector3[] cur_angular_vel = motionDB.bone_angular_velocities[frameIdx];
-        for (int i = 1; i < 23; i++)
-        {
-            mm_v2.Bones bone = (mm_v2.Bones)i;
-            if (!apply_all_local_rots && !bones_to_apply.Contains(bone))
-                continue;
-            Transform t = boneToTransform[i];
-            Quaternion local_rot = curr_bone_rotations[i];
-            bool print_debug = bone == debug_bone;
-
-            if (!set_art_bodies)
-            {
-                t.localPosition = curr_bone_positions[i];
-                t.localRotation = local_rot;
-                continue;
-            }
-            ArticulationBody ab = bone_to_art_body[i];
-            if (ab == null || !bones_to_apply.Contains(bone))
-                continue;
-            //if (print_debug)
-                //if (set_target_velocities)
-                    //Debug.Log($"Local target velocity: {cur_angular_vel[i].ToString("f6")}");
-                //else
-                    //Debug.Log($"Local rot: {local_rot.ToString("f6")}");
-
-            if (set_target_velocities)
-            {
-                Vector3 scaled_angle_axis_vel = cur_angular_vel[i];
-                float angle = scaled_angle_axis_vel.magnitude;
-                Vector3 axis = scaled_angle_axis_vel.normalized;
-                //Debug.Log($"Original angle: {angle} , axis: {axis.ToString("f6")}");
-                Quaternion q = Quaternion.AngleAxis(angle, axis);// * Quaternion.Inverse(ab.anchorRotation);
-                Quaternion q2 =  Quaternion.AngleAxis(angle, axis)* Quaternion.Inverse(ab.anchorRotation);
-
-                Vector3 rot_in_reduced_space = ab.ToTargetRotationInReducedSpace(q);
-                Vector3 final_vel =  q.ToEulerAnglesInRange180();  // rot_in_reduced_space * 30; //  multiply by 30 because 30fps
-                if (set_target_velocities) {
-                    Debug.Log($"Local target velocity: {final_vel.ToString("f6")}");
-                    Debug.Log($"Joint velocity: {ab.jointVelocity[0] * Mathf.Rad2Deg} , {ab.jointVelocity[1] * Mathf.Rad2Deg} , {ab.jointVelocity[2] * Mathf.Rad2Deg}");
-                }
-                Vector3 old_vel = new Vector3(ab.jointVelocity[0] , ab.jointVelocity[1] , ab.jointVelocity[2]) * Mathf.Rad2Deg;
-                //ForceMode.VelocityChange: Interprets the parameter as a direct angular velocity change (measured in degrees per second),
-                // and changes the angular velocity by the value of torque. The effect doesn't depend on the mass of the body and the simulation step length.
-                ab.AddRelativeTorque(final_vel , ForceMode.VelocityChange);
-                //ab.SetDriveTargetVelocity(final_vel, print_debug);
-            }
-            else
-                ab.SetDriveRotation(local_rot, print_debug);
-
-        }
-
-    }
     [ContextMenu("Find max rotations for each dimension for a bone")]
     private void find_rot_limits()
     {
-        motionDB = new database(Application.dataPath + @"/outputs/database.bin", 1, true, 10, 10);
+        motionDB = new database(Application.dataPath + @"/outputs/database.bin" );
         int num_frames = motionDB.nframes();
         int j = (int)debug_bone;
         ArticulationBody ab = boneToTransform[j].GetComponent<ArticulationBody>();
@@ -126,7 +155,7 @@ public class SimCharController : MonoBehaviour
     }
     // Useful for normalizing inputs 
     [ContextMenu("Find mins and maxes for velocities and positions")]
-    private void min_max_debugger()
+        public void min_max_debugger()
     {
         int num_state_bones = MLAgentsDirector.state_bones.Length;
         Vector3 vel_min = Vector3.positiveInfinity;
@@ -155,7 +184,7 @@ public class SimCharController : MonoBehaviour
         ref Vector3[] bone_vel_mins,
         ref Vector3[] bone_vel_maxes)
     {
-        database motionDB = new database(Application.dataPath + @"/outputs/database.bin", 1, true, 10, 10);
+        database motionDB = new database(Application.dataPath + @"/outputs/database.bin");
         int num_frames = motionDB.nframes();
         Vector3 last_cm = Vector3.zero;
         Vector3[] global_pos = new Vector3[23];

@@ -1,0 +1,29 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 92159,
+                "file_path": "results\\t4\\Drecon\\Drecon-92159.onnx",
+                "reward": 9.944198463598273,
+                "creation_time": 1664268553.0915082,
+                "auxillary_file_paths": [
+                    "results\\t4\\Drecon\\Drecon-92159.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 92159,
+            "file_path": "results\\t4\\Drecon.onnx",
+            "reward": 9.944198463598273,
+            "creation_time": 1664268553.0915082,
+            "auxillary_file_paths": [
+                "results\\t4\\Drecon\\Drecon-92159.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.10.2+cpu"
+    }
+}

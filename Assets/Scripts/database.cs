@@ -52,18 +52,17 @@ public class database
         }
         throw new Exception($"Index clamp out of range frame {frame} offset {_offset}");
     }
-    bool abTest = false;
     int frame_increments;
     int ignore_range_end = 20;
     int ignore_surrounding;
-    public database(string filename, int _num_neigh, bool _abTest, int _frame_increments, int _ignore_surrounding)
+    public database(string filename, int _num_neigh = 1, int _frame_increments = 10, int _ignore_surrounding = 20)
     {
+        Debug.Log($"Creating motion database");
+
         frame_increments = _frame_increments;
         ignore_surrounding = _ignore_surrounding;
         num_neigh = _num_neigh;
-        abTest = _abTest;
         load_db(filename);
-
     }
     public void database_build_matching_features(
         in float feature_weight_foot_position,
