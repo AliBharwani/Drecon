@@ -48,7 +48,7 @@ public class mm_v2 : MonoBehaviour
     public int frame_increments = 10;
     public int ignore_surrounding = 10;
 
-    public string databaseFilepath = "database_v1";
+    public string databaseFilepath = "database";
     public int numNeigh = 1;
     public int searchEveryNFrames = 1;
     public int frameCounter = 1;
@@ -123,6 +123,7 @@ public class mm_v2 : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log("Called awwake!");
         if (Application.isEditor)
         {
             UnityEditor.SceneView.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
@@ -191,7 +192,7 @@ public class mm_v2 : MonoBehaviour
             inertialize_blending_halflife,
             0f
         );
-
+        is_initalized = true;
     }
 
     void FixedUpdate()
@@ -200,7 +201,7 @@ public class mm_v2 : MonoBehaviour
         // Update if we are reading from user input (ie not generating random rotations) or we are
         // generating random inputs and every frame the user changes desires with P(.001)
         if (gen_inputs && Random.value <= prob_to_change_inputs) {
-            Debug.Log("Genning new inputs!");
+            //Debug.Log("Genning new inputs!");
             random_lstick_input = Random.insideUnitCircle;
             // Random chance of making desired rotation face direction of velocity  
             is_strafing = Random.value <= .5f;

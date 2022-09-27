@@ -34,8 +34,6 @@ public class SimCharController : MonoBehaviour
             ab.SetAllDriveStiffness(stiffness);
             ab.SetAllDriveDamping(damping);
             ab.SetAllForceLimit(force_limit);
-
-
         }
         // we need to make sure the body starts the right angles, because after this we will only be applying 
         // velocities
@@ -130,7 +128,7 @@ public class SimCharController : MonoBehaviour
     [ContextMenu("Find mins and maxes for velocities and positions")]
     private void min_max_debugger()
     {
-        int num_state_bones = GetMlState.state_bones.Length;
+        int num_state_bones = MLAgentsDirector.state_bones.Length;
         Vector3 vel_min = Vector3.positiveInfinity;
         Vector3 vel_max = Vector3.negativeInfinity;
         Vector3[] bone_pos_mins = new Vector3[num_state_bones];
@@ -162,7 +160,7 @@ public class SimCharController : MonoBehaviour
         Vector3 last_cm = Vector3.zero;
         Vector3[] global_pos = new Vector3[23];
         Quaternion[] global_rots = new Quaternion[23];
-        int num_state_bones = GetMlState.state_bones.Length;
+        int num_state_bones = MLAgentsDirector.state_bones.Length;
         Vector3[] state_bone_pos = new Vector3[num_state_bones];
 
         cm_vel_min = Vector3.positiveInfinity;
@@ -189,7 +187,7 @@ public class SimCharController : MonoBehaviour
             for (int j = 0; j < num_state_bones; j++)
             {
                 // Get state bone pose
-                Vector3 bone_pos = global_pos[(int)GetMlState.state_bones[j]];
+                Vector3 bone_pos = global_pos[(int)MLAgentsDirector.state_bones[j]];
                 // Resolve in reference frame (multiply by inverse of root rotation and subtract root position)
                 Vector3 local_bone_pos = Utils.quat_inv_mul_vec3(global_rots[0], bone_pos - cm);
                 Vector3 bone_vel = (local_bone_pos - state_bone_pos[j]) / frame_time;

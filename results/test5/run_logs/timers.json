@@ -1,0 +1,42 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1664256820",
+        "python_version": "3.6.8 (tags/v3.6.8:3c6b436a57, Dec 24 2018, 00:16:47) [MSC v.1916 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Unity Projects\\test-env\\Scripts\\mlagents-learn Assets\\config\\Drecon.yaml --run-id=test5",
+        "mlagents_version": "0.28.0",
+        "mlagents_envs_version": "0.28.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "1.10.2+cpu",
+        "numpy_version": "1.19.5",
+        "end_time_seconds": "1664256883"
+    },
+    "total": 63.415819,
+    "count": 1,
+    "self": 0.012318099999994558,
+    "children": {
+        "run_training.setup": {
+            "total": 0.2679732,
+            "count": 1,
+            "self": 0.2679732
+        },
+        "TrainerController.start_learning": {
+            "total": 63.135527700000004,
+            "count": 1,
+            "self": 0.00038020000000216214,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 63.1351272,
+                    "count": 1,
+                    "self": 63.1351272
+                },
+                "TrainerController._save_models": {
+                    "total": 2.0300000002748675e-05,
+                    "count": 1,
+                    "self": 2.0300000002748675e-05
+                }
+            }
+        }
+    }
+}

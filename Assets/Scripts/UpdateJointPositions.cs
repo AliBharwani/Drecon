@@ -58,7 +58,17 @@ public class UpdateJointPositions : MonoBehaviour
                 ab.enabled = false;
         }
     }
-    [ContextMenu("Set All Material Colors")]
+    public Material selected_material;
+    [ContextMenu("Set All Material Colors To Selected Material")]
+    public void set_all_material_colors_white()
+    {
+        foreach (Transform t in getAllChildren())
+        {
+            Renderer renderer = t.gameObject.GetComponent<Renderer>();
+            if (renderer != null && renderer.enabled)
+                renderer.material = selected_material;
+        }
+    } 
     public void set_all_material_colors(Color color)
     {
         foreach (Transform t in getAllChildren())
