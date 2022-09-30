@@ -61,7 +61,6 @@ public class CreateAllBoundingCapsules : MonoBehaviour
     public Bones[] boxed_bones;
     public float min_rad = .005f;
     public bool draw_gizmos;
-    private float AVG_HUMAN_DENSITY = 90; // 90 kg / m^3
     Vector3[] m_vertices;
 
     [ContextMenu("Build all bone capsulse")]
@@ -77,29 +76,24 @@ public class CreateAllBoundingCapsules : MonoBehaviour
             if (debug && !debug_bone_ids.Contains(cur_bone))
                 continue;
             GameObject boneObject = boneObjects[i];
-            bool[] trash = new bool[0];
-            Vector3[] verts = getVerts(bone_ids[i] , ref trash);
+            Vector3[] verts = bone_verts_lists[bone_ids[i]].ToArray();
             debug_points.AddRange(verts);
-            float volume = 0f;
-            GameObject colliderObject = boxed_bones.Contains(cur_bone) ? calculateBoundingBox(verts, out volume) : calculateBoundingCapsule(verts, bone_ids[i], out volume);
+            GameObject colliderObject = boxed_bones.Contains(cur_bone) ? calc_bounding_box(verts) : calc_bounding_capsule(verts, bone_ids[i]);
             colliderObject.transform.parent = boneObject.transform;
-            // rigidbody mass in unity is kilos by default
-            float mass = volume * AVG_HUMAN_DENSITY;
-
         }
     }
     private Vector3[] getVerts(int bone_id, ref bool[] kept)
     {
-        return filterVertices(bone_verts_lists[bone_id].ToArray(), min_rad, ref kept);
+        return filter_verts(bone_verts_lists[bone_id].ToArray(), min_rad, ref kept);
     }
     private Vector3[] getVerts(int bone_id)
     {
         bool[] kept = new bool[0];
-        return filterVertices(bone_verts_lists[bone_id].ToArray(), min_rad, ref kept);
+        return filter_verts(bone_verts_lists[bone_id].ToArray(), min_rad, ref kept);
     }
     private List<Vector3[]> debug_lines;
     private List<Vector3> debug_points;
-    private GameObject calculateBoundingBox(Vector3[] verts, out float volume)
+    private GameObject calc_bounding_box(Vector3[] verts)
     {
         Vector3 mins = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
         Vector3 maxes = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
@@ -114,10 +108,9 @@ public class CreateAllBoundingCapsules : MonoBehaviour
         boxObject.transform.rotation = Quaternion.identity;
         BoxCollider box = boxObject.AddComponent<BoxCollider>();
         box.size = maxes - mins;
-        volume = box.size.x * box.size.y * box.size.z;
         return boxObject;
     }
-    private GameObject calculateBoundingCapsule(Vector3[] verts, int bone_id, out float volume)
+    private GameObject calc_bounding_capsule(Vector3[] verts, int bone_id)
     {
 
         int n = verts.Length;
@@ -128,46 +121,41 @@ public class CreateAllBoundingCapsules : MonoBehaviour
         else if (bones_that_use_prev_joints_verts.Contains((Bones) bone_id))
             full_verts = verts.Concat(getVerts(bone_id - 1)).ToArray();
 
-        Vector3 mean = GeoUtils.calculateMean(full_verts);
+        Vector3 mean = GeoUtils.calc_mean(full_verts);
 
-        double[,] covar = GeoUtils.calculateCovarMat(full_verts);
-        double[] eigenvalues = GeoUtils.getEigenvalues(covar);
-        Vector3 largest_eigen = GeoUtils.getEigenvectorFromValue(covar, eigenvalues[0]).normalized;
+        SkinnedMeshRenderer rend = GetComponent<SkinnedMeshRenderer>();
+        Mesh mesh = rend.sharedMesh;
+        double[,] covar = GeoUtils.calculate_continous_covar(mesh);
+        double[] eigenvalues = GeoUtils.get_eigenvalues(covar);
+        Vector3 largest_eigen = GeoUtils.get_eigenvector_from_value(covar, eigenvalues[0]).normalized;
 
-        Vector3[] proj_verts = GeoUtils.projectVertsOntoAxis(verts, mean, mean + largest_eigen);
-        debug_points.AddRange(proj_verts);
+        Vector3[] proj_verts = GeoUtils.proj_verts_onto_axis(verts, mean, mean + largest_eigen);
         Vector3 center = Vector3.zero;
-        float height = GeoUtils.getMaxDistApart(proj_verts, ref center);
+        float height = GeoUtils.get_max_dist_apart(proj_verts, ref center);
         float radius;
         if (bone_ids_use_small_rad.Contains((Bones)bone_id))
         {
             double dist_from_main_axis_sum = 0;
             foreach (Vector3 v in verts)
-                dist_from_main_axis_sum += (v - GeoUtils.closestPointOnLine(mean, mean + largest_eigen, v)).magnitude;
+                dist_from_main_axis_sum += (v - GeoUtils.closest_point_on_line(mean, mean + largest_eigen, v)).magnitude;
             radius = (float)dist_from_main_axis_sum / n;
         }
         else
         {
             double max_dist_from_main_axis = 0;
             foreach (Vector3 v in verts)
-                max_dist_from_main_axis = Math.Max(max_dist_from_main_axis, (v - GeoUtils.closestPointOnLine(mean, mean + largest_eigen, v)).magnitude);
+                max_dist_from_main_axis = Math.Max(max_dist_from_main_axis, (v - GeoUtils.closest_point_on_line(mean, mean + largest_eigen, v)).magnitude);
             radius = (float)max_dist_from_main_axis;
         }
-        //height += 2 * radius;
 
         debug_lines.Add(new Vector3[] { mean - largest_eigen, mean + largest_eigen });
         GameObject capsuleObject = new GameObject();
         capsuleObject.transform.position = center;
-        capsuleObject.transform.rotation = GeoUtils.getRotationBetween(Vector3.right, largest_eigen);
+        capsuleObject.transform.rotation = GeoUtils.get_rot_between(Vector3.right, largest_eigen);
         CapsuleCollider capsule = capsuleObject.AddComponent<CapsuleCollider>();
         capsule.height = height;
         capsule.direction = 0;
         capsule.radius = radius;
-
-        // volume of capsule: pi * r^2 * ((4/3) * r * a)
-        // a = side len
-        float a = height - 2 * radius;
-        volume = (float) Math.PI * radius * radius * ((4f/3f) * radius * a);
         return capsuleObject;
     }
     private void OnDrawGizmos()
@@ -183,13 +171,17 @@ public class CreateAllBoundingCapsules : MonoBehaviour
         foreach (Vector3 v in debug_points)
             Gizmos.DrawSphere(v, .005f);
     }
-
+    public bool do_not_filter;
     // Rudimentary algorithm to filter out a bunch of verts that are close to each other
-    private Vector3[] filterVertices(Vector3[] verts, float min_rad, ref bool[] kept)
+    public  Vector3[] filter_verts(Vector3[] verts, float min_rad, ref bool[] kept)
     {
         int n = verts.Length;
         bool[] keep = Enumerable.Repeat(true, n).ToArray();
+        kept = keep;
+        if (do_not_filter)
+            return verts;
         int it = 0;
+        int num_kept = verts.Length;
         while (true)
         {
             bool should_break = true;
@@ -204,6 +196,7 @@ public class CreateAllBoundingCapsules : MonoBehaviour
                     if (Vector3.Distance(verts[i], verts[j]) < min_rad)
                     {
                         keep[i] = false;
+                        num_kept--;
                         should_break = false;
                         break;
                     }
@@ -213,13 +206,12 @@ public class CreateAllBoundingCapsules : MonoBehaviour
                 break;
             it++;
         }
-        List<Vector3> new_verts = new List<Vector3>();
+        Vector3[] new_verts = new Vector3[num_kept];
+        int new_verts_idx = 0;
         for (int i = 0; i < n; i++)
             if (keep[i])
-                new_verts.Add(verts[i]);
-        Debug.Log($"Original Length: {n} New verts length: {new_verts.Count} Iterations: {it}");
-        kept = keep;
-        return new_verts.ToArray();
+                new_verts[new_verts_idx++] = verts[i];
+        return new_verts;
     }
     private void initializeBoneVerts()
     {
@@ -239,11 +231,13 @@ public class CreateAllBoundingCapsules : MonoBehaviour
         BoneWeight[] bws = mesh.boneWeights;
         bool[] kept = new bool[mesh.vertexCount];
         m_vertices = mesh.vertices;
-        filterVertices(mesh.vertices, min_rad, ref kept);
+        filter_verts(mesh.vertices, min_rad, ref kept);
+        int it = 0;
         for (int i = 0; i < mesh.vertexCount; i++)
         {
             if (!kept[i])
                 continue;
+            it++;
             BoneWeight bw = bws[i];
             int bone_id = -1;
             if (bw.weight0 > Mathf.Max(bw.weight1, bw.weight2, bw.weight3))

@@ -140,14 +140,14 @@ public class MeshTester : MonoBehaviour
         if (!gizmos_on)
             return;
         if (bone_verts_lists == null)
-            testMesh();
+            return;
         string mean = "0.647868  ,  1.44229543, -0.03082059";
         Vector3 meanPoint = BVHUtils.convertToVec(mean);
         string test = "-0.99862385, -0.01221036,  0.05100307";
         Vector3 testVec = BVHUtils.convertToVec(test).normalized;
         Gizmos.color = Color.blue;
-        Gizmos.DrawLine(meanPoint, meanPoint + testVec);
-        Gizmos.DrawLine(meanPoint, meanPoint - testVec);
+        //Gizmos.DrawLine(meanPoint, meanPoint + testVec);
+        //Gizmos.DrawLine(meanPoint, meanPoint - testVec);
 
         foreach (int bone_id in bone_ids_to_use)
         {
@@ -157,11 +157,11 @@ public class MeshTester : MonoBehaviour
             Gizmos.color = boneToColor[bone_id];
             foreach (Vector3 vert in bone_verts_lists[bone_id])
                 Gizmos.DrawSphere(vert, vert_size);
-            Vector3[] verts = bone_verts_lists[bone_id].ToArray();
-            Vector3[] proj_verts = GeoUtils.projectVertsOntoAxis(verts, meanPoint, meanPoint + testVec);
-            Gizmos.color = Color.green;
-            foreach (Vector3 vert in proj_verts)
-                Gizmos.DrawSphere(vert, vert_size);
+            //Vector3[] verts = bone_verts_lists[bone_id].ToArray();
+            //Vector3[] proj_verts = GeoUtils.projectVertsOntoAxis(verts, meanPoint, meanPoint + testVec);
+            //Gizmos.color = Color.green;
+            //foreach (Vector3 vert in proj_verts)
+            //    Gizmos.DrawSphere(vert, vert_size);
 
         }
     }

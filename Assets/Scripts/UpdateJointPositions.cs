@@ -201,18 +201,26 @@ public class UpdateJointPositions : MonoBehaviour
         //addGizmoSphere(bottom);
     }
 
-    [ContextMenu("Log random debug stuff")]
-    private void log_random_debug()
+    [ContextMenu("Disable all visualizers")]
+    private void disable_all_capsule_renderers()
     {
         List<Transform> all = getAllChildren();
         foreach (Transform t in all)
         {
-            var obj = t.gameObject;
-            bool is_debug_obj = test_obj != null && t.gameObject.name == test_obj.name;
-            ArticulationBody ab = obj.GetComponent<ArticulationBody>();
-            if (ab != null || !is_debug_obj)
-                continue;
-            //Debug.Log($"GetDOFindices: {ab.GetDofStartIndices()}")
+            var mesh_renderer = t.gameObject.GetComponent<MeshRenderer>();
+            if (mesh_renderer != null)
+                mesh_renderer.enabled = false;
+        }
+    }
+    [ContextMenu("Deactivate all colliders")]
+    private void deactivate_all_colliders()
+    {
+        List<Transform> all = getAllChildren();
+        foreach (Transform t in all)
+        {
+            var colliider = t.gameObject.GetComponent<Collider>();
+            if (colliider != null)
+                t.gameObject.SetActive(false);
         }
     }
 
