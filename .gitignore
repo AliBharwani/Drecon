@@ -12,7 +12,8 @@ __pycache__/
 *$py.class
 # dotenv
 .env
-
+# Mac stuff
+*.DS_Store
 # virtualenv
 venv/
 ENV/
