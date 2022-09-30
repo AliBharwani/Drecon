@@ -87,4 +87,9 @@ public static class Utils
     {
         return Quaternion.AngleAxis(Mathf.Atan2(x, y) * Mathf.Rad2Deg, Vector3.up);
     }
+
+    public static void debugArray<T>(T[] data, string name)
+    {
+        Debug.Log(name + string.Join(" , ", data));
+    }
 }

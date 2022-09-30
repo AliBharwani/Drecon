@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.IO;
@@ -105,8 +103,6 @@ public class database
         compute_bone_velocity_feature( (int)Bone_Hips, feature_weight_hip_velocity);
         compute_trajectory_position_feature( feature_weight_trajectory_positions);
         compute_trajectory_direction_feature(feature_weight_trajectory_directions);
-        //BVHUtils.debugArray(features_offset, "Features offset: ");
-        //BVHUtils.debugArray(features_scale, "Features scale: ");
 
         UnityEngine.Assertions.Assert.IsTrue(offset == nfeatures);
 
@@ -126,8 +122,7 @@ public class database
                 entry[j] = features[i][j];
             }
             entry[nfeatures] = i;
-            //if (i < 11)
-            //    BVHUtils.debugArray(entry, $"Entry {i}: ");
+
             tree.Add(entry);
         }
 
@@ -141,7 +136,6 @@ public class database
             int t0 = database_trajectory_index_clamp(i, frame_increments);
             int t1 = database_trajectory_index_clamp(i, frame_increments * 2);
             int t2 = database_trajectory_index_clamp(i, frame_increments * 3);
-            //Debug.Log($"unclamped: {i + 60} clamped: {t2}");
 
             Vector3 trajectory_pos0 = Utils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t0][0] - bone_positions[i][0]);
             Vector3 trajectory_pos1 = Utils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t1][0] - bone_positions[i][0]);
@@ -232,19 +226,12 @@ public class database
 
             // multiply by inverse of simulation bone 
             bone_position = Utils.quat_mul_vec3(inv_sim_rot(i), bone_position - bone_positions[i][0]);
-            //Debug.Log(features[i]);
 
             features[i][offset + 0] = bone_position.x;
             features[i][offset + 1] = bone_position.y;
             features[i][offset + 2] = bone_position.z;
         }
-        //for (int i = 0; i < 11; i++)
-        //{
-        //Debug.Log($"Offset: {offset}");
-        //Debug.Log($"Bone id {bone} local position before normalize: x: {features[0][offset + 0]} , y: {features[0][offset + 1]}, z: {features[0][offset + 2]}");
-        //}
         normalize_feature(3, weight);
-        //Debug.Log($"Bone id {bone} local position after normalize: x: {features[0][offset + 0]} , y: {features[0][offset + 1]}, z: {features[0][offset + 2]}");
 
         offset += 3;
     }
@@ -412,10 +399,6 @@ public class database
                 y *= invertY ? -1 : 1;
                 z = reader.ReadSingle();
                 arr[i][j] = new Vector3(x, y, z);
-                //if (i < 3)
-                //{
-                //    Debug.Log($"[ {x}, {y}, {z}");
-                //}
             }
         }
     }
@@ -439,36 +422,21 @@ public class database
                 x = reader.ReadSingle();
                 y = reader.ReadSingle();
                 z = reader.ReadSingle();
-                //w = reader.ReadSingle();
                 arr[i][j] = new Quaternion(x, y, z , w);
-                //if (j == 0)
-                //{
-                //    arr[i][j] *= Quaternion.AngleAxis(180f, Vector3.forward);
-                //}
-                //arr[j][i] = Utils.to_unity_rot(new Quaternion(x, y, z, w));
-                //if (i < 3)
-                //{
-                //    Debug.Log($"[ {x}, {y}, {z}, {w}]");
-                //}
             }
-            //arr[i][0] = arr[i][0] * Quaternion.AngleAxis(180f, Vector3.forward) ;
 
         }
     }
 
     private void loadArray(BinaryReader reader, ref int[] arr)
     {
-        // rows = num_frames, cols = num_bones
         uint size;
         size = reader.ReadUInt32();
-        //Debug.Log(size);
-        //Debug.Log($"Rows: {rows} , Cols: {cols}");
         arr = new int[size];
         for (int i = 0; i < size; i++)
         {
             uint val = reader.ReadUInt32();
             arr[i] = (int) val;
-            //Debug.Log(val);
         }
     }
 
