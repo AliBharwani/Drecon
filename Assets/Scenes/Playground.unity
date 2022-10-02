@@ -658,7 +658,8 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2857947523237843473, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
 --- !u!1 &297290902 stripped
 GameObject:
@@ -845,7 +846,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 1
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1439,7 +1440,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2857947523237843473, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
 --- !u!4 &541777148655995783
 Transform:
@@ -1683,7 +1685,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2857947523237843473, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
 --- !u!1 &4352768906907268186
 GameObject:
@@ -1822,7 +1825,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7988652974649708348, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
 --- !u!23 &8285025639305363958
 MeshRenderer:

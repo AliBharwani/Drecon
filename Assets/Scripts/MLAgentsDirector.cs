@@ -147,8 +147,7 @@ public class MLAgentsDirector : Agent
             angle = (angle - 1.5f) * 120;
             scaled_angleaxis.Normalize();
             Quaternion offset = Quaternion.AngleAxis(angle, scaled_angleaxis);
-            Debug.Log($"Cur bone rotations length - {cur_rotations.Length} - bone_idx : {bone_idx}");
-            Quaternion final = cur_rotations[bone_idx] * offset;
+            Quaternion final = cur_rotations[bone_idx];
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
             ab.SetDriveRotation(final);
         }
@@ -163,13 +162,13 @@ public class MLAgentsDirector : Agent
             if (use_xdrive)
             {
                 ArticulationDrive drive = ab.xDrive;
-                drive.target = target.x + angle;
+                drive.target = target.x;
                 ab.xDrive = drive;
             }
             else
             {
                 ArticulationDrive drive = ab.zDrive;
-                drive.target = target.z + angle;
+                drive.target = target.z;
                 ab.zDrive = drive;
             }
         }
@@ -276,18 +275,28 @@ public class MLAgentsDirector : Agent
         }
         // request Decision
         RequestDecision();
+        set_rewards();
+    }
+
+    private void set_rewards()
+    {
         bool heads_1m_apart;
         double pos_reward, vel_reward, local_pose_reward, cm_vel_reward, fall_factor;
         calc_fall_factor(out fall_factor, out heads_1m_apart);
-        if (heads_1m_apart) {
+        if (heads_1m_apart)
+        {
             SetReward(0f);
+            //Debug.Log($"Reward is {0}");
             EndEpisode();
         }
         calculate_pos_and_vel_reward(out pos_reward, out vel_reward);
         calc_local_pose_reward(out local_pose_reward);
         calc_cm_vel_reward(out cm_vel_reward);
         // generated reward
-        float final_reward = (float) (fall_factor * (pos_reward + vel_reward + local_pose_reward + cm_vel_reward));
+        float final_reward = (float)(fall_factor * (pos_reward + vel_reward + local_pose_reward + cm_vel_reward));
+        //Debug.Log($"fall_factor: {fall_factor}, pos_reward: {pos_reward}, vel_reward: {vel_reward}, local_pose_reward: {local_pose_reward}, cm_vel_reward: {cm_vel_reward}");
+        //Debug.Log($"final_reward: {final_reward}");
+
         SetReward(final_reward);
     }
     /*
@@ -577,8 +586,8 @@ public class MLAgentsDirector : Agent
             kin_char.bone_surface_pts[i] = new_kin_bone_surface_pts;
             sim_char.bone_surface_pts[i] = new_sim_bone_surface_pts;
         }
-        pos_reward = Math.Exp((-10 / nbodies) *  pos_diffs_sum );
-        vel_reward = Math.Exp((-1 / nbodies) *  vel_diffs_sum );
+        pos_reward = Math.Exp((-10f / nbodies) *  pos_diffs_sum );
+        vel_reward = Math.Exp((-1f / nbodies) *  vel_diffs_sum );
     }
 
     void calc_local_pose_reward(out double pose_reward)
@@ -601,16 +610,19 @@ public class MLAgentsDirector : Agent
 
             Vector3 diff_vec = new Vector3(diff.x, diff.y, diff.z);
             double angle = 2 * Math.Atan2(diff_vec.magnitude, diff.w) * Mathf.Rad2Deg;
-            double unity_angle = Quaternion.Angle(sim_bone.localRotation, kin_bone.localRotation);
-            pose_reward_sum += GeoUtils.wrap_angle(unity_angle);
+            // We want the magnitude of the diff so we take abs value
+            angle = Math.Abs(GeoUtils.wrap_angle(angle));
+            //double unity_angle = Quaternion.Angle(sim_bone.localRotation, kin_bone.localRotation);
+            //Debug.Log($"Bone: {(mm_v2.Bones)i} Unity Angle: {unity_angle}, My Angle {angle}");
+            pose_reward_sum += GeoUtils.wrap_angle(angle);
         }
-        pose_reward = Math.Exp((-10 / nbodies) * pose_reward_sum);
+        pose_reward = Math.Exp((-10f / nbodies) * pose_reward_sum);
+
     }
 
     void calc_cm_vel_reward(out double cm_vel_reward)
     {
-
-        cm_vel_reward = Math.Exp(-1 * (kin_char.cm_vel - sim_char.cm_vel).magnitude);
+        cm_vel_reward = Math.Exp(-1d * (kin_char.cm_vel - sim_char.cm_vel).magnitude);
     }
 
     void calc_fall_factor(out double fall_factor, out bool heads_1m_apart)
@@ -619,7 +631,7 @@ public class MLAgentsDirector : Agent
         Vector3 sim_head_pos = sim_char.bone_to_transform[(int)Bone_Head].position;
         float head_distance = (kin_head_pos - sim_head_pos).magnitude;
         heads_1m_apart = head_distance > 1f;
-        fall_factor = Math.Clamp(1.3 - 1.4 * head_distance, 0, 1);
+        fall_factor = Math.Clamp(1.3 - 1.4 * head_distance, 0d, 1d);
     }
 
     // Get 6 points on capsule object
