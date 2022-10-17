@@ -212,6 +212,7 @@ public class SimCharController : MonoBehaviour
             //apply_global_pos_and_rot(global_pos, global_rots, boneToTransform);
             Vector3 cm = get_cm(boneToTransform, global_pos);
             Vector3 cm_vel = (cm - last_cm) / frame_time;
+            cm_vel = Utils.quat_inv_mul_vec3(global_rots[0], cm_vel);
             // probably a glitch
             if (cm_vel.magnitude < 10f)
                 updated_mins_and_maxes(cm_vel, ref cm_vel_min, ref cm_vel_max);
@@ -224,6 +225,7 @@ public class SimCharController : MonoBehaviour
                 // Resolve in reference frame (multiply by inverse of root rotation and subtract root position)
                 Vector3 local_bone_pos = Utils.quat_inv_mul_vec3(global_rots[0], bone_pos - cm);
                 Vector3 bone_vel = (bone_pos - state_bone_pos[j]) / frame_time;
+                bone_vel = Utils.quat_inv_mul_vec3(global_rots[0], bone_vel);
                 // Compare min maxes
                 updated_mins_and_maxes(local_bone_pos,ref  bone_pos_mins[j], ref bone_pos_maxes[j]);
                 updated_mins_and_maxes(bone_vel, ref bone_vel_mins[j], ref bone_vel_maxes[j]);
