@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Text;
 using static mm_v2.Bones;
-public class database
+public class database : MonoBehaviour
 {
     [HideInInspector] // Hides var below
     public Vector3[][] bone_positions;
@@ -53,7 +53,23 @@ public class database
     int frame_increments;
     int ignore_range_end = 20;
     int ignore_surrounding;
-    public database(string filename, int _num_neigh = 1, int _frame_increments = 10, int _ignore_surrounding = 20)
+
+    private static database _instance;
+    public static database Instance { get { return _instance; } }
+    private void Awake()
+    {
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            init_database(Application.dataPath + @"/outputs/database.bin");
+            _instance = this;
+        }
+    }
+
+    public void init_database(string filename, int _num_neigh = 1, int _frame_increments = 10, int _ignore_surrounding = 20)
     {
         Debug.Log($"Creating motion database");
 

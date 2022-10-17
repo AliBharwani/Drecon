@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static mm_v2.Bones;
 using System.Collections;
+using UnityEditor;
 
 struct char_info
 {
@@ -33,7 +34,6 @@ public class MLAgentsDirector : Agent
     public GameObject simulated_char;
     public GameObject simulated_char_prefab;
     public GameObject kinematic_char_prefab;
-
     private mm_v2 MMScript;
     private SimCharController SimCharController;
     private int nbodies;
@@ -141,12 +141,12 @@ public class MLAgentsDirector : Agent
         for (int i = 0; i < full_dof_bones.Length; i++)
         {
             int bone_idx = (int)full_dof_bones[i];
-            Vector3 scaled_angleaxis = new Vector3(final_actions[i * 3], final_actions[i * 3 + 1], final_actions[i * 3 + 2]);
-            float angle = scaled_angleaxis.magnitude;
+            //Vector3 scaled_angleaxis = new Vector3(final_actions[i * 3], final_actions[i * 3 + 1], final_actions[i * 3 + 2]);
+            //float angle = scaled_angleaxis.magnitude;
             // Angle is in range (0,3) => map to (-180, 180)
-            angle = (angle - 1.5f) * 120;
-            scaled_angleaxis.Normalize();
-            Quaternion offset = Quaternion.AngleAxis(angle, scaled_angleaxis);
+            //angle = (angle - 1.5f) * 120;
+            //scaled_angleaxis.Normalize();
+            //Quaternion offset = Quaternion.AngleAxis(angle, scaled_angleaxis);
             Quaternion final = cur_rotations[bone_idx];
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
             ab.SetDriveRotation(final);
@@ -155,7 +155,7 @@ public class MLAgentsDirector : Agent
         {
             int bone_idx = (int)limited_dof_bones[i];
             // Angle is in range (-1, 1) => map to (-180, 180)
-            float angle = final_actions[i] * 180;
+            //float angle = final_actions[i] * 180;
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
             Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
             bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
@@ -175,6 +175,13 @@ public class MLAgentsDirector : Agent
     }
     void my_initalize()
     {
+        if (use_debug_mats)
+        {
+            Material RedMatTransparent = (Material)AssetDatabase.LoadAssetAtPath("Assets/materials/RedMatTransparent.mat", typeof(Material));
+            Material WhiteMatTransparent = (Material)AssetDatabase.LoadAssetAtPath("Assets/materials/WhiteMatTransparent.mat", typeof(Material));
+            kinematic_char.GetComponent<UpdateJointPositions>().set_all_material(WhiteMatTransparent);
+            simulated_char.GetComponent<UpdateJointPositions>().set_all_material(RedMatTransparent);
+        }
         MMScript = kinematic_char.GetComponent<mm_v2>();
         if (!MMScript.is_initalized)
             return;
@@ -217,10 +224,13 @@ public class MLAgentsDirector : Agent
         origin_hip_rot = sim_char.bone_to_transform[(int)Bone_Hips].rotation;
         is_initalized = true;
     }
+    Unity.MLAgents.Policies.BehaviorParameters behavior_params;
+    public bool use_debug_mats = false;
     public void Awake()
     {
         Debug.Log("MLAgents Director Awake called");
         // motionDB = new database(Application.dataPath + @"/outputs/database.bin");
+        behavior_params = gameObject.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         if (normalize_observations)
         {
             SimCharController.find_mins_and_maxes(kin_char.bone_to_transform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
@@ -233,7 +243,8 @@ public class MLAgentsDirector : Agent
         Debug.Log("OnEpisodeBegin() called");
         if (motionDB == null) {
             Debug.Log("OnEpisodeBegin motionDB is null");
-            motionDB = new database(Application.dataPath + @"/outputs/database.bin");
+            motionDB = database.Instance;
+            //motionDB = new database(Application.dataPath + @"/outputs/database.bin");
         }
         is_initalized = false;
         //if (kinematic_char != null)
@@ -372,8 +383,32 @@ public class MLAgentsDirector : Agent
     {
         return (f - min) / (max - min + float.Epsilon);
     }
+
+    List<(Vector3 pos, Color color)> gizmoSpheres;
+    private void add_gizmo_sphere(Vector3 v, Color c)
+    {
+        if (gizmoSpheres == null)
+            gizmoSpheres = new List<(Vector3, Color)>();
+        gizmoSpheres.Add((v,c));
+    }
+    private void clear_gizmos()
+    {
+        if (gizmoSpheres != null)
+            gizmoSpheres.Clear();
+    }
+    public bool draw_gizmos = false;
+    private void OnDrawGizmosSelected()
+    {
+        if (gizmoSpheres == null || !draw_gizmos)
+            return;
+        foreach((Vector3 v, Color c) in gizmoSpheres) {
+            Gizmos.color = c;
+            Gizmos.DrawSphere(v, .1f);
+        }
+    }
     double[] get_state()
     {
+        Debug.Log("get_state called");
         double[] state = new double[110];
         int state_idx = 0;
 
@@ -384,6 +419,9 @@ public class MLAgentsDirector : Agent
         if (normalize_observations)
             kin_cm_vel = normalize_vel_vector(kin_cm_vel);
         kin_char.cm_vel = kin_cm_vel;
+        clear_gizmos();
+        add_gizmo_sphere(kin_char.cm, Color.blue);
+        add_gizmo_sphere(new_kin_cm, Color.green);
         kin_char.cm = new_kin_cm;
         copy_vector_into_arr(ref state, ref state_idx, kin_cm_vel);
 

@@ -132,8 +132,8 @@ public class mm_v2 : MonoBehaviour
         if (motionDB == null)
         {
             Debug.Log("mm_v2 sees motion DB is null");
-            motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, frame_increments, ignore_surrounding);
-
+            //motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, frame_increments, ignore_surrounding);
+            motionDB = database.Instance;
         }
         motionDB.database_build_matching_features(
             feature_weight_foot_position,

@@ -78,6 +78,16 @@ public class UpdateJointPositions : MonoBehaviour
                 renderer.material.color = color;
         }
     }
+    public void set_all_material(Material mat)
+    {
+        foreach (Transform t in getAllChildren())
+        {
+            Renderer renderer = t.gameObject.GetComponent<Renderer>();
+            if (renderer != null && renderer.enabled)
+                renderer.material = mat;
+        }
+    }
+
     // -15 15 -15 15
     private Keyboard kboard = Keyboard.current;
     public GameObject hips;

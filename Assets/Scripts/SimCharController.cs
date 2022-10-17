@@ -25,7 +25,9 @@ public class SimCharController : MonoBehaviour
         if (Application.isEditor)
             UnityEditor.EditorWindow.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
         Application.targetFrameRate = 30;
-        motionDB = new database(Application.dataPath + @"/outputs/database.bin");
+        //motionDB = new database(Application.dataPath + @"/outputs/database.bin");
+        motionDB = database.Instance;
+
         for (int i = 0; i < 23; i++)
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
@@ -128,7 +130,8 @@ public class SimCharController : MonoBehaviour
     [ContextMenu("Find max rotations for each dimension for a bone")]
     private void find_rot_limits()
     {
-        motionDB = new database(Application.dataPath + @"/outputs/database.bin" );
+        motionDB = database.Instance;
+        //motionDB = new database(Application.dataPath + @"/outputs/database.bin" );
         int num_frames = motionDB.nframes();
         int j = (int)debug_bone;
         ArticulationBody ab = boneToTransform[j].GetComponent<ArticulationBody>();
@@ -184,7 +187,8 @@ public class SimCharController : MonoBehaviour
         ref Vector3[] bone_vel_mins,
         ref Vector3[] bone_vel_maxes)
     {
-        database motionDB = new database(Application.dataPath + @"/outputs/database.bin");
+        database motionDB = database.Instance;
+        //database motionDB = new database(Application.dataPath + @"/outputs/database.bin");
         int num_frames = motionDB.nframes();
         Vector3 last_cm = Vector3.zero;
         Vector3[] global_pos = new Vector3[23];
