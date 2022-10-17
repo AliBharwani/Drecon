@@ -103,8 +103,8 @@ public class TestDirector : MonoBehaviour
         sim_char.bone_surface_pts = new Vector3[nbodies][];
         sim_char.bone_to_art_body = SimCharController.bone_to_art_body;
 
-        kin_char.bone_local_pos = new Vector3[state_bones.Length];
-        sim_char.bone_local_pos = new Vector3[state_bones.Length];
+        kin_char.bone_world_pos = new Vector3[state_bones.Length];
+        sim_char.bone_world_pos = new Vector3[state_bones.Length];
 
         origin = kin_char.char_trans.position;
         origin_hip_rot = sim_char.bone_to_transform[(int)Bone_Hips].rotation;

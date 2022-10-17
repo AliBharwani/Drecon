@@ -17,8 +17,7 @@ struct char_info
     public ArticulationBody hip_bone;
     public Vector3 cm; // prev center of mass
     public Vector3 cm_vel;
-    public Vector3 pos;
-    public Vector3[] bone_local_pos;
+    public Vector3[] bone_world_pos;
     public Vector3[][] bone_surface_pts;
     public ArticulationBody[] bone_to_art_body;
 }
@@ -201,8 +200,8 @@ public class MLAgentsDirector : Agent
         sim_char.bone_surface_pts = new Vector3[nbodies][];
         sim_char.bone_to_art_body = SimCharController.bone_to_art_body;
 
-        kin_char.bone_local_pos = new Vector3[state_bones.Length];
-        sim_char.bone_local_pos = new Vector3[state_bones.Length];
+        kin_char.bone_world_pos = new Vector3[state_bones.Length];
+        sim_char.bone_world_pos = new Vector3[state_bones.Length];
 
         kin_char.bone_to_collider = new GameObject[nbodies];
         sim_char.bone_to_collider = new GameObject[nbodies];
@@ -310,42 +309,7 @@ public class MLAgentsDirector : Agent
 
         SetReward(final_reward);
     }
-    /*
-     At each control step the policy is provided with a state s in R^110
-    The state contains:
-    Center of Mass velocity in R^3 for kinematic and simulated character
-
-    The desired horizontal CM velocity from user-input is also considered v(des) - R^2
-
-    The diff between current simulated character horizontal
-    CM velocity and v(des) = v(diff) R^2
-
-
-    For a subset of bodies:
-    Left Toe, RightToe, Spine, Head, LeftForeArm, RightForeArm
-    We compute positions and velocities then concatenate these giving s(sim)
-    and s(kin) in R^36
-
-    The smootehd actions produced in the previous step of the policy are collected
-    in y(t-1) in R^25
-
-    Animated character body positions, velocities, CM velocity, and
-    desired CM velocity are resolved in reference frame F(kin), which
-    is formed from the horizontal heading of the kinematic character,
-    the gravity direction, and positioned at the character CM
-        -> Means multiply those by inverse of kin root bone rotation
-
-    The exact same procedure is used for the simulated character positions and
-    velocities, except with a frame F(sim), which is identical to F(kin) in
-    orientation but positioned at the simulated character’s CM position.
-        -> Means multiply by inverse of kin root bone rotation but keep sim position 
-
-    Note that when velocities are decomposed into F(kin) or F(sim), the
-    reference frames are considered to have no angular or linear velocity
-    and acceleration so that global velocity features are measurable in
-    the state.
-     
-     */
+   
     // Roughly 6.81 m/s
     public Vector3 MAX_VELOCITY = new Vector3(4.351938f, 1.454015f, 5.032811f);
     public Vector3 MIN_VELOCITY = new Vector3(-4.351710f, -1.688771f, -4.900798f);
@@ -359,11 +323,11 @@ public class MLAgentsDirector : Agent
     Vector2 MIN_DESIRED_SPEED = new Vector2(-2.5f, -2f);
     Vector2 MAX_DESIRED_SPEED = new Vector2(2.5f, 3f);
 
-    Vector2 normalize_desired_vel_vector(Vector2 vel)
+    Vector2 normalize_desired_vel_vector(Vector3 vel)
     {
         float new_x = normalize_float(vel.x, MIN_DESIRED_SPEED.x, MAX_DESIRED_SPEED.x);
-        float new_y = normalize_float(vel.y, MIN_DESIRED_SPEED.y, MAX_DESIRED_SPEED.y);
-        return new Vector2(new_x, new_y);
+        float new_z = normalize_float(vel.z, MIN_DESIRED_SPEED.y, MAX_DESIRED_SPEED.y);
+        return new Vector3(new_x, 0f, new_z);
     }
     Vector3 normalize_bone_pos(Vector3 pos, int idx)
     {
@@ -385,27 +349,84 @@ public class MLAgentsDirector : Agent
     }
 
     List<(Vector3 pos, Color color)> gizmoSpheres;
+    List<(Vector3 a, Vector3 b, Color color)> gizmoLines;
+
     private void add_gizmo_sphere(Vector3 v, Color c)
     {
         if (gizmoSpheres == null)
             gizmoSpheres = new List<(Vector3, Color)>();
         gizmoSpheres.Add((v,c));
     }
+    private void add_gizmo_line(Vector3 a, Vector3 b, Color color)
+    {
+        if (gizmoLines == null)
+            gizmoLines = new List<(Vector3, Vector3, Color)>();
+        gizmoLines.Add((a, b, color));
+    }
     private void clear_gizmos()
     {
         if (gizmoSpheres != null)
             gizmoSpheres.Clear();
+        if (gizmoLines != null)
+            gizmoLines.Clear();
     }
     public bool draw_gizmos = false;
     private void OnDrawGizmosSelected()
     {
-        if (gizmoSpheres == null || !draw_gizmos)
+        if (!draw_gizmos)
             return;
-        foreach((Vector3 v, Color c) in gizmoSpheres) {
-            Gizmos.color = c;
-            Gizmos.DrawSphere(v, .1f);
+        if (gizmoSpheres != null) { 
+            foreach((Vector3 v, Color c) in gizmoSpheres) {
+                Gizmos.color = c;
+                Gizmos.DrawSphere(v, .1f);
+            }
+        }
+
+        if (gizmoLines != null)
+        {
+            foreach ((Vector3 a, Vector3 b, Color color) in gizmoLines)
+            {
+                Gizmos.color = color;
+                Gizmos.DrawLine(a, b);
+            }
         }
     }
+    /*
+    At each control step the policy is provided with a state s in R^110
+   The state contains:
+   Center of Mass velocity in R^3 for kinematic and simulated character
+
+   The desired horizontal CM velocity from user-input is also considered v(des) - R^2
+
+   The diff between current simulated character horizontal
+   CM velocity and v(des) = v(diff) R^2
+
+
+   For a subset of bodies:
+   Left Toe, RightToe, Spine, Head, LeftForeArm, RightForeArm
+   We compute positions and velocities then concatenate these giving s(sim)
+   and s(kin) in R^36
+
+   The smootehd actions produced in the previous step of the policy are collected
+   in y(t-1) in R^25
+
+   Animated character body positions, velocities, CM velocity, and
+   desired CM velocity are resolved in reference frame F(kin), which
+   is formed from the horizontal heading of the kinematic character,
+   the gravity direction, and positioned at the character CM
+       -> Means multiply those by inverse of kin root bone rotation
+
+   The exact same procedure is used for the simulated character positions and
+   velocities, except with a frame F(sim), which is identical to F(kin) in
+   orientation but positioned at the simulated character’s CM position.
+       -> Means multiply by inverse of kin root bone rotation but keep sim position 
+
+   Note that when velocities are decomposed into F(kin) or F(sim), the
+   reference frames are considered to have no angular or linear velocity
+   and acceleration so that global velocity features are measurable in
+   the state.
+
+    */
     double[] get_state()
     {
         Debug.Log("get_state called");
@@ -416,47 +437,52 @@ public class MLAgentsDirector : Agent
         Vector3 new_kin_cm = get_kinematic_cm(kin_char.bone_to_transform);
         Vector3 kin_cm_vel = (new_kin_cm - kin_char.cm) / deltatime();
         kin_cm_vel = resolve_vel_in_kin_ref_frame(kin_cm_vel);
+        Vector3 kin_cm_vel_normalized = kin_cm_vel;
         if (normalize_observations)
-            kin_cm_vel = normalize_vel_vector(kin_cm_vel);
+            kin_cm_vel_normalized = normalize_vel_vector(kin_cm_vel);
         kin_char.cm_vel = kin_cm_vel;
         clear_gizmos();
-        add_gizmo_sphere(kin_char.cm, Color.blue);
-        add_gizmo_sphere(new_kin_cm, Color.green);
+
         kin_char.cm = new_kin_cm;
-        copy_vector_into_arr(ref state, ref state_idx, kin_cm_vel);
+        copy_vector_into_arr(ref state, ref state_idx, kin_cm_vel_normalized);
 
         // simulated character center of mass
         Vector3 new_sim_cm = sim_char.hip_bone.worldCenterOfMass;
         Vector3 sim_cm_vel = (new_sim_cm - sim_char.cm) / deltatime();
-        if (normalize_observations)
-            sim_cm_vel = normalize_vel_vector(sim_cm_vel);
         sim_cm_vel = resolve_vel_in_kin_ref_frame(sim_cm_vel);
+        Vector3 sim_cm_vel_normalized = sim_cm_vel;
+        if (normalize_observations)
+            sim_cm_vel_normalized = normalize_vel_vector(sim_cm_vel);
         sim_char.cm_vel = sim_cm_vel;
-
+        //add_gizmo_sphere(sim_char.cm, Color.blue);
+        //add_gizmo_sphere(new_sim_cm, Color.green);
         sim_char.cm = new_sim_cm;
-        copy_vector_into_arr(ref state, ref state_idx, sim_cm_vel);
+        copy_vector_into_arr(ref state, ref state_idx, sim_cm_vel_normalized);
 
         // Copy v(sim) - v(kin)
-        copy_vector_into_arr(ref state, ref state_idx, sim_cm_vel - kin_cm_vel);
+        copy_vector_into_arr(ref state, ref state_idx, normalize_observations ? normalize_vel_vector(sim_cm_vel - kin_cm_vel) : sim_cm_vel - kin_cm_vel);
 
 
         // The desired horizontal CM velocity from user-input is also considered v(des) - R^2
-        Vector2 desired_vel = new Vector2(MMScript.desired_velocity.x, MMScript.desired_velocity.z);
+        Vector3 desired_vel = MMScript.desired_velocity;
+        //add_gizmo_line(new_kin_cm, new_kin_cm + desired_vel, Color.blue);
         desired_vel = resolve_vel_in_kin_ref_frame(desired_vel);
+        //Vector2 desired_vel = new Vector2(MMScript.desired_velocity.x, MMScript.desired_velocity.z);
+
+        // Since we resolved in kin ref frame, it should point the "wrong way", not in the direction kin moves
+        // Red and green lines should overlap when char should be moving straight forward
+        //add_gizmo_line(new_kin_cm, new_kin_cm + desired_vel, Color.red);
+        //add_gizmo_line(new_kin_cm, new_kin_cm + Vector3.forward, Color.green);
+        Vector3 desired_vel_normalized = desired_vel;
         if (normalize_observations)
-            desired_vel = normalize_desired_vel_vector(desired_vel);
-        copy_vector_into_arr(ref state, ref state_idx, desired_vel);
+            desired_vel_normalized = normalize_desired_vel_vector(desired_vel);
+        copy_vector_into_arr(ref state, ref state_idx, new Vector2(desired_vel_normalized.x, desired_vel_normalized.z));
 
 
         //The diff between current simulated character horizontal
         //CM velocity and v(des) = v(diff) R ^ 2
-        Vector3 cur_sim_vel = (sim_char.char_trans.position - sim_char.pos) / deltatime();
-        cur_sim_vel = resolve_vel_in_kin_ref_frame(cur_sim_vel);
-        if (normalize_observations)
-            cur_sim_vel = normalize_vel_vector(cur_sim_vel);
-        Vector2 v_diff = new Vector2(desired_vel.x - cur_sim_vel.x, desired_vel.y - cur_sim_vel.z);
-        sim_char.pos = sim_char.char_trans.position;
-        copy_vector_into_arr(ref state, ref state_idx, v_diff);
+        Vector3 v_diff = desired_vel_normalized - sim_cm_vel_normalized;
+        copy_vector_into_arr(ref state, ref state_idx, new Vector2(v_diff.x, v_diff.z));
 
         // we do it once for kin char and once for sim char
         char_info cur_char = kin_char;
@@ -477,8 +503,9 @@ public class MLAgentsDirector : Agent
                 Vector3 bone_world_pos = cur_char.bone_to_transform[(int)bone].position;
                 Vector3 bone_local_pos = i == 0 ? resolve_pos_in_kin_ref_frame(bone_world_pos) : resolve_pos_in_sim_ref_frame(bone_world_pos);
                 //Vector3 bone_relative_pos = Utils.quat_inv_mul_vec3(relative_rot, bone_local_pos);
-                Vector3 prev_bone_pos = cur_char.bone_local_pos[j];
-                Vector3 bone_vel = (bone_local_pos - prev_bone_pos) / deltatime();
+                Vector3 prev_bone_pos = cur_char.bone_world_pos[j];
+                Vector3 bone_vel = (bone_world_pos - prev_bone_pos) / deltatime();
+                bone_vel = resolve_vel_in_kin_ref_frame(bone_vel);
                 if (normalize_observations)
                 {
                     bone_local_pos = normalize_bone_pos(bone_local_pos, j);
@@ -486,7 +513,7 @@ public class MLAgentsDirector : Agent
                 }
                 copy_vector_into_arr(ref copy_into, ref copy_idx, bone_local_pos);
                 copy_vector_into_arr(ref copy_into, ref copy_idx, bone_vel);
-                cur_char.bone_local_pos[j] = bone_local_pos;
+                cur_char.bone_world_pos[j] = bone_world_pos;
 
             }
             // Reset for second loop run with sim car

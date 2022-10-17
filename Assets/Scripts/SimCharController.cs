@@ -223,11 +223,11 @@ public class SimCharController : MonoBehaviour
                 Vector3 bone_pos = global_pos[(int)MLAgentsDirector.state_bones[j]];
                 // Resolve in reference frame (multiply by inverse of root rotation and subtract root position)
                 Vector3 local_bone_pos = Utils.quat_inv_mul_vec3(global_rots[0], bone_pos - cm);
-                Vector3 bone_vel = (local_bone_pos - state_bone_pos[j]) / frame_time;
+                Vector3 bone_vel = (bone_pos - state_bone_pos[j]) / frame_time;
                 // Compare min maxes
                 updated_mins_and_maxes(local_bone_pos,ref  bone_pos_mins[j], ref bone_pos_maxes[j]);
                 updated_mins_and_maxes(bone_vel, ref bone_vel_mins[j], ref bone_vel_maxes[j]);
-                state_bone_pos[j] = local_bone_pos;
+                state_bone_pos[j] = bone_pos;
             }
         }
 
