@@ -429,7 +429,7 @@ public class MLAgentsDirector : Agent
     */
     double[] get_state()
     {
-        Debug.Log("get_state called");
+        // Debug.Log("get_state called");
         double[] state = new double[110];
         int state_idx = 0;
 

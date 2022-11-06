@@ -92,4 +92,12 @@ public static class Utils
     {
         Debug.Log(name + string.Join(" , ", data));
     }
+
+    public static Quaternion[] identityQuatArray(int size)
+    {
+        Quaternion[] ret = new Quaternion[size];
+        for (int i = 0; i < size; i++)
+            ret[i] = Quaternion.identity;
+        return ret;
+    }
 }

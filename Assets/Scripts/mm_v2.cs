@@ -131,7 +131,6 @@ public class mm_v2 : MonoBehaviour
         origin = transform.position;
         if (motionDB == null)
         {
-            Debug.Log("mm_v2 sees motion DB is null");
             //motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, frame_increments, ignore_surrounding);
             motionDB = database.Instance;
         }
@@ -245,38 +244,7 @@ public class mm_v2 : MonoBehaviour
             return;
         Gizmos.color = Color.blue;
         for (int i = 0; i < 4; i++)
-        {
             Gizmos.DrawSphere(trajectory_positions[i], .1f);
-            //if (i > 0)
-            //{
-            //    toy_pointers[i - 1].position = trajectory_positions[i];
-            //    toy_pointers[i - 1].rotation = trajectory_rotations[i];
-            //}
-        }
-        
-        //toy_pointers[1].rotation = simulation_rotation;
-        //toy_pointers[2].rotation = desired_rotation;
-
-        //Gizmos.color = Color.green;
-        //Vector3 root_position = bone_positions[0];
-        //Quaternion root_rotation = bone_rotations[0];
-
-        //Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
-        //Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
-        //Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation,  trajectory_positions[3] - root_position);
-
-        //Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
-        //traj0 = Utils.quat_mul_vec3(root_rotation, traj0) + root_position;
-        ////Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[2] - root_position);
-        //traj1 = Utils.quat_mul_vec3(root_rotation, traj1) + root_position;
-        ////Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[3] - root_position);
-        //traj2 = Utils.quat_mul_vec3(root_rotation, traj2) + root_position;
-
-        //Gizmos.DrawSphere(traj0, .1f);
-        //Gizmos.DrawSphere(traj1, .1f);
-        //Gizmos.DrawSphere(traj2, .1f);
-
-
     }
 
     private void playFrameIdx()
