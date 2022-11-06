@@ -63,13 +63,19 @@ public static class GeoUtils
         }
         return proj_verts;
     }
-    // Projects point b onto line defined by a and b
+    // Projects point p onto line defined by a and b
     public static Vector3 closest_point_on_line(Vector3 a, Vector3 b, Vector3 p)
     {
         Vector3 ap = p - a;
         Vector3 ab = b - a;
         Vector3 result = a + Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab) * ab;
         return result;
+    }
+
+    public static float dist_bt_line_and_point(Vector3 a, Vector3 b, Vector3 p)
+    {
+
+        return 0f;
     }
 
     public static double[] cross(double[,] mat, int col_a_idx, int col_b_idx, bool _normalize = false)

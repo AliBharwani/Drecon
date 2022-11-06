@@ -58,5 +58,6 @@ public static class CapsuleColliderUtils
         float halfHeight = cap.height / 2 - cap.radius;
         var top = cap.transform.TransformPoint(center + halfHeight * Vector3.right);
         var bottom = cap.transform.TransformPoint(center - halfHeight * Vector3.right);
+         GeoUtils.
     }
 } 

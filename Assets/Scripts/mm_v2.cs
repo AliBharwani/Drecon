@@ -552,6 +552,9 @@ public class mm_v2 : MonoBehaviour
         // and rotational velocity in the world space by transforming 
         // the input animation from it's animation space into the 
         // space of the currently playing animation.
+
+        // For world posoition, first we subtract the transition src position. This tells us how far the
+        // 
         Vector3 world_space_position = Utils.quat_mul_vec3(transition_dst_rotation,
             Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position))
                 + transition_dst_position;
