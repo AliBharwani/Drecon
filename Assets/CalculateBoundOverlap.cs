@@ -18,48 +18,53 @@ public class CalculateBoundOverlap : MonoBehaviour
         float [][] bone_to_points = new float[n][];
         gizmo_points = new List<Vector3>();
 
-        // idx 0 = total points,1 = points only in this bone, 2 = points shared bt 1 bones, 3 = points shared bt 2 bones
+        // idx 0 = points only in this bone, 1 = points shared bt 1 other bone, 2 = points shared bt 2 other bones, 3 etc 4 etc
         for (int i = 0; i < n; i++)
-            bone_to_points[i] = new float[4];
+            bone_to_points[i] = new float[5];
 
         int[] bone_collided = new int[n];
         foreach (BoxCollider box in boxes)
         {
             //float min_x, max_x, min_y, max_y, min_z, max_z;
-            Vector3 mins = transform.position + box.transform.TransformPoint(box.center - box.size/2);
-            Vector3 maxes = transform.position + box.transform.TransformPoint(box.center + box.size / 2);
+            Vector3 mins = box.transform.TransformPoint(box.center - box.size/2);
+            Vector3 maxes = box.transform.TransformPoint(box.center + box.size / 2);
             int num_points_checked = 0;
             for (float x = mins.x; x < maxes.x; x += INC)
-                for (float y = mins.y; x < maxes.y; x += INC)
-                    for (float z = mins.z; x < maxes.z; x += INC)
+                for (float y = mins.y; y < maxes.y; y += INC)
+                    for (float z = mins.z; z < maxes.z; z += INC)
                     {
                         Vector3 point = new Vector3(x, y, z);
                         int num_collisions = 0;
-                        for (int i = 0; i < n; i++)
+                        for (int i = 1; i < n; i++)
                         {
                             int collided = check_collision(point, (mm_v2.Bones)i) ? 1 : 0;
                             num_collisions += collided;
                             bone_collided[i] = collided;
                         }
-                        if (num_collisions >= 4)
+                        if (num_collisions > 5)
                             Debug.Log($"Point with {num_collisions} collisions found");
-                        if (num_collisions > 0 && num_collisions < 4)
-                            for (int i = 0; i < n; i++)
-                                bone_to_points[i][num_collisions] += bone_collided[i];
+                        if (num_collisions > 0 && num_collisions <= 5)
+                            for (int i = 1; i < n; i++)
+                                bone_to_points[i][num_collisions - 1] += bone_collided[i];
                         num_points_checked += 1;
                         gizmo_points.Add(point);
                     }
             Debug.Log($"Num points checked: {num_points_checked}");
         }
-        for (int i = 0; i < n; i++)
+        for (int i = 1; i < n; i++)
         {
             float[] weight_dist = bone_to_points[i];
-            float total_collisions = weight_dist[1] + weight_dist[2] + weight_dist[3];
+            float total_collisions = weight_dist[0] + weight_dist[1] + weight_dist[2] + weight_dist[3] + weight_dist[4];
             float full_weight = get_full_weight((mm_v2.Bones)i);
-            float final_weight = (weight_dist[1] / total_collisions) * full_weight +
-                                 (weight_dist[2] / total_collisions) * .5f * full_weight +
-                                (weight_dist[3] / total_collisions) * .33f * full_weight;
-            Debug.Log($"Bone {(mm_v2.Bones)i} full weight: {full_weight} | final_weight: {final_weight}");
+            float final_weight =  (weight_dist[0] / total_collisions) * full_weight +
+                                  (weight_dist[1] / total_collisions) * .5f * full_weight +
+                                  (weight_dist[2] / total_collisions) * .33f * full_weight +
+                                  (weight_dist[3] / total_collisions) * .25f * full_weight +
+                                  (weight_dist[4] / total_collisions) * .2f * full_weight;
+
+            Debug.Log($"Bone {(mm_v2.Bones)i} total_collisions: {total_collisions}  full weight: {full_weight} | final_weight: {final_weight}");
+            Debug.Log($"| weight_dist[0]: {weight_dist[0]} weight_dist[1] : {weight_dist[1]}  weight_dist[2]: {weight_dist[2]} | weight_dist[3]: {weight_dist[3]} | weight_dist[4]: {weight_dist[4]}");
+
         }
     }
     public int AVG_HUMAN_DENSITY = 985; // kg / m^3
@@ -110,12 +115,13 @@ public class CalculateBoundOverlap : MonoBehaviour
             return caps.collision_check(point);
         }
     }
-    bool draw_gizmos = false;
+    public bool draw_gizmos = false;
     List<Vector3> gizmo_points;
     private void OnDrawGizmos()
     {
-        if (gizmo_points == null || !draw_gizmos)
+        if (gizmo_points == null || !draw_gizmos || gizmo_points.Count > 10000)
             return;
+        Gizmos.color = Color.red;
         foreach (Vector3 point in gizmo_points)
             Gizmos.DrawSphere(point, .01f);
     }
@@ -130,7 +136,7 @@ public static class CapsuleColliderUtils
         Vector3 center = cap.center;
         float halfHeight = cap.height / 2 - cap.radius;
         if (halfHeight < 0 || Mathf.Approximately(halfHeight, 0f))
-            return cap.radius >= (point - cap.center).magnitude;
+            return cap.radius >= (point - cap.transform.TransformPoint(center)).magnitude;
         var top = cap.transform.TransformPoint(center + halfHeight * Vector3.right);
         var bottom = cap.transform.TransformPoint(center - halfHeight * Vector3.right);
         return cap.radius >= GeoUtils.dist_bt_point_and_seg(point, top, bottom);
