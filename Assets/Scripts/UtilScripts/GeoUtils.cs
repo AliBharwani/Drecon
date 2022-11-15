@@ -72,12 +72,6 @@ public static class GeoUtils
         return result;
     }
 
-    public static float dist_bt_line_and_point(Vector3 a, Vector3 b, Vector3 p)
-    {
-
-        return 0f;
-    }
-
     public static double[] cross(double[,] mat, int col_a_idx, int col_b_idx, bool _normalize = false)
     {
         double[] a = new double[] { mat[0, col_a_idx], mat[1, col_a_idx], mat[2, col_a_idx] };
@@ -359,5 +353,19 @@ public static class GeoUtils
     {
         angle %= 360;
         return angle > 180 ? angle - 360 : angle;
+    }
+
+    // Computes distance between Point C and line segment created by Point A and B 
+    // Implementation from realtimecollision textbook 
+    public static float dist_bt_point_and_seg(Vector3 c, Vector3 a, Vector3 b)
+    {
+        Vector3 ab = b - a, ac = c - a, bc = c - b;
+        float e = Vector3.Dot(ac, ab);
+        // Handle cases where closest point is a or b
+        if (e <= 0f) return ac.magnitude;
+        float f = ab.sqrMagnitude;
+        if (e >= f) return bc.magnitude;
+        // C projects onto ab
+        return Mathf.Sqrt(ac.sqrMagnitude - e * e / f);
     }
 }
