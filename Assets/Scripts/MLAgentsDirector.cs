@@ -8,7 +8,7 @@ using static mm_v2.Bones;
 using System.Collections;
 using UnityEditor;
 
-struct char_info
+public struct char_info
 {
     public Transform[]  bone_to_transform;
     public GameObject[] bone_to_collider;
@@ -27,6 +27,7 @@ public class MLAgentsDirector : Agent
     public bool use_deltatime = false;
     float frametime = 1f / 30f;
     private bool is_initalized;
+    public bool normalize_action_ouputs = true;
     public bool normalize_observations = false;
     char_info kin_char, sim_char;
     public GameObject kinematic_char;
@@ -35,7 +36,10 @@ public class MLAgentsDirector : Agent
     public GameObject kinematic_char_prefab;
     private mm_v2 MMScript;
     private SimCharController SimCharController;
-    private int nbodies;
+    private int nbodies; 
+    private int evaluate_k_steps = 1;
+    private int cur_step = 0;
+
     float[] prev_action_output = new float[25];
     database motionDB;
 
@@ -63,11 +67,8 @@ public class MLAgentsDirector : Agent
             my_initalize();
             return;
         }
-        double[] cur_state = get_state();
-        foreach (double d in cur_state)
-            sensor.AddObservation((float) d);
+        sensor.AddObservation(get_state());
     }
-
     // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -83,27 +84,107 @@ public class MLAgentsDirector : Agent
            final_actions[i] = ACTION_STIFFNESS_HYPERPARAM * cur_actions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prev_action_output[i];
        prev_action_output = final_actions;
        Quaternion[] cur_rotations = MMScript.bone_rotations;
+
        for (int i = 0; i < full_dof_bones.Length; i ++)
        {
             int bone_idx = (int)full_dof_bones[i];
+            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            if (normalize_action_ouputs)
+            {
+                Vector3 output = new Vector3(final_actions[i * 3], final_actions[i * 3 + 1], final_actions[i * 3 + 2]);
+                Vector3 targetRotationInJointSpace = -(Quaternion.Inverse(ab.anchorRotation) * Quaternion.Inverse(cur_rotations[bone_idx]) * ab.parentAnchorRotation).eulerAngles;
+                targetRotationInJointSpace = new Vector3(
+                        Mathf.DeltaAngle(0, targetRotationInJointSpace.x),
+                        Mathf.DeltaAngle(0, targetRotationInJointSpace.y),
+                        Mathf.DeltaAngle(0, targetRotationInJointSpace.z));
+
+                var xdrive = ab.xDrive;
+                var scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
+                var midpoint = xdrive.lowerLimit + scale;
+                //var normalizedTargetX = (targetRotationInJointSpace.x - midpoint) / scale;
+                //normalizedTargetX += output.x;
+                var outputX = (output.x * scale) + midpoint;
+                xdrive.target = targetRotationInJointSpace.x + outputX;
+                ab.xDrive = xdrive;
+
+                var ydrive = ab.yDrive;
+                 scale = (ydrive.upperLimit - ydrive.lowerLimit) / 2f;
+                 midpoint = ydrive.lowerLimit + scale;
+                //var normalizedTargetY = (targetRotationInJointSpace.y - midpoint) / scale;
+                //normalizedTargetY += output.y;
+                var outputY = (output.y * scale) + midpoint;
+                ydrive.target = targetRotationInJointSpace.y + outputY ;
+                ab.yDrive = ydrive;
+
+                var zdrive = ab.zDrive;
+                scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
+                midpoint = zdrive.lowerLimit + scale;
+                //var normalizedTargetZ = (targetRotationInJointSpace.z - midpoint) / scale;
+                //normalizedTargetZ += output.z;
+                var outputZ = (output.z  * scale) + midpoint;
+                zdrive.target = targetRotationInJointSpace.z + outputZ;
+                ab.zDrive = zdrive;
+                continue;
+            }
             Vector3 scaled_angleaxis = new Vector3(final_actions[i*3], final_actions[i*3 + 1], final_actions[i*3 + 2]);
-            float angle = scaled_angleaxis.magnitude;
+            float angle = scaled_angleaxis.sqrMagnitude;
             // Angle is in range (0,3) => map to (-180, 180)
-            angle = (angle - 1.5f) * 120;
+            angle = (angle * 120) - 180;
             scaled_angleaxis.Normalize();
             Quaternion offset = Quaternion.AngleAxis(angle, scaled_angleaxis);
             Quaternion final = cur_rotations[bone_idx] * offset;
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
             ab.SetDriveRotation(final);
        }
         for (int i = 0; i < limited_dof_bones.Length; i++)
         {
             int bone_idx = (int)limited_dof_bones[i];
-            // Angle is in range (-1, 1) => map to (-180, 180)
-            float angle = final_actions[i] * 180;
+            bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            int final_actions_idx = i + 21;
+
+            if (normalize_action_ouputs)
+            {
+                float output = final_actions[final_actions_idx];
+                // parent anchor rotation = q(ab) 
+                // anchor rotation = q(a) 
+                // target local = q(c) 
+                // need q(x) s.t. a * x = a * c
+                // 
+                Vector3 targetRotationInJointSpace = -(Quaternion.Inverse(ab.anchorRotation) * Quaternion.Inverse(cur_rotations[bone_idx]) * ab.parentAnchorRotation).eulerAngles;
+                targetRotationInJointSpace = new Vector3(
+                        Mathf.DeltaAngle(0, targetRotationInJointSpace.x),
+                        Mathf.DeltaAngle(0, targetRotationInJointSpace.y),
+                        Mathf.DeltaAngle(0, targetRotationInJointSpace.z));
+                Vector3 targetEuler = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
+                Vector3 test = (Quaternion.Inverse(ab.anchorRotation) * cur_rotations[bone_idx]).eulerAngles;
+                if (use_xdrive)
+                {
+                    Debug.Log($"{limited_dof_bones[i]} target euler: {targetEuler} | targetRot: {targetRotationInJointSpace} | test: {test} | Current x drive target: {ab.xDrive.target}");
+                    var xdrive = ab.xDrive;
+                    var scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
+                    var midpoint = xdrive.lowerLimit + scale;
+                    //var normalizedTargetX = (targetRotationInJointSpace.x - midpoint) / scale;
+                    //normalizedTargetX += output.x;
+                    var outputX = (output * scale) + midpoint;
+                    xdrive.target = targetRotationInJointSpace.x + outputX;
+                    ab.xDrive = xdrive;
+
+                } else
+                {
+                    var zdrive = ab.zDrive;
+                    var scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
+                    var midpoint = zdrive.lowerLimit + scale;
+                    //var normalizedTargetZ = (targetRotationInJointSpace.z - midpoint) / scale;
+                    //normalizedTargetZ += output.z;
+                    var outputZ = (output * scale) + midpoint;
+                    zdrive.target = targetRotationInJointSpace.z + outputZ;
+                    ab.zDrive = zdrive;
+                }
+                continue;
+            }
+            // Angle is in range (-1, 1) => map to (-180, 180)
+            float angle = final_actions[final_actions_idx] * 180;
             Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
-            bool use_xdrive = limited_dof_bones[i] ==  Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
             if (use_xdrive)
             {
                 ArticulationDrive drive = ab.xDrive;
@@ -123,6 +204,7 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
             ab.SetDriveRotation(final);
         }
+        set_rewards();
     }
     public override void Heuristic(in ActionBuffers actionsout)
     {
@@ -141,7 +223,7 @@ public class MLAgentsDirector : Agent
         {
             int bone_idx = (int)full_dof_bones[i];
             //Vector3 scaled_angleaxis = new Vector3(final_actions[i * 3], final_actions[i * 3 + 1], final_actions[i * 3 + 2]);
-            //float angle = scaled_angleaxis.magnitude;
+            //float angle = scaled_angleaxis.sqrMagnitude;
             // Angle is in range (0,3) => map to (-180, 180)
             //angle = (angle - 1.5f) * 120;
             //scaled_angleaxis.Normalize();
@@ -150,14 +232,14 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
             ab.SetDriveRotation(final);
         }
-        for (int i = 21; i < limited_dof_bones.Length; i++)
+        for (int i = 0; i < limited_dof_bones.Length; i++)
         {
-            int bone_idx = (int)limited_dof_bones[i];
+            mm_v2.Bones bone =  limited_dof_bones[i];
             // Angle is in range (-1, 1) => map to (-180, 180)
             //float angle = final_actions[i] * 180;
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
-            Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
-            bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
+            ArticulationBody ab = sim_char.bone_to_art_body[(int)bone];
+            Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[(int) bone]);
+            bool use_xdrive = bone == Bone_LeftLeg || bone == Bone_RightLeg;
             if (use_xdrive)
             {
                 ArticulationDrive drive = ab.xDrive;
@@ -176,14 +258,21 @@ public class MLAgentsDirector : Agent
     {
         if (use_debug_mats)
         {
-            Material RedMatTransparent = (Material)AssetDatabase.LoadAssetAtPath("Assets/materials/RedMatTransparent.mat", typeof(Material));
-            Material WhiteMatTransparent = (Material)AssetDatabase.LoadAssetAtPath("Assets/materials/WhiteMatTransparent.mat", typeof(Material));
-            kinematic_char.GetComponent<UpdateJointPositions>().set_all_material(WhiteMatTransparent);
-            simulated_char.GetComponent<UpdateJointPositions>().set_all_material(RedMatTransparent);
+            Material RedMatTransparent, WhiteMatTransparent;
+#if UNITY_EDITOR
+            RedMatTransparent = (Material)AssetDatabase.LoadAssetAtPath("Assets/Resources/RedMatTransparent.mat", typeof(Material));
+            WhiteMatTransparent = (Material)AssetDatabase.LoadAssetAtPath("Assets/Resources/WhiteMatTransparent.mat", typeof(Material));
+#else
+            RedMatTransparent = Resources.Load<Material>("RedMatTransparent.mat");
+            WhiteMatTransparent = Resources.Load<Material>("WhiteMatTransparent.mat");
+#endif
+            kinematic_char.GetComponent<ArtBodyTester>().set_all_material(WhiteMatTransparent);
+            simulated_char.GetComponent<ArtBodyTester>().set_all_material(RedMatTransparent);
         }
         MMScript = kinematic_char.GetComponent<mm_v2>();
         if (!MMScript.is_initalized)
             return;
+        MMScript.use_deltatime = use_deltatime;
         kin_char = new char_info();
         kin_char.char_trans = kinematic_char.transform;
         kin_char.bone_to_transform = MMScript.boneToTransform;
@@ -209,66 +298,47 @@ public class MLAgentsDirector : Agent
         {
             if (i == (int)Bone_LeftFoot || i == (int)Bone_RightFoot)
             {
-                kin_char.bone_to_collider[i] = UpdateJointPositions.getChildBoxCollider(kin_char.bone_to_transform[i].gameObject);
-                sim_char.bone_to_collider[i] = UpdateJointPositions.getChildBoxCollider(sim_char.bone_to_transform[i].gameObject);
+                kin_char.bone_to_collider[i] = ArtBodyTester.getChildBoxCollider(kin_char.bone_to_transform[i].gameObject);
+                sim_char.bone_to_collider[i] = ArtBodyTester.getChildBoxCollider(sim_char.bone_to_transform[i].gameObject);
             } else { 
-                kin_char.bone_to_collider[i] = UpdateJointPositions.getChildCapsuleCollider(kin_char.bone_to_transform[i].gameObject);
-                sim_char.bone_to_collider[i] = UpdateJointPositions.getChildCapsuleCollider(sim_char.bone_to_transform[i].gameObject);
+                kin_char.bone_to_collider[i] = ArtBodyTester.getChildCapsuleCollider(kin_char.bone_to_transform[i].gameObject);
+                sim_char.bone_to_collider[i] = ArtBodyTester.getChildCapsuleCollider(sim_char.bone_to_transform[i].gameObject);
             }
             kin_char.bone_surface_pts[i] = new Vector3[6];
             sim_char.bone_surface_pts[i] = new Vector3[6];
         }
 
-        origin = kin_char.char_trans.position;
-        origin_hip_rot = sim_char.bone_to_transform[(int)Bone_Hips].rotation;
+        if (normalize_observations)
+            SimCharController.find_mins_and_maxes(kin_char.bone_to_transform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
         is_initalized = true;
     }
     Unity.MLAgents.Policies.BehaviorParameters behavior_params;
     public bool use_debug_mats = false;
     public void Awake()
     {
-        Debug.Log("MLAgents Director Awake called");
+        //Debug.Log("MLAgents Director Awake called");
+        //Application.targetFrameRate = 30;
         // motionDB = new database(Application.dataPath + @"/outputs/database.bin");
         behavior_params = gameObject.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
-        if (normalize_observations)
-        {
-            SimCharController.find_mins_and_maxes(kin_char.bone_to_transform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
-        }
+        if (motionDB == null)
+            motionDB = database.Instance;
         kinematic_char = Instantiate(kinematic_char_prefab, Vector3.zero, Quaternion.identity);
+        simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
+        my_initalize();
     }
 
     public override void OnEpisodeBegin()
     {
-        Debug.Log("OnEpisodeBegin() called");
-        if (motionDB == null) {
-            Debug.Log("OnEpisodeBegin motionDB is null");
-            motionDB = database.Instance;
-            //motionDB = new database(Application.dataPath + @"/outputs/database.bin");
-        }
-        is_initalized = false;
-        //if (kinematic_char != null)
-        //    Destroy(kinematic_char);
-        if (simulated_char != null)
-            Destroy(simulated_char);
-        // Setup the kinematic character
-        // kinematic_char = Instantiate(kinematic_char_prefab, Vector3.zero, Quaternion.identity);
-        // kinematic_char.GetComponent<mm_v2>().motionDB = motionDB;
-        // Setup the sim character
-        if (kinematic_char != null)
-        {
-            simulated_char = Instantiate(simulated_char_prefab, kinematic_char.transform.position, kinematic_char.transform.rotation);
-            ArticulationBody sim_hip = simulated_char.GetComponent<SimCharController>().bone_to_art_body[(int)Bone_Hips];
-            Transform[] kin_bone_to_transform = kinematic_char.GetComponent<mm_v2>().boneToTransform;
-            sim_hip.TeleportRoot(sim_hip.gameObject.transform.position, kin_bone_to_transform[(int)Bone_Hips].localRotation);
-        } else
-        {
-            simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
-        }
-        // simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
-        my_initalize();
+        //Debug.Log("OnEpisodeBegin() called");
+        //if (motionDB == null) 
+        //    motionDB = database.Instance;
+        //is_initalized = false;
+        //MMScript.Reset();
+        //MMScript.FixedUpdate();
+        SimCharController.teleport_sim_char(sim_char, kin_char);
+        return;
     }
-    Vector3 origin;
-    Quaternion origin_hip_rot;
+
 
     private void FixedUpdate()
     {
@@ -277,15 +347,16 @@ public class MLAgentsDirector : Agent
             return;
         }
         // Make sure to teleport sim character if kin character teleported
-        bool teleport_sim = MMScript.teleported_last_frame;
-        if (teleport_sim)
+        if (MMScript.teleported_last_frame)
         {
             sim_char.char_trans.rotation = kin_char.char_trans.rotation;
-            sim_char.hip_bone.TeleportRoot(origin, kin_char.bone_to_transform[(int)Bone_Hips].rotation);
+            sim_char.hip_bone.TeleportRoot(Vector3.zero, kin_char.bone_to_transform[(int)Bone_Hips].rotation);
         }
+            //SimCharController.teleport_sim_char(sim_char, kin_char);
         // request Decision
-        RequestDecision();
-        set_rewards();
+        if (cur_step % evaluate_k_steps == 0)
+            RequestDecision();
+        cur_step++;
     }
 
     private void set_rewards()
@@ -427,10 +498,10 @@ public class MLAgentsDirector : Agent
    the state.
 
     */
-    double[] get_state()
+    float[] get_state()
     {
         // Debug.Log("get_state called");
-        double[] state = new double[110];
+        float[] state = new float[110];
         int state_idx = 0;
 
         // kinematic character center of mass
@@ -490,11 +561,11 @@ public class MLAgentsDirector : Agent
         //Vector3 relative_cm = kin_cm;
         //Quaternion relative_rot = kin_char.char_trans.rotation;
         //Vector3[] prev_bone_local_pos = prev_kin_bone_local_pos;
-        double[] s_sim, s_kin;
-        s_sim = new double[36];
-        s_kin = new double[36];
+        float[] s_sim, s_kin;
+        s_sim = new float[36];
+        s_kin = new float[36];
         int copy_idx = 0;
-        double[] copy_into = s_kin;
+        float[] copy_into = s_kin;
         for (int i = 0; i < 2; i++) {
             for(int j = 0; j < state_bones.Length; j++)
             {
@@ -558,7 +629,7 @@ public class MLAgentsDirector : Agent
     }
     float deltatime()
     {
-        return use_deltatime ? Time.deltaTime : frametime;
+        return use_deltatime ? Time.fixedDeltaTime : frametime;
     }
     // Velocity is different in that we only need to make its rotation
     // local to the kinematic character, whereas with pos we also need to
@@ -579,14 +650,14 @@ public class MLAgentsDirector : Agent
         return Utils.quat_inv_mul_vec3(kin_char.char_trans.rotation, pos - sim_char.cm);
     }
 
-    void copy_vector_into_arr(ref double[] state, ref int start_idx, Vector3 v)
+    void copy_vector_into_arr(ref float[] state, ref int start_idx, Vector3 v)
     {
         state[start_idx] = v.x;
         state[start_idx + 1] = v.y;
         state[start_idx + 2] = v.z;
         start_idx += 3;
     }
-    void copy_vector_into_arr(ref double[] state, ref int start_idx, Vector2 v)
+    void copy_vector_into_arr(ref float[] state, ref int start_idx, Vector2 v)
     {
         state[start_idx] = v.x;
         state[start_idx + 1] = v.y;

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static mm_v2.Bones;
-public class CalculateBoundOverlap : MonoBehaviour
+public class CalculateBoneMasses : MonoBehaviour
 {
 
     public float INC = .001f;
@@ -10,8 +10,8 @@ public class CalculateBoundOverlap : MonoBehaviour
     public GameObject[] bone_to_collider;
     public Transform[] bone_to_transform;
 
-    [ContextMenu("Calculate bounding overlaps")]
-    void calculateBoundingOverlaps()
+    [ContextMenu("setAllArticulationBodyMasses")]
+    void setAllArticulationBodyMasses()
     {
         init_bone_colliders();
         int n = 23; // num bones
@@ -41,15 +41,15 @@ public class CalculateBoundOverlap : MonoBehaviour
                             num_collisions += collided;
                             bone_collided[i] = collided;
                         }
-                        if (num_collisions > 5)
-                            Debug.Log($"Point with {num_collisions} collisions found");
+                        //if (num_collisions > 5)
+                        //    Debug.Log($"Point with {num_collisions} collisions found");
                         if (num_collisions > 0 && num_collisions <= 5)
                             for (int i = 1; i < n; i++)
                                 bone_to_points[i][num_collisions - 1] += bone_collided[i];
                         num_points_checked += 1;
                         gizmo_points.Add(point);
                     }
-            Debug.Log($"Num points checked: {num_points_checked}");
+            //Debug.Log($"Num points checked: {num_points_checked}");
         }
         for (int i = 1; i < n; i++)
         {
@@ -62,8 +62,11 @@ public class CalculateBoundOverlap : MonoBehaviour
                                   (weight_dist[3] / total_collisions) * .25f * full_weight +
                                   (weight_dist[4] / total_collisions) * .2f * full_weight;
 
-            Debug.Log($"Bone {(mm_v2.Bones)i} total_collisions: {total_collisions}  full weight: {full_weight} | final_weight: {final_weight}");
-            Debug.Log($"| weight_dist[0]: {weight_dist[0]} weight_dist[1] : {weight_dist[1]}  weight_dist[2]: {weight_dist[2]} | weight_dist[3]: {weight_dist[3]} | weight_dist[4]: {weight_dist[4]}");
+            //Debug.Log($"Bone {(mm_v2.Bones)i} total_collisions: {total_collisions}  full weight: {full_weight} | final_weight: {final_weight}");
+            ArticulationBody ab = bone_to_transform[i].GetComponent<ArticulationBody>();
+            if (ab != null)
+                ab.mass = final_weight;
+            //Debug.Log($"| weight_dist[0]: {weight_dist[0]} weight_dist[1] : {weight_dist[1]}  weight_dist[2]: {weight_dist[2]} | weight_dist[3]: {weight_dist[3]} | weight_dist[4]: {weight_dist[4]}");
 
         }
     }
@@ -94,9 +97,9 @@ public class CalculateBoundOverlap : MonoBehaviour
         for (int i = 0; i < nbodies; i++)
         {
             if (i == (int)Bone_LeftFoot || i == (int)Bone_RightFoot)  
-                bone_to_collider[i] = UpdateJointPositions.getChildBoxCollider(bone_to_transform[i].gameObject);
+                bone_to_collider[i] = ArtBodyTester.getChildBoxCollider(bone_to_transform[i].gameObject);
             else
-                bone_to_collider[i] = UpdateJointPositions.getChildCapsuleCollider(bone_to_transform[i].gameObject);
+                bone_to_collider[i] = ArtBodyTester.getChildCapsuleCollider(bone_to_transform[i].gameObject);
             
         }
 

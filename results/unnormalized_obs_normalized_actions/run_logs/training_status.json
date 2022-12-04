@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 3199975,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3199975.onnx",
+                "reward": 3.1771894824214097,
+                "creation_time": 1669538882.1355636,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3199975.pt"
+                ]
+            },
+            {
+                "steps": 3299983,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3299983.onnx",
+                "reward": 3.156976628907119,
+                "creation_time": 1669539606.7626066,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3299983.pt"
+                ]
+            },
+            {
+                "steps": 3399965,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3399965.onnx",
+                "reward": 3.024923584391089,
+                "creation_time": 1669540325.438209,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3399965.pt"
+                ]
+            },
+            {
+                "steps": 3499991,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3499991.onnx",
+                "reward": 2.772539601174753,
+                "creation_time": 1669541046.531445,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3499991.pt"
+                ]
+            },
+            {
+                "steps": 3599972,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3599972.onnx",
+                "reward": 3.6229256855622505,
+                "creation_time": 1669541763.6576068,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3599972.pt"
+                ]
+            },
+            {
+                "steps": 3699985,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3699985.onnx",
+                "reward": 3.890014295578003,
+                "creation_time": 1669542476.6119306,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3699985.pt"
+                ]
+            },
+            {
+                "steps": 3799989,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3799989.onnx",
+                "reward": 3.1462070083728544,
+                "creation_time": 1669543189.3931396,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3799989.pt"
+                ]
+            },
+            {
+                "steps": 3899969,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3899969.onnx",
+                "reward": 2.8827095254892257,
+                "creation_time": 1669543903.1297626,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3899969.pt"
+                ]
+            },
+            {
+                "steps": 3999982,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3999982.onnx",
+                "reward": 3.227685759584588,
+                "creation_time": 1669544618.187096,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-3999982.pt"
+                ]
+            },
+            {
+                "steps": 4074928,
+                "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-4074928.onnx",
+                "reward": 2.9316107799757773,
+                "creation_time": 1669576596.2279809,
+                "auxillary_file_paths": [
+                    "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-4074928.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 4074928,
+            "file_path": "results\\unnormalized_obs_normalized_actions\\Drecon.onnx",
+            "reward": 2.9316107799757773,
+            "creation_time": 1669576596.2279809,
+            "auxillary_file_paths": [
+                "results\\unnormalized_obs_normalized_actions\\Drecon\\Drecon-4074928.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

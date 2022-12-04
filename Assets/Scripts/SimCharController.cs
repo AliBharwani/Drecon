@@ -19,46 +19,34 @@ public class SimCharController : MonoBehaviour
     public float damping = 3f;
     public float force_limit = 200f;
 
-
     void Start()
     {
+#if UNITY_EDITOR
         if (Application.isEditor)
             UnityEditor.EditorWindow.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
-        Application.targetFrameRate = 30;
+#endif
+
+        //Application.targetFrameRate = 30;
         //motionDB = new database(Application.dataPath + @"/outputs/database.bin");
         motionDB = database.Instance;
 
+        initBoneToArtBodies();
+    }
+
+    public void initBoneToArtBodies()
+    {
         for (int i = 0; i < 23; i++)
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
-            bool disable_bone = false;
-            if (!apply_all_local_rots && !bones_to_apply.Contains(bone))
-                disable_bone = true;
             ArticulationBody ab = boneToTransform[i].GetComponent<ArticulationBody>();
             bone_to_art_body[i] = ab;
-            if (ab == null)
-                continue;
-            if (disable_bone)
-            {
-                if (ab.isRoot)
-                    ab.immovable = true;
-                ab.useGravity = false;
-                ab.jointType = ArticulationJointType.FixedJoint;
-            }
-            else if (set_art_bodies)
-            {
-
-            }
-            else
-            {
-                ab.enabled = false;
-            }
         }
     }
-        void FixedUpdate()
+
+    void FixedUpdate()
     {
-        frameIdx++;
-        playFrameIdx();
+       // frameIdx++;
+        //playFrameIdx();
     }
 
     private void playFrameIdx()
@@ -106,6 +94,104 @@ public class SimCharController : MonoBehaviour
 
         }
 
+    }
+
+    public static database db;
+    public static bool[] anchor_rot_found = new bool[23];
+    public static Quaternion[] bone_anchor_rot = new Quaternion[23];
+    public static Quaternion get_bone_parent_rotation(int bone_idx, ArticulationBody[] bone_to_art_body)
+    {
+        bool is_hip = (mm_v2.Bones)bone_idx == mm_v2.Bones.Bone_Hips;
+        if (anchor_rot_found[bone_idx] == true || is_hip)
+            return is_hip ? Quaternion.identity : bone_anchor_rot[bone_idx];
+        if (db == null)
+            db = database.Instance;
+        int parent_idx = db.bone_parents[bone_idx];
+        Quaternion grandparent_rotation = get_bone_parent_rotation(parent_idx, bone_to_art_body);
+        Quaternion parent_rotation = grandparent_rotation * bone_to_art_body[bone_idx].parentAnchorRotation;
+        Debug.Log($"{(mm_v2.Bones)bone_idx}'s parent's rotation is  {(mm_v2.Bones)parent_idx}'s parent's rotation times current parentAnchorRotation");
+        bone_anchor_rot[bone_idx] = parent_rotation;
+        anchor_rot_found[bone_idx] = true;
+        return parent_rotation;
+    }
+
+    public static void teleport_sim_char(char_info sim_char, char_info kin_char)
+    {
+//        if (db == null)
+//        {
+//#if UNITY_EDITOR
+//            db = new database();
+//#else
+//            db = database.Instance;
+//#endif
+//        }
+
+        //Destroy(simulated_char);
+        //simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
+        //my_initalize();
+        sim_char.char_trans.rotation = kin_char.char_trans.rotation;
+        Transform kin_hip = kin_char.bone_to_transform[(int)mm_v2.Bones.Bone_Hips];
+        sim_char.hip_bone.TeleportRoot(kin_hip.position, kin_hip.rotation);
+        sim_char.hip_bone.resetJointPhysics();
+        //Quaternion[] global_ab_rots = new Quaternion[23];
+        //global_ab_rots[1] = sim_char.hip_bone.anchorRotation;
+        for (int i = 2; i < 23; i++)
+        {
+            ArticulationBody body = sim_char.bone_to_art_body[i];
+            //Quaternion parent_anchor_rot = get_bone_parent_rotation(i, sim_char.bone_to_art_body);// global_ab_rots[i - 1];
+            //global_ab_rots[i] = parent_anchor_rot * body.anchorRotation;
+            if (body.jointType != ArticulationJointType.SphericalJoint)
+            {
+                body.resetJointPhysics();
+                continue;
+            }
+            Quaternion targetLocalRot = kin_char.bone_to_transform[i].localRotation;
+            // from https://github.com/Unity-Technologies/marathon-envs/blob/58852e9ac22eac56ca46d1780573cc6c32278a71/UnitySDK/Assets/MarathonEnvs/Scripts/ActiveRagdoll003/DebugJoints.cs
+            Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles;
+            //TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot);
+            //TargetRotationInJointSpace = (Quaternion.Inverse(body.anchorRotation) * targetLocalRot * body.parentAnchorRotation).eulerAngles;
+            //TargetRotationInJointSpace = (targetLocalRot * Quaternion.Inverse(body.anchorRotation)).eulerAngles;
+            TargetRotationInJointSpace = new Vector3(
+                Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
+                Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
+                Mathf.DeltaAngle(0, TargetRotationInJointSpace.z)) * Mathf.Deg2Rad;
+
+            if (body.dofCount == 3)
+            {
+                //if (body.twistLock == ArticulationDofLock.LockedMotion)
+                //    TargetRotationInJointSpace.x = 0f;
+                //if (body.swingYLock == ArticulationDofLock.LockedMotion)
+                //    TargetRotationInJointSpace.y = 0f;
+                //if (body.swingZLock == ArticulationDofLock.LockedMotion)
+                //    TargetRotationInJointSpace.z = 0f;
+                body.resetJointPosition(TargetRotationInJointSpace);
+            }
+            else if (body.dofCount == 1)
+            {
+                float new_target = 0f;
+                if (body.twistLock != ArticulationDofLock.LockedMotion)
+                    new_target = TargetRotationInJointSpace.x;
+                else if (body.swingYLock != ArticulationDofLock.LockedMotion)
+                    new_target = TargetRotationInJointSpace.y;
+                else if (body.swingZLock != ArticulationDofLock.LockedMotion)
+                    new_target = TargetRotationInJointSpace.z;
+                body.resetJointPosition(new_target);
+            }
+        }
+
+    }
+
+    internal void remove_joint_limits(ArticulationBody[] bodies)
+    {
+        for(int i = 1; i < 23; i++)
+        {
+            var body = bodies[i];
+            if (body.isRoot || !(body.jointType != ArticulationJointType.SphericalJoint))
+                continue;
+            body.twistLock = ArticulationDofLock.FreeMotion;
+            body.swingYLock = ArticulationDofLock.FreeMotion;
+            body.swingZLock = ArticulationDofLock.FreeMotion;
+        }
     }
     [ContextMenu("Setup art bodies")]
     void setup_art_bodies()

@@ -144,6 +144,33 @@ public static class ArtBodyUtils
             return angle > 180 ? angle - 360 : angle;
         }
     }
+    public static void resetJointPosition(this ArticulationBody body, Vector3 newJointPositions)
+    {
+        if (body.jointType != ArticulationJointType.SphericalJoint)
+            throw new System.Exception("Attempting to reset joint phyiscs with Vector3 on non spherical articulation body: " + body.gameObject.name);
+        body.jointPosition = new ArticulationReducedSpace(newJointPositions.x, newJointPositions.y, newJointPositions.z);
+        body.jointAcceleration = new ArticulationReducedSpace(0f, 0f, 0f);
+        body.jointVelocity = new ArticulationReducedSpace(0f, 0f, 0f);
+        body.jointForce = new ArticulationReducedSpace(0f, 0f, 0f);
+        body.velocity = Vector3.zero;
+        body.angularVelocity = Vector3.zero;
+    }
+    public static void resetJointPosition(this ArticulationBody body, float newJointPosition)
+    {
+        if (body.dofCount != 1)
+            throw new System.Exception($"Attempting to reset joint phyiscs with float on non articulation body with != 1 DOF: DOF: {body.dofCount} name: {body.gameObject.name}");
+        body.jointPosition = new ArticulationReducedSpace(newJointPosition);
+        body.jointAcceleration = new ArticulationReducedSpace(0);
+        body.jointVelocity = new ArticulationReducedSpace(0);
+        body.jointForce = new ArticulationReducedSpace(0);
+        body.velocity = Vector3.zero;
+        body.angularVelocity = Vector3.zero;
+    }
 
+    public static void resetJointPhysics(this ArticulationBody body)
+    {
+        body.velocity = Vector3.zero;
+        body.angularVelocity = Vector3.zero;
+    }
 
 }

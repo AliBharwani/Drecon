@@ -69,6 +69,12 @@ public class database : MonoBehaviour
         }
     }
 
+    public database(string filename = null )
+    {
+        filename = filename == null ? Application.dataPath + @"/outputs/database.bin" : filename;
+        init_database(filename);
+    }
+
     public void init_database(string filename, int _num_neigh = 1, int _frame_increments = 10, int _ignore_surrounding = 20)
     {
         Debug.Log($"Creating motion database");

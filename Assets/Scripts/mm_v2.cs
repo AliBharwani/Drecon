@@ -10,7 +10,7 @@ public class mm_v2 : MonoBehaviour
     private float frametime = 1f / 30f;
     public bool gen_inputs = true;
     public float MAX_WANDERING_RADIUS = 10f;
-    public float prob_to_change_inputs = 60f;
+    private float prob_to_change_inputs = .001f;
     public enum Bones
     {
         Bone_Entity = 0,
@@ -45,7 +45,6 @@ public class mm_v2 : MonoBehaviour
     public float feature_weight_trajectory_directions = 1.5f;
     public float inertialize_blending_halflife = 0.1f;
     public float simulation_rotation_halflife = .1f;
-    public bool abTest = true;
     public float MoveSpeed = 3;
     public int frame_increments = 10;
     public int ignore_surrounding = 10;
@@ -118,17 +117,23 @@ public class mm_v2 : MonoBehaviour
     // ====================== Stuff added for ML
     Vector2 random_lstick_input;
     Vector3 origin;
+    Quaternion origin_rot;
+    float time_since_last_check = 0f;
     bool is_strafing;
     [HideInInspector]
     public bool teleported_last_frame = false;
     [HideInInspector]
     public bool is_initalized = false;
-
+    internal bool debug_move_every_second = false;
+    float time_since_last_move = 0f;
     void Awake()
     {
         gamepad = Gamepad.current;
-        Application.targetFrameRate = 30;
+        //Application.targetFrameRate = 300;
         origin = transform.position;
+        origin_rot = transform.rotation;
+        //Debug.Log($"Origin is set as {origin}");
+
         if (motionDB == null)
         {
             //motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, frame_increments, ignore_surrounding);
@@ -141,7 +146,13 @@ public class mm_v2 : MonoBehaviour
             feature_weight_trajectory_positions,
             feature_weight_trajectory_directions);
         numBones = motionDB.nbones();
+        init();
+        is_initalized = true;
+    }
 
+    void init()
+    {
+        //Debug.Log($"Init called, frame idx is currently {frameIdx}");
         curr_bone_positions = motionDB.bone_positions[frameIdx];
         curr_bone_velocities = motionDB.bone_velocities[frameIdx];
         curr_bone_rotations = motionDB.bone_rotations[frameIdx];
@@ -151,11 +162,19 @@ public class mm_v2 : MonoBehaviour
         trns_bone_velocities = motionDB.bone_velocities[frameIdx];
         trns_bone_rotations = motionDB.bone_rotations[frameIdx];
         trns_bone_angular_velocities = motionDB.bone_angular_velocities[frameIdx];
-
-        bone_positions = motionDB.bone_positions[frameIdx];
-        bone_velocities = motionDB.bone_velocities[frameIdx];
-        bone_rotations = motionDB.bone_rotations[frameIdx];
-        bone_angular_velocities = motionDB.bone_angular_velocities[frameIdx];
+        //Debug.Log($"motionDB.bone_positions[frameIdx][0] {motionDB.bone_positions[frameIdx][0]}");
+        bone_positions = new Vector3[numBones];
+        bone_velocities = new Vector3[numBones];
+        bone_rotations = new Quaternion[numBones];
+        bone_angular_velocities = new Vector3[numBones];
+        System.Array.Copy(motionDB.bone_positions[frameIdx], bone_positions, numBones);
+        System.Array.Copy(motionDB.bone_velocities[frameIdx], bone_velocities, numBones);
+        System.Array.Copy(motionDB.bone_rotations[frameIdx], bone_rotations, numBones);
+        System.Array.Copy(motionDB.bone_angular_velocities[frameIdx], bone_angular_velocities, numBones);
+        //bone_positions = motionDB.bone_positions[frameIdx];
+        //bone_velocities = motionDB.bone_velocities[frameIdx];
+        //bone_rotations = motionDB.bone_rotations[frameIdx];
+        //bone_angular_velocities = motionDB.bone_angular_velocities[frameIdx];
 
         bone_offset_positions = new Vector3[numBones];
         bone_offset_velocities = new Vector3[numBones];
@@ -179,7 +198,6 @@ public class mm_v2 : MonoBehaviour
         trajectory_rotations = identityQuatArray(4);
         trajectory_angular_velocities = new Vector3[4];
         random_lstick_input = Random.insideUnitCircle;
-        prob_to_change_inputs = 1f / prob_to_change_inputs;
         simulation_position = origin;
         inertialize_pose_reset(bone_positions[0], bone_rotations[0]);
         inertialize_pose_update(
@@ -190,15 +208,71 @@ public class mm_v2 : MonoBehaviour
             inertialize_blending_halflife,
             0f
         );
-        is_initalized = true;
+        time_since_last_check = 0f;
+    }
+    public void Reset()
+    {
+        //Debug.Log("Reset called");
+        frameIdx = 0;
+        frameCounter = 1;
+        //transform.position = origin;
+        //transform.rotation = origin_rot;
+        simulation_velocity = Vector3.zero;
+        simulation_acceleration = Vector3.zero;
+        simulation_rotation = Quaternion.identity;
+        simulation_angular_velocity = Vector3.zero;
+        desired_velocity = Vector3.zero;
+        desired_rotation = Quaternion.identity;
+        init();
+    }
+    internal void set_random_pose()
+    {
+
+        if (motionDB == null)
+        {
+            motionDB = new database();
+            bone_parents = motionDB.bone_parents;
+            numBones = motionDB.nbones();
+
+            global_bone_positions = new Vector3[numBones];
+            global_bone_rotations = identityQuatArray(numBones);
+            //motionDB = database.Instance;
+        }
+        // Set bone positions and bone rotations
+        int random_frame = (int)Random.Range(0f, motionDB.numframes - 1);
+        bone_positions = motionDB.bone_positions[random_frame];
+        bone_rotations = motionDB.bone_rotations[random_frame];
+        forward_kinematics_full();
+        apply_global_pos_and_rot();
     }
 
-    void FixedUpdate()
+    bool should_gen_inputs()
     {
+        if (!gen_inputs)
+            return false;
+        time_since_last_check += Time.fixedDeltaTime;
+        if (time_since_last_check > 1f / 60f)
+        {
+            time_since_last_check = 0f;
+            return Random.value <= prob_to_change_inputs;
+        }
+        return false;
+    }
+
+    internal void FixedUpdate()
+    {
+        if (debug_move_every_second && Time.realtimeSinceStartup > 2f)
+        {
+            time_since_last_move += Time.fixedDeltaTime;
+            if (time_since_last_move > 2)
+                time_since_last_move = 0f;
+             else
+                return;
+        }
         teleported_last_frame = false;
         // Update if we are reading from user input (ie not generating random rotations) or we are
         // generating random inputs and every frame the user changes desires with P(.001)
-        if (gen_inputs && Random.value <= prob_to_change_inputs) {
+        if (should_gen_inputs()) {
             //Debug.Log("Genning new inputs!");
             random_lstick_input = Random.insideUnitCircle;
             // Random chance of making desired rotation face direction of velocity  
@@ -224,16 +298,18 @@ public class mm_v2 : MonoBehaviour
         // Get the desired velocity
 
         trajectory_desired_rotations_predict();
-        trajectory_rotations_predict(frame_increments * (use_deltatime ? Time.fixedDeltaTime : frametime));
+        trajectory_rotations_predict(frame_increments * (deltatime()));
         trajectory_desired_velocities_predict();
-        trajectory_positions_predict(frame_increments * (use_deltatime ? Time.fixedDeltaTime : frametime));
+        trajectory_positions_predict(frame_increments * (deltatime()));
         if (search)
         {
             // Search database and update frame idx 
             motionMatch();
         }
+        else
+            frameIdx++;
         //motionDB.setDataToFrame(ref local_bone_positions, ref local_bone_rotations, frameIdx);
-        frameIdx++;
+        //frameIdx++;
         playFrameIdx();
         frameCounter++;
     }
@@ -261,7 +337,7 @@ public class mm_v2 : MonoBehaviour
             curr_bone_angular_velocities,
             inertialize_blending_halflife,
             //1f/30f
-            (use_deltatime ? Time.deltaTime : frametime)
+            deltatime()
             );
         simulation_positions_update(
             ref simulation_position,
@@ -269,13 +345,13 @@ public class mm_v2 : MonoBehaviour
             ref simulation_acceleration,
             desired_velocity,
             simulation_velocity_halflife,
-            (use_deltatime ? Time.deltaTime : frametime));
+            deltatime());
         simulation_rotations_update(
             ref simulation_rotation,
             ref simulation_angular_velocity,
             desired_rotation,
             simulation_rotation_halflife,
-            (use_deltatime ? Time.deltaTime : frametime));
+            deltatime());
         //inertialize_root_adjust(ref bone_offset_positions[0], ref bone_positions[0], ref bone_rotations[0], simulation_position, simulation_rotation);
         forward_kinematics_full();
         apply_global_pos_and_rot();
@@ -540,6 +616,13 @@ public class mm_v2 : MonoBehaviour
     {
         return Vector3.Distance(origin, pos) > MAX_WANDERING_RADIUS;
     }
+
+    private Vector3 get_world_space_position()
+    {
+        return Utils.quat_mul_vec3(transition_dst_rotation,
+            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_positions[0] - transition_src_position))
+                + transition_dst_position; 
+    }
     private void inertialize_pose_update(
         in Vector3[] bone_input_positions,
         in Vector3[] bone_input_velocities,
@@ -625,6 +708,8 @@ public class mm_v2 : MonoBehaviour
     }
     private void inertialize_pose_reset(Vector3 root_position, Quaternion root_rotation)
     {
+        //Debug.Log($"Intertialize pose reset called w root position: {root_position}");
+
         bone_offset_positions = new Vector3[numBones];
         bone_offset_velocities = new Vector3[numBones];
         bone_offset_rotations = identityQuatArray(numBones);
@@ -767,11 +852,15 @@ public class mm_v2 : MonoBehaviour
         //boneToTransform[0].rotation *= Quaternion.AngleAxis( 180f, Vector3.forward);
     }
 
-    private Quaternion[] identityQuatArray(int size)
+    public static Quaternion[] identityQuatArray(int size)
     {
         Quaternion[] ret = new Quaternion[size];
         for (int i = 0; i < size; i++)
             ret[i] = Quaternion.identity;
         return ret;
+    }
+    float deltatime()
+    {
+        return use_deltatime ? Time.fixedDeltaTime : frametime;
     }
 }

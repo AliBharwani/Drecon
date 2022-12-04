@@ -1,4 +1,4 @@
-using System;
+using System.Linq;
 using UnityEngine;
 using static mm_v2.Bones;
 
@@ -6,8 +6,8 @@ public class TestDirector : MonoBehaviour
 {
     private bool is_initalized;
     char_info kin_char, sim_char;
-    public GameObject kinematic_char;
-    public GameObject simulated_char;
+    private GameObject kinematic_char;
+    private GameObject simulated_char;
     public GameObject simulated_char_prefab;
     public GameObject kinematic_char_prefab;
 
@@ -22,11 +22,12 @@ public class TestDirector : MonoBehaviour
     public static mm_v2.Bones[] state_bones = new mm_v2.Bones[]
     {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
     [HideInInspector]
-    public static mm_v2.Bones[] full_dof_bones = new mm_v2.Bones[]
-    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Spine};
+    public static mm_v2.Bones[] all_full_dof_bones = new mm_v2.Bones[]
+    //{ Bone_LeftArm, Bone_RightArm, };
+    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Spine,  Bone_Spine1, Bone_Spine2, Bone_Neck,  Bone_LeftHand, Bone_RightHand};
     [HideInInspector]
-    public static mm_v2.Bones[] limited_dof_bones = new mm_v2.Bones[]
-    {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftToe, Bone_RightToe };
+    public static mm_v2.Bones[] all_limited_dof_bones = new mm_v2.Bones[]
+    {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftToe, Bone_RightToe, Bone_LeftForeArm, Bone_RightForeArm};
 
     [HideInInspector]
     public static mm_v2.Bones[] openloop_bones = new mm_v2.Bones[]
@@ -36,19 +37,18 @@ public class TestDirector : MonoBehaviour
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public void apply_action()
     {
-        if (!is_initalized)
-        {
-            my_initalize();
-            return;
-        }
+        //if (!is_initalized)
+        //{
+        //    my_initalize();
+        //    return;
+        //}
         Quaternion[] cur_rotations = MMScript.bone_rotations;
-        for (int i = 0; i < limited_dof_bones.Length; i++)
+        for (int i = 0; i < all_limited_dof_bones.Length; i++)
         {
-            int bone_idx = (int)limited_dof_bones[i];
-            // Angle is in range (-1, 1) => map to (-180, 180)
+            int bone_idx = (int)all_limited_dof_bones[i];
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
             Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
-            bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
+            bool use_xdrive = all_limited_dof_bones[i] == Bone_LeftLeg || all_limited_dof_bones[i] == Bone_RightLeg;
             if (use_xdrive)
             {
                 ArticulationDrive drive = ab.xDrive;
@@ -62,13 +62,13 @@ public class TestDirector : MonoBehaviour
                 ab.zDrive = drive;
             }
         }
-        for (int i = 0; i < full_dof_bones.Length; i++)
+        for (int i = 0; i < all_full_dof_bones.Length; i++)
         {
-            int bone_idx = (int)full_dof_bones[i];
+            int bone_idx = (int)all_full_dof_bones[i];
             // Debug.Log($"Cur bone rotations length - {cur_rotations.Length} - bone_idx : {bone_idx}");
             Quaternion final = cur_rotations[bone_idx];
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
-            Debug.Log($"Setting drive rotation for ab: {ab.gameObject.name}");
+            //Debug.Log($"Setting drive rotation for ab: {ab.gameObject.name}");
             ab.SetDriveRotation(final);
         }
 
@@ -77,7 +77,7 @@ public class TestDirector : MonoBehaviour
             int bone_idx = (int)openloop_bones[i];
             Quaternion final = cur_rotations[bone_idx];
             ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
-            Debug.Log($"Setting drive rotation for ab: {ab.gameObject.name}");
+            //Debug.Log($"Setting drive rotation for ab: {ab.gameObject.name}");
             ab.SetDriveRotation(final);
         }
     }
@@ -85,7 +85,7 @@ public class TestDirector : MonoBehaviour
     void my_initalize()
     {
         MMScript = kinematic_char.GetComponent<mm_v2>();
-        if (!MMScript.is_initalized)
+        if (!MMScript.is_initalized && !Application.isEditor)
             return;
         kin_char = new char_info();
         kin_char.char_trans = kinematic_char.transform;
@@ -95,6 +95,8 @@ public class TestDirector : MonoBehaviour
         kin_char.bone_surface_pts = new Vector3[nbodies][];
 
         SimCharController = simulated_char.GetComponent<SimCharController>();
+        if (Application.isEditor)
+            SimCharController.initBoneToArtBodies();
         sim_char = new char_info();
         sim_char.char_trans = simulated_char.transform;
         sim_char.bone_to_transform = SimCharController.boneToTransform;
@@ -117,24 +119,56 @@ public class TestDirector : MonoBehaviour
         kinematic_char = Instantiate(kinematic_char_prefab, Vector3.zero, Quaternion.identity);
         // Setup the sim character
         simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
+        //Application.targetFrameRate = 60;
     }
 
     void Start()
     {
         my_initalize();
+        MMScript.debug_move_every_second = true;
+        SimCharController.remove_joint_limits(sim_char.bone_to_art_body);
     }
 
     Vector3 origin;
     Quaternion origin_hip_rot;
+    [ContextMenu("create_and_set_kin_char")]
+    private void create_and_set_kin_char()
+    {
+        if (kinematic_char == null)
+            kinematic_char = Instantiate(kinematic_char_prefab, Vector3.zero, Quaternion.identity);
+        MMScript = kinematic_char.GetComponent<mm_v2>();
+        MMScript.set_random_pose();
 
+    }
+    public float physicsSimulateTime = .01f;
+    [ContextMenu("Set sim char to match kin char")]
+    private void create_and_set_sim_char()
+    {
+        //Physics.autoSimulation = false;
+        if (simulated_char == null)
+            simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
+        my_initalize();
+        SimCharController.teleport_sim_char(sim_char, kin_char);
+        Physics.Simulate(physicsSimulateTime);
+    }
+    [ContextMenu("reset")]
+    private void delete_sim_char()
+    {
+        DestroyImmediate(simulated_char);
+        DestroyImmediate(kinematic_char);
+        kinematic_char = null;
+        simulated_char = null;
+    }
+
+    int frame = 0;
     private void FixedUpdate()
     {
-        Debug.Log($"Is initalized: {is_initalized}");
-        if (!is_initalized)
-        {
-            my_initalize();
-            return;
+        if (frame % 5 == 0) {
+            SimCharController.teleport_sim_char(sim_char, kin_char);//teleport_sim_char();
+            //create_and_set_kin_char();
+            //Destroy(MMScript);
         }
+        return;
         apply_action();
         // Make sure to teleport sim character if kin character teleported
         bool teleport_sim = MMScript.teleported_last_frame;
@@ -144,6 +178,10 @@ public class TestDirector : MonoBehaviour
             sim_char.hip_bone.TeleportRoot(origin, origin_hip_rot);
         }
         return;
+    }
+    private void Update()
+    {
+        frame++;
     }
 
 }

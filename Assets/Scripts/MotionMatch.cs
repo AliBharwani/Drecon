@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 public class MotionMatch : MonoBehaviour
 {
     public bool use_deltatime = false;
-    private float frametime = 1f / 30f;
+    //private float frametime = 1f / 30f;
     public bool gen_inputs = true;
     public float MAX_WANDERING_RADIUS = 10f;
     public float prob_to_change_inputs = 60f;
@@ -94,7 +94,7 @@ public class MotionMatch : MonoBehaviour
     void Awake()
     {
         gamepad = Gamepad.current;
-        Application.targetFrameRate = 30;
+        //Application.targetFrameRate = 30;
         origin = transform.position;
         if (motionDB == null)
         {

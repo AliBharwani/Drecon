@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class UpdateJointPositions : MonoBehaviour
+public class ArtBodyTester : MonoBehaviour
 {
     public int target_fr = 5;
     public bool set_target_fr = false;
@@ -14,12 +14,14 @@ public class UpdateJointPositions : MonoBehaviour
     {
         if (set_target_fr)
             Application.targetFrameRate = target_fr;
+#if UNITY_EDITOR
         if (Application.isEditor && scene_view_on_start)
         {
             UnityEditor.EditorWindow.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
         }
+#endif
         //if (debug == 0)
-        //    return;
+        //    return; 
         if (debug == 2)
         {
             disable_all_art_bodies_except_debug();
@@ -60,14 +62,9 @@ public class UpdateJointPositions : MonoBehaviour
     }
     public Material selected_material;
     [ContextMenu("Set All Material Colors To Selected Material")]
-    public void set_all_material_colors_white()
+    public void set_all_material_colors_to_selected_mat()
     {
-        foreach (Transform t in getAllChildren())
-        {
-            Renderer renderer = t.gameObject.GetComponent<Renderer>();
-            if (renderer != null && renderer.enabled)
-                renderer.material = selected_material;
-        }
+        set_all_material(selected_material);
     } 
     public void set_all_material_colors(Color color)
     {
@@ -88,7 +85,6 @@ public class UpdateJointPositions : MonoBehaviour
         }
     }
 
-    // -15 15 -15 15
     private Keyboard kboard = Keyboard.current;
     public GameObject hips;
     public float torque = .1f;
@@ -130,8 +126,8 @@ public class UpdateJointPositions : MonoBehaviour
     public GameObject[] bones;
     public int debug;
     public int AVG_HUMAN_DENSITY = 985; // kg / m^3
-    [ContextMenu("Update all articulation bodies centers")]
-    private void setAllArticulationBodies()
+    [ContextMenu("Update all articulation bodies anchors")]
+    private void set_articulation_body_anchors()
     {
         resetGizmos();
         for (int i = 0; i < bones.Length; i++)
@@ -157,59 +153,7 @@ public class UpdateJointPositions : MonoBehaviour
         }
     }
 
-
-
-    [ContextMenu("Update all articulation bodies masses")]
-
-    private void setAllMasses()
-    {
-        List<Transform> all = getAllChildren();
-        float total_mass = 0;
-        foreach(Transform t in all)
-        {
-            ArticulationBody ab = t.gameObject.GetComponent<ArticulationBody>();
-            if (ab == null)
-                continue;
-            float volume;
-            GameObject capsule_obj = getChildCapsuleCollider(t.gameObject);
-            if (capsule_obj != null)
-            {
-                volume = GeoUtils.GetCapsuleVolume(capsule_obj.GetComponent<CapsuleCollider>());
-            } else
-            {
-                GameObject box_obj = getChildBoxCollider(t.gameObject);
-                if (box_obj == null)
-                    continue;
-                BoxCollider bc = box_obj.GetComponent<BoxCollider>();
-                volume = bc.size.x * bc.size.y * bc.size.z;
-            }
-            if (volume < 0)
-                Debug.Log($"{t.gameObject.name} has negative volume");
-            //Debug.Log($"{t.gameObject.name} has volume {volume}");
-            ab.mass = volume * AVG_HUMAN_DENSITY;
-            total_mass += ab.mass;
-        }
-        Debug.Log($"Total mass: {total_mass}");
-    }
-
     public Transform debug_to_local_pos;
-
-    [ContextMenu("Print tippy top of Capsule")]
-    private void printCapsuleTippyTop()
-    {
-        GameObject child = getChildCapsuleCollider(FindDeepChild());
-        CapsuleCollider cap = child.GetComponent<CapsuleCollider>();
-        Vector3 center = cap.center;
-        float halfHeight = cap.height / 2;
-        var top = child.transform.TransformPoint(center + halfHeight * Vector3.right);
-        var bottom = child.transform.TransformPoint(center - halfHeight * Vector3.right);
-        Debug.Log($"Top: {top.ToString("f6")} | Bottom: {bottom.ToString("f6")}");
-        var local_top = debug_to_local_pos.InverseTransformPoint(top);
-        var local_bot = debug_to_local_pos.InverseTransformPoint(bottom);
-        Debug.Log($"In local coords: top: {local_top.ToString("f6")} bottom: {local_bot.ToString("f6")}");
-        addGizmoSphere(top);
-        //addGizmoSphere(bottom);
-    }
 
     [ContextMenu("Disable all visualizers")]
     private void disable_all_capsule_renderers()
@@ -250,7 +194,17 @@ public class UpdateJointPositions : MonoBehaviour
         addGizmoSphere(top);
         //addGizmoSphere(bottom);
     }
-
+    [ContextMenu("Set all art bodies to use gravity")]
+    private void set_art_bodies_use_gravity()
+    {
+        List<Transform> all = getAllChildren();
+        foreach (Transform t in all)
+        {
+            var ab = t.gameObject.GetComponent<ArticulationBody>();
+            if (ab != null)
+                ab.useGravity = true;
+        }
+    }
 
     [ContextMenu("Reset gizmos")]
     private void resetGizmos()

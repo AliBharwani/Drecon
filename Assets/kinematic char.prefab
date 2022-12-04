@@ -984,7 +984,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  use_deltatime: 0
+  use_deltatime: 1
   gen_inputs: 1
   MAX_WANDERING_RADIUS: 10
   prob_to_change_inputs: 60
@@ -1031,6 +1031,7 @@ MonoBehaviour:
   - {fileID: 7359794960830430102}
   - {fileID: 5107416141246503917}
   - {fileID: 6624601450024259959}
+  motionDB: {fileID: 0}
   bone_rotations: []
   desired_velocity: {x: 0, y: 0, z: 0}
   teleported_last_frame: 0

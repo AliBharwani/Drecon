@@ -25,11 +25,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.213
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.37
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1030,8 +1030,8 @@ ArticulationBody:
   m_GameObject: {fileID: 828532449249486166}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 19.642708
-  m_ParentAnchorPosition: {x: -0.12588106, y: -7.166818e-10, z: 0.000000008498505}
+  m_Mass: 11.849134
+  m_ParentAnchorPosition: {x: -0.12588106, y: -7.166818e-10, z: 1.16602e-10}
   m_ParentAnchorRotation: {x: 0, y: 0.0000004172325, z: 0.00024360418, w: 1}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1071,7 +1071,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!1 &993718570042830121 stripped
 GameObject:
@@ -1087,8 +1087,8 @@ ArticulationBody:
   m_GameObject: {fileID: 993718570042830121}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 1
-  m_ParentAnchorPosition: {x: -0.173, y: -0.000000029802322, z: 0.00000004600428}
+  m_Mass: 0.0053723427
+  m_ParentAnchorPosition: {x: -0.173, y: -0.000000029802322, z: -0.00000001360036}
   m_ParentAnchorRotation: {x: -0.000022316563, y: -0.000015193746, z: 0.5631326, w: 0.8263666}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
@@ -1149,7 +1149,7 @@ ArticulationBody:
   m_GameObject: {fileID: 1132167594955317350}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.14866123
+  m_Mass: 0.13312024
   m_ParentAnchorPosition: {x: -0.12126742, y: -0.0035406481, z: -0.039631598}
   m_ParentAnchorRotation: {x: -0.0040372782, y: -0.005844451, z: 0.6957181, w: 0.7182798}
   m_AnchorPosition: {x: -0.00886007, y: -0.003917441, z: -0.039501168}
@@ -1190,7 +1190,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!4 &1500721974564023196 stripped
 Transform:
@@ -1221,8 +1221,8 @@ ArticulationBody:
   m_GameObject: {fileID: 1831162360222045762}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.6826062
-  m_ParentAnchorPosition: {x: -0.019516408, y: 0.07323423, z: -0.117682695}
+  m_Mass: 0.6182399
+  m_ParentAnchorPosition: {x: -0.019516408, y: 0.07323423, z: -0.11768277}
   m_ParentAnchorRotation: {x: -0.008726642, y: 0.999962, z: 0.00000028312206, w: 0.00000017881393}
   m_AnchorPosition: {x: 0.017525133, y: 0.054970186, z: 0.012197763}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1262,7 +1262,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!1 &1904586241674194021 stripped
 GameObject:
@@ -1365,8 +1365,8 @@ ArticulationBody:
   m_GameObject: {fileID: 2336223390907340623}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 1.7700031
-  m_ParentAnchorPosition: {x: -0.25832897, y: -0.000000033717086, z: -0.00000011333457}
+  m_Mass: 1.2105039
+  m_ParentAnchorPosition: {x: -0.25832897, y: -0.000000033717086, z: 2.8680766e-10}
   m_ParentAnchorRotation: {x: -0.0000004172325, y: 0.000000029802322, z: 0.025024593, w: 0.99968684}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1406,7 +1406,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!1 &2421684698170206382 stripped
 GameObject:
@@ -1422,7 +1422,7 @@ ArticulationBody:
   m_GameObject: {fileID: 2421684698170206382}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.015498733
+  m_Mass: 0.015482886
   m_ParentAnchorPosition: {x: -0.24740401, y: -0.009929431, z: -0.010191576}
   m_ParentAnchorRotation: {x: -0.000003606081, y: -0.000027993694, z: -0.000015836209, w: 1.0000002}
   m_AnchorPosition: {x: 0.0045935023, y: -0.009930603, z: -0.010196129}
@@ -1463,7 +1463,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!4 &2524662342284585249 stripped
 Transform:
@@ -1484,8 +1484,8 @@ ArticulationBody:
   m_GameObject: {fileID: 2549151624471946115}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 19.642698
-  m_ParentAnchorPosition: {x: -0.12343204, y: 0.00000003630325, z: -0.00000008612653}
+  m_Mass: 15.041358
+  m_ParentAnchorPosition: {x: -0.12343204, y: 0.00000003630325, z: 2.0795176e-11}
   m_ParentAnchorRotation: {x: 0.000000059604645, y: -0.00000074505806, z: 0.0030195713, w: 0.99999547}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1525,7 +1525,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!1 &2578837153396138982 stripped
 GameObject:
@@ -1581,6 +1581,32 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
   m_PrefabInstance: {fileID: 3145691377191050888}
   m_PrefabAsset: {fileID: 0}
+--- !u!65 &297290903
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2839190218147783641}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 0.49, y: 1.9, z: 0.4}
+  m_Center: {x: 0, y: 0.92, z: 0.02}
+--- !u!65 &297290904
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2839190218147783641}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 1.8604076, y: 0.2, z: 0.16}
+  m_Center: {x: 0, y: 1.44, z: -0.03}
 --- !u!114 &297290907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1607,6 +1633,33 @@ MonoBehaviour:
   min_rad: 0.005
   draw_gizmos: 0
   do_not_filter: 0
+--- !u!114 &297290910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2839190218147783641}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 921a4c10a06ed784ba8364db43bd9a1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target_fr: 5
+  set_target_fr: 0
+  scene_view_on_start: 1
+  test_obj: {fileID: 0}
+  selected_material: {fileID: 0}
+  hips: {fileID: 0}
+  torque: 0.1
+  child_str: 
+  draw_gizmos: 0
+  gizmoSphereRad: 0.01
+  gizmoSpheres: []
+  bones: []
+  debug: 0
+  AVG_HUMAN_DENSITY: 985
+  debug_to_local_pos: {fileID: 0}
 --- !u!114 &364380266375844084
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1624,7 +1677,7 @@ MonoBehaviour:
   set_target_velocities: 0
   frameIdx: 500
   bones_to_apply: 1000000011000000120000001400000015000000160000000a0000000b0000000c0000000d0000000e0000000f00000013000000
-  debug_bone: 5
+  debug_bone: 9
   boneToTransform:
   - {fileID: 3183205843433044323}
   - {fileID: 3860585276555842962}
@@ -1677,44 +1730,72 @@ MonoBehaviour:
   stiffness: 100
   damping: 20
   force_limit: 200
---- !u!114 &7069632750438841426
+--- !u!114 &3282222037220238322
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2839190218147783641}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 921a4c10a06ed784ba8364db43bd9a1d, type: 3}
+  m_Script: {fileID: 11500000, guid: 98ebf9e4b7a7c47febcbf5e232db877a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target_fr: 5
-  set_target_fr: 0
-  scene_view_on_start: 1
-  test_obj: {fileID: 4910789067727814284}
-  selected_material: {fileID: 0}
-  hips: {fileID: 5391228334716195300}
-  torque: 0.1
-  child_str: Model:LeftForeArm
-  draw_gizmos: 1
-  gizmoSphereRad: 0.03
-  gizmoSpheres: []
-  bones:
-  - {fileID: 8767857822973082416}
-  - {fileID: 4910789067727814284}
-  - {fileID: 1831162360222045762}
-  - {fileID: 9067366343690682249}
-  - {fileID: 4433874829562620935}
-  - {fileID: 1132167594955317350}
-  - {fileID: 4118498621590371189}
-  - {fileID: 5751607993963203360}
-  - {fileID: 4583827688868643611}
-  - {fileID: 2421684698170206382}
-  - {fileID: 8694770521652114834}
-  debug: 2
+  INC: 0.01
+  boxes:
+  - {fileID: 297290904}
+  - {fileID: 297290903}
+  bone_to_collider:
+  - {fileID: 0}
+  - {fileID: 5432198775081988987}
+  - {fileID: 4514021562654873641}
+  - {fileID: 1904586241674194021}
+  - {fileID: 4457069194433489983}
+  - {fileID: 4392477894161880145}
+  - {fileID: 6450221430967275324}
+  - {fileID: 2578837153396138982}
+  - {fileID: 6387561477541963652}
+  - {fileID: 5953596051953825791}
+  - {fileID: 2909911722488416811}
+  - {fileID: 5133594216617308083}
+  - {fileID: 7150972241592453040}
+  - {fileID: 5647937818243349568}
+  - {fileID: 2992199167114644190}
+  - {fileID: 7663205160126568420}
+  - {fileID: 5907926919719615342}
+  - {fileID: 2920571847165532718}
+  - {fileID: 2190272623914907960}
+  - {fileID: 2157736301672877638}
+  - {fileID: 655205822015854158}
+  - {fileID: 4526133321041268292}
+  - {fileID: 8525206097679634873}
+  bone_to_transform:
+  - {fileID: 3183205843433044323}
+  - {fileID: 3860585276555842962}
+  - {fileID: 5674827124357274012}
+  - {fileID: 5941875768147877809}
+  - {fileID: 1543283012345462251}
+  - {fileID: 1583270424832409077}
+  - {fileID: 3372012781306034078}
+  - {fileID: 6056670402659763736}
+  - {fileID: 3640794888219912348}
+  - {fileID: 3638882258659002917}
+  - {fileID: 7590756810146796065}
+  - {fileID: 5379888693329535536}
+  - {fileID: 3603934493291661466}
+  - {fileID: 2939923788674917902}
+  - {fileID: 6087626700901023526}
+  - {fileID: 714101693782852782}
+  - {fileID: 2142218043122893321}
+  - {fileID: 5603073145050728045}
+  - {fileID: 7729697899601786265}
+  - {fileID: 5711711208964621441}
+  - {fileID: 4813399412326534964}
+  - {fileID: 7065778573295349583}
+  - {fileID: 9151543335565272533}
   AVG_HUMAN_DENSITY: 985
-  debug_to_local_pos: {fileID: 3640794888219912348}
+  draw_gizmos: 0
 --- !u!4 &2870062021235750932 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 897130671458477724, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
@@ -1931,9 +2012,9 @@ ArticulationBody:
   m_GameObject: {fileID: 4118498621590371189}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.059817202
-  m_ParentAnchorPosition: {x: -0.31166482, y: -0.015932871, z: 0.00836646}
-  m_ParentAnchorRotation: {x: -0.0000005229376, y: -0.000000011175871, z: 0.04797841, w: 0.99884874}
+  m_Mass: 0.056312628
+  m_ParentAnchorPosition: {x: -0.31166488, y: -0.015932871, z: 0.00836646}
+  m_ParentAnchorRotation: {x: -0.0000005825277, y: -0.000000014901161, z: 0.0479784, w: 0.9988486}
   m_AnchorPosition: {x: 0.016724085, y: -0.017616961, z: 0.00836615}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
   m_MatchAnchors: 1
@@ -2027,8 +2108,8 @@ ArticulationBody:
   m_GameObject: {fileID: 4433874829562620935}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.14647658
-  m_ParentAnchorPosition: {x: -0.12139225, y: -0.003990826, z: 0.04048848}
+  m_Mass: 0.13085671
+  m_ParentAnchorPosition: {x: -0.12139228, y: -0.003990826, z: 0.04048848}
   m_ParentAnchorRotation: {x: -0.0014372289, y: 0.006989825, z: -0.015952138, w: 0.9998476}
   m_AnchorPosition: {x: -0.00898251, y: -0.004386695, z: 0.04035405}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -2143,11 +2224,11 @@ ArticulationBody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4583827688868643611}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.016262075
-  m_ParentAnchorPosition: {x: -0.575833, y: -0.034869302, z: 0.010552261}
-  m_ParentAnchorRotation: {x: -0.00000055271084, y: -0.000000014901161, z: 0.047978356, w: 0.9988487}
+  m_Mass: 0.016246194
+  m_ParentAnchorPosition: {x: -0.24804285, y: -0.011146679, z: 0.0105519155}
+  m_ParentAnchorRotation: {x: 0.0000001488952, y: -0.0000000055879354, z: -0.00000013783574, w: 1.0000002}
   m_AnchorPosition: {x: 0.003957213, y: -0.011146844, z: 0.010551877}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
   m_MatchAnchors: 1
@@ -2232,7 +2313,7 @@ ArticulationBody:
   m_GameObject: {fileID: 4910789067727814284}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.19049655
+  m_Mass: 0.18553929
   m_ParentAnchorPosition: {x: -0.4328437, y: 0.007608307, z: -0.00095125753}
   m_ParentAnchorRotation: {x: -0.0185102, y: 0.70686454, z: -0.018510073, w: -0.7068644}
   m_AnchorPosition: {x: 0.0025515717, y: 0.0074853385, z: -0.0009512337}
@@ -2246,7 +2327,7 @@ ArticulationBody:
   m_SwingZ: 0
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -10
+    lowerLimit: 0
     upperLimit: 150
     stiffness: 100
     damping: 20
@@ -2273,7 +2354,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!1 &4921058561376045733 stripped
 GameObject:
@@ -2338,7 +2419,7 @@ ArticulationBody:
   m_GameObject: {fileID: 5391228334716195300}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 20.171213
+  m_Mass: 14.159232
   m_ParentAnchorPosition: {x: 1.8436734e-14, y: 0.9317413, z: -0.04283123}
   m_ParentAnchorRotation: {x: 0, y: 0.7071068, z: 0, w: -0.7071068}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
@@ -2379,7 +2460,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!4 &5401636536461503673 stripped
 Transform:
@@ -2449,8 +2530,8 @@ ArticulationBody:
   m_GameObject: {fileID: 5617117370454975823}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.1399712
-  m_ParentAnchorPosition: {x: -0.19745907, y: -0.01480367, z: 0.06000097}
+  m_Mass: 0.10167554
+  m_ParentAnchorPosition: {x: -0.19745907, y: -0.01480367, z: 0.06000105}
   m_ParentAnchorRotation: {x: -0.70206845, y: -0.009738363, z: 0.7119062, w: -0.013967053}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -2540,7 +2621,7 @@ ArticulationBody:
   m_GameObject: {fileID: 5751607993963203360}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.059794728
+  m_Mass: 0.056340016
   m_ParentAnchorPosition: {x: -0.31173688, y: -0.01580367, z: -0.008095232}
   m_ParentAnchorRotation: {x: -0.034079622, y: 0.70620555, z: 0.03377216, w: 0.70637983}
   m_AnchorPosition: {x: 0.016663376, y: -0.017478006, z: -0.008106989}
@@ -2581,7 +2662,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!4 &5756640863410363343 stripped
 Transform:
@@ -2655,8 +2736,8 @@ ArticulationBody:
   m_GameObject: {fileID: 6015171175632296834}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 14.893609
-  m_ParentAnchorPosition: {x: -0.069019616, y: -0.02603729, z: 0}
+  m_Mass: 7.1856103
+  m_ParentAnchorPosition: {x: -0.069019616, y: -0.02603729, z: -0.0000000037252903}
   m_ParentAnchorRotation: {x: -0.000000029802322, y: -0.000000029802322, z: -0.04355377, w: 0.9990511}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -2696,7 +2777,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!4 &6056670402659763736 stripped
 Transform:
@@ -2717,8 +2798,8 @@ ArticulationBody:
   m_GameObject: {fileID: 6075882774001658755}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.1399712
-  m_ParentAnchorPosition: {x: -0.19746093, y: -0.014803755, z: -0.060000822}
+  m_Mass: 0.101697624
+  m_ParentAnchorPosition: {x: -0.19746093, y: -0.014803755, z: -0.060000747}
   m_ParentAnchorRotation: {x: 0.70206946, y: 0.009738356, z: 0.7119049, w: -0.013966948}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -2779,8 +2860,8 @@ ArticulationBody:
   m_GameObject: {fileID: 6219476216320110426}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 4.0115294
-  m_ParentAnchorPosition: {x: -0.4092246, y: 0.028721074, z: 0.021013098}
+  m_Mass: 1.210343
+  m_ParentAnchorPosition: {x: -0.4092246, y: 0.028721074, z: 0.021012994}
   m_ParentAnchorRotation: {x: -0.000000029802322, y: -0.000000029802322, z: -0.5788106, w: 0.815462}
   m_AnchorPosition: {x: -0.022329, y: 0.023162, z: 0.021013}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -2820,7 +2901,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!4 &6250082807372834577 stripped
 Transform:
@@ -3248,8 +3329,8 @@ ArticulationBody:
   m_GameObject: {fileID: 8767857822973082416}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.6525892
-  m_ParentAnchorPosition: {x: -0.019805133, y: 0.07256366, z: 0.124667645}
+  m_Mass: 0.5939795
+  m_ParentAnchorPosition: {x: -0.019805133, y: 0.07256366, z: 0.12466775}
   m_ParentAnchorRotation: {x: -0.008726627, y: 0.99996185, z: -0.00000013411045, w: -0.000000044703484}
   m_AnchorPosition: {x: 0.017825505, y: 0.054304745, z: -0.019182725}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -3289,7 +3370,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!1 &8843774548501252761 stripped
 GameObject:
@@ -3305,8 +3386,8 @@ ArticulationBody:
   m_GameObject: {fileID: 8843774548501252761}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 4.011529
-  m_ParentAnchorPosition: {x: -0.40948042, y: 0.027989788, z: -0.019797962}
+  m_Mass: 1.2098577
+  m_ParentAnchorPosition: {x: -0.40948042, y: 0.027989788, z: -0.01979788}
   m_ParentAnchorRotation: {x: -0.00000017881393, y: 0.00000012665987, z: -0.57881063, w: 0.81546205}
   m_AnchorPosition: {x: -0.021723, y: 0.02268, z: -0.019798}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -3346,7 +3427,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!4 &8897984402453262411 stripped
 Transform:
@@ -3367,8 +3448,8 @@ ArticulationBody:
   m_GameObject: {fileID: 8920629416049463147}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 1
-  m_ParentAnchorPosition: {x: -0.17299998, y: -0.000000007450581, z: 0.000000032714397}
+  m_Mass: 0.0053723427
+  m_ParentAnchorPosition: {x: -0.17299998, y: -0.000000007450581, z: 0.0000000699673}
   m_ParentAnchorRotation: {x: 0.000022287595, y: 0.000015364976, z: 0.5631326, w: 0.8263667}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
@@ -3439,8 +3520,8 @@ ArticulationBody:
   m_GameObject: {fileID: 9067366343690682249}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.18758607
-  m_ParentAnchorPosition: {x: -0.4329844, y: 0.008026589, z: 0.00025521775}
+  m_Mass: 0.18255635
+  m_ParentAnchorPosition: {x: -0.43298444, y: 0.008026589, z: 0.00025514324}
   m_ParentAnchorRotation: {x: -0.018510286, y: 0.7068645, z: -0.018510327, w: -0.7068646}
   m_AnchorPosition: {x: 0.0024332858, y: 0.007910309, z: 0.0002550373}
   m_AnchorRotation: {x: 0, y: 0.70710677, z: 0, w: -0.70710677}
@@ -3453,7 +3534,7 @@ ArticulationBody:
   m_SwingZ: 0
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -10
+    lowerLimit: 0
     upperLimit: 150
     stiffness: 100
     damping: 20
@@ -3480,7 +3561,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_CollisionDetectionMode: 0
 --- !u!4 &9072381800440281958 stripped
 Transform:

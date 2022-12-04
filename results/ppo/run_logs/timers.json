@@ -1,0 +1,47 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1669447247",
+        "python_version": "3.9.0 (tags/v3.9.0:9cf6752, Oct  5 2020, 15:34:40) [MSC v.1927 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Users\\ali\\AppData\\Local\\Programs\\Python\\Python39\\Scripts\\mlagents-learn Assets\\config\\Drecon.yaml --env=Builds\\Drecon\" --run-id=execeutable_t1",
+        "mlagents_version": "0.28.0",
+        "mlagents_envs_version": "0.28.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "1.7.1+cu110",
+        "numpy_version": "1.23.4",
+        "end_time_seconds": "1669447247"
+    },
+    "total": 0.5766402,
+    "count": 1,
+    "self": 0.0024151000000001144,
+    "children": {
+        "run_training.setup": {
+            "total": 0.04196409999999995,
+            "count": 1,
+            "self": 0.04196409999999995
+        },
+        "TrainerController.start_learning": {
+            "total": 0.532261,
+            "count": 1,
+            "self": 0.0002761999999999487,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 0.5319742000000001,
+                    "count": 1,
+                    "self": 0.5319742000000001
+                },
+                "trainer_threads": {
+                    "total": 5.00000000069889e-07,
+                    "count": 1,
+                    "self": 5.00000000069889e-07
+                },
+                "TrainerController._save_models": {
+                    "total": 1.0099999999901854e-05,
+                    "count": 1,
+                    "self": 1.0099999999901854e-05
+                }
+            }
+        }
+    }
+}
