@@ -4,7 +4,6 @@ using static mm_v2.Bones;
 
 public class TestDirector : MonoBehaviour
 {
-    private bool is_initalized;
     char_info kin_char, sim_char;
     private GameObject kinematic_char;
     private GameObject simulated_char;
@@ -110,7 +109,6 @@ public class TestDirector : MonoBehaviour
 
         origin = kin_char.char_trans.position;
         origin_hip_rot = sim_char.bone_to_transform[(int)Bone_Hips].rotation;
-        is_initalized = true;
     }
 
     private void Awake()
@@ -125,8 +123,8 @@ public class TestDirector : MonoBehaviour
     void Start()
     {
         my_initalize();
-        MMScript.debug_move_every_second = true;
-        SimCharController.remove_joint_limits(sim_char.bone_to_art_body);
+        //MMScript.debug_move_every_second = true;
+        //SimCharController.remove_joint_limits(sim_char.bone_to_art_body);
     }
 
     Vector3 origin;

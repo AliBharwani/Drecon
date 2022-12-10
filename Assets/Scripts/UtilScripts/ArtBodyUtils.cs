@@ -35,7 +35,7 @@ public static class ArtBodyUtils
     }
     public static void SetDriveRotation(this ArticulationBody body, Quaternion targetLocalRotation, bool debug = false)
     {
-        Vector3 target = body.ToTargetRotationInReducedSpace(targetLocalRotation);
+        Vector3 target = body.ToTargetRotationInReducedSpaceV2(targetLocalRotation, true);
         if (debug)
             Debug.Log($"Target rot: {target.ToString("f6")}");
 
@@ -127,6 +127,18 @@ public static class ArtBodyUtils
         Vector3 rotInReducedSpace = Quaternion.Inverse(body.anchorRotation) * axis * angle;
 
         return rotInReducedSpace;
+    }
+
+    public static Vector3 ToTargetRotationInReducedSpaceV2(this ArticulationBody body, Quaternion targetLocalRotation, bool inDegrees)
+    {
+        if (body.isRoot)
+            return Vector3.zero;
+        Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation).eulerAngles;
+        TargetRotationInJointSpace = new Vector3(
+            Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
+            Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
+            Mathf.DeltaAngle(0, TargetRotationInJointSpace.z));
+        return inDegrees ? TargetRotationInJointSpace : TargetRotationInJointSpace * Mathf.Deg2Rad;
     }
 
     public static Vector3 ToEulerAnglesInRange180(this Quaternion q)

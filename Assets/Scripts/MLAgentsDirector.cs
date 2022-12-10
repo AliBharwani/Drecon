@@ -57,7 +57,7 @@ public class MLAgentsDirector : Agent
     {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftToe, Bone_RightToe };
     [HideInInspector]
     public static mm_v2.Bones[] openloop_bones = new mm_v2.Bones[]
-      {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand};
+      {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand, Bone_LeftShoulder, Bone_RightShoulder};
 
     Vector3[] bone_pos_mins, bone_pos_maxes, bone_vel_mins, bone_vel_maxes;
     public override void CollectObservations(VectorSensor sensor)
@@ -92,11 +92,12 @@ public class MLAgentsDirector : Agent
             if (normalize_action_ouputs)
             {
                 Vector3 output = new Vector3(final_actions[i * 3], final_actions[i * 3 + 1], final_actions[i * 3 + 2]);
-                Vector3 targetRotationInJointSpace = -(Quaternion.Inverse(ab.anchorRotation) * Quaternion.Inverse(cur_rotations[bone_idx]) * ab.parentAnchorRotation).eulerAngles;
-                targetRotationInJointSpace = new Vector3(
-                        Mathf.DeltaAngle(0, targetRotationInJointSpace.x),
-                        Mathf.DeltaAngle(0, targetRotationInJointSpace.y),
-                        Mathf.DeltaAngle(0, targetRotationInJointSpace.z));
+                Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpaceV2(cur_rotations[bone_idx], true);
+                //Vector3 targetRotationInJointSpace = -(Quaternion.Inverse(ab.anchorRotation) * Quaternion.Inverse(cur_rotations[bone_idx]) * ab.parentAnchorRotation).eulerAngles;
+                //targetRotationInJointSpace = new Vector3(
+                //        Mathf.DeltaAngle(0, targetRotationInJointSpace.x),
+                //        Mathf.DeltaAngle(0, targetRotationInJointSpace.y),
+                //        Mathf.DeltaAngle(0, targetRotationInJointSpace.z));
 
                 var xdrive = ab.xDrive;
                 var scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
@@ -150,16 +151,10 @@ public class MLAgentsDirector : Agent
                 // target local = q(c) 
                 // need q(x) s.t. a * x = a * c
                 // 
-                Vector3 targetRotationInJointSpace = -(Quaternion.Inverse(ab.anchorRotation) * Quaternion.Inverse(cur_rotations[bone_idx]) * ab.parentAnchorRotation).eulerAngles;
-                targetRotationInJointSpace = new Vector3(
-                        Mathf.DeltaAngle(0, targetRotationInJointSpace.x),
-                        Mathf.DeltaAngle(0, targetRotationInJointSpace.y),
-                        Mathf.DeltaAngle(0, targetRotationInJointSpace.z));
-                Vector3 targetEuler = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
-                Vector3 test = (Quaternion.Inverse(ab.anchorRotation) * cur_rotations[bone_idx]).eulerAngles;
+                Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpaceV2(cur_rotations[bone_idx], true);
                 if (use_xdrive)
                 {
-                    Debug.Log($"{limited_dof_bones[i]} target euler: {targetEuler} | targetRot: {targetRotationInJointSpace} | test: {test} | Current x drive target: {ab.xDrive.target}");
+                    //Debug.Log($"{limited_dof_bones[i]} target euler: {targetEuler} | targetRot: {targetRotationInJointSpace} | test: {test} | Current x drive target: {ab.xDrive.target}");
                     var xdrive = ab.xDrive;
                     var scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
                     var midpoint = xdrive.lowerLimit + scale;
@@ -253,6 +248,13 @@ public class MLAgentsDirector : Agent
                 ab.zDrive = drive;
             }
         }
+        for (int i = 0; i < openloop_bones.Length; i++)
+        {
+            int bone_idx = (int)openloop_bones[i];
+            Quaternion final = cur_rotations[bone_idx];
+            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ab.SetDriveRotation(final);
+        }
     }
     void my_initalize()
     {
@@ -325,6 +327,7 @@ public class MLAgentsDirector : Agent
         kinematic_char = Instantiate(kinematic_char_prefab, Vector3.zero, Quaternion.identity);
         simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
         my_initalize();
+        //SimCharController.set_art_body_rot_limits();
     }
 
     public override void OnEpisodeBegin()
@@ -333,8 +336,8 @@ public class MLAgentsDirector : Agent
         //if (motionDB == null) 
         //    motionDB = database.Instance;
         //is_initalized = false;
-        //MMScript.Reset();
-        //MMScript.FixedUpdate();
+        MMScript.Reset();
+        MMScript.FixedUpdate();
         SimCharController.teleport_sim_char(sim_char, kin_char);
         return;
     }

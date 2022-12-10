@@ -99,6 +99,7 @@ public class SimCharController : MonoBehaviour
     public static database db;
     public static bool[] anchor_rot_found = new bool[23];
     public static Quaternion[] bone_anchor_rot = new Quaternion[23];
+
     public static Quaternion get_bone_parent_rotation(int bone_idx, ArticulationBody[] bone_to_art_body)
     {
         bool is_hip = (mm_v2.Bones)bone_idx == mm_v2.Bones.Bone_Hips;
@@ -117,14 +118,13 @@ public class SimCharController : MonoBehaviour
 
     public static void teleport_sim_char(char_info sim_char, char_info kin_char)
     {
-//        if (db == null)
-//        {
-//#if UNITY_EDITOR
-//            db = new database();
-//#else
-//            db = database.Instance;
-//#endif
-//        }
+        if (db == null)
+        {
+            if (UnityEditor.EditorApplication.isPlaying)
+                db = database.Instance;
+            else 
+                db = new database();
+        }
 
         //Destroy(simulated_char);
         //simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
@@ -146,10 +146,15 @@ public class SimCharController : MonoBehaviour
                 continue;
             }
             Quaternion targetLocalRot = kin_char.bone_to_transform[i].localRotation;
+            mm_v2.Bones bone = (mm_v2.Bones)i;
+            //if (bone == mm_v2.Bones.Bone_LeftArm || bone == mm_v2.Bones.Bone_RightArm)
+            //    targetLocalRot = kin_char.bone_to_transform[db.bone_parents[i]].localRotation * targetLocalRot;
+            //if (body.anchorRotation == Quaternion.identity)
+            //    Debug.Log($"{(mm_v2.Bones)i } has no anchor rotation");
             // from https://github.com/Unity-Technologies/marathon-envs/blob/58852e9ac22eac56ca46d1780573cc6c32278a71/UnitySDK/Assets/MarathonEnvs/Scripts/ActiveRagdoll003/DebugJoints.cs
             Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles;
             //TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot);
-            //TargetRotationInJointSpace = (Quaternion.Inverse(body.anchorRotation) * targetLocalRot * body.parentAnchorRotation).eulerAngles;
+            //TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * targetLocalRot * Quaternion.Inverse(body.parentAnchorRotation)).eulerAngles;
             //TargetRotationInJointSpace = (targetLocalRot * Quaternion.Inverse(body.anchorRotation)).eulerAngles;
             TargetRotationInJointSpace = new Vector3(
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
@@ -165,6 +170,15 @@ public class SimCharController : MonoBehaviour
                 //if (body.swingZLock == ArticulationDofLock.LockedMotion)
                 //    TargetRotationInJointSpace.z = 0f;
                 body.resetJointPosition(TargetRotationInJointSpace);
+                var drive = body.xDrive;
+                drive.target = 0f;
+                body.xDrive = drive;
+                  drive = body.yDrive;
+                drive.target = 0f;
+                body.yDrive = drive;
+                  drive = body.zDrive;
+                drive.target = 0f;
+                body.zDrive = drive;
             }
             else if (body.dofCount == 1)
             {
@@ -216,32 +230,93 @@ public class SimCharController : MonoBehaviour
     [ContextMenu("Find max rotations for each dimension for a bone")]
     private void find_rot_limits()
     {
-        motionDB = database.Instance;
-        //motionDB = new database(Application.dataPath + @"/outputs/database.bin" );
+        //motionDB = database.Instance;
+        motionDB = new database(Application.dataPath + @"/outputs/database.bin");
         int num_frames = motionDB.nframes();
         int j = (int)debug_bone;
         ArticulationBody ab = boneToTransform[j].GetComponent<ArticulationBody>();
-        float min_x, min_y, min_z;
-        min_x = min_y = min_z = float.PositiveInfinity;
-        float max_x, max_y, max_z;
-        max_x = max_y = max_z = float.NegativeInfinity;
-        for (int i = 0; i < num_frames; i++)
-        {
-            Quaternion debug_bone_rot = motionDB.bone_rotations[i][j];
-            Vector3 target_rot = ab.ToTargetRotationInReducedSpace(debug_bone_rot);
-            //Debug.Log(target_rot.ToString("f6"));
-            min_x = Mathf.Min(min_x, target_rot.x);
-            min_y = Mathf.Min(min_y, target_rot.y);
-            min_z = Mathf.Min(min_z, target_rot.z);
+        Debug.Log($"Bone {(mm_v2.Bones)debug_bone}");
+        for (int k = 0; k < 2; k++) {
+            float min_x, min_y, min_z;
+            min_x = min_y = min_z = float.PositiveInfinity;
+            float max_x, max_y, max_z;
+            max_x = max_y = max_z = float.NegativeInfinity;
 
-            max_x = Mathf.Max(max_x, target_rot.x);
-            max_y = Mathf.Max(max_y, target_rot.y);
-            max_z = Mathf.Max(max_z, target_rot.z);
+            for (int i = 0; i < num_frames; i++) {
+                Quaternion debug_bone_rot = motionDB.bone_rotations[i][j];
+                Vector3 target_rot =  k == 0 ? ab.ToTargetRotationInReducedSpace(debug_bone_rot) : ab.ToTargetRotationInReducedSpaceV2(debug_bone_rot, true);
+                //Debug.Log(target_rot.ToString("f6"));
+                min_x = Mathf.Min(min_x, target_rot.x);
+                min_y = Mathf.Min(min_y, target_rot.y);
+                min_z = Mathf.Min(min_z, target_rot.z);
+
+                max_x = Mathf.Max(max_x, target_rot.x);
+                max_y = Mathf.Max(max_y, target_rot.y);
+                max_z = Mathf.Max(max_z, target_rot.z);
+            }
+            Debug.Log($"Mins: x: {min_x} , y: {min_y} , z: {min_z}");
+
+            Debug.Log($"Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
         }
-        Debug.Log($"Mins: x: {min_x} , y: {min_y} , z: {min_z}");
-
-        Debug.Log($"Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
     }
+    [ContextMenu("Set all art body rot limits")]
+    public void set_art_body_rot_limits()
+    {
+        if (db == null)
+        {
+            if (UnityEditor.EditorApplication.isPlaying)
+                db = database.Instance;
+            else
+                db = new database();
+        }
+        int num_frames = db.nframes();
+
+
+        for (int j = 2; j < db.nbones(); j++)
+        {
+            Debug.Log($"Bone {(mm_v2.Bones)j}");
+            ArticulationBody ab = boneToTransform[j].GetComponent<ArticulationBody>();
+
+            float min_x, min_y, min_z;
+            min_x = min_y = min_z = float.PositiveInfinity;
+            float max_x, max_y, max_z;
+            max_x = max_y = max_z = float.NegativeInfinity;
+
+            for (int i = 0; i < num_frames; i++)
+            {
+                Quaternion debug_bone_rot = db.bone_rotations[i][j];
+                Vector3 target_rot = ab.ToTargetRotationInReducedSpaceV2(debug_bone_rot, true);
+                //Debug.Log(target_rot.ToString("f6"));
+                min_x = Mathf.Min(min_x, target_rot.x);
+                min_y = Mathf.Min(min_y, target_rot.y);
+                min_z = Mathf.Min(min_z, target_rot.z);
+
+                max_x = Mathf.Max(max_x, target_rot.x);
+                max_y = Mathf.Max(max_y, target_rot.y);
+                max_z = Mathf.Max(max_z, target_rot.z);
+            }
+            var drive = ab.xDrive;
+            drive.lowerLimit = min_x;
+            drive.upperLimit = max_x;
+            ab.xDrive = drive;
+
+            drive = ab.yDrive;
+            drive.lowerLimit = min_y;
+            drive.upperLimit = max_y;
+            ab.yDrive = drive;
+
+            drive = ab.zDrive;
+            drive.lowerLimit = min_z;
+            drive.upperLimit = max_z;
+            ab.zDrive = drive;
+
+            Debug.Log($"Mins: x: {min_x} , y: {min_y} , z: {min_z}");
+
+            Debug.Log($"Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
+        }
+    }
+
+
     // Useful for normalizing inputs 
     [ContextMenu("Find mins and maxes for velocities and positions")]
         public void min_max_debugger()

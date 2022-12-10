@@ -713,7 +713,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_Name
-      value: simulated char
+      value: 'OLD simulated char '
       objectReference: {fileID: 0}
     - target: {fileID: 1015377072094712135, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_Layer
@@ -2536,7 +2536,7 @@ ArticulationBody:
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
   m_MatchAnchors: 1
-  m_ArticulationJointType: 0
+  m_ArticulationJointType: 3
   m_LinearX: 2
   m_LinearY: 2
   m_LinearZ: 2
@@ -2552,8 +2552,8 @@ ArticulationBody:
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: 0
+    upperLimit: 0
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2804,13 +2804,13 @@ ArticulationBody:
   m_AnchorPosition: {x: 0, y: 0, z: 0}
   m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
   m_MatchAnchors: 1
-  m_ArticulationJointType: 0
+  m_ArticulationJointType: 3
   m_LinearX: 2
   m_LinearY: 2
   m_LinearZ: 2
-  m_SwingY: 2
-  m_SwingZ: 2
-  m_Twist: 2
+  m_SwingY: 1
+  m_SwingZ: 1
+  m_Twist: 1
   m_XDrive:
     lowerLimit: 0
     upperLimit: 0
