@@ -2,7 +2,7 @@ behaviors:
   Drecon:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 1024
+      batch_size: 512
       buffer_size: 10240
       learning_rate: 0.0003
       beta: 0.005

@@ -327,7 +327,7 @@ public class MLAgentsDirector : Agent
         kinematic_char = Instantiate(kinematic_char_prefab, Vector3.zero, Quaternion.identity);
         simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
         my_initalize();
-        //SimCharController.set_art_body_rot_limits();
+        SimCharController.set_art_body_rot_limits();
     }
 
     public override void OnEpisodeBegin()

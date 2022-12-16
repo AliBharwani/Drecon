@@ -30,7 +30,10 @@ public class SimCharController : MonoBehaviour
         //motionDB = new database(Application.dataPath + @"/outputs/database.bin");
         motionDB = database.Instance;
 
-        initBoneToArtBodies();
+        if (set_art_bodies) { 
+            initBoneToArtBodies();
+            set_art_body_rot_limits();
+        }
     }
 
     public void initBoneToArtBodies()
@@ -45,8 +48,8 @@ public class SimCharController : MonoBehaviour
 
     void FixedUpdate()
     {
-       // frameIdx++;
-        //playFrameIdx();
+        frameIdx++;
+        playFrameIdx();
     }
 
     private void playFrameIdx()
@@ -69,27 +72,27 @@ public class SimCharController : MonoBehaviour
                 continue;
             }
             ArticulationBody ab = bone_to_art_body[i];
-            if (ab == null || !bones_to_apply.Contains(bone))
+            if (ab == null)
                 continue;
 
             if (!set_target_velocities)
             {
                 // Angle is in range (-1, 1) => map to (-180, 180)
-                Vector3 target = ab.ToTargetRotationInReducedSpace(local_rot);
-                bool use_xdrive = bone == mm_v2.Bones.Bone_LeftLeg || bone == mm_v2.Bones.Bone_RightLeg;
-                if (use_xdrive)
-                {
-                    ArticulationDrive drive = ab.xDrive;
-                    drive.target = target.x;
-                    ab.xDrive = drive;
-                }
-                else
-                {
-                    ArticulationDrive drive = ab.zDrive;
-                    drive.target = target.z;
-                    ab.zDrive = drive;
-                }
-                ab.SetDriveRotation(local_rot, print_debug);
+                //Vector3 target = ab.ToTargetRotationInReducedSpace(local_rot);
+                //bool use_xdrive = bone == mm_v2.Bones.Bone_LeftLeg || bone == mm_v2.Bones.Bone_RightLeg;
+                //if (use_xdrive)
+                //{
+                //    ArticulationDrive drive = ab.xDrive;
+                //    drive.target = target.x;
+                //    ab.xDrive = drive;
+                //}
+                //else
+                //{
+                //    ArticulationDrive drive = ab.zDrive;
+                //    drive.target = target.z;
+                //    ab.zDrive = drive;
+                //}
+                ab.SetDriveRotation(local_rot);
             }
 
         }
@@ -272,7 +275,7 @@ public class SimCharController : MonoBehaviour
         int num_frames = db.nframes();
 
 
-        for (int j = 2; j < db.nbones(); j++)
+        for (int j = 1; j < db.nbones(); j++)
         {
             Debug.Log($"Bone {(mm_v2.Bones)j}");
             ArticulationBody ab = boneToTransform[j].GetComponent<ArticulationBody>();
@@ -310,9 +313,9 @@ public class SimCharController : MonoBehaviour
             drive.upperLimit = max_z;
             ab.zDrive = drive;
 
-            Debug.Log($"Mins: x: {min_x} , y: {min_y} , z: {min_z}");
+            Debug.Log($"Bone {(mm_v2.Bones)j} Mins: x: {min_x} , y: {min_y} , z: {min_z}");
 
-            Debug.Log($"Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
+            Debug.Log($"Bone {(mm_v2.Bones)j} Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
         }
     }
 
