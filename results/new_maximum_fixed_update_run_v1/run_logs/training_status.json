@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 5786249,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-5786249.onnx",
+                "reward": 12.23167759180069,
+                "creation_time": 1671236320.4272935,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-5786249.pt"
+                ]
+            },
+            {
+                "steps": 5799989,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-5799989.onnx",
+                "reward": 10.457437568781327,
+                "creation_time": 1671236469.699158,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-5799989.pt"
+                ]
+            },
+            {
+                "steps": 5899983,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-5899983.onnx",
+                "reward": 11.476094722747803,
+                "creation_time": 1671237766.2683635,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-5899983.pt"
+                ]
+            },
+            {
+                "steps": 5999987,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-5999987.onnx",
+                "reward": 10.676755661867103,
+                "creation_time": 1671239191.233091,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-5999987.pt"
+                ]
+            },
+            {
+                "steps": 6099989,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6099989.onnx",
+                "reward": 10.713533645452456,
+                "creation_time": 1671240724.1995049,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6099989.pt"
+                ]
+            },
+            {
+                "steps": 6199994,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6199994.onnx",
+                "reward": 10.752821065941635,
+                "creation_time": 1671242227.7701619,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6199994.pt"
+                ]
+            },
+            {
+                "steps": 6299958,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6299958.onnx",
+                "reward": 11.970064943486994,
+                "creation_time": 1671243725.633347,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6299958.pt"
+                ]
+            },
+            {
+                "steps": 6399973,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6399973.onnx",
+                "reward": 10.563379799878156,
+                "creation_time": 1671245206.2058825,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6399973.pt"
+                ]
+            },
+            {
+                "steps": 6499977,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6499977.onnx",
+                "reward": 11.083815551098482,
+                "creation_time": 1671246412.8090332,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6499977.pt"
+                ]
+            },
+            {
+                "steps": 6565785,
+                "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6565785.onnx",
+                "reward": 10.864394938692133,
+                "creation_time": 1671247197.6370966,
+                "auxillary_file_paths": [
+                    "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6565785.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 6565785,
+            "file_path": "results\\new_maximum_fixed_update_run_v1\\Drecon.onnx",
+            "reward": 10.864394938692133,
+            "creation_time": 1671247197.6370966,
+            "auxillary_file_paths": [
+                "results\\new_maximum_fixed_update_run_v1\\Drecon\\Drecon-6565785.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

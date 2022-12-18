@@ -124,12 +124,13 @@ public class mm_v2 : MonoBehaviour
     public bool teleported_last_frame = false;
     [HideInInspector]
     public bool is_initalized = false;
-    internal bool debug_move_every_second = false;
+    internal bool debug_move_every_second = true;
     float time_since_last_move = 0f;
+    float minimum_fixed_update_timer = 0f;
     void Awake()
     {
         gamepad = Gamepad.current;
-        //Application.targetFrameRate = 300;
+        //Application.targetFrameRate = 30;
         origin = transform.position;
         origin_rot = transform.rotation;
         //Debug.Log($"Origin is set as {origin}");
@@ -264,7 +265,7 @@ public class mm_v2 : MonoBehaviour
         if (debug_move_every_second )// && Time.realtimeSinceStartup > 2f)
         {
             time_since_last_move += Time.fixedDeltaTime;
-            if (time_since_last_move > 2)
+            if (time_since_last_move > minimum_fixed_update_timer)
                 time_since_last_move = 0f;
              else
                 return;
@@ -321,6 +322,8 @@ public class mm_v2 : MonoBehaviour
         Gizmos.color = Color.blue;
         for (int i = 0; i < 4; i++)
             Gizmos.DrawSphere(trajectory_positions[i], .1f);
+        //Gizmos.color = Color.cyan;
+        //Gizmos.DrawSphere(MLAgentsDirector.get_cm(boneToTransform), .1f);
     }
 
     private void playFrameIdx()

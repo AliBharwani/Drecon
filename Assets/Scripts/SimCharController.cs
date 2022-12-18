@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
+using static mm_v2.Bones;
 public class SimCharController : MonoBehaviour
 {
     public bool apply_all_local_rots;
@@ -12,27 +12,62 @@ public class SimCharController : MonoBehaviour
     public mm_v2.Bones debug_bone;
     public Transform[] boneToTransform = new Transform[23];
     public ArticulationBody[] bone_to_art_body = new ArticulationBody[23];
+    public bool is_active = false;
     public int start_delay = 60;
-    Gamepad gamepad;
-    database motionDB;
     public float stiffness = 120f;
     public float damping = 3f;
     public float force_limit = 200f;
 
     void Start()
     {
+        db = database.Instance;
+        initBoneToCollider();
+        setupIgnoreCollisions();
+        if (!is_active)
+            return;
 #if UNITY_EDITOR
         if (Application.isEditor)
             UnityEditor.EditorWindow.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
 #endif
 
         //Application.targetFrameRate = 30;
-        //motionDB = new database(Application.dataPath + @"/outputs/database.bin");
-        motionDB = database.Instance;
+        //db = new database(Application.dataPath + @"/outputs/database.bin");
 
         if (set_art_bodies) { 
-            initBoneToArtBodies();
             set_art_body_rot_limits();
+        }
+    }
+    Collider[] boneToCollider;
+    private void initBoneToCollider()
+    {
+        boneToCollider = new Collider[db.nbones()];
+        for (int i = 1; i < db.nbones(); i++)
+        {
+            Transform trans = boneToTransform[i];
+            if (i == (int) Bone_LeftFoot || i == (int) Bone_RightFoot)
+                boneToCollider[i] = ArtBodyTester.getChildBoxCollider(trans.gameObject).GetComponent<Collider>();
+            else
+                boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(trans.gameObject).GetComponent<Collider>();
+            if (boneToCollider[i] == null)
+                Debug.Log($"Could not find collider for {(mm_v2.Bones)i }");
+        }
+    }
+
+    private void setupIgnoreCollisions()
+    {
+        Physics.IgnoreCollision(boneToCollider[(int)Bone_LeftUpLeg], boneToCollider[(int)Bone_RightUpLeg]);
+        int[] torsoColliders = new int[] { (int)Bone_Neck, (int)Bone_LeftShoulder, (int)Bone_RightShoulder, (int) Bone_Spine2,
+                                            (int) Bone_Spine1, (int) Bone_Spine, (int) Bone_Hips};
+        for (int i = 0; i < torsoColliders.Length; i++)
+            for (int j = i + 1; j < torsoColliders.Length; j++)
+                Physics.IgnoreCollision(boneToCollider[torsoColliders[i]], boneToCollider[torsoColliders[j]]);
+        for (int i = 2; i < db.nbones(); i++) // start at 2 because hip has no parent collider
+        {
+            int parent = db.bone_parents[i];
+            Physics.IgnoreCollision(boneToCollider[i], boneToCollider[parent]);
+            if (i == (int) Bone_LeftUpLeg || i == (int) Bone_RightUpLeg)
+                Physics.IgnoreCollision(boneToCollider[i], boneToCollider[(int)Bone_Spine]);
+           
         }
     }
 
@@ -48,14 +83,16 @@ public class SimCharController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!is_active)
+            return;
         frameIdx++;
         playFrameIdx();
     }
 
     private void playFrameIdx()
     {
-        Vector3[] curr_bone_positions = motionDB.bone_positions[frameIdx];
-        Quaternion[] curr_bone_rotations = motionDB.bone_rotations[frameIdx];
+        Vector3[] curr_bone_positions = db.bone_positions[frameIdx];
+        Quaternion[] curr_bone_rotations = db.bone_rotations[frameIdx];
         for (int i = 1; i < 23; i++)
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
@@ -119,7 +156,7 @@ public class SimCharController : MonoBehaviour
         return parent_rotation;
     }
 
-    public static void teleport_sim_char(char_info sim_char, char_info kin_char)
+    public static void teleport_sim_char(CharInfo sim_char, CharInfo kin_char)
     {
         if (db == null)
         {
@@ -132,15 +169,15 @@ public class SimCharController : MonoBehaviour
         //Destroy(simulated_char);
         //simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
         //my_initalize();
-        sim_char.char_trans.rotation = kin_char.char_trans.rotation;
-        Transform kin_hip = kin_char.bone_to_transform[(int)mm_v2.Bones.Bone_Hips];
-        sim_char.hip_bone.TeleportRoot(kin_hip.position, kin_hip.rotation);
-        sim_char.hip_bone.resetJointPhysics();
+        sim_char.trans.rotation = kin_char.trans.rotation;
+        Transform kin_root = kin_char.boneToTransform[(int)mm_v2.Bones.Bone_Entity];
+        sim_char.root.TeleportRoot(kin_root.position, kin_root.rotation);
+        sim_char.root.resetJointPhysics();
         //Quaternion[] global_ab_rots = new Quaternion[23];
         //global_ab_rots[1] = sim_char.hip_bone.anchorRotation;
-        for (int i = 2; i < 23; i++)
+        for (int i = 1; i < 23; i++)
         {
-            ArticulationBody body = sim_char.bone_to_art_body[i];
+            ArticulationBody body = sim_char.boneToArtBody[i];
             //Quaternion parent_anchor_rot = get_bone_parent_rotation(i, sim_char.bone_to_art_body);// global_ab_rots[i - 1];
             //global_ab_rots[i] = parent_anchor_rot * body.anchorRotation;
             if (body.jointType != ArticulationJointType.SphericalJoint)
@@ -148,7 +185,7 @@ public class SimCharController : MonoBehaviour
                 body.resetJointPhysics();
                 continue;
             }
-            Quaternion targetLocalRot = kin_char.bone_to_transform[i].localRotation;
+            Quaternion targetLocalRot = kin_char.boneToTransform[i].localRotation;
             mm_v2.Bones bone = (mm_v2.Bones)i;
             //if (bone == mm_v2.Bones.Bone_LeftArm || bone == mm_v2.Bones.Bone_RightArm)
             //    targetLocalRot = kin_char.bone_to_transform[db.bone_parents[i]].localRotation * targetLocalRot;
@@ -230,38 +267,7 @@ public class SimCharController : MonoBehaviour
         // velocities
 
     }
-    [ContextMenu("Find max rotations for each dimension for a bone")]
-    private void find_rot_limits()
-    {
-        //motionDB = database.Instance;
-        motionDB = new database(Application.dataPath + @"/outputs/database.bin");
-        int num_frames = motionDB.nframes();
-        int j = (int)debug_bone;
-        ArticulationBody ab = boneToTransform[j].GetComponent<ArticulationBody>();
-        Debug.Log($"Bone {(mm_v2.Bones)debug_bone}");
-        for (int k = 0; k < 2; k++) {
-            float min_x, min_y, min_z;
-            min_x = min_y = min_z = float.PositiveInfinity;
-            float max_x, max_y, max_z;
-            max_x = max_y = max_z = float.NegativeInfinity;
 
-            for (int i = 0; i < num_frames; i++) {
-                Quaternion debug_bone_rot = motionDB.bone_rotations[i][j];
-                Vector3 target_rot =  k == 0 ? ab.ToTargetRotationInReducedSpace(debug_bone_rot) : ab.ToTargetRotationInReducedSpaceV2(debug_bone_rot, true);
-                //Debug.Log(target_rot.ToString("f6"));
-                min_x = Mathf.Min(min_x, target_rot.x);
-                min_y = Mathf.Min(min_y, target_rot.y);
-                min_z = Mathf.Min(min_z, target_rot.z);
-
-                max_x = Mathf.Max(max_x, target_rot.x);
-                max_y = Mathf.Max(max_y, target_rot.y);
-                max_z = Mathf.Max(max_z, target_rot.z);
-            }
-            Debug.Log($"Mins: x: {min_x} , y: {min_y} , z: {min_z}");
-
-            Debug.Log($"Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
-        }
-    }
     [ContextMenu("Set all art body rot limits")]
     public void set_art_body_rot_limits()
     {
@@ -277,7 +283,7 @@ public class SimCharController : MonoBehaviour
 
         for (int j = 1; j < db.nbones(); j++)
         {
-            Debug.Log($"Bone {(mm_v2.Bones)j}");
+            //Debug.Log($"Bone {(mm_v2.Bones)j}");
             ArticulationBody ab = boneToTransform[j].GetComponent<ArticulationBody>();
 
             float min_x, min_y, min_z;
@@ -313,9 +319,11 @@ public class SimCharController : MonoBehaviour
             drive.upperLimit = max_z;
             ab.zDrive = drive;
 
-            Debug.Log($"Bone {(mm_v2.Bones)j} Mins: x: {min_x} , y: {min_y} , z: {min_z}");
-
-            Debug.Log($"Bone {(mm_v2.Bones)j} Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
+            if (!UnityEditor.EditorApplication.isPlaying)
+            { 
+                Debug.Log($"Bone {(mm_v2.Bones)j} Mins: x: {min_x} , y: {min_y} , z: {min_z}");
+                Debug.Log($"Bone {(mm_v2.Bones)j} Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
+            }
         }
     }
 
@@ -336,10 +344,10 @@ public class SimCharController : MonoBehaviour
         Debug.Log($"vel_max: {vel_max.ToString("f6")}");
         for (int j = 0; j < num_state_bones; j++)
         {
-            Debug.Log($"{j} bone pos min: {bone_pos_mins[j].ToString("f6")}");
-            Debug.Log($"{j} bone pos max: {bone_pos_maxes[j].ToString("f6")}");
-            Debug.Log($"{j} bone vel min: {bone_vel_mins[j].ToString("f6")}");
-            Debug.Log($"{j} bone vel max: {bone_vel_maxes[j].ToString("f6")}");
+            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos min: {bone_pos_mins[j].ToString("f6")}");
+            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos max: {bone_pos_maxes[j].ToString("f6")}");
+            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone vel min: {bone_vel_mins[j].ToString("f6")}");
+            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone vel max: {bone_vel_maxes[j].ToString("f6")}");
 
         }
     }
@@ -351,9 +359,9 @@ public class SimCharController : MonoBehaviour
         ref Vector3[] bone_vel_mins,
         ref Vector3[] bone_vel_maxes)
     {
-        database motionDB = database.Instance;
-        //database motionDB = new database(Application.dataPath + @"/outputs/database.bin");
-        int num_frames = motionDB.nframes();
+        database db = database.Instance;
+        //database db = new database(Application.dataPath + @"/outputs/database.bin");
+        int num_frames = db.nframes();
         Vector3 last_cm = Vector3.zero;
         Vector3[] global_pos = new Vector3[23];
         Quaternion[] global_rots = new Quaternion[23];
@@ -372,9 +380,9 @@ public class SimCharController : MonoBehaviour
         // 7153 is where it ends 
         for (int i = 0; i < num_frames; i++)
         {
-            forward_kinematics_full(motionDB, i, ref global_pos, ref global_rots);
+            forward_kinematics_full(db, i, ref global_pos, ref global_rots);
             //apply_global_pos_and_rot(global_pos, global_rots, boneToTransform);
-            Vector3 cm = get_cm(boneToTransform, global_pos);
+            Vector3 cm = MLAgentsDirector.get_cm(boneToTransform, global_pos);
             Vector3 cm_vel = (cm - last_cm) / frame_time;
             cm_vel = Utils.quat_inv_mul_vec3(global_rots[0], cm_vel);
             // probably a glitch
@@ -399,23 +407,6 @@ public class SimCharController : MonoBehaviour
 
     }
 
-    public static Vector3 get_cm(Transform[] bone_to_transform, Vector3[] global_bone_positions)
-    {
-        // We start at 1 because 0 is the root bone with no colliders
-        // to calculate CM, we get the masses and centers of each capsule and
-        // sum them together and divide by the total mass
-        float total_mass = 0f;
-        Vector3 CoM = Vector3.zero;
-        for (int i = 1; i < bone_to_transform.Length; i++)
-        {
-            Transform t = bone_to_transform[i];
-            float mass = t.GetComponent<ArticulationBody>().mass;
-            CoM += mass * global_bone_positions[i];
-            total_mass += mass;
-        }
-        return CoM / total_mass;
-    }
-
     private static void updated_mins_and_maxes(Vector3 val, ref Vector3 mins, ref Vector3 maxes)
     {
         maxes = update_maxes(maxes, val);
@@ -433,28 +424,28 @@ public class SimCharController : MonoBehaviour
     }
 
     private static void forward_kinematics_full(
-     database motionDB,
+     database db,
      int frame,
      ref Vector3[] global_bone_positions,
      ref Quaternion[] global_bone_rotations
     )
     {
-        int[] bone_parents = motionDB.bone_parents;
+        int[] bone_parents = db.bone_parents;
 
         for (int i = 0; i < bone_parents.Length; i++)
         {
             // Assumes bones are always sorted from root onwards
             if (bone_parents[i] == -1)
             {
-                global_bone_positions[i] = motionDB.bone_positions[frame][i];
-                global_bone_rotations[i] = motionDB.bone_rotations[frame][i];
+                global_bone_positions[i] = db.bone_positions[frame][i];
+                global_bone_rotations[i] = db.bone_rotations[frame][i];
             }
             else
             {
                 Vector3 parent_position = global_bone_positions[bone_parents[i]];
                 Quaternion parent_rotation = global_bone_rotations[bone_parents[i]];
-                global_bone_positions[i] = Utils.quat_mul_vec3(parent_rotation, motionDB.bone_positions[frame][i]) + parent_position;
-                global_bone_rotations[i] = parent_rotation * motionDB.bone_rotations[frame][i];
+                global_bone_positions[i] = Utils.quat_mul_vec3(parent_rotation, db.bone_positions[frame][i]) + parent_position;
+                global_bone_rotations[i] = parent_rotation * db.bone_rotations[frame][i];
             }
         }
     }

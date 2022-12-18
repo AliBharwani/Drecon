@@ -8,18 +8,32 @@ using static mm_v2.Bones;
 using System.Collections;
 using UnityEditor;
 
-public struct char_info
+public struct CharInfo
 {
-    public Transform[]  bone_to_transform;
-    public GameObject[] bone_to_collider;
-    public GameObject char_obj;
-    public Transform  char_trans;
-    public ArticulationBody hip_bone;
+    public Transform[]  boneToTransform;
+    public GameObject[] boneToCollider;
+    public GameObject charObj;
+    public Transform  trans;
+    public ArticulationBody root;
     public Vector3 cm; // prev center of mass
-    public Vector3 cm_vel;
-    public Vector3[] bone_world_pos;
-    public Vector3[][] bone_surface_pts;
-    public ArticulationBody[] bone_to_art_body;
+    public Vector3 cmVel;
+    public Vector3[] boneWorldPos;
+    public Vector3[][] boneSurfacePts;
+    public Vector3[][] boneSurfaceVels;
+    public ArticulationBody[] boneToArtBody;
+    public float[] boneState;
+
+    public CharInfo(int nbodies, int numStateBones) : this()
+    {
+        boneSurfacePts = new Vector3[nbodies][];
+        boneSurfaceVels = new Vector3[nbodies][];
+        boneWorldPos = new Vector3[numStateBones];
+        boneToCollider = new GameObject[nbodies];
+        // From DreCon paper, contains: 
+        // { LeftToe, RightToe, Spine, Head, LeftForeArm, RightForeArm },
+        // we compute positions and velocities then concatenate these
+        boneState = new float[36];
+    }
 }
 public class MLAgentsDirector : Agent
 {
@@ -29,7 +43,7 @@ public class MLAgentsDirector : Agent
     private bool is_initalized;
     public bool normalize_action_ouputs = true;
     public bool normalize_observations = false;
-    char_info kin_char, sim_char;
+    CharInfo kinChar, simChar;
     public GameObject kinematic_char;
     public GameObject simulated_char;
     public GameObject simulated_char_prefab;
@@ -64,7 +78,7 @@ public class MLAgentsDirector : Agent
     {
         if (!is_initalized)
         {
-            my_initalize();
+            CustomInit();
             return;
         }
         sensor.AddObservation(get_state());
@@ -75,7 +89,7 @@ public class MLAgentsDirector : Agent
     {
         if (!is_initalized)
         {
-            my_initalize();
+            CustomInit();
             return;
         }
         float[] cur_actions = actionBuffers.ContinuousActions.Array;
@@ -88,7 +102,7 @@ public class MLAgentsDirector : Agent
        for (int i = 0; i < full_dof_bones.Length; i ++)
        {
             int bone_idx = (int)full_dof_bones[i];
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             if (normalize_action_ouputs)
             {
                 Vector3 output = new Vector3(final_actions[i * 3], final_actions[i * 3 + 1], final_actions[i * 3 + 2]);
@@ -140,7 +154,7 @@ public class MLAgentsDirector : Agent
         {
             int bone_idx = (int)limited_dof_bones[i];
             bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             int final_actions_idx = i + 21;
 
             if (normalize_action_ouputs)
@@ -196,7 +210,7 @@ public class MLAgentsDirector : Agent
         {
             int bone_idx = (int)openloop_bones[i];
             Quaternion final = cur_rotations[bone_idx];
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             ab.SetDriveRotation(final);
         }
         set_rewards();
@@ -205,7 +219,7 @@ public class MLAgentsDirector : Agent
     {
         if (!is_initalized)
         {
-            my_initalize();
+            CustomInit();
             return;
         }
         float[] cur_actions = actionsout.ContinuousActions.Array;
@@ -224,7 +238,7 @@ public class MLAgentsDirector : Agent
             //scaled_angleaxis.Normalize();
             //Quaternion offset = Quaternion.AngleAxis(angle, scaled_angleaxis);
             Quaternion final = cur_rotations[bone_idx];
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             ab.SetDriveRotation(final);
         }
         for (int i = 0; i < limited_dof_bones.Length; i++)
@@ -232,7 +246,7 @@ public class MLAgentsDirector : Agent
             mm_v2.Bones bone =  limited_dof_bones[i];
             // Angle is in range (-1, 1) => map to (-180, 180)
             //float angle = final_actions[i] * 180;
-            ArticulationBody ab = sim_char.bone_to_art_body[(int)bone];
+            ArticulationBody ab = simChar.boneToArtBody[(int)bone];
             Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[(int) bone]);
             bool use_xdrive = bone == Bone_LeftLeg || bone == Bone_RightLeg;
             if (use_xdrive)
@@ -252,11 +266,11 @@ public class MLAgentsDirector : Agent
         {
             int bone_idx = (int)openloop_bones[i];
             Quaternion final = cur_rotations[bone_idx];
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             ab.SetDriveRotation(final);
         }
     }
-    void my_initalize()
+    void CustomInit()
     {
         if (use_debug_mats)
         {
@@ -275,59 +289,64 @@ public class MLAgentsDirector : Agent
         if (!MMScript.is_initalized)
             return;
         MMScript.use_deltatime = use_deltatime;
-        kin_char = new char_info();
-        kin_char.char_trans = kinematic_char.transform;
-        kin_char.bone_to_transform = MMScript.boneToTransform;
-        kin_char.char_obj = kinematic_char;
-        nbodies = kin_char.bone_to_transform.Length;
-        kin_char.bone_surface_pts = new Vector3[nbodies][];
+        kinChar = new CharInfo(nbodies, state_bones.Length);
+        kinChar.trans = kinematic_char.transform;
+        kinChar.boneToTransform = MMScript.boneToTransform;
+        kinChar.charObj = kinematic_char;
+        //nbodies = kinChar.boneToTransform.Length;
+        //kinChar.boneSurfacePts = new Vector3[nbodies][];
 
         SimCharController = simulated_char.GetComponent<SimCharController>();
-        sim_char = new char_info();
-        sim_char.char_trans = simulated_char.transform;
-        sim_char.bone_to_transform = SimCharController.boneToTransform;
-        sim_char.hip_bone = SimCharController.bone_to_art_body[(int)Bone_Hips];
-        sim_char.char_obj = simulated_char;
-        sim_char.bone_surface_pts = new Vector3[nbodies][];
-        sim_char.bone_to_art_body = SimCharController.bone_to_art_body;
+        SimCharController.is_active = false;
+        SimCharController.enabled = true;
+        simChar = new CharInfo(nbodies, state_bones.Length);
+        simChar.trans = simulated_char.transform;
+        simChar.boneToTransform = SimCharController.boneToTransform;
+        simChar.root = SimCharController.bone_to_art_body[(int)Bone_Entity];
+        simChar.charObj = simulated_char;
+        //simChar.boneSurfacePts = new Vector3[nbodies][];
+        simChar.boneToArtBody = SimCharController.bone_to_art_body;
 
-        kin_char.bone_world_pos = new Vector3[state_bones.Length];
-        sim_char.bone_world_pos = new Vector3[state_bones.Length];
+        //kinChar.boneWorldPos = new Vector3[state_bones.Length];
+        //simChar.boneWorldPos = new Vector3[state_bones.Length];
 
-        kin_char.bone_to_collider = new GameObject[nbodies];
-        sim_char.bone_to_collider = new GameObject[nbodies];
+        //kinChar.boneToCollider = new GameObject[nbodies];
+        //simChar.boneToCollider = new GameObject[nbodies];
         for (int i = 0; i < nbodies; i++)
         {
             if (i == (int)Bone_LeftFoot || i == (int)Bone_RightFoot)
             {
-                kin_char.bone_to_collider[i] = ArtBodyTester.getChildBoxCollider(kin_char.bone_to_transform[i].gameObject);
-                sim_char.bone_to_collider[i] = ArtBodyTester.getChildBoxCollider(sim_char.bone_to_transform[i].gameObject);
+                kinChar.boneToCollider[i] = ArtBodyTester.getChildBoxCollider(kinChar.boneToTransform[i].gameObject);
+                simChar.boneToCollider[i] = ArtBodyTester.getChildBoxCollider(simChar.boneToTransform[i].gameObject);
             } else { 
-                kin_char.bone_to_collider[i] = ArtBodyTester.getChildCapsuleCollider(kin_char.bone_to_transform[i].gameObject);
-                sim_char.bone_to_collider[i] = ArtBodyTester.getChildCapsuleCollider(sim_char.bone_to_transform[i].gameObject);
+                kinChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(kinChar.boneToTransform[i].gameObject);
+                simChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(simChar.boneToTransform[i].gameObject);
             }
-            kin_char.bone_surface_pts[i] = new Vector3[6];
-            sim_char.bone_surface_pts[i] = new Vector3[6];
+            kinChar.boneSurfacePts[i] = new Vector3[6];
+            kinChar.boneSurfaceVels[i] = new Vector3[6];
+            simChar.boneSurfacePts[i] = new Vector3[6];
+            simChar.boneSurfaceVels[i] = new Vector3[6];
         }
 
         if (normalize_observations)
-            SimCharController.find_mins_and_maxes(kin_char.bone_to_transform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
+            SimCharController.find_mins_and_maxes(kinChar.boneToTransform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
         is_initalized = true;
     }
-    Unity.MLAgents.Policies.BehaviorParameters behavior_params;
+
     public bool use_debug_mats = false;
     public void Awake()
     {
         //Debug.Log("MLAgents Director Awake called");
         //Application.targetFrameRate = 30;
         // motionDB = new database(Application.dataPath + @"/outputs/database.bin");
-        behavior_params = gameObject.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
+        //Unity.MLAgents.Policies.BehaviorParameters behavior_params = gameObject.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         if (motionDB == null)
             motionDB = database.Instance;
+        nbodies = motionDB.nbones();
         kinematic_char = Instantiate(kinematic_char_prefab, Vector3.zero, Quaternion.identity);
         simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
-        my_initalize();
-        SimCharController.set_art_body_rot_limits();
+        CustomInit();
+        //SimCharController.set_art_body_rot_limits();
     }
 
     public override void OnEpisodeBegin()
@@ -338,7 +357,7 @@ public class MLAgentsDirector : Agent
         //is_initalized = false;
         MMScript.Reset();
         MMScript.FixedUpdate();
-        SimCharController.teleport_sim_char(sim_char, kin_char);
+        SimCharController.teleport_sim_char(simChar, kinChar);
         return;
     }
 
@@ -346,22 +365,101 @@ public class MLAgentsDirector : Agent
     private void FixedUpdate()
     {
         if (!is_initalized) { 
-            my_initalize();
+            CustomInit();
             return;
         }
         // Make sure to teleport sim character if kin character teleported
+        bool updateVelocity = true;
         if (MMScript.teleported_last_frame)
         {
-            sim_char.char_trans.rotation = kin_char.char_trans.rotation;
-            sim_char.hip_bone.TeleportRoot(Vector3.zero, kin_char.bone_to_transform[(int)Bone_Hips].rotation);
+            //sim_char.char_trans.rotation = kin_char.char_trans.rotation;
+            simChar.root.TeleportRoot(Vector3.zero, kinChar.trans.rotation);
+            updateVelocity = false;
         }
-            //SimCharController.teleport_sim_char(sim_char, kin_char);
+        float deltaTime = Time.fixedDeltaTime + float.Epsilon;
+        // Update CMs 
+        UpdateCMData(updateVelocity, deltaTime);
+        UpdateBoneObsState(updateVelocity, deltaTime);
+        UpdateBoneSurfacePts(updateVelocity, deltaTime);
+
+        //SimCharController.teleport_sim_char(sim_char, kin_char);
         // request Decision
         if (cur_step % evaluate_k_steps == 0)
             RequestDecision();
         cur_step++;
     }
 
+    private void UpdateCMData(bool updateVelocity, float deltaTime)
+    {
+        Vector3 newSimCM = get_cm(simChar.boneToTransform);
+        simChar.cmVel = updateVelocity ? (simChar.cm - newSimCM) / deltaTime : simChar.cmVel;
+        simChar.cm = newSimCM;
+        Vector3 newKinCM = get_cm(kinChar.boneToTransform);
+        kinChar.cmVel = updateVelocity ? (kinChar.cm - newKinCM) / deltaTime : kinChar.cmVel;
+        kinChar.cm = newKinCM;
+    }
+
+    private void UpdateBoneSurfacePts(bool updateVelocity, float deltaTime)
+    {
+        for (int i = 1; i < 23; i++)
+        {
+
+            Vector3[] new_kin_bone_surface_pts = new Vector3[6];
+            Vector3[] new_sim_bone_surface_pts = new Vector3[6];
+
+            getSixPointsOnCollider(kinChar.boneToCollider[i], ref new_kin_bone_surface_pts, (mm_v2.Bones) i);
+            getSixPointsOnCollider(simChar.boneToCollider[i], ref new_sim_bone_surface_pts, (mm_v2.Bones) i);
+
+            Vector3[] prev_kin_surface_pts = kinChar.boneSurfacePts[i];
+            Vector3[] prev_sim_surface_pts = simChar.boneSurfacePts[i];
+
+            for (int j = 0; j < 6; j++)
+            {
+                new_kin_bone_surface_pts[j] = resolve_pos_in_kin_ref_frame(new_kin_bone_surface_pts[j]);
+                new_sim_bone_surface_pts[j] = resolve_pos_in_sim_ref_frame(new_sim_bone_surface_pts[j]);
+
+                if (updateVelocity) {
+                    kinChar.boneSurfaceVels[i][j] = (new_kin_bone_surface_pts[j] - prev_kin_surface_pts[j]) / deltaTime;
+                    simChar.boneSurfaceVels[i][j] = (new_sim_bone_surface_pts[j] - prev_sim_surface_pts[j]) / deltaTime;
+                }
+            }
+            kinChar.boneSurfacePts[i] = new_kin_bone_surface_pts;
+            simChar.boneSurfacePts[i] = new_sim_bone_surface_pts;
+        }
+    }
+
+    private void UpdateBoneObsState(bool updateVelocity, float deltaTime)
+    {
+        CharInfo curInfo = kinChar;
+        for (int i = 0; i < 2; i++)
+        {
+            float[] copyInto = curInfo.boneState;
+            int copyIdx = 0;
+            for (int j = 0; j < state_bones.Length; j++)
+            {
+                mm_v2.Bones bone = state_bones[j];
+                // Compute position of bone
+                Vector3 bone_world_pos = curInfo.boneToTransform[(int)bone].position;
+                Vector3 bone_local_pos = i == 0 ? resolve_pos_in_kin_ref_frame(bone_world_pos) : resolve_pos_in_sim_ref_frame(bone_world_pos);
+                //Vector3 bone_relative_pos = Utils.quat_inv_mul_vec3(relative_rot, bone_local_pos);
+                Vector3 prev_bone_pos = curInfo.boneWorldPos[j];
+                Vector3 bone_vel = (bone_world_pos - prev_bone_pos) / deltaTime;
+                bone_vel = resolve_vel_in_kin_ref_frame(bone_vel);
+                if (normalize_observations)
+                {
+                    bone_local_pos = normalize_bone_pos(bone_local_pos, j);
+                    bone_vel = normalize_bone_vel(bone_vel, j);
+                }
+                copy_vector_into_arr(ref copyInto, ref copyIdx, bone_local_pos);
+                if (updateVelocity)
+                    copy_vector_into_arr(ref copyInto, ref copyIdx, bone_vel);
+                else
+                    copyIdx += 3;
+                curInfo.boneWorldPos[j] = bone_world_pos;
+            }
+            curInfo = simChar;
+        }
+    }
     private void set_rewards()
     {
         bool heads_1m_apart;
@@ -369,8 +467,7 @@ public class MLAgentsDirector : Agent
         calc_fall_factor(out fall_factor, out heads_1m_apart);
         if (heads_1m_apart)
         {
-            SetReward(0f);
-            //Debug.Log($"Reward is {0}");
+            SetReward(-.5f);
             EndEpisode();
         }
         calculate_pos_and_vel_reward(out pos_reward, out vel_reward);
@@ -507,34 +604,23 @@ public class MLAgentsDirector : Agent
         float[] state = new float[110];
         int state_idx = 0;
 
-        // kinematic character center of mass
-        Vector3 new_kin_cm = get_kinematic_cm(kin_char.bone_to_transform);
-        Vector3 kin_cm_vel = (new_kin_cm - kin_char.cm) / deltatime();
-        kin_cm_vel = resolve_vel_in_kin_ref_frame(kin_cm_vel);
-        Vector3 kin_cm_vel_normalized = kin_cm_vel;
+        Vector3 kin_cm_vel_normalized = resolve_vel_in_kin_ref_frame(kinChar.cmVel);
         if (normalize_observations)
-            kin_cm_vel_normalized = normalize_vel_vector(kin_cm_vel);
-        kin_char.cm_vel = kin_cm_vel;
+            kin_cm_vel_normalized = normalize_vel_vector(kin_cm_vel_normalized);
         clear_gizmos();
-
-        kin_char.cm = new_kin_cm;
         copy_vector_into_arr(ref state, ref state_idx, kin_cm_vel_normalized);
 
-        // simulated character center of mass
-        Vector3 new_sim_cm = sim_char.hip_bone.worldCenterOfMass;
-        Vector3 sim_cm_vel = (new_sim_cm - sim_char.cm) / deltatime();
-        sim_cm_vel = resolve_vel_in_kin_ref_frame(sim_cm_vel);
-        Vector3 sim_cm_vel_normalized = sim_cm_vel;
+
+        Vector3 sim_cm_vel_normalized = resolve_vel_in_kin_ref_frame(simChar.cmVel);
         if (normalize_observations)
-            sim_cm_vel_normalized = normalize_vel_vector(sim_cm_vel);
-        sim_char.cm_vel = sim_cm_vel;
+            sim_cm_vel_normalized = normalize_vel_vector(sim_cm_vel_normalized);
         //add_gizmo_sphere(sim_char.cm, Color.blue);
         //add_gizmo_sphere(new_sim_cm, Color.green);
-        sim_char.cm = new_sim_cm;
         copy_vector_into_arr(ref state, ref state_idx, sim_cm_vel_normalized);
 
         // Copy v(sim) - v(kin)
-        copy_vector_into_arr(ref state, ref state_idx, normalize_observations ? normalize_vel_vector(sim_cm_vel - kin_cm_vel) : sim_cm_vel - kin_cm_vel);
+        Vector3 vel_diff = simChar.cmVel - kinChar.cmVel;
+        copy_vector_into_arr(ref state, ref state_idx, normalize_observations ? normalize_vel_vector(vel_diff) : vel_diff);
 
 
         // The desired horizontal CM velocity from user-input is also considered v(des) - R^2
@@ -559,60 +645,33 @@ public class MLAgentsDirector : Agent
         copy_vector_into_arr(ref state, ref state_idx, new Vector2(v_diff.x, v_diff.z));
 
         // we do it once for kin char and once for sim char
-        char_info cur_char = kin_char;
-        //Transform[] bone_to_transform = kin_char.bone_to_transform;
+        CharInfo cur_char = kinChar;
         //Vector3 relative_cm = kin_cm;
         //Quaternion relative_rot = kin_char.char_trans.rotation;
         //Vector3[] prev_bone_local_pos = prev_kin_bone_local_pos;
-        float[] s_sim, s_kin;
-        s_sim = new float[36];
-        s_kin = new float[36];
-        int copy_idx = 0;
-        float[] copy_into = s_kin;
-        for (int i = 0; i < 2; i++) {
-            for(int j = 0; j < state_bones.Length; j++)
-            {
-                mm_v2.Bones bone = state_bones[j];
-                // Compute position of bone
-                Vector3 bone_world_pos = cur_char.bone_to_transform[(int)bone].position;
-                Vector3 bone_local_pos = i == 0 ? resolve_pos_in_kin_ref_frame(bone_world_pos) : resolve_pos_in_sim_ref_frame(bone_world_pos);
-                //Vector3 bone_relative_pos = Utils.quat_inv_mul_vec3(relative_rot, bone_local_pos);
-                Vector3 prev_bone_pos = cur_char.bone_world_pos[j];
-                Vector3 bone_vel = (bone_world_pos - prev_bone_pos) / deltatime();
-                bone_vel = resolve_vel_in_kin_ref_frame(bone_vel);
-                if (normalize_observations)
-                {
-                    bone_local_pos = normalize_bone_pos(bone_local_pos, j);
-                    bone_vel = normalize_bone_vel(bone_vel, j);
-                }
-                copy_vector_into_arr(ref copy_into, ref copy_idx, bone_local_pos);
-                copy_vector_into_arr(ref copy_into, ref copy_idx, bone_vel);
-                cur_char.bone_world_pos[j] = bone_world_pos;
-
-            }
-            // Reset for second loop run with sim car
-            cur_char = sim_char;
-            copy_into = s_sim;
-            copy_idx = 0;
-        }
-
-        // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then s(kin)
+        // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
         for (int i = 0; i < 36; i++)
-            state[state_idx++] = s_sim[i];
+            state[state_idx++] = kinChar.boneState[i];
         for (int i = 0; i < 36; i++)
-            state[state_idx++] = s_sim[i] - s_kin[i];
+            state[state_idx++] = simChar.boneState[i] - kinChar.boneState[i];
         for (int i = 0; i < 25; i++)
             state[state_idx++] = prev_action_output[i];
 
         if (state_idx != 110)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything but smootehd actions");
-
+        for (int i = 0; i < 110; i++)
+        {
+            if (float.IsInfinity(state[i]))
+                Debug.Log($"State idx {i} is infinity");
+            if (float.IsNaN(state[i]))
+                Debug.Log($"State idx {i} is NaN");
+        }
         return state;
 
     }
 
     // Gets CoM in world position
-    Vector3 get_kinematic_cm(Transform[] bone_to_transform)
+    public static Vector3 get_cm(Transform[] bone_to_transform, Vector3[] global_bone_positions = null)
     {
         // We start at 1 because 0 is the root bone with no colliders
         // to calculate CM, we get the masses and centers of each capsule and
@@ -623,7 +682,7 @@ public class MLAgentsDirector : Agent
         {
             Transform t = bone_to_transform[i];
             float mass = t.GetComponent<ArticulationBody>().mass;
-            Vector3 child_center = get_child_collider_center(t.gameObject);
+            Vector3 child_center = global_bone_positions == null ? get_child_collider_center(t.gameObject) : global_bone_positions[i];
             CoM += mass * child_center;
             total_mass += mass;
 
@@ -640,17 +699,17 @@ public class MLAgentsDirector : Agent
     Vector3 resolve_vel_in_kin_ref_frame(Vector3 vel)
     {
         // using same logic as in desired_velocity_update
-        return Utils.quat_inv_mul_vec3(kin_char.char_trans.rotation, vel);
+        return Utils.quat_inv_mul_vec3(kinChar.trans.rotation, vel);
     }
     Vector3 resolve_pos_in_kin_ref_frame(Vector3 pos)
     {
         // using same logic as in desired_velocity_update
-        return Utils.quat_inv_mul_vec3(kin_char.char_trans.rotation, pos - kin_char.cm);
+        return Utils.quat_inv_mul_vec3(kinChar.trans.rotation, pos - kinChar.cm);
     }
     Vector3 resolve_pos_in_sim_ref_frame(Vector3 pos)
     {
         // using same logic as in desired_velocity_update
-        return Utils.quat_inv_mul_vec3(kin_char.char_trans.rotation, pos - sim_char.cm);
+        return Utils.quat_inv_mul_vec3(kinChar.trans.rotation, pos - simChar.cm);
     }
 
     void copy_vector_into_arr(ref float[] state, ref int start_idx, Vector3 v)
@@ -691,39 +750,11 @@ public class MLAgentsDirector : Agent
         double vel_diffs_sum = 0f;
         for (int i = 1; i < 23; i++)
         {
-            GameObject kin_collider_obj = kin_char.bone_to_collider[i];
-            GameObject sim_collider_obj = sim_char.bone_to_collider[i];
-
-            Vector3[] new_kin_bone_surface_pts = new Vector3[6];
-            Vector3[] new_sim_bone_surface_pts = new Vector3[6];
-
-
-            if (i == (int)Bone_LeftFoot || i == (int)Bone_RightFoot)
-            {
-                // do special stuff
-                get_six_points_on_box(kin_collider_obj, ref new_kin_bone_surface_pts);
-                get_six_points_on_box(sim_collider_obj, ref new_sim_bone_surface_pts);
-            } else
-            {
-                get_six_points_on_capsule(kin_collider_obj, ref new_kin_bone_surface_pts);
-                get_six_points_on_capsule(sim_collider_obj, ref new_sim_bone_surface_pts);
-            }
-
-            Vector3[] prev_kin_surface_pts = kin_char.bone_surface_pts[i];
-            Vector3[] prev_sim_surface_pts = sim_char.bone_surface_pts[i];
-
             for (int j = 0; j < 6; j++)
             {
-                new_kin_bone_surface_pts[j] = resolve_pos_in_kin_ref_frame(new_kin_bone_surface_pts[j]);
-                new_sim_bone_surface_pts[j] = resolve_pos_in_sim_ref_frame(new_sim_bone_surface_pts[j]);
-
-                pos_diffs_sum += (new_kin_bone_surface_pts[j] - new_sim_bone_surface_pts[j]).magnitude;
-                Vector3 kin_surface_pt_vel = (new_kin_bone_surface_pts[j] - prev_kin_surface_pts[j]) / deltatime();
-                Vector3 sim_surface_pt_vel = (new_sim_bone_surface_pts[j] - prev_sim_surface_pts[j]) / deltatime();
-                vel_diffs_sum += (kin_surface_pt_vel - sim_surface_pt_vel).magnitude;
+                pos_diffs_sum += (kinChar.boneSurfacePts[i][j] - simChar.boneSurfacePts[i][j]).magnitude;
+                vel_diffs_sum += (kinChar.boneSurfaceVels[i][j] - simChar.boneSurfaceVels[i][j]).magnitude;
             }
-            kin_char.bone_surface_pts[i] = new_kin_bone_surface_pts;
-            sim_char.bone_surface_pts[i] = new_sim_bone_surface_pts;
         }
         pos_reward = Math.Exp((-10f / nbodies) *  pos_diffs_sum );
         vel_reward = Math.Exp((-1f / nbodies) *  vel_diffs_sum );
@@ -734,8 +765,8 @@ public class MLAgentsDirector : Agent
         double pose_reward_sum = 0;
         for (int i = 1; i < 23; i++)
         {
-            Transform kin_bone = kin_char.bone_to_transform[i];
-            Transform sim_bone = sim_char.bone_to_transform[i];
+            Transform kin_bone = kinChar.boneToTransform[i];
+            Transform sim_bone = simChar.boneToTransform[i];
             // From Stack Overflow:
             //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
             // diff * q1 = q2  --->  diff = q2 * inverse(q1)
@@ -761,13 +792,13 @@ public class MLAgentsDirector : Agent
 
     void calc_cm_vel_reward(out double cm_vel_reward)
     {
-        cm_vel_reward = Math.Exp(-1d * (kin_char.cm_vel - sim_char.cm_vel).magnitude);
+        cm_vel_reward = Math.Exp(-1d * (kinChar.cmVel - simChar.cmVel).magnitude);
     }
 
     void calc_fall_factor(out double fall_factor, out bool heads_1m_apart)
     {
-        Vector3 kin_head_pos = kin_char.bone_to_transform[(int)Bone_Head].position;
-        Vector3 sim_head_pos = sim_char.bone_to_transform[(int)Bone_Head].position;
+        Vector3 kin_head_pos = kinChar.boneToTransform[(int)Bone_Head].position;
+        Vector3 sim_head_pos = simChar.boneToTransform[(int)Bone_Head].position;
         float head_distance = (kin_head_pos - sim_head_pos).magnitude;
         heads_1m_apart = head_distance > 1f;
         fall_factor = Math.Clamp(1.3 - 1.4 * head_distance, 0d, 1d);
@@ -807,6 +838,14 @@ public class MLAgentsDirector : Agent
             outputs[i * 2] = obj.transform.TransformPoint(center + variable * axis);
             outputs[i * 2 + 1] = obj.transform.TransformPoint(center - variable * axis);
         }
+
+    }
+    public static void getSixPointsOnCollider(GameObject obj, ref Vector3[] outputs, mm_v2.Bones bone)
+    {
+        if (bone == Bone_LeftFoot || bone == Bone_RightFoot)
+            get_six_points_on_box(obj, ref outputs);
+        else
+            get_six_points_on_capsule(obj, ref outputs);
 
     }
     public static void get_six_points_on_box(GameObject obj, ref Vector3[] outputs)
@@ -851,17 +890,14 @@ public class MLAgentsDirector : Agent
     [ContextMenu("Create gizmos for capsule position points")]
     private void debug_capsule_surface_points()
     {
-        my_initalize();
+        CustomInit();
         for (int i = 1; i < 23; i++)
         {
             // Get bone, transform, child capsule object
             mm_v2.Bones bone = (mm_v2.Bones)i;
-            GameObject kin_collider_obj = kin_char.bone_to_collider[i];
+            GameObject kin_collider_obj = kinChar.boneToCollider[i];
             Vector3[] gizmos = new Vector3[6];
-            if (bone == Bone_LeftFoot || bone == Bone_RightFoot)            
-                get_six_points_on_box(kin_collider_obj, ref gizmos);            
-            else
-                get_six_points_on_capsule(kin_collider_obj, ref gizmos);            
+            getSixPointsOnCollider(kin_collider_obj, ref gizmos, bone);            
             foreach (Vector3 v in gizmos)
                 add_gizmo_sphere(v);
         }

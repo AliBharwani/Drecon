@@ -4,7 +4,7 @@ using static mm_v2.Bones;
 
 public class TestDirector : MonoBehaviour
 {
-    char_info kin_char, sim_char;
+    CharInfo kin_char, sim_char;
     private GameObject kinematic_char;
     private GameObject simulated_char;
     public GameObject simulated_char_prefab;
@@ -45,7 +45,7 @@ public class TestDirector : MonoBehaviour
         for (int i = 0; i < all_limited_dof_bones.Length; i++)
         {
             int bone_idx = (int)all_limited_dof_bones[i];
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ArticulationBody ab = sim_char.boneToArtBody[bone_idx];
             Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
             bool use_xdrive = all_limited_dof_bones[i] == Bone_LeftLeg || all_limited_dof_bones[i] == Bone_RightLeg;
             if (use_xdrive)
@@ -66,7 +66,7 @@ public class TestDirector : MonoBehaviour
             int bone_idx = (int)all_full_dof_bones[i];
             // Debug.Log($"Cur bone rotations length - {cur_rotations.Length} - bone_idx : {bone_idx}");
             Quaternion final = cur_rotations[bone_idx];
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ArticulationBody ab = sim_char.boneToArtBody[bone_idx];
             //Debug.Log($"Setting drive rotation for ab: {ab.gameObject.name}");
             ab.SetDriveRotation(final);
         }
@@ -75,7 +75,7 @@ public class TestDirector : MonoBehaviour
         {
             int bone_idx = (int)openloop_bones[i];
             Quaternion final = cur_rotations[bone_idx];
-            ArticulationBody ab = sim_char.bone_to_art_body[bone_idx];
+            ArticulationBody ab = sim_char.boneToArtBody[bone_idx];
             //Debug.Log($"Setting drive rotation for ab: {ab.gameObject.name}");
             ab.SetDriveRotation(final);
         }
@@ -86,29 +86,30 @@ public class TestDirector : MonoBehaviour
         MMScript = kinematic_char.GetComponent<mm_v2>();
         if (!MMScript.is_initalized && !Application.isEditor)
             return;
-        kin_char = new char_info();
-        kin_char.char_trans = kinematic_char.transform;
-        kin_char.bone_to_transform = MMScript.boneToTransform;
-        kin_char.char_obj = kinematic_char;
-        nbodies = kin_char.bone_to_transform.Length;
-        kin_char.bone_surface_pts = new Vector3[nbodies][];
+        kin_char = new CharInfo();
+        kin_char.trans = kinematic_char.transform;
+        kin_char.boneToTransform = MMScript.boneToTransform;
+        kin_char.charObj = kinematic_char;
+        nbodies = kin_char.boneToTransform.Length;
+        kin_char.boneSurfacePts = new Vector3[nbodies][];
 
         SimCharController = simulated_char.GetComponent<SimCharController>();
         if (Application.isEditor)
             SimCharController.initBoneToArtBodies();
-        sim_char = new char_info();
-        sim_char.char_trans = simulated_char.transform;
-        sim_char.bone_to_transform = SimCharController.boneToTransform;
-        sim_char.hip_bone = SimCharController.bone_to_art_body[(int)Bone_Hips];
-        sim_char.char_obj = simulated_char;
-        sim_char.bone_surface_pts = new Vector3[nbodies][];
-        sim_char.bone_to_art_body = SimCharController.bone_to_art_body;
+        sim_char = new CharInfo();
+        sim_char.trans = simulated_char.transform;
+        sim_char.boneToTransform = SimCharController.boneToTransform;
+        sim_char.root = SimCharController.bone_to_art_body[(int)Bone_Entity];
+        sim_char.charObj = simulated_char;
+        sim_char.boneSurfacePts = new Vector3[nbodies][];
+        sim_char.boneToArtBody = SimCharController.bone_to_art_body;
 
-        kin_char.bone_world_pos = new Vector3[state_bones.Length];
-        sim_char.bone_world_pos = new Vector3[state_bones.Length];
+        kin_char.boneWorldPos = new Vector3[state_bones.Length];
+        sim_char.boneWorldPos = new Vector3[state_bones.Length];
 
-        origin = kin_char.char_trans.position;
-        origin_hip_rot = sim_char.bone_to_transform[(int)Bone_Hips].rotation;
+        origin = kin_char.trans.position;
+        origin_rot = sim_char.boneToTransform[(int)Bone_Entity].rotation;
+
     }
 
     private void Awake()
@@ -128,7 +129,7 @@ public class TestDirector : MonoBehaviour
     }
 
     Vector3 origin;
-    Quaternion origin_hip_rot;
+    Quaternion origin_rot;
     [ContextMenu("create_and_set_kin_char")]
     private void create_and_set_kin_char()
     {
@@ -172,8 +173,8 @@ public class TestDirector : MonoBehaviour
         bool teleport_sim = MMScript.teleported_last_frame;
         if (teleport_sim)
         {
-            sim_char.char_trans.rotation = kin_char.char_trans.rotation;
-            sim_char.hip_bone.TeleportRoot(origin, origin_hip_rot);
+            //sim_char.char_trans.rotation = kin_char.char_trans.rotation;
+            sim_char.root.TeleportRoot(origin, origin_rot);
         }
         return;
     }

@@ -713,7 +713,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_Name
-      value: 'OLD simulated char '
+      value: simulated char (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1015377072094712135, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_Layer
@@ -808,6 +812,10 @@ PrefabInstance:
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4755398621840771436, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4922375052555398904, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
@@ -1044,24 +1052,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -45
-    upperLimit: 45
+    lowerLimit: -13.766876
+    upperLimit: 13.766876
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -11.313171
+    upperLimit: 11.31308
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -19.864868
+    upperLimit: -0.3711853
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -1098,19 +1106,19 @@ ArticulationBody:
   m_LinearY: 2
   m_LinearZ: 2
   m_SwingY: 0
-  m_SwingZ: 2
+  m_SwingZ: 1
   m_Twist: 0
   m_XDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -0.000030517578
+    upperLimit: 0.000029714658
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -0.000030517578
+    upperLimit: 0.000011671461
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -1118,7 +1126,7 @@ ArticulationBody:
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: 0
-    upperLimit: 0
+    upperLimit: 0.00003976031
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -1163,24 +1171,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -90
-    upperLimit: 45
+    lowerLimit: -8.088837
+    upperLimit: 67.916534
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -70
-    upperLimit: 70
+    lowerLimit: -53.250336
+    upperLimit: 108.565445
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -60
-    upperLimit: 120
+    lowerLimit: -61.661926
+    upperLimit: 99.4487
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -1235,24 +1243,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -15
-    upperLimit: 45
+    lowerLimit: -41.556305
+    upperLimit: 45.524048
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -15
-    upperLimit: 45
+    lowerLimit: -31.345367
+    upperLimit: 38.62793
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -90
-    upperLimit: 60
+    lowerLimit: -88.47992
+    upperLimit: 32.79077
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -1379,24 +1387,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -60
-    upperLimit: 60
+    lowerLimit: -40.98343
+    upperLimit: 40.98352
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -39.336853
+    upperLimit: 39.336823
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -45
-    upperLimit: 45
+    lowerLimit: -30.803589
+    upperLimit: 36.221558
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -1436,24 +1444,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -85.905334
+    upperLimit: 34.966095
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -90
-    upperLimit: 30
+    lowerLimit: -169.31223
+    upperLimit: 176.00987
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -148.29222
+    upperLimit: 162.99461
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -1498,24 +1506,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -45
-    upperLimit: 45
+    lowerLimit: -13.816498
+    upperLimit: 13.816467
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -11.260956
+    upperLimit: 11.261139
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -19.864777
+    upperLimit: -0.36791992
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -1719,7 +1727,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2839190218147783641}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 40d7fb855e3667d4088259aa8f907fa6, type: 3}
   m_Name: 
@@ -1755,7 +1763,7 @@ MonoBehaviour:
   - {fileID: 7065778573295349583}
   - {fileID: 9151543335565272533}
   bone_to_art_body:
-  - {fileID: 0}
+  - {fileID: 7804826596565404471}
   - {fileID: 8498230533959129126}
   - {fileID: 6778893863012374977}
   - {fileID: 5894115638739661346}
@@ -1778,6 +1786,7 @@ MonoBehaviour:
   - {fileID: 7407306032439914427}
   - {fileID: 1848427620241704218}
   - {fileID: 1693676771373342448}
+  is_active: 0
   start_delay: 0
   stiffness: 100
   damping: 20
@@ -2078,24 +2087,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 0
   m_XDrive:
-    lowerLimit: -120
-    upperLimit: 0
+    lowerLimit: 0.07064819
+    upperLimit: 4.1614685
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -2.7861938
+    upperLimit: 24.656952
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: 0
-    upperLimit: 120
+    lowerLimit: -0.4013977
+    upperLimit: 131.20053
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2174,24 +2183,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -45
-    upperLimit: 90
+    lowerLimit: -50.17157
+    upperLimit: 76.48743
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -70
-    upperLimit: 70
+    lowerLimit: -106.54187
+    upperLimit: 8.6684265
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -60
-    upperLimit: 120
+    lowerLimit: -32.62906
+    upperLimit: 92.92676
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2292,24 +2301,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -34.965637
+    upperLimit: 85.902405
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -30
-    upperLimit: 90
+    lowerLimit: -176.02214
+    upperLimit: 169.29982
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -148.26111
+    upperLimit: 163.01227
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2379,24 +2388,24 @@ ArticulationBody:
   m_SwingZ: 0
   m_Twist: 1
   m_XDrive:
-    lowerLimit: 0
-    upperLimit: 150
+    lowerLimit: 4.866455
+    upperLimit: 89.96045
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 180
+    lowerLimit: -179.82222
+    upperLimit: 179.95956
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: 170
-    upperLimit: 270
+    lowerLimit: -179.91258
+    upperLimit: 179.64737
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2481,28 +2490,28 @@ ArticulationBody:
   m_LinearX: 2
   m_LinearY: 2
   m_LinearZ: 2
-  m_SwingY: 2
-  m_SwingZ: 2
-  m_Twist: 2
+  m_SwingY: 1
+  m_SwingZ: 1
+  m_Twist: 1
   m_XDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -31.912933
+    upperLimit: 31.912933
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -37.085327
+    upperLimit: 37.085327
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -28.168732
+    upperLimit: 20.81842
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2596,24 +2605,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -1.4712219
+    upperLimit: 2.9024353
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -26.773376
+    upperLimit: 6.175934
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -21.809967
+    upperLimit: 21.928772
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2687,24 +2696,24 @@ ArticulationBody:
   m_SwingZ: 0
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -120
-    upperLimit: 0
+    lowerLimit: -87.38049
+    upperLimit: 0.40127563
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -174.98233
+    upperLimit: -0.2709961
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: 0
-    upperLimit: 120
+    lowerLimit: -173.68561
+    upperLimit: -0.044647217
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2802,24 +2811,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -45
-    upperLimit: 45
+    lowerLimit: -7.009735
+    upperLimit: 7.009735
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -5.4360046
+    upperLimit: 5.4360046
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -30
-    upperLimit: 30
+    lowerLimit: -9.916687
+    upperLimit: -0.15136719
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2864,24 +2873,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -2.9023438
+    upperLimit: 1.4711609
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -6.1757507
+    upperLimit: 26.77356
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -21.809967
+    upperLimit: 21.928772
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -2926,24 +2935,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -45
-    upperLimit: 45
+    lowerLimit: -50.60498
+    upperLimit: 41.2782
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -45
-    upperLimit: 45
+    lowerLimit: -23.585815
+    upperLimit: 43.10205
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -125
-    upperLimit: 15
+    lowerLimit: -60.661865
+    upperLimit: 40.30844
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -3338,24 +3347,24 @@ ArticulationBody:
   m_SwingZ: 2
   m_Twist: 2
   m_XDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -46.509583
+    upperLimit: 46.509094
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -46.46176
+    upperLimit: 46.461975
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -25.46051
+    upperLimit: 37.09369
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -3395,24 +3404,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -45
-    upperLimit: 15
+    lowerLimit: -45.524048
+    upperLimit: 41.556335
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -45
-    upperLimit: 15
+    lowerLimit: -38.6279
+    upperLimit: 31.345398
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -90
-    upperLimit: 60
+    lowerLimit: -88.47992
+    upperLimit: 32.79077
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -3452,24 +3461,24 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -45
-    upperLimit: 45
+    lowerLimit: -41.278168
+    upperLimit: 50.60501
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: -45
-    upperLimit: 45
+    lowerLimit: -43.10208
+    upperLimit: 23.585815
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: -125
-    upperLimit: 15
+    lowerLimit: -60.661896
+    upperLimit: 40.30844
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -3511,27 +3520,27 @@ ArticulationBody:
   m_LinearY: 2
   m_LinearZ: 2
   m_SwingY: 0
-  m_SwingZ: 2
+  m_SwingZ: 1
   m_Twist: 0
   m_XDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -0.000030517578
+    upperLimit: 0.000029979085
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: -0.000030517578
+    upperLimit: 0.000015243464
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: 0
-    upperLimit: 0
+    lowerLimit: 0.000003846052
+    upperLimit: 0.000047453403
     stiffness: 100
     damping: 20
     forceLimit: 200
@@ -3586,24 +3595,24 @@ ArticulationBody:
   m_SwingZ: 0
   m_Twist: 1
   m_XDrive:
-    lowerLimit: 0
-    upperLimit: 150
+    lowerLimit: 4.8664246
+    upperLimit: 89.96573
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_YDrive:
-    lowerLimit: 0
-    upperLimit: 180
+    lowerLimit: -179.95956
+    upperLimit: 179.8222
     stiffness: 100
     damping: 20
     forceLimit: 200
     target: 0
     targetVelocity: 0
   m_ZDrive:
-    lowerLimit: 170
-    upperLimit: 270
+    lowerLimit: -179.64735
+    upperLimit: 179.91258
     stiffness: 100
     damping: 20
     forceLimit: 200
