@@ -713,7 +713,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_Name
-      value: simulated char (1)
+      value: 'OLD simulated char '
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 49875d6e7ea6a4316bb2e854b571a09f, type: 3}
       propertyPath: m_Layer
@@ -1665,7 +1665,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!114 &297290907
 MonoBehaviour:
@@ -1791,6 +1791,7 @@ MonoBehaviour:
   stiffness: 100
   damping: 20
   force_limit: 200
+  boneToCollider: []
 --- !u!114 &3282222037220238322
 MonoBehaviour:
   m_ObjectHideFlags: 0

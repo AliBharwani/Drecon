@@ -206,13 +206,10 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &97353462
@@ -883,20 +880,12 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
---- !u!1 &297290902 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
-  m_PrefabInstance: {fileID: 3282222037220238298}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &399470364
 GameObject:
   m_ObjectHideFlags: 0
@@ -1223,13 +1212,10 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &602526823
@@ -1315,13 +1301,10 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &626637396
@@ -1418,6 +1401,7 @@ GameObject:
   - component: {fileID: 767361689}
   - component: {fileID: 767361688}
   - component: {fileID: 767361690}
+  - component: {fileID: 767361691}
   m_Layer: 0
   m_Name: ML_Director
   m_TagString: Untagged
@@ -1445,14 +1429,11 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
-  draw_gizmos: 1
+  draw_gizmos: 0
   gizmoSphereRad: 0.01
 --- !u!4 &767361689
 Transform:
@@ -1499,6 +1480,18 @@ MonoBehaviour:
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_ObservableAttributeHandling: 0
+--- !u!114 &767361691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 767361687}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 885ff57caa2445342b3bd4a3c63fbcac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &777315053
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2175,13 +2168,10 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1001 &1221041499
@@ -2460,13 +2450,10 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &1371882026
@@ -2552,13 +2539,10 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &1407241025
@@ -2974,13 +2958,10 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1001 &1770047141
@@ -3456,13 +3437,10 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1001 &2047262205
@@ -3724,6 +3702,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2090630089}
   - component: {fileID: 2090630088}
+  - component: {fileID: 2090630090}
   m_Layer: 0
   m_Name: MultiMLAgentsDirector
   m_TagString: Untagged
@@ -3743,8 +3722,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 5
+  numAgents: 8
   modelDirector: {fileID: 767361687}
+  reportMeanRewardEveryNSteps: 100000
 --- !u!4 &2090630089
 Transform:
   m_ObjectHideFlags: 0
@@ -3760,6 +3740,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2090630090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2090630087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 885ff57caa2445342b3bd4a3c63fbcac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2128387238
 GameObject:
   m_ObjectHideFlags: 0
@@ -3843,13 +3835,10 @@ MonoBehaviour:
   use_deltatime: 1
   normalize_action_ouputs: 1
   normalize_observations: 1
-  kinematic_char: {fileID: 297290902}
-  simulated_char: {fileID: 0}
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
+  reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  MAX_VELOCITY: {x: 0, y: 0, z: 0}
-  MIN_VELOCITY: {x: 0, y: 0, z: 0}
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!4 &541777148655995783

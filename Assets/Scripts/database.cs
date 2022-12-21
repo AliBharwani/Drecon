@@ -13,12 +13,12 @@ public class database : MonoBehaviour
     public Quaternion[][] bone_rotations;
     [HideInInspector]
     public Vector3[][] bone_angular_velocities;
-    [HideInInspector]
+    //[HideInInspector]
     public int[] bone_parents;
     public int numframes;
 
-    int[] range_starts;
-    int[] range_stops;
+    internal int[] range_starts;
+    internal int[] range_stops;
 
     public float[][] features;
     public float[]  features_offset;
@@ -91,10 +91,7 @@ public class database : MonoBehaviour
         in float feature_weight_trajectory_positions,
         in float feature_weight_trajectory_directions)
     {
-        //for (int i = 0; i < nranges(); i++)
-        //{
-        //    Debug.Log($"Idx {i} range start: {range_starts[i]} | range stop: {range_stops[i]}");
-        //}
+
         int nfeatures =
             3 + // Left Foot Position
             3 + // Right Foot Position 
@@ -481,7 +478,9 @@ public class database : MonoBehaviour
         }
         bone_parents[0] = -1;
         numframes = nframes();
-
+        //for (int i = 0; i < nranges(); i++)
+        //    Debug.Log($"Idx {i} range start: {range_starts[i]} | range stop: {range_stops[i]}");
+        
     }
 
 

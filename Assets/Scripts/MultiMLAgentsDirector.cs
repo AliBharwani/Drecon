@@ -7,6 +7,9 @@ public class MultiMLAgentsDirector : MonoBehaviour
     public int numAgents = 5;
     public GameObject modelDirector;
     private MLAgentsDirector[] directors;
+    public int reportMeanRewardEveryNSteps = 10000;
+    private int curStep = 0;
+    private float meanReward;
     // Start is called before the first frame update
     void Awake()
     {
@@ -38,9 +41,17 @@ public class MultiMLAgentsDirector : MonoBehaviour
         obj.SetActive(true);
         return obj.GetComponent<MLAgentsDirector>();
     }
-    //void Update()
-    //{
-    //    if (modelDirector == null)
-    //        return;
-    //}
+    void FixedUpdate()
+    {
+        curStep++;
+        if (curStep % reportMeanRewardEveryNSteps == 0)
+        {
+            Debug.Log($"Step {curStep} mean reward last {reportMeanRewardEveryNSteps} is: {meanReward}");
+            meanReward = 0f;
+        }
+        float curStepReward = 0f;
+        foreach (var director in directors)
+            curStepReward += director.final_reward / (float) directors.Length;
+        meanReward += (curStepReward / (float)reportMeanRewardEveryNSteps);
+    }
 }

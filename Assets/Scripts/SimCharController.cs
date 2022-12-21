@@ -18,7 +18,7 @@ public class SimCharController : MonoBehaviour
     public float damping = 3f;
     public float force_limit = 200f;
 
-    void Start()
+    void Awake()
     {
         db = database.Instance;
         initBoneToCollider();
@@ -37,7 +37,7 @@ public class SimCharController : MonoBehaviour
             set_art_body_rot_limits();
         }
     }
-    Collider[] boneToCollider;
+    public Collider[] boneToCollider;
     private void initBoneToCollider()
     {
         boneToCollider = new Collider[db.nbones()];
@@ -56,8 +56,11 @@ public class SimCharController : MonoBehaviour
     private void setupIgnoreCollisions()
     {
         Physics.IgnoreCollision(boneToCollider[(int)Bone_LeftUpLeg], boneToCollider[(int)Bone_RightUpLeg]);
+        Physics.IgnoreCollision(boneToCollider[(int)Bone_LeftArm], boneToCollider[(int)Bone_Spine2]);
+        Physics.IgnoreCollision(boneToCollider[(int)Bone_RightArm], boneToCollider[(int)Bone_Spine2]);
+
         int[] torsoColliders = new int[] { (int)Bone_Neck, (int)Bone_LeftShoulder, (int)Bone_RightShoulder, (int) Bone_Spine2,
-                                            (int) Bone_Spine1, (int) Bone_Spine, (int) Bone_Hips};
+                                            (int) Bone_Spine1, (int) Bone_Spine, (int) Bone_Hips, (int) Bone_Head};
         for (int i = 0; i < torsoColliders.Length; i++)
             for (int j = i + 1; j < torsoColliders.Length; j++)
                 Physics.IgnoreCollision(boneToCollider[torsoColliders[i]], boneToCollider[torsoColliders[j]]);
@@ -159,12 +162,7 @@ public class SimCharController : MonoBehaviour
     public static void teleport_sim_char(CharInfo sim_char, CharInfo kin_char)
     {
         if (db == null)
-        {
-            if (UnityEditor.EditorApplication.isPlaying)
-                db = database.Instance;
-            else 
-                db = new database();
-        }
+            db = getDB();
 
         //Destroy(simulated_char);
         //simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
@@ -267,9 +265,7 @@ public class SimCharController : MonoBehaviour
         // velocities
 
     }
-
-    [ContextMenu("Set all art body rot limits")]
-    public void set_art_body_rot_limits()
+    private static database getDB()
     {
         if (db == null)
         {
@@ -278,6 +274,13 @@ public class SimCharController : MonoBehaviour
             else
                 db = new database();
         }
+        return db;
+    }
+    [ContextMenu("Set all art body rot limits")]
+    public void set_art_body_rot_limits()
+    {
+        if (db == null)
+            db = getDB();
         int num_frames = db.nframes();
 
 
@@ -344,10 +347,10 @@ public class SimCharController : MonoBehaviour
         Debug.Log($"vel_max: {vel_max.ToString("f6")}");
         for (int j = 0; j < num_state_bones; j++)
         {
-            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos min: {bone_pos_mins[j].ToString("f6")}");
-            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos max: {bone_pos_maxes[j].ToString("f6")}");
-            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone vel min: {bone_vel_mins[j].ToString("f6")}");
-            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone vel max: {bone_vel_maxes[j].ToString("f6")}");
+            //Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos min: {bone_pos_mins[j].ToString("f6")}");
+            //Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos max: {bone_pos_maxes[j].ToString("f6")}");
+            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone vel min: {bone_vel_mins[j].ToString("f6")} || bone vel max: {bone_vel_maxes[j].ToString("f6")}");
+            //Debug.Log($"{MLAgentsDirector.state_bones[j]} bone vel max: {bone_vel_maxes[j].ToString("f6")}");
 
         }
     }
@@ -359,7 +362,8 @@ public class SimCharController : MonoBehaviour
         ref Vector3[] bone_vel_mins,
         ref Vector3[] bone_vel_maxes)
     {
-        database db = database.Instance;
+        if (db == null)
+            db = getDB();
         //database db = new database(Application.dataPath + @"/outputs/database.bin");
         int num_frames = db.nframes();
         Vector3 last_cm = Vector3.zero;
@@ -381,12 +385,12 @@ public class SimCharController : MonoBehaviour
         for (int i = 0; i < num_frames; i++)
         {
             forward_kinematics_full(db, i, ref global_pos, ref global_rots);
+            bool update_velocity = !db.range_starts.Contains(i);
             //apply_global_pos_and_rot(global_pos, global_rots, boneToTransform);
             Vector3 cm = MLAgentsDirector.get_cm(boneToTransform, global_pos);
-            Vector3 cm_vel = (cm - last_cm) / frame_time;
+            Vector3 cm_vel =  (cm - last_cm) / frame_time;
             cm_vel = Utils.quat_inv_mul_vec3(global_rots[0], cm_vel);
-            // probably a glitch
-            if (cm_vel.magnitude < 10f)
+            if (update_velocity)
                 updated_mins_and_maxes(cm_vel, ref cm_vel_min, ref cm_vel_max);
 
             last_cm = cm;
@@ -399,8 +403,9 @@ public class SimCharController : MonoBehaviour
                 Vector3 bone_vel = (bone_pos - state_bone_pos[j]) / frame_time;
                 bone_vel = Utils.quat_inv_mul_vec3(global_rots[0], bone_vel);
                 // Compare min maxes
-                updated_mins_and_maxes(local_bone_pos,ref  bone_pos_mins[j], ref bone_pos_maxes[j]);
-                updated_mins_and_maxes(bone_vel, ref bone_vel_mins[j], ref bone_vel_maxes[j]);
+                updated_mins_and_maxes(local_bone_pos, ref  bone_pos_mins[j], ref bone_pos_maxes[j]);
+                if (update_velocity)
+                    updated_mins_and_maxes(bone_vel, ref bone_vel_mins[j], ref bone_vel_maxes[j]);
                 state_bone_pos[j] = bone_pos;
             }
         }

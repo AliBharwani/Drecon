@@ -1,0 +1,29 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 44432,
+                "file_path": "results\\eight_agents_paper\\Drecon\\Drecon-44432.onnx",
+                "reward": 6.637837190213411,
+                "creation_time": 1671590922.770565,
+                "auxillary_file_paths": [
+                    "results\\eight_agents_paper\\Drecon\\Drecon-44432.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 44432,
+            "file_path": "results\\eight_agents_paper\\Drecon.onnx",
+            "reward": 6.637837190213411,
+            "creation_time": 1671590922.770565,
+            "auxillary_file_paths": [
+                "results\\eight_agents_paper\\Drecon\\Drecon-44432.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

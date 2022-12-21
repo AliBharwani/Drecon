@@ -44,21 +44,19 @@ public class MLAgentsDirector : Agent
     public bool normalize_action_ouputs = true;
     public bool normalize_observations = false;
     CharInfo kinChar, simChar;
-    public GameObject kinematic_char;
-    public GameObject simulated_char;
+    GameObject kinematic_char;
+    internal GameObject simulated_char;
     public GameObject simulated_char_prefab;
     public GameObject kinematic_char_prefab;
+    public int reportMeanRewardEveryNSteps = 10000;
     private mm_v2 MMScript;
     private SimCharController SimCharController;
     private int nbodies; 
-    private int evaluate_k_steps = 1;
-    private int cur_step = 0;
+    private int evaluateEveryKSteps = 1;
+    private int curFixedUpdate = 0;
 
     float[] prev_action_output = new float[25];
     database motionDB;
-
-    //private ArticulationBody sim_hip_bone; // root of ArticulationBody
-
 
     [HideInInspector]
     public static mm_v2.Bones[] state_bones = new mm_v2.Bones[] 
@@ -247,7 +245,7 @@ public class MLAgentsDirector : Agent
             // Angle is in range (-1, 1) => map to (-180, 180)
             //float angle = final_actions[i] * 180;
             ArticulationBody ab = simChar.boneToArtBody[(int)bone];
-            Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[(int) bone]);
+            Vector3 target = ab.ToTargetRotationInReducedSpaceV2(cur_rotations[(int) bone], true);
             bool use_xdrive = bone == Bone_LeftLeg || bone == Bone_RightLeg;
             if (use_xdrive)
             {
@@ -384,9 +382,10 @@ public class MLAgentsDirector : Agent
 
         //SimCharController.teleport_sim_char(sim_char, kin_char);
         // request Decision
-        if (cur_step % evaluate_k_steps == 0)
+        if (curFixedUpdate % evaluateEveryKSteps == 0)
             RequestDecision();
-        cur_step++;
+        curFixedUpdate++;
+        //updateMeanReward();
     }
 
     private void UpdateCMData(bool updateVelocity, float deltaTime)
@@ -460,6 +459,8 @@ public class MLAgentsDirector : Agent
             curInfo = simChar;
         }
     }
+    private float meanReward = 0f;
+    internal float final_reward = 0f;
     private void set_rewards()
     {
         bool heads_1m_apart;
@@ -467,6 +468,8 @@ public class MLAgentsDirector : Agent
         calc_fall_factor(out fall_factor, out heads_1m_apart);
         if (heads_1m_apart)
         {
+            final_reward = -.5f;
+            //updateMeanReward(-.5f);
             SetReward(-.5f);
             EndEpisode();
         }
@@ -474,16 +477,26 @@ public class MLAgentsDirector : Agent
         calc_local_pose_reward(out local_pose_reward);
         calc_cm_vel_reward(out cm_vel_reward);
         // generated reward
-        float final_reward = (float)(fall_factor * (pos_reward + vel_reward + local_pose_reward + cm_vel_reward));
+        final_reward = (float)(fall_factor * (pos_reward + vel_reward + local_pose_reward + cm_vel_reward));
         //Debug.Log($"fall_factor: {fall_factor}, pos_reward: {pos_reward}, vel_reward: {vel_reward}, local_pose_reward: {local_pose_reward}, cm_vel_reward: {cm_vel_reward}");
         //Debug.Log($"final_reward: {final_reward}");
-
+        //updateMeanReward(final_reward);
         SetReward(final_reward);
+    }
+
+    private void updateMeanReward()
+    {
+        if (curFixedUpdate % reportMeanRewardEveryNSteps == 0)
+        {
+            Debug.Log($"Step {curFixedUpdate} mean reward last {reportMeanRewardEveryNSteps} is: {meanReward}");
+            meanReward = 0f;
+        }
+        meanReward += (final_reward / (float)reportMeanRewardEveryNSteps);
     }
    
     // Roughly 6.81 m/s
-    public Vector3 MAX_VELOCITY = new Vector3(4.351938f, 1.454015f, 5.032811f);
-    public Vector3 MIN_VELOCITY = new Vector3(-4.351710f, -1.688771f, -4.900798f);
+    Vector3 MAX_VELOCITY = new Vector3(4.351938f, 1.454015f, 5.032811f);
+    Vector3 MIN_VELOCITY = new Vector3(-4.351710f, -1.688771f, -4.900798f);
     Vector3 normalize_vel_vector(Vector3 vel)
     {
         float new_x = normalize_float(vel.x, MIN_VELOCITY.x, MAX_VELOCITY.x);
@@ -610,7 +623,6 @@ public class MLAgentsDirector : Agent
         clear_gizmos();
         copy_vector_into_arr(ref state, ref state_idx, kin_cm_vel_normalized);
 
-
         Vector3 sim_cm_vel_normalized = resolve_vel_in_kin_ref_frame(simChar.cmVel);
         if (normalize_observations)
             sim_cm_vel_normalized = normalize_vel_vector(sim_cm_vel_normalized);
@@ -621,7 +633,6 @@ public class MLAgentsDirector : Agent
         // Copy v(sim) - v(kin)
         Vector3 vel_diff = simChar.cmVel - kinChar.cmVel;
         copy_vector_into_arr(ref state, ref state_idx, normalize_observations ? normalize_vel_vector(vel_diff) : vel_diff);
-
 
         // The desired horizontal CM velocity from user-input is also considered v(des) - R^2
         Vector3 desired_vel = MMScript.desired_velocity;
@@ -638,17 +649,11 @@ public class MLAgentsDirector : Agent
             desired_vel_normalized = normalize_desired_vel_vector(desired_vel);
         copy_vector_into_arr(ref state, ref state_idx, new Vector2(desired_vel_normalized.x, desired_vel_normalized.z));
 
-
         //The diff between current simulated character horizontal
         //CM velocity and v(des) = v(diff) R ^ 2
         Vector3 v_diff = desired_vel_normalized - sim_cm_vel_normalized;
         copy_vector_into_arr(ref state, ref state_idx, new Vector2(v_diff.x, v_diff.z));
 
-        // we do it once for kin char and once for sim char
-        CharInfo cur_char = kinChar;
-        //Vector3 relative_cm = kin_cm;
-        //Quaternion relative_rot = kin_char.char_trans.rotation;
-        //Vector3[] prev_bone_local_pos = prev_kin_bone_local_pos;
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
         for (int i = 0; i < 36; i++)
             state[state_idx++] = kinChar.boneState[i];
@@ -659,13 +664,6 @@ public class MLAgentsDirector : Agent
 
         if (state_idx != 110)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything but smootehd actions");
-        for (int i = 0; i < 110; i++)
-        {
-            if (float.IsInfinity(state[i]))
-                Debug.Log($"State idx {i} is infinity");
-            if (float.IsNaN(state[i]))
-                Debug.Log($"State idx {i} is NaN");
-        }
         return state;
 
     }
