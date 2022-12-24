@@ -5,6 +5,7 @@ using System.Text;
 using static mm_v2.Bones;
 public class database : MonoBehaviour
 {
+    public bool use60fps = true;
     [HideInInspector] // Hides var below
     public Vector3[][] bone_positions;
     [HideInInspector]
@@ -14,15 +15,15 @@ public class database : MonoBehaviour
     [HideInInspector]
     public Vector3[][] bone_angular_velocities;
     //[HideInInspector]
-    public int[] bone_parents;
-    public int numframes;
+    internal int[] bone_parents;
+    internal int numframes;
 
     internal int[] range_starts;
     internal int[] range_stops;
 
-    public float[][] features;
-    public float[]  features_offset;
-    public float[] features_scale;
+    internal float[][] features;
+    internal float[]  features_offset;
+    internal float[] features_scale;
     int offset;
     int num_neigh;
     KDTree tree;
@@ -64,14 +65,17 @@ public class database : MonoBehaviour
         }
         else
         {
-            init_database(Application.dataPath + @"/outputs/database.bin");
+            init_database(getDatabaseFilename());
             _instance = this;
         }
     }
-
+    private string getDatabaseFilename()
+    {
+        return Application.dataPath + (use60fps ? @"/outputs/database60fps.bin" : @"/outputs/database.bin");
+    }
     public database(string filename = null )
     {
-        filename = filename == null ? Application.dataPath + @"/outputs/database.bin" : filename;
+        filename = filename == null ? getDatabaseFilename() : filename;
         init_database(filename);
     }
 

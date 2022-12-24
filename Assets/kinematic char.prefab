@@ -984,7 +984,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  use_deltatime: 1
   gen_inputs: 1
   MAX_WANDERING_RADIUS: 10
   toy_pointers:
@@ -999,11 +998,10 @@ MonoBehaviour:
   inertialize_blending_halflife: 0.1
   simulation_rotation_halflife: 0.1
   MoveSpeed: 3
-  frame_increments: 10
+  frame_increments: 20
   ignore_surrounding: 20
-  databaseFilepath: database
   numNeigh: 1
-  searchEveryNFrames: 3
+  searchEveryNFrames: 8
   frameCounter: 1
   boneToTransform:
   - {fileID: 631237458873011649}

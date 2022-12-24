@@ -30,9 +30,6 @@ public class SimCharController : MonoBehaviour
             UnityEditor.EditorWindow.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
 #endif
 
-        //Application.targetFrameRate = 30;
-        //db = new database(Application.dataPath + @"/outputs/database.bin");
-
         if (set_art_bodies) { 
             set_art_body_rot_limits();
         }
@@ -364,7 +361,6 @@ public class SimCharController : MonoBehaviour
     {
         if (db == null)
             db = getDB();
-        //database db = new database(Application.dataPath + @"/outputs/database.bin");
         int num_frames = db.nframes();
         Vector3 last_cm = Vector3.zero;
         Vector3[] global_pos = new Vector3[23];

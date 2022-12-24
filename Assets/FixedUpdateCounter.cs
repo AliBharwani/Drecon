@@ -42,10 +42,12 @@ public class FixedUpdateCounter : MonoBehaviour
     void OnGUI()
     {
         GUIStyle fontSize = new GUIStyle(GUI.skin.GetStyle("label"));
-        fontSize.fontSize = 24;
+        fontSize.fontSize = 16;
         GUI.Label(new Rect(100, 100, 200, 50), "Update: " + updateUpdateCountPerSecond.ToString(), fontSize);
-        GUI.Label(new Rect(100, 150, 200, 50), "FixedUpdate: " + updateFixedUpdateCountPerSecond.ToString(), fontSize);
-        GUI.Label(new Rect(100, 200, 600, 100), "timeSinceLastCount: " + timeSinceLastCount.ToString(), fontSize);
+        GUI.Label(new Rect(100, 125, 200, 50), "FixedUpdate: " + updateFixedUpdateCountPerSecond.ToString(), fontSize);
+        GUI.Label(new Rect(100, 150, 600, 100), "timeSinceLastCount: " + timeSinceLastCount.ToString(), fontSize);
+        GUI.Label(new Rect(100, 175, 600, 100), "fixedUnscaledDeltaTime: " + Time.fixedUnscaledDeltaTime.ToString(), fontSize);
+        //GUI.Label(new Rect(100, 200, 600, 100), "timeSinceLastCount: " + timeSinceLastCount.ToString(), fontSize);
 
     }
 
@@ -54,7 +56,7 @@ public class FixedUpdateCounter : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(1 * Time.timeScale);
+            yield return new WaitForSecondsRealtime(1);
             updateUpdateCountPerSecond = updateCount;
             updateFixedUpdateCountPerSecond = fixedUpdateCount;
             timeSinceLastCount = Time.realtimeSinceStartup - timeOfLastCount;

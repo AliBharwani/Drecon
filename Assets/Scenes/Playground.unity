@@ -202,14 +202,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &97353462
@@ -256,7 +263,7 @@ MeshCollider:
   m_GameObject: {fileID: 97353462}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: 30
@@ -401,7 +408,7 @@ BoxCollider:
   m_GameObject: {fileID: 164818128}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -876,14 +883,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &399470364
@@ -1075,7 +1089,7 @@ BoxCollider:
   m_GameObject: {fileID: 530870745}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -1208,14 +1222,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &602526823
@@ -1297,14 +1318,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &626637396
@@ -1425,14 +1453,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 2
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
+  projectileTraining: 1
+  projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 1
+  LAUNCH_SPEED: 5
   draw_gizmos: 0
   gizmoSphereRad: 0.01
 --- !u!4 &767361689
@@ -1708,10 +1743,10 @@ BoxCollider:
   m_GameObject: {fileID: 97353462}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 2.41, z: 0}
+  m_Center: {x: 0, y: -0.5, z: 0}
 --- !u!1 &897371289
 GameObject:
   m_ObjectHideFlags: 0
@@ -1873,10 +1908,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc92cf45f459cea48bd0af43edbec20d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bone_parents: 
-  numframes: 0
-  features_offset: []
-  features_scale: []
+  use60fps: 0
 --- !u!4 &1013764259
 Transform:
   m_ObjectHideFlags: 0
@@ -1945,7 +1977,7 @@ BoxCollider:
   m_GameObject: {fileID: 1126254640}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -2164,14 +2196,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1001 &1221041499
@@ -2446,14 +2485,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &1371882026
@@ -2535,14 +2581,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1 &1407241025
@@ -2821,7 +2874,7 @@ BoxCollider:
   m_GameObject: {fileID: 1664100943}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -2954,14 +3007,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1001 &1770047141
@@ -3433,14 +3493,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!1001 &2047262205
@@ -3722,9 +3789,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 8
+  numAgents: 2
   modelDirector: {fileID: 767361687}
   reportMeanRewardEveryNSteps: 100000
+  targetFrameRate: 30
+  fps: 60
+  projectileTraining: 1
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 1
+  LAUNCH_SPEED: 5
 --- !u!4 &2090630089
 Transform:
   m_ObjectHideFlags: 0
@@ -3831,14 +3904,21 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  evaluateEveryKSteps: 1
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  use_deltatime: 1
+  resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalize_observations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  projectileTraining: 0
+  projectilePrefab: {fileID: 0}
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.66
+  LAUNCH_SPEED: 5
   draw_gizmos: 1
   gizmoSphereRad: 0.01
 --- !u!4 &541777148655995783
@@ -4081,6 +4161,67 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+--- !u!1001 &3492376383867976402
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_RootOrder
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.1121778
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.9599843
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.71336603
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3644107568797285219, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_Name
+      value: Projectile
+      objectReference: {fileID: 0}
+    - target: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
 --- !u!1001 &3814572696148659044
 PrefabInstance:
   m_ObjectHideFlags: 0

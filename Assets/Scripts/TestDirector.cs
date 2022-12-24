@@ -168,15 +168,15 @@ public class TestDirector : MonoBehaviour
             //Destroy(MMScript);
         }
         return;
-        apply_action();
-        // Make sure to teleport sim character if kin character teleported
-        bool teleport_sim = MMScript.teleported_last_frame;
-        if (teleport_sim)
-        {
-            //sim_char.char_trans.rotation = kin_char.char_trans.rotation;
-            sim_char.root.TeleportRoot(origin, origin_rot);
-        }
-        return;
+        //apply_action();
+        //// Make sure to teleport sim character if kin character teleported
+        //bool teleport_sim = MMScript.teleported_last_frame;
+        //if (teleport_sim)
+        //{
+        //    //sim_char.char_trans.rotation = kin_char.char_trans.rotation;
+        //    sim_char.root.TeleportRoot(origin, origin_rot);
+        //}
+        //return;
     }
     private void Update()
     {

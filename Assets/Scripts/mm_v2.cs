@@ -6,8 +6,6 @@ using UnityEngine.InputSystem;
 
 public class mm_v2 : MonoBehaviour
 {
-    public bool use_deltatime = false;
-    private float frametime = 1f / 30f;
     public bool gen_inputs = true;
     public float MAX_WANDERING_RADIUS = 10f;
     private float prob_to_change_inputs = .001f;
@@ -49,7 +47,6 @@ public class mm_v2 : MonoBehaviour
     public int frame_increments = 10;
     public int ignore_surrounding = 10;
 
-    public string databaseFilepath = "database";
     public int numNeigh = 1;
     public int searchEveryNFrames = 1;
     public int frameCounter = 1;
@@ -130,14 +127,12 @@ public class mm_v2 : MonoBehaviour
     void Awake()
     {
         gamepad = Gamepad.current;
-        //Application.targetFrameRate = 30;
         origin = transform.position;
         origin_rot = transform.rotation;
         //Debug.Log($"Origin is set as {origin}");
 
         if (motionDB == null)
         {
-            //motionDB = new database(Application.dataPath + @"/outputs/" + databaseFilepath + ".bin", numNeigh, frame_increments, ignore_surrounding);
             motionDB = database.Instance;
         }
         motionDB.database_build_matching_features(
@@ -251,13 +246,14 @@ public class mm_v2 : MonoBehaviour
     {
         if (!gen_inputs)
             return false;
-        time_since_last_check += Time.fixedDeltaTime;
-        if (time_since_last_check > 1f / 60f)
-        {
-            time_since_last_check = 0f;
-            return Random.value <= prob_to_change_inputs;
-        }
-        return false;
+        return Random.value <= prob_to_change_inputs;
+        //time_since_last_check += Time.fixedDeltaTime;
+        //if (time_since_last_check > 1f / 60f)
+        //{
+        //    time_since_last_check = 0f;
+        //    return Random.value <= prob_to_change_inputs;
+        //}
+        //return false;
     }
 
     internal void FixedUpdate()
@@ -299,9 +295,9 @@ public class mm_v2 : MonoBehaviour
         // Get the desired velocity
 
         trajectory_desired_rotations_predict();
-        trajectory_rotations_predict(frame_increments * (deltatime()));
+        trajectory_rotations_predict(frame_increments * (Time.fixedDeltaTime));
         trajectory_desired_velocities_predict();
-        trajectory_positions_predict(frame_increments * (deltatime()));
+        trajectory_positions_predict(frame_increments * (Time.fixedDeltaTime));
         if (search)
         {
             // Search database and update frame idx 
@@ -340,7 +336,7 @@ public class mm_v2 : MonoBehaviour
             curr_bone_angular_velocities,
             inertialize_blending_halflife,
             //1f/30f
-            deltatime()
+            Time.fixedDeltaTime
             );
         simulation_positions_update(
             ref simulation_position,
@@ -348,13 +344,13 @@ public class mm_v2 : MonoBehaviour
             ref simulation_acceleration,
             desired_velocity,
             simulation_velocity_halflife,
-            deltatime());
+            Time.fixedDeltaTime);
         simulation_rotations_update(
             ref simulation_rotation,
             ref simulation_angular_velocity,
             desired_rotation,
             simulation_rotation_halflife,
-            deltatime());
+            Time.fixedDeltaTime);
         //inertialize_root_adjust(ref bone_offset_positions[0], ref bone_positions[0], ref bone_rotations[0], simulation_position, simulation_rotation);
         forward_kinematics_full();
         apply_global_pos_and_rot();
@@ -862,8 +858,5 @@ public class mm_v2 : MonoBehaviour
             ret[i] = Quaternion.identity;
         return ret;
     }
-    float deltatime()
-    {
-        return use_deltatime ? Time.fixedDeltaTime : frametime;
-    }
+
 }

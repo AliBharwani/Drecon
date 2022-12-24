@@ -37,10 +37,10 @@ public struct CharInfo
 }
 public class MLAgentsDirector : Agent
 {
+    public int evaluateEveryKSteps = 1;
+    public int MAX_EPISODE_LENGTH_SECONDS = 20;
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
-    public bool use_deltatime = false;
-    float frametime = 1f / 30f;
-    private bool is_initalized;
+    public bool resetKinCharOnEpisodeEnd = false;
     public bool normalize_action_ouputs = true;
     public bool normalize_observations = false;
     CharInfo kinChar, simChar;
@@ -52,11 +52,12 @@ public class MLAgentsDirector : Agent
     private mm_v2 MMScript;
     private SimCharController SimCharController;
     private int nbodies; 
-    private int evaluateEveryKSteps = 1;
     private int curFixedUpdate = 0;
+    private bool is_initalized;
 
     float[] prev_action_output = new float[25];
     database motionDB;
+    public bool use_debug_mats = false;
 
     [HideInInspector]
     public static mm_v2.Bones[] state_bones = new mm_v2.Bones[] 
@@ -72,6 +73,21 @@ public class MLAgentsDirector : Agent
       {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand, Bone_LeftShoulder, Bone_RightShoulder};
 
     Vector3[] bone_pos_mins, bone_pos_maxes, bone_vel_mins, bone_vel_maxes;
+
+    // 0.2 m side length cube
+    // Mass between 0.01 kg and 8 kg
+    // The cube is launched at 5 m/s, towards a uniformly sampled location on the vertical axis,
+    // from −0.5 m to 0.5 m, centered on the character’s CM
+    // Launches occur every second, with the cube remaining in the scene until it is relaunched
+    public bool projectileTraining = false;
+    public GameObject projectilePrefab;
+    internal GameObject projectile;
+    internal Collider projectileCollider;
+    internal Rigidbody projectileRB;
+    private float lastProjectileLaunchtime = 0f;
+    public float LAUNCH_FREQUENCY = 1f;
+    public float LAUNCH_RADIUS = .66f;
+    public float LAUNCH_SPEED = 5f;
     public override void CollectObservations(VectorSensor sensor)
     {
         if (!is_initalized)
@@ -286,7 +302,6 @@ public class MLAgentsDirector : Agent
         MMScript = kinematic_char.GetComponent<mm_v2>();
         if (!MMScript.is_initalized)
             return;
-        MMScript.use_deltatime = use_deltatime;
         kinChar = new CharInfo(nbodies, state_bones.Length);
         kinChar.trans = kinematic_char.transform;
         kinChar.boneToTransform = MMScript.boneToTransform;
@@ -302,14 +317,8 @@ public class MLAgentsDirector : Agent
         simChar.boneToTransform = SimCharController.boneToTransform;
         simChar.root = SimCharController.bone_to_art_body[(int)Bone_Entity];
         simChar.charObj = simulated_char;
-        //simChar.boneSurfacePts = new Vector3[nbodies][];
         simChar.boneToArtBody = SimCharController.bone_to_art_body;
 
-        //kinChar.boneWorldPos = new Vector3[state_bones.Length];
-        //simChar.boneWorldPos = new Vector3[state_bones.Length];
-
-        //kinChar.boneToCollider = new GameObject[nbodies];
-        //simChar.boneToCollider = new GameObject[nbodies];
         for (int i = 0; i < nbodies; i++)
         {
             if (i == (int)Bone_LeftFoot || i == (int)Bone_RightFoot)
@@ -326,23 +335,29 @@ public class MLAgentsDirector : Agent
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
 
+        projectile = Instantiate(projectilePrefab, simulated_char.transform.position + Vector3.up, Quaternion.identity);
+        projectileCollider = projectile.GetComponent<Collider>();
+        projectileRB = projectile.GetComponent<Rigidbody>();
+
         if (normalize_observations)
             SimCharController.find_mins_and_maxes(kinChar.boneToTransform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
         is_initalized = true;
     }
 
-    public bool use_debug_mats = false;
     public void Awake()
     {
         //Debug.Log("MLAgents Director Awake called");
-        //Application.targetFrameRate = 30;
-        // motionDB = new database(Application.dataPath + @"/outputs/database.bin");
         //Unity.MLAgents.Policies.BehaviorParameters behavior_params = gameObject.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         if (motionDB == null)
             motionDB = database.Instance;
         nbodies = motionDB.nbones();
         kinematic_char = Instantiate(kinematic_char_prefab, Vector3.zero, Quaternion.identity);
         simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
+        if (Academy.Instance.IsCommunicatorOn)
+        {
+            int numFixedUpdatesPerSecond = Mathf.CeilToInt(1f / Time.fixedDeltaTime);
+            MaxStep = numFixedUpdatesPerSecond * MAX_EPISODE_LENGTH_SECONDS;
+        }
         CustomInit();
         //SimCharController.set_art_body_rot_limits();
     }
@@ -350,11 +365,11 @@ public class MLAgentsDirector : Agent
     public override void OnEpisodeBegin()
     {
         //Debug.Log("OnEpisodeBegin() called");
-        //if (motionDB == null) 
-        //    motionDB = database.Instance;
-        //is_initalized = false;
-        MMScript.Reset();
-        MMScript.FixedUpdate();
+        if (resetKinCharOnEpisodeEnd)
+        {
+            MMScript.Reset();
+            MMScript.FixedUpdate();
+        }
         SimCharController.teleport_sim_char(simChar, kinChar);
         return;
     }
@@ -380,12 +395,31 @@ public class MLAgentsDirector : Agent
         UpdateBoneObsState(updateVelocity, deltaTime);
         UpdateBoneSurfacePts(updateVelocity, deltaTime);
 
-        //SimCharController.teleport_sim_char(sim_char, kin_char);
         // request Decision
         if (curFixedUpdate % evaluateEveryKSteps == 0)
             RequestDecision();
         curFixedUpdate++;
         //updateMeanReward();
+        if (projectileTraining && (Time.time - lastProjectileLaunchtime > LAUNCH_FREQUENCY))
+        {
+            lastProjectileLaunchtime = Time.time;
+            projectileRB.mass = UnityEngine.Random.Range(.01f, 8f);
+            // To get XZ position, consider characters position on plane, pick random spot on unit cirlce,
+            // and go RADIUS units towards that spot 
+            // Y position is uniformly sampled from −0.5 m to 0.5 m, centered on the character’s CM
+            float YTarget = UnityEngine.Random.Range(simChar.cm.y - .5f, simChar.cm.y + .5f);
+            Vector2 randomUnitCircle = UnityEngine.Random.insideUnitCircle.normalized * LAUNCH_RADIUS;
+            Vector3 finalPosition = new Vector3(simChar.cm.x + randomUnitCircle.x, simChar.cm.y, simChar.cm.z + randomUnitCircle.y);
+            projectile.transform.position = finalPosition;
+            // We want the projectile to be at YTarget when it reaches the target
+            // We know its acceleration (-9.8), its final position (YTarget), its starting Y position (simChar.cm.y), we need its
+            // current velocity 
+            float timeToTravel = LAUNCH_RADIUS / LAUNCH_SPEED; // So if it's traveling 1m at 5m/s, its timeToTravel is .2 seconds
+            float changeInY = YTarget - simChar.cm.y;
+            float totalAcceleration = timeToTravel * -9.8f; // this will be negative ofc
+            float curYVelocity = -totalAcceleration + (changeInY / timeToTravel);
+            projectileRB.AddForce(-randomUnitCircle.x * LAUNCH_SPEED, curYVelocity, -randomUnitCircle.y * LAUNCH_SPEED, ForceMode.VelocityChange);
+        }
     }
 
     private void UpdateCMData(bool updateVelocity, float deltaTime)
@@ -687,10 +721,7 @@ public class MLAgentsDirector : Agent
         }
         return CoM / total_mass;
     }
-    float deltatime()
-    {
-        return use_deltatime ? Time.fixedDeltaTime : frametime;
-    }
+
     // Velocity is different in that we only need to make its rotation
     // local to the kinematic character, whereas with pos we also need to
     // position at the character's CM position
