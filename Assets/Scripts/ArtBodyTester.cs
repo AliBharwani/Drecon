@@ -12,8 +12,8 @@ public class ArtBodyTester : MonoBehaviour
     public bool scene_view_on_start = true;
     private void Start()
     {
-        if (set_target_fr)
-            Application.targetFrameRate = target_fr;
+        //if (set_target_fr)
+        //    Application.targetFrameRate = target_fr;
 #if UNITY_EDITOR
         if (Application.isEditor && scene_view_on_start)
         {
@@ -66,22 +66,16 @@ public class ArtBodyTester : MonoBehaviour
     {
         set_all_material(selected_material);
     } 
-    public void set_all_material_colors(Color color)
-    {
-        foreach (Transform t in getAllChildren())
-        {
-            Renderer renderer = t.gameObject.GetComponent<Renderer>();
-            if (renderer != null && renderer.enabled)
-                renderer.material.color = color;
-        }
-    }
     public void set_all_material(Material mat)
     {
-        foreach (Transform t in getAllChildren())
+        foreach (var renderer in GetComponentsInChildren<Renderer>())
         {
-            Renderer renderer = t.gameObject.GetComponent<Renderer>();
-            if (renderer != null && renderer.enabled)
-                renderer.material = mat;
+            if (renderer.enabled)
+# if UNITY_EDITOR
+                renderer.sharedMaterial = mat;
+#else
+                renderer.sharedMaterial = mat;
+#endif
         }
     }
 

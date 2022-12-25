@@ -1462,12 +1462,12 @@ MonoBehaviour:
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 10000
-  use_debug_mats: 1
+  use_debug_mats: 0
   projectileTraining: 1
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 1
-  LAUNCH_SPEED: 5
+  LAUNCH_SPEED: 7.5
   draw_gizmos: 0
   gizmoSphereRad: 0.01
 --- !u!4 &767361689
@@ -1509,7 +1509,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 1
-  m_BehaviorType: 1
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2246,31 +2246,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.243
+      value: 7.702
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -8.12
+      value: -15.156
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9743701
+      value: 0.9610481
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.22495107
+      value: 0.27638125
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 26
+      value: 32.089
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
@@ -3796,8 +3796,8 @@ MonoBehaviour:
   fps: 60
   projectileTraining: 1
   LAUNCH_FREQUENCY: 1
-  LAUNCH_RADIUS: 1
-  LAUNCH_SPEED: 5
+  LAUNCH_RADIUS: 0.5
+  LAUNCH_SPEED: 7.5
 --- !u!4 &2090630089
 Transform:
   m_ObjectHideFlags: 0

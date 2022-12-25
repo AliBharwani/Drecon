@@ -1709,7 +1709,7 @@ MonoBehaviour:
   set_target_fr: 0
   scene_view_on_start: 1
   test_obj: {fileID: 0}
-  selected_material: {fileID: 0}
+  selected_material: {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   hips: {fileID: 0}
   torque: 0.1
   child_str: 

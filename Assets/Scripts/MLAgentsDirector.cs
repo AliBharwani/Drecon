@@ -227,7 +227,7 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             ab.SetDriveRotation(final);
         }
-        set_rewards();
+        //set_rewards();
     }
     public override void Heuristic(in ActionBuffers actionsout)
     {
@@ -293,8 +293,8 @@ public class MLAgentsDirector : Agent
             RedMatTransparent = (Material)AssetDatabase.LoadAssetAtPath("Assets/Resources/RedMatTransparent.mat", typeof(Material));
             WhiteMatTransparent = (Material)AssetDatabase.LoadAssetAtPath("Assets/Resources/WhiteMatTransparent.mat", typeof(Material));
 #else
-            RedMatTransparent = Resources.Load<Material>("RedMatTransparent.mat");
-            WhiteMatTransparent = Resources.Load<Material>("WhiteMatTransparent.mat");
+            RedMatTransparent = Resources.Load<Material>("RedMatTransparent");
+            WhiteMatTransparent = Resources.Load<Material>("WhiteMatTransparent");
 #endif
             kinematic_char.GetComponent<ArtBodyTester>().set_all_material(WhiteMatTransparent);
             simulated_char.GetComponent<ArtBodyTester>().set_all_material(RedMatTransparent);
@@ -316,6 +316,11 @@ public class MLAgentsDirector : Agent
         simChar.trans = simulated_char.transform;
         simChar.boneToTransform = SimCharController.boneToTransform;
         simChar.root = SimCharController.bone_to_art_body[(int)Bone_Entity];
+        foreach (var body in simulated_char.GetComponentsInChildren<ArticulationBody>())
+        {
+            body.solverIterations = 255;
+            body.solverVelocityIterations = 255;
+        }
         simChar.charObj = simulated_char;
         simChar.boneToArtBody = SimCharController.bone_to_art_body;
 
@@ -394,7 +399,7 @@ public class MLAgentsDirector : Agent
         UpdateCMData(updateVelocity, deltaTime);
         UpdateBoneObsState(updateVelocity, deltaTime);
         UpdateBoneSurfacePts(updateVelocity, deltaTime);
-
+        set_rewards();
         // request Decision
         if (curFixedUpdate % evaluateEveryKSteps == 0)
             RequestDecision();
@@ -502,9 +507,9 @@ public class MLAgentsDirector : Agent
         calc_fall_factor(out fall_factor, out heads_1m_apart);
         if (heads_1m_apart)
         {
-            final_reward = -.5f;
+            final_reward = 0f;
             //updateMeanReward(-.5f);
-            SetReward(-.5f);
+            SetReward(0f);
             EndEpisode();
         }
         calculate_pos_and_vel_reward(out pos_reward, out vel_reward);

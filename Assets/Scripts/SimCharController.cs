@@ -266,10 +266,14 @@ public class SimCharController : MonoBehaviour
     {
         if (db == null)
         {
+#if UNITY_EDITOR
             if (UnityEditor.EditorApplication.isPlaying)
                 db = database.Instance;
             else
                 db = new database();
+#else
+            db = new database();
+#endif
         }
         return db;
     }
@@ -318,12 +322,13 @@ public class SimCharController : MonoBehaviour
             drive.lowerLimit = min_z;
             drive.upperLimit = max_z;
             ab.zDrive = drive;
-
+#if UNITY_EDITOR
             if (!UnityEditor.EditorApplication.isPlaying)
             { 
                 Debug.Log($"Bone {(mm_v2.Bones)j} Mins: x: {min_x} , y: {min_y} , z: {min_z}");
                 Debug.Log($"Bone {(mm_v2.Bones)j} Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
             }
+#endif
         }
     }
 

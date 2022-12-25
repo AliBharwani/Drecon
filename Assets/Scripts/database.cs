@@ -71,7 +71,11 @@ public class database : MonoBehaviour
     }
     private string getDatabaseFilename()
     {
+# if UNITY_EDITOR
         return Application.dataPath + (use60fps ? @"/outputs/database60fps.bin" : @"/outputs/database.bin");
+#else
+        return Application.dataPath + (use60fps ? @"/outputs/database60fps.bin" : @"/outputs/database.bin");
+#endif
     }
     public database(string filename = null )
     {
@@ -465,7 +469,14 @@ public class database : MonoBehaviour
 
     private void load_db(string filename)
     {
-        using (var stream = File.Open(filename, FileMode.Open))
+        Stream stream;
+#if UNITY_EDITOR
+        stream = File.Open(filename, FileMode.Open);
+#else
+        var textAsset = Resources.Load<TextAsset>("database60fps");
+        stream = new MemoryStream(textAsset.bytes);
+#endif
+        using (stream)
         {
             using (var reader = new BinaryReader(stream, Encoding.UTF8))
             {

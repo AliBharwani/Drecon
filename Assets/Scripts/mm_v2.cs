@@ -115,7 +115,7 @@ public class mm_v2 : MonoBehaviour
     Vector2 random_lstick_input;
     Vector3 origin;
     Quaternion origin_rot;
-    float time_since_last_check = 0f;
+    //float time_since_last_check = 0f;
     bool is_strafing;
     [HideInInspector]
     public bool teleported_last_frame = false;
@@ -204,7 +204,7 @@ public class mm_v2 : MonoBehaviour
             inertialize_blending_halflife,
             0f
         );
-        time_since_last_check = 0f;
+        //time_since_last_check = 0f;
     }
     public void Reset()
     {
