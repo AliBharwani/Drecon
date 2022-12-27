@@ -170,7 +170,7 @@ public class TestDirector : MonoBehaviour
         return;
         //apply_action();
         //// Make sure to teleport sim character if kin character teleported
-        //bool teleport_sim = MMScript.teleported_last_frame;
+        //bool teleport_sim = MMScript.teleportedThisFixedUpdaet;
         //if (teleport_sim)
         //{
         //    //sim_char.char_trans.rotation = kin_char.char_trans.rotation;

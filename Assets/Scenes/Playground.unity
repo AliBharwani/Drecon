@@ -212,6 +212,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -230,7 +231,6 @@ GameObject:
   - component: {fileID: 97353463}
   - component: {fileID: 97353466}
   - component: {fileID: 97353465}
-  - component: {fileID: 97353464}
   - component: {fileID: 870766689}
   m_Layer: 0
   m_Name: Ground
@@ -254,20 +254,6 @@ Transform:
   m_Father: {fileID: 7073534504278568567}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: -1.5020001, z: 0}
---- !u!64 &97353464
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 97353462}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &97353465
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -893,6 +879,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -1232,6 +1219,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -1328,6 +1316,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -1462,7 +1451,8 @@ MonoBehaviour:
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 10000
-  use_debug_mats: 0
+  use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 1
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   LAUNCH_FREQUENCY: 1
@@ -2206,6 +2196,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -2495,6 +2486,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -2591,6 +2583,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -3017,6 +3010,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -3503,6 +3497,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -3914,6 +3909,7 @@ MonoBehaviour:
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
+  gen_mins_and_maxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
@@ -4159,7 +4155,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 297290904, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+    - {fileID: 297290903, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
 --- !u!1001 &3492376383867976402
 PrefabInstance:

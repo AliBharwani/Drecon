@@ -46,7 +46,7 @@ public class FixedUpdateCounter : MonoBehaviour
         GUI.Label(new Rect(100, 100, 200, 50), "Update: " + updateUpdateCountPerSecond.ToString(), fontSize);
         GUI.Label(new Rect(100, 125, 200, 50), "FixedUpdate: " + updateFixedUpdateCountPerSecond.ToString(), fontSize);
         GUI.Label(new Rect(100, 150, 600, 100), "timeSinceLastCount: " + timeSinceLastCount.ToString(), fontSize);
-        GUI.Label(new Rect(100, 175, 600, 100), "fixedUnscaledDeltaTime: " + Time.fixedUnscaledDeltaTime.ToString(), fontSize);
+        //GUI.Label(new Rect(100, 175, 600, 100), "fixedUnscaledDeltaTime: " + Time.fixedUnscaledDeltaTime.ToString(), fontSize);
         //GUI.Label(new Rect(100, 200, 600, 100), "timeSinceLastCount: " + timeSinceLastCount.ToString(), fontSize);
 
     }

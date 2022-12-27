@@ -30,27 +30,13 @@ public class MultiMLAgentsDirector : MonoBehaviour
             directors[i] = createMLAgent();
         Application.targetFrameRate = targetFrameRate;
         Physics.autoSimulation = false;
+        UnityEngine.Rendering.DebugManager.instance.enableRuntimeUI = false;
     }
 
     private void Start()
     {
-        for(int i = 0; i < numAgents; i++)
-            for(int j = + 1; j < numAgents; j++)
-            {
-                var colliders1 = directors[i].simulated_char.GetComponentsInChildren<Collider>();
-                var projCollider1 = directors[i].projectileCollider;
-                var colliders2 = directors[j].simulated_char.GetComponentsInChildren<Collider>();
-                var projCollider2 = directors[j].projectileCollider;
-                Physics.IgnoreCollision(projCollider1, projCollider2);
-                foreach (var c1 in colliders1)
-                    foreach (var c2 in colliders2)
-                    {
-                        Physics.IgnoreCollision(c1, c2);
-                        Physics.IgnoreCollision(projCollider1, c2);
-                        Physics.IgnoreCollision(c1, projCollider2);
-                    }
-
-            }
+        for(int i = 0; i < numAgents; i++) 
+            directors[i].AssignLayer(LayerMask.NameToLayer($"model_{i + 1}"));
         Physics.autoSimulation = true;
     }
     private MLAgentsDirector createMLAgent()

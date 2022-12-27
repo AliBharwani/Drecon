@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
@@ -52,12 +53,14 @@ public class MLAgentsDirector : Agent
     private mm_v2 MMScript;
     private SimCharController SimCharController;
     private int nbodies; 
-    private int curFixedUpdate = 0;
+    private int curFixedUpdate = -1;
     private bool is_initalized;
 
     float[] prev_action_output = new float[25];
     database motionDB;
     public bool use_debug_mats = false;
+    // Used for normalization
+    public bool gen_mins_and_maxes = false;
 
     [HideInInspector]
     public static mm_v2.Bones[] state_bones = new mm_v2.Bones[] 
@@ -73,7 +76,8 @@ public class MLAgentsDirector : Agent
       {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand, Bone_LeftShoulder, Bone_RightShoulder};
 
     Vector3[] bone_pos_mins, bone_pos_maxes, bone_vel_mins, bone_vel_maxes;
-
+    long timeAtStart;
+    bool simCharTeleported;
     // 0.2 m side length cube
     // Mass between 0.01 kg and 8 kg
     // The cube is launched at 5 m/s, towards a uniformly sampled location on the vertical axis,
@@ -343,14 +347,26 @@ public class MLAgentsDirector : Agent
         projectile = Instantiate(projectilePrefab, simulated_char.transform.position + Vector3.up, Quaternion.identity);
         projectileCollider = projectile.GetComponent<Collider>();
         projectileRB = projectile.GetComponent<Rigidbody>();
+        UpdateCMData(false, Time.fixedDeltaTime);
+        bone_pos_mins = new Vector3[state_bones.Length];
+        bone_pos_maxes = new Vector3[state_bones.Length];
+        bone_vel_mins = new Vector3[state_bones.Length];
+        bone_vel_maxes = new Vector3[state_bones.Length];
+        if (gen_mins_and_maxes)
+            MMScript.run_max_speed = true;
+        else
+            ReadMinsAndMaxes();
+        //if (normalize_observations)
+        //    SimCharController.find_mins_and_maxes(kinChar.boneToTransform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
+        //Debug.Log($"Min velocity: {MIN_VELOCITY.ToString("f6")}");
+        //Debug.Log($"Max velocity: {MAX_VELOCITY.ToString("f6")}");
 
-        if (normalize_observations)
-            SimCharController.find_mins_and_maxes(kinChar.boneToTransform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
         is_initalized = true;
     }
 
     public void Awake()
     {
+        timeAtStart = DateTimeOffset.Now.ToUnixTimeSeconds();
         //Debug.Log("MLAgents Director Awake called");
         //Unity.MLAgents.Policies.BehaviorParameters behavior_params = gameObject.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         if (motionDB == null)
@@ -376,7 +392,7 @@ public class MLAgentsDirector : Agent
             MMScript.FixedUpdate();
         }
         SimCharController.teleport_sim_char(simChar, kinChar);
-        return;
+        simCharTeleported = true;
     }
 
 
@@ -386,55 +402,129 @@ public class MLAgentsDirector : Agent
             CustomInit();
             return;
         }
+        curFixedUpdate++;
+
         // Make sure to teleport sim character if kin character teleported
-        bool updateVelocity = true;
-        if (MMScript.teleported_last_frame)
+        //Debug.Log($"simCharTeleported: {simCharTeleported}");
+        //if (simCharTeleported)
+        //    Debug.Log($"BOOM : {simCharTeleported}");
+        bool updateVelocity = !simCharTeleported;
+        if (MMScript.teleportedThisFixedUpdate)
         {
             //sim_char.char_trans.rotation = kin_char.char_trans.rotation;
             simChar.root.TeleportRoot(Vector3.zero, kinChar.trans.rotation);
             updateVelocity = false;
         }
-        float deltaTime = Time.fixedDeltaTime + float.Epsilon;
+        float deltaTime = Time.fixedDeltaTime;
         // Update CMs 
         UpdateCMData(updateVelocity, deltaTime);
         UpdateBoneObsState(updateVelocity, deltaTime);
         UpdateBoneSurfacePts(updateVelocity, deltaTime);
-        set_rewards();
+        bool episodeEnded = set_rewards();
+        if (episodeEnded)
+            return;
         // request Decision
         if (curFixedUpdate % evaluateEveryKSteps == 0)
             RequestDecision();
-        curFixedUpdate++;
         //updateMeanReward();
-        if (projectileTraining && (Time.time - lastProjectileLaunchtime > LAUNCH_FREQUENCY))
+        if (gen_mins_and_maxes && curFixedUpdate % 300 == 0)
+            WriteMinsAndMaxes();
+        if (projectileTraining)
+            FireProjectile();
+        
+         simCharTeleported = false;
+    }
+
+    private void FireProjectile()
+    {
+        if (Time.time - lastProjectileLaunchtime < LAUNCH_FREQUENCY)
+            return;
+        lastProjectileLaunchtime = Time.time;
+        projectileRB.mass = UnityEngine.Random.Range(.01f, 8f);
+        // To get XZ position, consider characters position on plane, pick random spot on unit cirlce,
+        // and go RADIUS units towards that spot 
+        // Y position is uniformly sampled from −0.5 m to 0.5 m, centered on the character’s CM
+        float YTarget = UnityEngine.Random.Range(simChar.cm.y - .5f, simChar.cm.y + .5f);
+        Vector2 randomUnitCircle = UnityEngine.Random.insideUnitCircle.normalized * LAUNCH_RADIUS;
+        Vector3 finalPosition = new Vector3(simChar.cm.x + randomUnitCircle.x, simChar.cm.y, simChar.cm.z + randomUnitCircle.y);
+        projectile.transform.position = finalPosition;
+        // We want the projectile to be at YTarget when it reaches the target
+        // We know its acceleration (-9.8), its final position (YTarget), its starting Y position (simChar.cm.y), we need its
+        // current velocity 
+        float timeToTravel = LAUNCH_RADIUS / LAUNCH_SPEED; // So if it's traveling 1m at 5m/s, its timeToTravel is .2 seconds
+        float changeInY = YTarget - simChar.cm.y;
+        float totalAcceleration = timeToTravel * -9.8f; // this will be negative ofc
+        float curYVelocity = -totalAcceleration + (changeInY / timeToTravel);
+        projectileRB.AddForce(-randomUnitCircle.x * LAUNCH_SPEED, curYVelocity, -randomUnitCircle.y * LAUNCH_SPEED, ForceMode.VelocityChange);
+    }
+
+    private void WriteMinsAndMaxes()
+    {
+        Stream stream;
+#if UNITY_EDITOR
+        stream = File.Open(@"Assets/Normalization/NormalizationData-" + timeAtStart.ToString() + ".bin", FileMode.Create);
+#else
+        throw new Exception("Should not be recording mins and maxes outside of Editor");
+#endif
+        using (stream)
         {
-            lastProjectileLaunchtime = Time.time;
-            projectileRB.mass = UnityEngine.Random.Range(.01f, 8f);
-            // To get XZ position, consider characters position on plane, pick random spot on unit cirlce,
-            // and go RADIUS units towards that spot 
-            // Y position is uniformly sampled from −0.5 m to 0.5 m, centered on the character’s CM
-            float YTarget = UnityEngine.Random.Range(simChar.cm.y - .5f, simChar.cm.y + .5f);
-            Vector2 randomUnitCircle = UnityEngine.Random.insideUnitCircle.normalized * LAUNCH_RADIUS;
-            Vector3 finalPosition = new Vector3(simChar.cm.x + randomUnitCircle.x, simChar.cm.y, simChar.cm.z + randomUnitCircle.y);
-            projectile.transform.position = finalPosition;
-            // We want the projectile to be at YTarget when it reaches the target
-            // We know its acceleration (-9.8), its final position (YTarget), its starting Y position (simChar.cm.y), we need its
-            // current velocity 
-            float timeToTravel = LAUNCH_RADIUS / LAUNCH_SPEED; // So if it's traveling 1m at 5m/s, its timeToTravel is .2 seconds
-            float changeInY = YTarget - simChar.cm.y;
-            float totalAcceleration = timeToTravel * -9.8f; // this will be negative ofc
-            float curYVelocity = -totalAcceleration + (changeInY / timeToTravel);
-            projectileRB.AddForce(-randomUnitCircle.x * LAUNCH_SPEED, curYVelocity, -randomUnitCircle.y * LAUNCH_SPEED, ForceMode.VelocityChange);
+            using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8))
+            {
+                FileUtils.WriteVector(writer, MIN_VELOCITY);
+                FileUtils.WriteVector(writer, MAX_VELOCITY);
+                for (int i = 0; i < state_bones.Length; i++ )
+                {
+                    FileUtils.WriteVector(writer, bone_pos_mins[i]);
+                    FileUtils.WriteVector(writer, bone_pos_maxes[i]);
+                    FileUtils.WriteVector(writer, bone_vel_mins[i]);
+                    FileUtils.WriteVector(writer, bone_vel_maxes[i]);
+                    //Debug.Log($"{state_bones[i]} Min vel: {bone_vel_mins[i]} Max Vel: {bone_vel_maxes[i]}");
+                }
+            }
+        }
+
+    }
+    private void ReadMinsAndMaxes()
+    {
+        Stream stream;
+#if UNITY_EDITOR
+        stream = File.Open(@"Assets/Normalization/NormalizationData.bin", FileMode.Open);
+#else
+        var textAsset = Resources.Load<TextAsset>("NormalizationData");
+        stream = new MemoryStream(textAsset.bytes);
+#endif
+        using (stream)
+        {
+            using (var reader = new BinaryReader(stream, System.Text.Encoding.UTF8))
+            {
+                FileUtils.ReadVector(reader, ref MIN_VELOCITY);
+                FileUtils.ReadVector(reader, ref MAX_VELOCITY);
+                //Debug.Log($"Min vel: {MIN_VELOCITY} Max Vel: {MAX_VELOCITY}");
+                for (int i = 0; i < state_bones.Length; i++)
+                {
+                    FileUtils.ReadVector(reader, ref bone_pos_mins[i]);
+                    FileUtils.ReadVector(reader, ref bone_pos_maxes[i]);
+                    FileUtils.ReadVector(reader, ref bone_vel_mins[i]);
+                    FileUtils.ReadVector(reader, ref bone_vel_maxes[i]);
+                    //Debug.Log($"{state_bones[i]} Min Pos: {bone_pos_mins[i]} Max Pos: {bone_pos_maxes[i]}");
+                    //Debug.Log($"{state_bones[i]} Min vel: {bone_vel_mins[i]} Max Vel: {bone_vel_maxes[i]}");
+                }
+            }
         }
     }
 
     private void UpdateCMData(bool updateVelocity, float deltaTime)
     {
-        Vector3 newSimCM = get_cm(simChar.boneToTransform);
-        simChar.cmVel = updateVelocity ? (simChar.cm - newSimCM) / deltaTime : simChar.cmVel;
+        Vector3 newSimCM = getCM(simChar.boneToTransform);
+        simChar.cmVel = updateVelocity ? (newSimCM - simChar.cm) / deltaTime : simChar.cmVel;
         simChar.cm = newSimCM;
-        Vector3 newKinCM = get_cm(kinChar.boneToTransform);
-        kinChar.cmVel = updateVelocity ? (kinChar.cm - newKinCM) / deltaTime : kinChar.cmVel;
+        Vector3 newKinCM = getCM(kinChar.boneToTransform);
+        kinChar.cmVel = updateVelocity ? (newKinCM - kinChar.cm) / deltaTime : kinChar.cmVel;
         kinChar.cm = newKinCM;
+        if (gen_mins_and_maxes && updateVelocity) { 
+            SimCharController.updated_mins_and_maxes(kinChar.cmVel, ref MIN_VELOCITY, ref MAX_VELOCITY);
+            SimCharController.updated_mins_and_maxes(simChar.cmVel, ref MIN_VELOCITY, ref MAX_VELOCITY);
+        }
     }
 
     private void UpdateBoneSurfacePts(bool updateVelocity, float deltaTime)
@@ -453,8 +543,8 @@ public class MLAgentsDirector : Agent
 
             for (int j = 0; j < 6; j++)
             {
-                new_kin_bone_surface_pts[j] = resolve_pos_in_kin_ref_frame(new_kin_bone_surface_pts[j]);
-                new_sim_bone_surface_pts[j] = resolve_pos_in_sim_ref_frame(new_sim_bone_surface_pts[j]);
+                new_kin_bone_surface_pts[j] = resolvePosInKinematicRefFrame(new_kin_bone_surface_pts[j]);
+                new_sim_bone_surface_pts[j] = resolvePosInSimRefFrame(new_sim_bone_surface_pts[j]);
 
                 if (updateVelocity) {
                     kinChar.boneSurfaceVels[i][j] = (new_kin_bone_surface_pts[j] - prev_kin_surface_pts[j]) / deltaTime;
@@ -477,30 +567,47 @@ public class MLAgentsDirector : Agent
             {
                 mm_v2.Bones bone = state_bones[j];
                 // Compute position of bone
-                Vector3 bone_world_pos = curInfo.boneToTransform[(int)bone].position;
-                Vector3 bone_local_pos = i == 0 ? resolve_pos_in_kin_ref_frame(bone_world_pos) : resolve_pos_in_sim_ref_frame(bone_world_pos);
+                Vector3 boneWorldPos = curInfo.boneToTransform[(int)bone].position;
+                Vector3 boneLocalPos = i == 0 ? resolvePosInKinematicRefFrame(boneWorldPos) : resolvePosInSimRefFrame(boneWorldPos);
                 //Vector3 bone_relative_pos = Utils.quat_inv_mul_vec3(relative_rot, bone_local_pos);
-                Vector3 prev_bone_pos = curInfo.boneWorldPos[j];
-                Vector3 bone_vel = (bone_world_pos - prev_bone_pos) / deltaTime;
-                bone_vel = resolve_vel_in_kin_ref_frame(bone_vel);
+                Vector3 prevBonePos = curInfo.boneWorldPos[j];
+                Vector3 boneVel = (boneWorldPos - prevBonePos) / deltaTime;
+                boneVel = resolve_vel_in_kin_ref_frame(boneVel);
+                if (gen_mins_and_maxes && curFixedUpdate > 30)
+                {
+                    SimCharController.updated_mins_and_maxes(boneLocalPos, ref bone_pos_mins[j], ref bone_pos_maxes[j]);
+                    if (updateVelocity)
+                        SimCharController.updated_mins_and_maxes(boneVel, ref bone_vel_mins[j], ref bone_vel_maxes[j]);
+                }
                 if (normalize_observations)
                 {
-                    bone_local_pos = normalize_bone_pos(bone_local_pos, j);
-                    bone_vel = normalize_bone_vel(bone_vel, j);
+                    boneLocalPos = normalize_bone_pos(boneLocalPos, j);
+                    boneVel = normalize_bone_vel(boneVel, j);
                 }
-                copy_vector_into_arr(ref copyInto, ref copyIdx, bone_local_pos);
+                copy_vector_into_arr(ref copyInto, ref copyIdx, boneLocalPos);
                 if (updateVelocity)
-                    copy_vector_into_arr(ref copyInto, ref copyIdx, bone_vel);
+                    copy_vector_into_arr(ref copyInto, ref copyIdx, boneVel);
                 else
                     copyIdx += 3;
-                curInfo.boneWorldPos[j] = bone_world_pos;
+                curInfo.boneWorldPos[j] = boneWorldPos;
             }
             curInfo = simChar;
         }
     }
+
+    public void AssignLayer(int layer)
+    {
+        simulated_char.layer = layer;
+        foreach (var child in simulated_char.GetComponentsInChildren<Transform>())
+            child.gameObject.layer = layer;
+        projectile.layer = layer;
+    }
+
+
     private float meanReward = 0f;
     internal float final_reward = 0f;
-    private void set_rewards()
+    // returns TRUE if episode ended
+    private bool set_rewards()
     {
         bool heads_1m_apart;
         double pos_reward, vel_reward, local_pose_reward, cm_vel_reward, fall_factor;
@@ -511,6 +618,7 @@ public class MLAgentsDirector : Agent
             //updateMeanReward(-.5f);
             SetReward(0f);
             EndEpisode();
+            return true;
         }
         calculate_pos_and_vel_reward(out pos_reward, out vel_reward);
         calc_local_pose_reward(out local_pose_reward);
@@ -521,6 +629,7 @@ public class MLAgentsDirector : Agent
         //Debug.Log($"final_reward: {final_reward}");
         //updateMeanReward(final_reward);
         SetReward(final_reward);
+        return false;
     }
 
     private void updateMeanReward()
@@ -594,7 +703,7 @@ public class MLAgentsDirector : Agent
             gizmoLines.Clear();
     }
     public bool draw_gizmos = false;
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         if (!draw_gizmos)
             return;
@@ -652,16 +761,23 @@ public class MLAgentsDirector : Agent
     */
     float[] get_state()
     {
+        clear_gizmos();
+
         // Debug.Log("get_state called");
         float[] state = new float[110];
         int state_idx = 0;
 
         Vector3 kin_cm_vel_normalized = resolve_vel_in_kin_ref_frame(kinChar.cmVel);
+        Vector3 kin_cm_vel_ref_frame = resolve_vel_in_kin_ref_frame(kinChar.cmVel);
+        //Debug.Log($"kinChar.cmVel : {kinChar.cmVel}");
+        add_gizmo_line(kinChar.cm, kinChar.cm + kinChar.cmVel, Color.red);
         if (normalize_observations)
             kin_cm_vel_normalized = normalize_vel_vector(kin_cm_vel_normalized);
-        clear_gizmos();
+        
         copy_vector_into_arr(ref state, ref state_idx, kin_cm_vel_normalized);
-
+        //for (int i = 0; i < 3; i++)
+        //    if (state[i] > 1f || state[i] < -1f)
+        //        Debug.Log($"State[{i}] is {state[i]} || kinChar.cmVel : {kinChar.cmVel} || kin_cm_vel_ref_frame: {kin_cm_vel_ref_frame} || kin_cm_vel_normalized: {kin_cm_vel_normalized}");
         Vector3 sim_cm_vel_normalized = resolve_vel_in_kin_ref_frame(simChar.cmVel);
         if (normalize_observations)
             sim_cm_vel_normalized = normalize_vel_vector(sim_cm_vel_normalized);
@@ -697,18 +813,29 @@ public class MLAgentsDirector : Agent
         for (int i = 0; i < 36; i++)
             state[state_idx++] = kinChar.boneState[i];
         for (int i = 0; i < 36; i++)
-            state[state_idx++] = simChar.boneState[i] - kinChar.boneState[i];
+            // In order to keep it between [-1, 1] 
+            state[state_idx++] = normalize_observations ? (simChar.boneState[i] - kinChar.boneState[i]) / 2 : simChar.boneState[i] - kinChar.boneState[i];
         for (int i = 0; i < 25; i++)
             state[state_idx++] = prev_action_output[i];
 
+   
         if (state_idx != 110)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything but smootehd actions");
+   
+        for(int i = 0; i < 110; i++)
+        {
+            if (state[i] > 1 || state[i] < -1)
+                Debug.Log($"State[{i}] is {state[i]}");
+        }
+        if (gen_mins_and_maxes)
+            state = new float[110];
+
         return state;
 
     }
 
     // Gets CoM in world position
-    public static Vector3 get_cm(Transform[] bone_to_transform, Vector3[] global_bone_positions = null)
+    public static Vector3 getCM(Transform[] bone_to_transform, Vector3[] global_bone_positions = null)
     {
         // We start at 1 because 0 is the root bone with no colliders
         // to calculate CM, we get the masses and centers of each capsule and
@@ -719,7 +846,7 @@ public class MLAgentsDirector : Agent
         {
             Transform t = bone_to_transform[i];
             float mass = t.GetComponent<ArticulationBody>().mass;
-            Vector3 child_center = global_bone_positions == null ? get_child_collider_center(t.gameObject) : global_bone_positions[i];
+            Vector3 child_center = global_bone_positions == null ? getChildColliderCenter(t.gameObject) : global_bone_positions[i];
             CoM += mass * child_center;
             total_mass += mass;
 
@@ -735,12 +862,12 @@ public class MLAgentsDirector : Agent
         // using same logic as in desired_velocity_update
         return Utils.quat_inv_mul_vec3(kinChar.trans.rotation, vel);
     }
-    Vector3 resolve_pos_in_kin_ref_frame(Vector3 pos)
+    Vector3 resolvePosInKinematicRefFrame(Vector3 pos)
     {
         // using same logic as in desired_velocity_update
         return Utils.quat_inv_mul_vec3(kinChar.trans.rotation, pos - kinChar.cm);
     }
-    Vector3 resolve_pos_in_sim_ref_frame(Vector3 pos)
+    Vector3 resolvePosInSimRefFrame(Vector3 pos)
     {
         // using same logic as in desired_velocity_update
         return Utils.quat_inv_mul_vec3(kinChar.trans.rotation, pos - simChar.cm);
@@ -760,7 +887,7 @@ public class MLAgentsDirector : Agent
         start_idx += 2;
     }
 
-    public static Vector3 get_child_collider_center(GameObject child)
+    public static Vector3 getChildColliderCenter(GameObject child)
     {
         foreach (Transform grandchild in child.transform)
         {
@@ -950,17 +1077,6 @@ public class MLAgentsDirector : Agent
         if (gizmo_spheres == null)
             gizmo_spheres = new List<Vector3>();
         gizmo_spheres.Add(center);
-    }
-    private void OnDrawGizmos()
-    {
-        if (gizmo_spheres == null)
-            return;
-        Gizmos.color = Color.cyan;
-        foreach (Vector3 sphere in gizmo_spheres)
-        {
-            Gizmos.DrawSphere(sphere, gizmoSphereRad);
-        }
-
     }
 
     [ContextMenu("Testing")]

@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 public class mm_v2 : MonoBehaviour
 {
     public bool gen_inputs = true;
+    public bool run_max_speed = false;
     public float MAX_WANDERING_RADIUS = 10f;
     private float prob_to_change_inputs = .001f;
     public enum Bones
@@ -118,7 +119,7 @@ public class mm_v2 : MonoBehaviour
     //float time_since_last_check = 0f;
     bool is_strafing;
     [HideInInspector]
-    public bool teleported_last_frame = false;
+    public bool teleportedThisFixedUpdate = false;
     [HideInInspector]
     public bool is_initalized = false;
     internal bool debug_move_every_second = true;
@@ -193,7 +194,7 @@ public class mm_v2 : MonoBehaviour
         trajectory_accelerations = new Vector3[4];
         trajectory_rotations = identityQuatArray(4);
         trajectory_angular_velocities = new Vector3[4];
-        random_lstick_input = Random.insideUnitCircle;
+        random_lstick_input = run_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
         simulation_position = origin;
         inertialize_pose_reset(bone_positions[0], bone_rotations[0]);
         inertialize_pose_update(
@@ -266,21 +267,25 @@ public class mm_v2 : MonoBehaviour
              else
                 return;
         }
-        teleported_last_frame = false;
+        teleportedThisFixedUpdate = false;
         // Update if we are reading from user input (ie not generating random rotations) or we are
         // generating random inputs and every frame the user changes desires with P(.001)
+        bool was_strafing = is_strafing;
         if (should_gen_inputs()) {
             //Debug.Log("Genning new inputs!");
-            random_lstick_input = Random.insideUnitCircle;
+            random_lstick_input = run_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
             // Random chance of making desired rotation face direction of velocity  
             is_strafing = Random.value <= .5f;
             Vector2 rotation_vec = is_strafing ?  Random.insideUnitCircle : random_lstick_input;
             desired_rotation =  Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y) ;
+        } else
+        {
+            is_strafing = gamepad.leftTrigger.isPressed;
         }
         desired_velocity = desired_velocity_update(simulation_rotation);
         //Debug.Log($"Gamepad: {gamepad.leftStick.ReadValue()}");
-        desired_rotation = !gen_inputs ? desired_rotation_update(desired_rotation, desired_velocity) : desired_rotation;
-
+        //desired_rotation = !gen_inputs ? desired_rotation_update(desired_rotation, desired_velocity) : desired_rotation;
+        desired_rotation = desired_rotation_update(desired_rotation, desired_velocity);
 
         Vector3 world_space_position = bone_positions[0];
         bool end_of_anim = motionDB.database_trajectory_index_clamp(frameIdx, 1) == frameIdx;
@@ -290,7 +295,7 @@ public class mm_v2 : MonoBehaviour
             bone_positions[0] = origin;
             simulation_position =  origin;
             search = true;
-            teleported_last_frame = true;
+            teleportedThisFixedUpdate = true;
         }
         // Get the desired velocity
 
@@ -592,7 +597,7 @@ public class mm_v2 : MonoBehaviour
     }
     private Quaternion desired_rotation_update(Quaternion rotation, Vector3 velocity)
     {
-        if (gen_inputs && is_strafing)
+        if ( is_strafing)
             return desired_rotation;
         if (gen_inputs || userIsInputting())
         {

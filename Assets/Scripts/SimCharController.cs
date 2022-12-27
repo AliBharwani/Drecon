@@ -388,7 +388,7 @@ public class SimCharController : MonoBehaviour
             forward_kinematics_full(db, i, ref global_pos, ref global_rots);
             bool update_velocity = !db.range_starts.Contains(i);
             //apply_global_pos_and_rot(global_pos, global_rots, boneToTransform);
-            Vector3 cm = MLAgentsDirector.get_cm(boneToTransform, global_pos);
+            Vector3 cm = MLAgentsDirector.getCM(boneToTransform, global_pos);
             Vector3 cm_vel =  (cm - last_cm) / frame_time;
             cm_vel = Utils.quat_inv_mul_vec3(global_rots[0], cm_vel);
             if (update_velocity)
@@ -413,18 +413,18 @@ public class SimCharController : MonoBehaviour
 
     }
 
-    private static void updated_mins_and_maxes(Vector3 val, ref Vector3 mins, ref Vector3 maxes)
+    public static void updated_mins_and_maxes(Vector3 val, ref Vector3 mins, ref Vector3 maxes)
     {
         maxes = update_maxes(maxes, val);
         mins = update_mins(mins, val);
     }
 
-    private static Vector3 update_maxes(Vector3 vel_max, Vector3 cm_vel)
+    public static Vector3 update_maxes(Vector3 vel_max, Vector3 cm_vel)
     {
         return new Vector3(Mathf.Max(vel_max.x, cm_vel.x), Mathf.Max(vel_max.y, cm_vel.y),Mathf.Max(vel_max.z, cm_vel.z));
     }
 
-    private static Vector3 update_mins(Vector3 vel_min, Vector3 cm_vel)
+    public static Vector3 update_mins(Vector3 vel_min, Vector3 cm_vel)
     {
         return new Vector3(Mathf.Min(vel_min.x, cm_vel.x), Mathf.Min(vel_min.y, cm_vel.y), Mathf.Min(vel_min.z, cm_vel.z));
     }
