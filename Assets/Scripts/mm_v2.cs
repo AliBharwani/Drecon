@@ -270,7 +270,6 @@ public class mm_v2 : MonoBehaviour
         teleportedThisFixedUpdate = false;
         // Update if we are reading from user input (ie not generating random rotations) or we are
         // generating random inputs and every frame the user changes desires with P(.001)
-        bool was_strafing = is_strafing;
         if (should_gen_inputs()) {
             //Debug.Log("Genning new inputs!");
             random_lstick_input = run_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
@@ -278,7 +277,7 @@ public class mm_v2 : MonoBehaviour
             is_strafing = Random.value <= .5f;
             Vector2 rotation_vec = is_strafing ?  Random.insideUnitCircle : random_lstick_input;
             desired_rotation =  Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y) ;
-        } else
+        } else if (!gen_inputs && gamepad != null)
         {
             is_strafing = gamepad.leftTrigger.isPressed;
         }

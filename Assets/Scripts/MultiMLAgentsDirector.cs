@@ -30,7 +30,7 @@ public class MultiMLAgentsDirector : MonoBehaviour
             directors[i] = createMLAgent();
         Application.targetFrameRate = targetFrameRate;
         Physics.autoSimulation = false;
-        UnityEngine.Rendering.DebugManager.instance.enableRuntimeUI = false;
+        //UnityEngine.Rendering.DebugManager.instance.enableRuntimeUI = false;
     }
 
     private void Start()
@@ -59,7 +59,7 @@ public class MultiMLAgentsDirector : MonoBehaviour
         }
         float curStepReward = 0f;
         foreach (var director in directors)
-            curStepReward += director.final_reward / (float) directors.Length;
+            curStepReward += director.finalReward / (float) directors.Length;
         meanReward += (curStepReward / (float)reportMeanRewardEveryNSteps);
     }
 }

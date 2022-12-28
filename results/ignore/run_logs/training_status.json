@@ -2,22 +2,103 @@
     "Drecon": {
         "checkpoints": [
             {
-                "steps": 6393,
-                "file_path": "results\\ignore\\Drecon\\Drecon-6393.onnx",
-                "reward": 1.3127269641653387,
-                "creation_time": 1672137079.177703,
+                "steps": 13399965,
+                "file_path": "results\\ignore\\Drecon\\Drecon-13399965.onnx",
+                "reward": 1.8451499234961004,
+                "creation_time": 1672162779.880947,
                 "auxillary_file_paths": [
-                    "results\\ignore\\Drecon\\Drecon-6393.pt"
+                    "results\\ignore\\Drecon\\Drecon-13399965.pt"
+                ]
+            },
+            {
+                "steps": 13499988,
+                "file_path": "results\\ignore\\Drecon\\Drecon-13499988.onnx",
+                "reward": 1.5242017401268806,
+                "creation_time": 1672162970.253977,
+                "auxillary_file_paths": [
+                    "results\\ignore\\Drecon\\Drecon-13499988.pt"
+                ]
+            },
+            {
+                "steps": 13599996,
+                "file_path": "results\\ignore\\Drecon\\Drecon-13599996.onnx",
+                "reward": 1.4328763574342802,
+                "creation_time": 1672163161.627357,
+                "auxillary_file_paths": [
+                    "results\\ignore\\Drecon\\Drecon-13599996.pt"
+                ]
+            },
+            {
+                "steps": 13699983,
+                "file_path": "results\\ignore\\Drecon\\Drecon-13699983.onnx",
+                "reward": 1.567381477496763,
+                "creation_time": 1672163352.9063053,
+                "auxillary_file_paths": [
+                    "results\\ignore\\Drecon\\Drecon-13699983.pt"
+                ]
+            },
+            {
+                "steps": 13799955,
+                "file_path": "results\\ignore\\Drecon\\Drecon-13799955.onnx",
+                "reward": 1.788897440766437,
+                "creation_time": 1672163544.3829067,
+                "auxillary_file_paths": [
+                    "results\\ignore\\Drecon\\Drecon-13799955.pt"
+                ]
+            },
+            {
+                "steps": 13899991,
+                "file_path": "results\\ignore\\Drecon\\Drecon-13899991.onnx",
+                "reward": 0.885597259672,
+                "creation_time": 1672163735.9687045,
+                "auxillary_file_paths": [
+                    "results\\ignore\\Drecon\\Drecon-13899991.pt"
+                ]
+            },
+            {
+                "steps": 13999999,
+                "file_path": "results\\ignore\\Drecon\\Drecon-13999999.onnx",
+                "reward": 1.441158671391172,
+                "creation_time": 1672163927.4661024,
+                "auxillary_file_paths": [
+                    "results\\ignore\\Drecon\\Drecon-13999999.pt"
+                ]
+            },
+            {
+                "steps": 14099991,
+                "file_path": "results\\ignore\\Drecon\\Drecon-14099991.onnx",
+                "reward": 1.7698904151930088,
+                "creation_time": 1672164119.0996714,
+                "auxillary_file_paths": [
+                    "results\\ignore\\Drecon\\Drecon-14099991.pt"
+                ]
+            },
+            {
+                "steps": 14199994,
+                "file_path": "results\\ignore\\Drecon\\Drecon-14199994.onnx",
+                "reward": 1.4514757469650938,
+                "creation_time": 1672164310.6445084,
+                "auxillary_file_paths": [
+                    "results\\ignore\\Drecon\\Drecon-14199994.pt"
+                ]
+            },
+            {
+                "steps": 14289806,
+                "file_path": "results\\ignore\\Drecon\\Drecon-14289806.onnx",
+                "reward": 1.469501590198221,
+                "creation_time": 1672164482.2065892,
+                "auxillary_file_paths": [
+                    "results\\ignore\\Drecon\\Drecon-14289806.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 6393,
+            "steps": 14289806,
             "file_path": "results\\ignore\\Drecon.onnx",
-            "reward": 1.3127269641653387,
-            "creation_time": 1672137079.177703,
+            "reward": 1.469501590198221,
+            "creation_time": 1672164482.2065892,
             "auxillary_file_paths": [
-                "results\\ignore\\Drecon\\Drecon-6393.pt"
+                "results\\ignore\\Drecon\\Drecon-14289806.pt"
             ]
         }
     },

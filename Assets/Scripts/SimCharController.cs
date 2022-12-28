@@ -337,7 +337,7 @@ public class SimCharController : MonoBehaviour
     [ContextMenu("Find mins and maxes for velocities and positions")]
         public void min_max_debugger()
     {
-        int num_state_bones = MLAgentsDirector.state_bones.Length;
+        int num_state_bones = MLAgentsDirector.stateBones.Length;
         Vector3 vel_min = Vector3.positiveInfinity;
         Vector3 vel_max = Vector3.negativeInfinity;
         Vector3[] bone_pos_mins = new Vector3[num_state_bones];
@@ -351,7 +351,7 @@ public class SimCharController : MonoBehaviour
         {
             //Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos min: {bone_pos_mins[j].ToString("f6")}");
             //Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos max: {bone_pos_maxes[j].ToString("f6")}");
-            Debug.Log($"{MLAgentsDirector.state_bones[j]} bone vel min: {bone_vel_mins[j].ToString("f6")} || bone vel max: {bone_vel_maxes[j].ToString("f6")}");
+            Debug.Log($"{MLAgentsDirector.stateBones[j]} bone vel min: {bone_vel_mins[j].ToString("f6")} || bone vel max: {bone_vel_maxes[j].ToString("f6")}");
             //Debug.Log($"{MLAgentsDirector.state_bones[j]} bone vel max: {bone_vel_maxes[j].ToString("f6")}");
 
         }
@@ -370,7 +370,7 @@ public class SimCharController : MonoBehaviour
         Vector3 last_cm = Vector3.zero;
         Vector3[] global_pos = new Vector3[23];
         Quaternion[] global_rots = new Quaternion[23];
-        int num_state_bones = MLAgentsDirector.state_bones.Length;
+        int num_state_bones = MLAgentsDirector.stateBones.Length;
         Vector3[] state_bone_pos = new Vector3[num_state_bones];
 
         cm_vel_min = Vector3.positiveInfinity;
@@ -398,7 +398,7 @@ public class SimCharController : MonoBehaviour
             for (int j = 0; j < num_state_bones; j++)
             {
                 // Get state bone pose
-                Vector3 bone_pos = global_pos[(int)MLAgentsDirector.state_bones[j]];
+                Vector3 bone_pos = global_pos[(int)MLAgentsDirector.stateBones[j]];
                 // Resolve in reference frame (multiply by inverse of root rotation and subtract root position)
                 Vector3 local_bone_pos = Utils.quat_inv_mul_vec3(global_rots[0], bone_pos - cm);
                 Vector3 bone_vel = (bone_pos - state_bone_pos[j]) / frame_time;
