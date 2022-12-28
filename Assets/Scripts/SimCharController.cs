@@ -298,7 +298,7 @@ public class SimCharController : MonoBehaviour
             for (int i = 0; i < num_frames; i++)
             {
                 Quaternion debug_bone_rot = db.bone_rotations[i][j];
-                Vector3 target_rot = ab.ToTargetRotationInReducedSpaceV2(debug_bone_rot, true);
+                Vector3 target_rot = ab.ToTargetRotationInReducedSpace(debug_bone_rot, true);
                 //Debug.Log(target_rot.ToString("f6"));
                 min_x = Mathf.Min(min_x, target_rot.x);
                 min_y = Mathf.Min(min_y, target_rot.y);

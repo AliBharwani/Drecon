@@ -35,7 +35,7 @@ public static class ArtBodyUtils
     }
     public static void SetDriveRotation(this ArticulationBody body, Quaternion targetLocalRotation, bool debug = false)
     {
-        Vector3 target = body.ToTargetRotationInReducedSpaceV2(targetLocalRotation, true);
+        Vector3 target = body.ToTargetRotationInReducedSpace(targetLocalRotation, true);
         if (debug)
             Debug.Log($"Target rot: {target.ToString("f6")}");
 
@@ -112,7 +112,7 @@ public static class ArtBodyUtils
     /// <param name="targetLocalRotation"> target's local rotation this articulation body is trying to mimic </param>
     /// <returns></returns>
 
-    public static Vector3 ToTargetRotationInReducedSpace(this ArticulationBody body, Quaternion targetLocalRotation)
+    public static Vector3 ToTargetRotationInReducedSpace_OLD_DO_NOT_USE(this ArticulationBody body, Quaternion targetLocalRotation)
     {
         if (body.isRoot)
             return Vector3.zero;
@@ -129,7 +129,7 @@ public static class ArtBodyUtils
         return rotInReducedSpace;
     }
 
-    public static Vector3 ToTargetRotationInReducedSpaceV2(this ArticulationBody body, Quaternion targetLocalRotation, bool inDegrees)
+    public static Vector3 ToTargetRotationInReducedSpace(this ArticulationBody body, Quaternion targetLocalRotation, bool inDegrees)
     {
         if (body.isRoot)
             return Vector3.zero;

@@ -46,7 +46,7 @@ public class TestDirector : MonoBehaviour
         {
             int bone_idx = (int)all_limited_dof_bones[i];
             ArticulationBody ab = sim_char.boneToArtBody[bone_idx];
-            Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx]);
+            Vector3 target = ab.ToTargetRotationInReducedSpace_OLD_DO_NOT_USE(cur_rotations[bone_idx]);
             bool use_xdrive = all_limited_dof_bones[i] == Bone_LeftLeg || all_limited_dof_bones[i] == Bone_RightLeg;
             if (use_xdrive)
             {
