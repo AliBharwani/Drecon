@@ -42,6 +42,9 @@ public class MLAgentsDirector : Agent
     public float EPISODE_END_REWARD = -.5f;
     public int MAX_EPISODE_LENGTH_SECONDS = 20;
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
+    public bool setDriveStiffnessAndDamping = false;
+    public float DriveStiffness = 150f;
+    public float DriveDamping = 20f;
     public bool resetKinCharOnEpisodeEnd = false;
     public bool normalize_action_ouputs = true;
     public bool normalizeObservations = false;
@@ -169,70 +172,70 @@ public class MLAgentsDirector : Agent
             Quaternion final = cur_rotations[bone_idx] * offset;
             ab.SetDriveRotation(final);
        }
-        for (int i = 0; i < limited_dof_bones.Length; i++)
+    for (int i = 0; i < limited_dof_bones.Length; i++)
+    {
+        int bone_idx = (int)limited_dof_bones[i];
+        bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
+        ArticulationBody ab = simChar.boneToArtBody[bone_idx];
+        int final_actions_idx = i + 21;
+
+        if (normalize_action_ouputs)
         {
-            int bone_idx = (int)limited_dof_bones[i];
-            bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
-            ArticulationBody ab = simChar.boneToArtBody[bone_idx];
-            int final_actions_idx = i + 21;
-
-            if (normalize_action_ouputs)
-            {
-                float output = final_actions[final_actions_idx];
-                // parent anchor rotation = q(ab) 
-                // anchor rotation = q(a) 
-                // target local = q(c) 
-                // need q(x) s.t. a * x = a * c
-                // 
-                Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx], true);
-                if (use_xdrive)
-                {
-                    //Debug.Log($"{limited_dof_bones[i]} target euler: {targetEuler} | targetRot: {targetRotationInJointSpace} | test: {test} | Current x drive target: {ab.xDrive.target}");
-                    var xdrive = ab.xDrive;
-                    var scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
-                    var midpoint = xdrive.lowerLimit + scale;
-                    //var normalizedTargetX = (targetRotationInJointSpace.x - midpoint) / scale;
-                    //normalizedTargetX += output.x;
-                    var outputX = (output * scale) + midpoint;
-                    xdrive.target = targetRotationInJointSpace.x + outputX;
-                    ab.xDrive = xdrive;
-
-                } else
-                {
-                    var zdrive = ab.zDrive;
-                    var scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
-                    var midpoint = zdrive.lowerLimit + scale;
-                    //var normalizedTargetZ = (targetRotationInJointSpace.z - midpoint) / scale;
-                    //normalizedTargetZ += output.z;
-                    var outputZ = (output * scale) + midpoint;
-                    zdrive.target = targetRotationInJointSpace.z + outputZ;
-                    ab.zDrive = zdrive;
-                }
-                continue;
-            }
-            // Angle is in range (-1, 1) => map to (-180, 180)
-            float angle = final_actions[final_actions_idx] * 180;
-            Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx], true);
+            float output = final_actions[final_actions_idx];
+            // parent anchor rotation = q(ab) 
+            // anchor rotation = q(a) 
+            // target local = q(c) 
+            // need q(x) s.t. a * x = a * c
+            // 
+            Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx], true);
             if (use_xdrive)
             {
-                ArticulationDrive drive = ab.xDrive;
-                drive.target = target.x + angle;
-                ab.xDrive = drive;
+                //Debug.Log($"{limited_dof_bones[i]} target euler: {targetEuler} | targetRot: {targetRotationInJointSpace} | test: {test} | Current x drive target: {ab.xDrive.target}");
+                var xdrive = ab.xDrive;
+                var scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
+                var midpoint = xdrive.lowerLimit + scale;
+                //var normalizedTargetX = (targetRotationInJointSpace.x - midpoint) / scale;
+                //normalizedTargetX += output.x;
+                var outputX = (output * scale) + midpoint;
+                xdrive.target = targetRotationInJointSpace.x + outputX;
+                ab.xDrive = xdrive;
+
             } else
             {
-                ArticulationDrive drive = ab.zDrive;
-                drive.target = target.z + angle;
-                ab.zDrive = drive;
+                var zdrive = ab.zDrive;
+                var scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
+                var midpoint = zdrive.lowerLimit + scale;
+                //var normalizedTargetZ = (targetRotationInJointSpace.z - midpoint) / scale;
+                //normalizedTargetZ += output.z;
+                var outputZ = (output * scale) + midpoint;
+                zdrive.target = targetRotationInJointSpace.z + outputZ;
+                ab.zDrive = zdrive;
             }
+            continue;
         }
-        for (int i = 0; i < openloop_bones.Length; i++)
+        // Angle is in range (-1, 1) => map to (-180, 180)
+        float angle = final_actions[final_actions_idx] * 180;
+        Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx], true);
+        if (use_xdrive)
         {
-            int bone_idx = (int)openloop_bones[i];
-            Quaternion final = cur_rotations[bone_idx];
-            ArticulationBody ab = simChar.boneToArtBody[bone_idx];
-            ab.SetDriveRotation(final);
+            ArticulationDrive drive = ab.xDrive;
+            drive.target = target.x + angle;
+            ab.xDrive = drive;
+        } else
+        {
+            ArticulationDrive drive = ab.zDrive;
+            drive.target = target.z + angle;
+            ab.zDrive = drive;
         }
-        //set_rewards();
+    }
+    for (int i = 0; i < openloop_bones.Length; i++)
+    {
+        int bone_idx = (int)openloop_bones[i];
+        Quaternion final = cur_rotations[bone_idx];
+        ArticulationBody ab = simChar.boneToArtBody[bone_idx];
+        ab.SetDriveRotation(final);
+    }
+    //set_rewards();
     }
     public override void Heuristic(in ActionBuffers actionsout)
     {
@@ -344,7 +347,13 @@ public class MLAgentsDirector : Agent
             simChar.boneSurfacePts[i] = new Vector3[6];
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
-
+        if (setDriveStiffnessAndDamping)
+        {
+            foreach (var body in simulatedCharObj.GetComponentsInChildren<ArticulationBody>()) { 
+                body.SetAllDriveDamping(DriveDamping);
+                body.SetAllDriveStiffness(DriveStiffness);
+            }
+        }
         projectile = Instantiate(projectilePrefab, simulatedCharObj.transform.position + Vector3.up, Quaternion.identity);
         projectileCollider = projectile.GetComponent<Collider>();
         projectileRB = projectile.GetComponent<Rigidbody>();
@@ -392,7 +401,7 @@ public class MLAgentsDirector : Agent
             MMScript.Reset();
             MMScript.FixedUpdate();
         }
-        SimCharController.teleport_sim_char(simChar, kinChar);
+        SimCharController.teleportSimChar(simChar, kinChar);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
     }
 
@@ -772,7 +781,7 @@ public class MLAgentsDirector : Agent
 
    
         if (state_idx != 110)
-            throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything but smootehd actions");
+            throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything");
    
         //for(int i = 0; i < 110; i++)
         //{

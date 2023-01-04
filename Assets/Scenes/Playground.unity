@@ -203,23 +203,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!1 &97353462
 GameObject:
   m_ObjectHideFlags: 0
@@ -870,23 +875,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!1 &399470364
 GameObject:
   m_ObjectHideFlags: 0
@@ -1210,23 +1220,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!1 &602526823
 GameObject:
   m_ObjectHideFlags: 0
@@ -1307,23 +1322,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!1 &626637396
 GameObject:
   m_ObjectHideFlags: 0
@@ -1443,23 +1463,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 2
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
-  ACTION_STIFFNESS_HYPERPARAM: 0.2
+  ACTION_STIFFNESS_HYPERPARAM: 1
+  setDriveStiffnessAndDamping: 1
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 1
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 1
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 1
   LAUNCH_SPEED: 7.5
-  draw_gizmos: 0
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!4 &767361689
 Transform:
   m_ObjectHideFlags: 0
@@ -2187,23 +2212,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!1001 &1221041499
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2477,23 +2507,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!1 &1371882026
 GameObject:
   m_ObjectHideFlags: 0
@@ -2574,23 +2609,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!1 &1407241025
 GameObject:
   m_ObjectHideFlags: 0
@@ -3001,23 +3041,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!1001 &1770047141
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3488,23 +3533,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!1001 &2047262205
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3900,23 +3950,28 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   evaluateEveryKSteps: 1
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  setDriveStiffnessAndDamping: 0
+  DriveStiffness: 150
+  DriveDamping: 20
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
-  normalize_observations: 1
+  normalizeObservations: 0
   simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 1000
   use_debug_mats: 1
-  gen_mins_and_maxes: 0
+  genMinsAndMaxes: 0
   projectileTraining: 0
   projectilePrefab: {fileID: 0}
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.66
   LAUNCH_SPEED: 5
-  draw_gizmos: 1
   gizmoSphereRad: 0.01
+  drawGizmos: 0
 --- !u!4 &541777148655995783
 Transform:
   m_ObjectHideFlags: 0

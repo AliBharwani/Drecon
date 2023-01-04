@@ -1,0 +1,42 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1672812956",
+        "python_version": "3.9.0 (tags/v3.9.0:9cf6752, Oct  5 2020, 15:34:40) [MSC v.1927 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Users\\ali\\AppData\\Local\\Programs\\Python\\Python39\\Scripts\\mlagents-learn Assets\\config\\Drecon.yaml --run-id=FullActionStiffnessHigherSpringStiffness --resume --time-scale 1 --capture-frame-rate=0",
+        "mlagents_version": "0.28.0",
+        "mlagents_envs_version": "0.28.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "1.7.1+cu110",
+        "numpy_version": "1.23.4",
+        "end_time_seconds": "1672813023"
+    },
+    "total": 67.0512183,
+    "count": 1,
+    "self": 0.0047462000000138005,
+    "children": {
+        "run_training.setup": {
+            "total": 0.04940180000000005,
+            "count": 1,
+            "self": 0.04940180000000005
+        },
+        "TrainerController.start_learning": {
+            "total": 66.99707029999999,
+            "count": 1,
+            "self": 7.959999999229694e-05,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 66.996976,
+                    "count": 1,
+                    "self": 66.996976
+                },
+                "TrainerController._save_models": {
+                    "total": 1.4699999994149948e-05,
+                    "count": 1,
+                    "self": 1.4699999994149948e-05
+                }
+            }
+        }
+    }
+}

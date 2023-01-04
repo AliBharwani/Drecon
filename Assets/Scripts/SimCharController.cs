@@ -31,7 +31,7 @@ public class SimCharController : MonoBehaviour
 #endif
 
         if (set_art_bodies) { 
-            set_art_body_rot_limits();
+            setArtBodyRotLimitsFromDB();
         }
     }
     public Collider[] boneToCollider;
@@ -156,7 +156,7 @@ public class SimCharController : MonoBehaviour
         return parent_rotation;
     }
 
-    public static void teleport_sim_char(CharInfo sim_char, CharInfo kin_char)
+    public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char)
     {
         if (db == null)
             db = getDB();
@@ -242,7 +242,7 @@ public class SimCharController : MonoBehaviour
             body.swingZLock = ArticulationDofLock.FreeMotion;
         }
     }
-    [ContextMenu("Setup art bodies")]
+    [ContextMenu("Setup art bodies stiffness damping and force limit")]
     void setup_art_bodies()
     {
         for (int i = 0; i < 23; i++)
@@ -278,7 +278,7 @@ public class SimCharController : MonoBehaviour
         return db;
     }
     [ContextMenu("Set all art body rot limits")]
-    public void set_art_body_rot_limits()
+    public void setArtBodyRotLimitsFromDB()
     {
         if (db == null)
             db = getDB();
