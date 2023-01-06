@@ -1,4 +1,4 @@
-using System.Linq;
+using System.Collections;
 using UnityEngine;
 using static mm_v2.Bones;
 
@@ -10,6 +10,9 @@ public class TestDirector : MonoBehaviour
     public GameObject simulatedCharPrefab;
     public GameObject kinematicCharPrefab;
 
+    public float physicsSimulateTime = 1f / 60f;
+    public float timeToSimulate = 10f;
+    public float physicsSpeed = .5f;
     private mm_v2 MMScript;
     private SimCharController SimCharController;
     private int nbodies;
@@ -98,6 +101,7 @@ public class TestDirector : MonoBehaviour
         simChar.charObj = simulatedChar;
         simChar.boneSurfacePts = new Vector3[nbodies][];
         simChar.boneToArtBody = SimCharController.bone_to_art_body;
+        simulatedChar.SetActive(true);
 
         kinChar.boneWorldPos = new Vector3[stateBones.Length];
         simChar.boneWorldPos = new Vector3[stateBones.Length];
@@ -134,7 +138,6 @@ public class TestDirector : MonoBehaviour
         MMScript.set_random_pose();
 
     }
-    public float physicsSimulateTime = .01f;
     [ContextMenu("Set sim char to match kin char")]
     private void create_and_set_sim_char()
     {
@@ -154,12 +157,37 @@ public class TestDirector : MonoBehaviour
             simulatedChar = Instantiate(simulatedCharPrefab, Vector3.zero, Quaternion.identity);
         myInit();
 
+        Transform kinRoot = kinChar.boneToTransform[(int)Bone_Entity];
+        simChar.root.TeleportRoot(kinRoot.position, kinRoot.rotation);
+        simChar.root.resetJointPhysics();
+ 
+        for (int i = 1; i < 23; i++)
+        {
+            ArticulationBody body = simChar.boneToArtBody[i];
+            Quaternion targetLocalRot = kinChar.boneToTransform[i].localRotation;
+            mm_v2.Bones bone = (mm_v2.Bones)i;
+            Vector3 TargetRotationInJointSpace;
+            // from https://github.com/Unity-Technologies/marathon-envs/blob/58852e9ac22eac56ca46d1780573cc6c32278a71/UnitySDK/Assets/MarathonEnvs/Scripts/ActiveRagdoll003/DebugJoints.cs
+            //Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles;
+            TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot, false);
+            body.SetDriveRotation(targetLocalRot, true);
+        }
+        //Physics.autoSimulation = false;
+        //StartCoroutine(PhysicsSimlateLoop());
 
+    }
+    IEnumerator PhysicsSimlateLoop()
+    {
+        float timeSimulated = 0f;
 
-
-
-        SimCharController.teleportSimChar(simChar, kinChar);
-        Physics.Simulate(physicsSimulateTime);
+        while (timeSimulated < timeToSimulate)
+        {
+            Physics.Simulate(physicsSimulateTime);
+            Debug.Log($"Simulating {physicsSimulateTime.ToString("N3")} amount of time, timeSimulated: {timeSimulated.ToString("N3")}, timeToSimulate: {timeToSimulate.ToString("N3")} ");
+            timeSimulated += physicsSimulateTime;
+            yield return new WaitForSeconds(physicsSimulateTime / physicsSpeed);
+        }
+        yield return null;
     }
 
     [ContextMenu("reset")]

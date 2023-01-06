@@ -188,7 +188,9 @@ public class ArtBodyTester : MonoBehaviour
         addGizmoSphere(top);
         //addGizmoSphere(bottom);
     }
-    [ContextMenu("Set all art bodies to use gravity")]
+
+    public bool useGravity = true;
+    [ContextMenu("Set all art bodies to \'use gravity\' param")]
     private void set_art_bodies_use_gravity()
     {
         List<Transform> all = getAllChildren();
@@ -196,7 +198,7 @@ public class ArtBodyTester : MonoBehaviour
         {
             var ab = t.gameObject.GetComponent<ArticulationBody>();
             if (ab != null)
-                ab.useGravity = true;
+                ab.useGravity = useGravity;
         }
     }
 

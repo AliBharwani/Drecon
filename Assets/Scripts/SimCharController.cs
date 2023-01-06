@@ -165,7 +165,7 @@ public class SimCharController : MonoBehaviour
         //simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
         //my_initalize();
         sim_char.trans.rotation = kin_char.trans.rotation;
-        Transform kin_root = kin_char.boneToTransform[(int)mm_v2.Bones.Bone_Entity];
+        Transform kin_root = kin_char.boneToTransform[(int)Bone_Entity];
         sim_char.root.TeleportRoot(kin_root.position, kin_root.rotation);
         sim_char.root.resetJointPhysics();
         //Quaternion[] global_ab_rots = new Quaternion[23];

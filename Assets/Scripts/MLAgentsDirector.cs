@@ -125,9 +125,9 @@ public class MLAgentsDirector : Agent
        {
             int bone_idx = (int)full_dof_bones[i];
             ArticulationBody ab = simChar.boneToArtBody[bone_idx];
+            Vector3 output = new Vector3(final_actions[i * 3], final_actions[i * 3 + 1], final_actions[i * 3 + 2]);
             if (normalize_action_ouputs)
             {
-                Vector3 output = new Vector3(final_actions[i * 3], final_actions[i * 3 + 1], final_actions[i * 3 + 2]);
                 Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx], true);
                 //Vector3 targetRotationInJointSpace = -(Quaternion.Inverse(ab.anchorRotation) * Quaternion.Inverse(cur_rotations[bone_idx]) * ab.parentAnchorRotation).eulerAngles;
                 //targetRotationInJointSpace = new Vector3(
@@ -163,12 +163,11 @@ public class MLAgentsDirector : Agent
                 ab.zDrive = zdrive;
                 continue;
             }
-            Vector3 scaled_angleaxis = new Vector3(final_actions[i*3], final_actions[i*3 + 1], final_actions[i*3 + 2]);
-            float angle = scaled_angleaxis.sqrMagnitude;
+            float angle = output.sqrMagnitude;
             // Angle is in range (0,3) => map to (-180, 180)
             angle = (angle * 120) - 180;
-            scaled_angleaxis.Normalize();
-            Quaternion offset = Quaternion.AngleAxis(angle, scaled_angleaxis);
+            output.Normalize();
+            Quaternion offset = Quaternion.AngleAxis(angle, output);
             Quaternion final = cur_rotations[bone_idx] * offset;
             ab.SetDriveRotation(final);
        }
