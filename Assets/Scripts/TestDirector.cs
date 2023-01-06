@@ -141,7 +141,7 @@ public class TestDirector : MonoBehaviour
     [ContextMenu("Set sim char to match kin char")]
     private void create_and_set_sim_char()
     {
-        //Physics.autoSimulation = false;
+        Physics.autoSimulation = false;
         if (simulatedChar == null)
             simulatedChar = Instantiate(simulatedCharPrefab, Vector3.zero, Quaternion.identity);
         myInit();
@@ -173,21 +173,7 @@ public class TestDirector : MonoBehaviour
             body.SetDriveRotation(targetLocalRot, true);
         }
         //Physics.autoSimulation = false;
-        //StartCoroutine(PhysicsSimlateLoop());
 
-    }
-    IEnumerator PhysicsSimlateLoop()
-    {
-        float timeSimulated = 0f;
-
-        while (timeSimulated < timeToSimulate)
-        {
-            Physics.Simulate(physicsSimulateTime);
-            Debug.Log($"Simulating {physicsSimulateTime.ToString("N3")} amount of time, timeSimulated: {timeSimulated.ToString("N3")}, timeToSimulate: {timeToSimulate.ToString("N3")} ");
-            timeSimulated += physicsSimulateTime;
-            yield return new WaitForSeconds(physicsSimulateTime / physicsSpeed);
-        }
-        yield return null;
     }
 
     [ContextMenu("reset")]
@@ -203,6 +189,7 @@ public class TestDirector : MonoBehaviour
     private void FixedUpdate()
     {
         if (frame % 5 == 0) {
+            Debug.Log($"Teleporting!");
             SimCharController.teleportSimChar(simChar, kinChar);//teleport_sim_char();
             //create_and_set_kin_char();
             //Destroy(MMScript);
