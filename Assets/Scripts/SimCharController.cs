@@ -172,6 +172,11 @@ public class SimCharController : MonoBehaviour
         //global_ab_rots[1] = sim_char.hip_bone.anchorRotation;
         for (int i = 1; i < 23; i++)
         {
+            mm_v2.Bones bone = (mm_v2.Bones)i;
+            if (bone == mm_v2.Bones.Bone_RightLeg)
+            {
+                //Debug.Log($"");
+            }
             ArticulationBody body = sim_char.boneToArtBody[i];
             //Quaternion parent_anchor_rot = get_bone_parent_rotation(i, sim_char.bone_to_art_body);// global_ab_rots[i - 1];
             //global_ab_rots[i] = parent_anchor_rot * body.anchorRotation;
@@ -181,13 +186,16 @@ public class SimCharController : MonoBehaviour
                 continue;
             }
             Quaternion targetLocalRot = kin_char.boneToTransform[i].localRotation;
-            mm_v2.Bones bone = (mm_v2.Bones)i;
             //if (bone == mm_v2.Bones.Bone_LeftArm || bone == mm_v2.Bones.Bone_RightArm)
             //    targetLocalRot = kin_char.bone_to_transform[db.bone_parents[i]].localRotation * targetLocalRot;
             //if (body.anchorRotation == Quaternion.identity)
             //    Debug.Log($"{(mm_v2.Bones)i } has no anchor rotation");
             // from https://github.com/Unity-Technologies/marathon-envs/blob/58852e9ac22eac56ca46d1780573cc6c32278a71/UnitySDK/Assets/MarathonEnvs/Scripts/ActiveRagdoll003/DebugJoints.cs
             Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles;
+            if (body.anchorRotation != Quaternion.identity)
+            {
+                Debug.Log($"{bone} anchor rotation is not identity");
+            } 
             //TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot);
             //TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * targetLocalRot * Quaternion.Inverse(body.parentAnchorRotation)).eulerAngles;
             //TargetRotationInJointSpace = (targetLocalRot * Quaternion.Inverse(body.anchorRotation)).eulerAngles;
@@ -195,6 +203,7 @@ public class SimCharController : MonoBehaviour
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.z)) * Mathf.Deg2Rad;
+            //Debug.Log($"{bone} dof count: {body.dofCount}");
 
             if (body.dofCount == 3)
             {
@@ -217,6 +226,7 @@ public class SimCharController : MonoBehaviour
             }
             else if (body.dofCount == 1)
             {
+                Debug.Log($"{bone} Target rotation in joint space: {TargetRotationInJointSpace}");
                 float new_target = 0f;
                 if (body.twistLock != ArticulationDofLock.LockedMotion)
                     new_target = TargetRotationInJointSpace.x;
@@ -323,7 +333,7 @@ public class SimCharController : MonoBehaviour
             drive.upperLimit = max_z;
             ab.zDrive = drive;
 #if UNITY_EDITOR
-            if (!UnityEditor.EditorApplication.isPlaying)
+            if (!UnityEditor.EditorApplication.isPlaying && TestDirector.allLimitedDOFBones.Contains((mm_v2.Bones)j))
             { 
                 Debug.Log($"Bone {(mm_v2.Bones)j} Mins: x: {min_x} , y: {min_y} , z: {min_z}");
                 Debug.Log($"Bone {(mm_v2.Bones)j} Maxess: x: {max_x} , y: {max_y} , z: {max_z}");

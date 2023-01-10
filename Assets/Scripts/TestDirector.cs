@@ -45,19 +45,19 @@ public class TestDirector : MonoBehaviour
             int bone_idx = (int)allLimitedDOFBones[i];
             ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             Vector3 target = ab.ToTargetRotationInReducedSpace_OLD_DO_NOT_USE(cur_rotations[bone_idx]);
-            bool use_xdrive = allLimitedDOFBones[i] == Bone_LeftLeg || allLimitedDOFBones[i] == Bone_RightLeg;
-            if (use_xdrive)
-            {
+            //bool use_xdrive = allLimitedDOFBones[i] == Bone_LeftLeg || allLimitedDOFBones[i] == Bone_RightLeg;
+            //if (use_xdrive)
+            //{
                 ArticulationDrive drive = ab.xDrive;
                 drive.target = target.x;
                 ab.xDrive = drive;
-            }
-            else
-            {
-                ArticulationDrive drive = ab.zDrive;
-                drive.target = target.z;
-                ab.zDrive = drive;
-            }
+            //}
+            //else
+            //{
+            //    ArticulationDrive drive = ab.zDrive;
+            //    drive.target = target.z;
+            //    ab.zDrive = drive;
+            //}
         }
         for (int i = 0; i < allFullDOFBones.Length; i++)
         {
@@ -106,8 +106,8 @@ public class TestDirector : MonoBehaviour
         kinChar.boneWorldPos = new Vector3[stateBones.Length];
         simChar.boneWorldPos = new Vector3[stateBones.Length];
 
-        origin = kinChar.trans.position;
-        origin_rot = simChar.boneToTransform[(int)Bone_Entity].rotation;
+        //origin = kinChar.trans.position;
+        //origin_rot = simChar.boneToTransform[(int)Bone_Entity].rotation;
 
     }
 
@@ -127,8 +127,7 @@ public class TestDirector : MonoBehaviour
         //SimCharController.remove_joint_limits(sim_char.bone_to_art_body);
     }
 
-    Vector3 origin;
-    Quaternion origin_rot;
+
     [ContextMenu("Create kin char and set to random pose")]
     private void createAndSetKinChar()
     {
@@ -138,8 +137,8 @@ public class TestDirector : MonoBehaviour
         MMScript.set_random_pose();
 
     }
-    [ContextMenu("Set sim char to match kin char")]
-    private void create_and_set_sim_char()
+    [ContextMenu("Teleport sim char to match kin char")]
+    private void createAndTeleportSimChar()
     {
         Physics.autoSimulation = false;
         if (simulatedChar == null)

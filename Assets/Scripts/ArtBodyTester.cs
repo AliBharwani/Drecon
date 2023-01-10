@@ -201,6 +201,15 @@ public class ArtBodyTester : MonoBehaviour
                 ab.useGravity = useGravity;
         }
     }
+    [ContextMenu("Remove all anchor positions and rotations")]
+    private void removeAllAnchorPositionsAndRotations()
+    {
+        foreach(var ab in GetComponentsInChildren<ArticulationBody>())
+        {
+            ab.anchorPosition = Vector3.zero;
+            ab.anchorRotation = Quaternion.identity;
+        }
+    }
 
     [ContextMenu("Reset gizmos")]
     private void resetGizmos()

@@ -174,7 +174,7 @@ public class MLAgentsDirector : Agent
     for (int i = 0; i < limited_dof_bones.Length; i++)
     {
         int bone_idx = (int)limited_dof_bones[i];
-        bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
+        //bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
         ArticulationBody ab = simChar.boneToArtBody[bone_idx];
         int final_actions_idx = i + 21;
 
@@ -187,8 +187,8 @@ public class MLAgentsDirector : Agent
             // need q(x) s.t. a * x = a * c
             // 
             Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx], true);
-            if (use_xdrive)
-            {
+            //if (use_xdrive)
+            //{
                 //Debug.Log($"{limited_dof_bones[i]} target euler: {targetEuler} | targetRot: {targetRotationInJointSpace} | test: {test} | Current x drive target: {ab.xDrive.target}");
                 var xdrive = ab.xDrive;
                 var scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
@@ -199,33 +199,33 @@ public class MLAgentsDirector : Agent
                 xdrive.target = targetRotationInJointSpace.x + outputX;
                 ab.xDrive = xdrive;
 
-            } else
-            {
-                var zdrive = ab.zDrive;
-                var scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
-                var midpoint = zdrive.lowerLimit + scale;
-                //var normalizedTargetZ = (targetRotationInJointSpace.z - midpoint) / scale;
-                //normalizedTargetZ += output.z;
-                var outputZ = (output * scale) + midpoint;
-                zdrive.target = targetRotationInJointSpace.z + outputZ;
-                ab.zDrive = zdrive;
-            }
+            //} else
+            //{
+            //    var zdrive = ab.zDrive;
+            //    var scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
+            //    var midpoint = zdrive.lowerLimit + scale;
+            //    //var normalizedTargetZ = (targetRotationInJointSpace.z - midpoint) / scale;
+            //    //normalizedTargetZ += output.z;
+            //    var outputZ = (output * scale) + midpoint;
+            //    zdrive.target = targetRotationInJointSpace.z + outputZ;
+            //    ab.zDrive = zdrive;
+            //}
             continue;
         }
         // Angle is in range (-1, 1) => map to (-180, 180)
         float angle = final_actions[final_actions_idx] * 180;
         Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx], true);
-        if (use_xdrive)
-        {
-            ArticulationDrive drive = ab.xDrive;
-            drive.target = target.x + angle;
-            ab.xDrive = drive;
-        } else
-        {
+        //if (use_xdrive)
+        //{
+        //    ArticulationDrive drive = ab.xDrive;
+        //    drive.target = target.x + angle;
+        //    ab.xDrive = drive;
+        //} else
+        //{
             ArticulationDrive drive = ab.zDrive;
             drive.target = target.z + angle;
             ab.zDrive = drive;
-        }
+        //}
     }
     for (int i = 0; i < openloop_bones.Length; i++)
     {
@@ -269,19 +269,19 @@ public class MLAgentsDirector : Agent
             //float angle = final_actions[i] * 180;
             ArticulationBody ab = simChar.boneToArtBody[(int)bone];
             Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[(int) bone], true);
-            bool use_xdrive = bone == Bone_LeftLeg || bone == Bone_RightLeg;
-            if (use_xdrive)
-            {
+            //bool use_xdrive = bone == Bone_LeftLeg || bone == Bone_RightLeg;
+            //if (use_xdrive)
+            //{
                 ArticulationDrive drive = ab.xDrive;
                 drive.target = target.x;
                 ab.xDrive = drive;
-            }
-            else
-            {
-                ArticulationDrive drive = ab.zDrive;
-                drive.target = target.z;
-                ab.zDrive = drive;
-            }
+            //}
+            //else
+            //{
+            //    ArticulationDrive drive = ab.zDrive;
+            //    drive.target = target.z;
+            //    ab.zDrive = drive;
+            //}
         }
         for (int i = 0; i < openloop_bones.Length; i++)
         {
