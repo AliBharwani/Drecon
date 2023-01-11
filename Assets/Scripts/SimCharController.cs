@@ -223,6 +223,23 @@ public class SimCharController : MonoBehaviour
         }
     }
 
+    [ContextMenu("applyTransformsFromFrameZero ")]
+    internal void applyTransformsFromFrameZero()
+    {
+        // This is neccessary because the prefabs are based off the FBX file
+        // However, the BVH file starts off by defining offsets for each bone
+        // In the kinematic character, these offsets are baked into the positions and rotations
+        // information created by the python script and directly applied to the character
+        // The simulated character however does have that 
+        if (db == null)
+            db = getDB();
+        int numBones = db.nbones();
+        Vector3[] globalBonePositions = new Vector3[numBones];
+        Quaternion[] globalBoneRotations = new Quaternion[numBones];
+        forward_kinematics_full(db, 0, ref globalBonePositions, ref globalBoneRotations);
+        apply_global_pos_and_rot(globalBonePositions,   globalBoneRotations, boneToTransform);
+}
+
     [ContextMenu("Remove all local positions and rotations")]
     internal void removeAllLocalRotations()
     {
