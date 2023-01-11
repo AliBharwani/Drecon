@@ -169,7 +169,7 @@ public class TestDirector : MonoBehaviour
             // from https://github.com/Unity-Technologies/marathon-envs/blob/58852e9ac22eac56ca46d1780573cc6c32278a71/UnitySDK/Assets/MarathonEnvs/Scripts/ActiveRagdoll003/DebugJoints.cs
             //Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles;
             TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot, false);
-            body.SetDriveRotation(targetLocalRot, true);
+            body.SetDriveRotation(targetLocalRot);
         }
         //Physics.autoSimulation = false;
 

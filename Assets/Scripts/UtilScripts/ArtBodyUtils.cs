@@ -38,7 +38,7 @@ public static class ArtBodyUtils
         Vector3 target = debug ? body.ToTargetRotationInReducedSpace(targetLocalRotation, true)
             : body.ToTargetRotationInReducedSpace_OLD_DO_NOT_USE(targetLocalRotation);
         //if (debug)
-        //    Debug.Log($"Target rot: {target.ToString("f6")}");
+        Debug.Log($"{body.transform.name} Target rot: {target.ToString("f6")}");
 
 
         // assign to the drive targets...

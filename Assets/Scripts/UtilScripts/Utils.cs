@@ -5,6 +5,20 @@ using UnityEngine;
 
 public static class Utils
 {
+    public static List<Transform> getAllChildren(Transform transform)
+    {
+        List<Transform> all = new List<Transform>();
+        Queue<Transform> queue = new Queue<Transform>();
+        queue.Enqueue(transform);
+        while (queue.Count > 0)
+        {
+            var c = queue.Dequeue();
+            all.Add(c);
+            foreach (Transform t in c)
+                queue.Enqueue(t);
+        }
+        return all;
+    }
     public static Vector3 quat_mul_vec3(Quaternion q, Vector3 v)
     {
         Vector3 t = 2.0f * Vector3.Cross( new Vector3(q.x, q.y, q.z), v);

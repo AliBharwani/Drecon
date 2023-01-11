@@ -137,24 +137,6 @@ public class SimCharController : MonoBehaviour
     }
 
     public static database db;
-    public static bool[] anchor_rot_found = new bool[23];
-    public static Quaternion[] bone_anchor_rot = new Quaternion[23];
-
-    public static Quaternion get_bone_parent_rotation(int bone_idx, ArticulationBody[] bone_to_art_body)
-    {
-        bool is_hip = (mm_v2.Bones)bone_idx == mm_v2.Bones.Bone_Hips;
-        if (anchor_rot_found[bone_idx] == true || is_hip)
-            return is_hip ? Quaternion.identity : bone_anchor_rot[bone_idx];
-        if (db == null)
-            db = database.Instance;
-        int parent_idx = db.bone_parents[bone_idx];
-        Quaternion grandparent_rotation = get_bone_parent_rotation(parent_idx, bone_to_art_body);
-        Quaternion parent_rotation = grandparent_rotation * bone_to_art_body[bone_idx].parentAnchorRotation;
-        Debug.Log($"{(mm_v2.Bones)bone_idx}'s parent's rotation is  {(mm_v2.Bones)parent_idx}'s parent's rotation times current parentAnchorRotation");
-        bone_anchor_rot[bone_idx] = parent_rotation;
-        anchor_rot_found[bone_idx] = true;
-        return parent_rotation;
-    }
 
     public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char)
     {
@@ -166,39 +148,30 @@ public class SimCharController : MonoBehaviour
         //my_initalize();
         sim_char.trans.rotation = kin_char.trans.rotation;
         Transform kin_root = kin_char.boneToTransform[(int)Bone_Entity];
-        sim_char.root.TeleportRoot(kin_root.position, kin_root.rotation);
+        Transform kinHips = kin_char.boneToTransform[(int)Bone_Hips];
+        Transform simHips = sim_char.boneToTransform[(int)Bone_Hips];
+        // Adding this to root transform position will give hip transform position
+        Vector3 simHipPositionOffset = sim_char.trans.position - simHips.position;
+        // we need to set: 
+        // simRootPosition + simHipPositionOffset = kinHipPosition 
+        // simRootPosition = kinHipPosition - simHipPositionOffset
+        //Debug.Log($"simRootPosition: {sim_char.trans.position}  simHipPositionOffset : {simHipPositionOffset} kinHipPosition: {kinHips.position}");
+        sim_char.root.TeleportRoot(kinHips.position + simHipPositionOffset, kin_root.rotation);
         sim_char.root.resetJointPhysics();
-        //Quaternion[] global_ab_rots = new Quaternion[23];
-        //global_ab_rots[1] = sim_char.hip_bone.anchorRotation;
+
         for (int i = 1; i < 23; i++)
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
-            if (bone == mm_v2.Bones.Bone_RightLeg)
-            {
-                //Debug.Log($"");
-            }
             ArticulationBody body = sim_char.boneToArtBody[i];
-            //Quaternion parent_anchor_rot = get_bone_parent_rotation(i, sim_char.bone_to_art_body);// global_ab_rots[i - 1];
-            //global_ab_rots[i] = parent_anchor_rot * body.anchorRotation;
+
             if (body.jointType != ArticulationJointType.SphericalJoint)
             {
                 body.resetJointPhysics();
                 continue;
             }
             Quaternion targetLocalRot = kin_char.boneToTransform[i].localRotation;
-            //if (bone == mm_v2.Bones.Bone_LeftArm || bone == mm_v2.Bones.Bone_RightArm)
-            //    targetLocalRot = kin_char.bone_to_transform[db.bone_parents[i]].localRotation * targetLocalRot;
-            //if (body.anchorRotation == Quaternion.identity)
-            //    Debug.Log($"{(mm_v2.Bones)i } has no anchor rotation");
             // from https://github.com/Unity-Technologies/marathon-envs/blob/58852e9ac22eac56ca46d1780573cc6c32278a71/UnitySDK/Assets/MarathonEnvs/Scripts/ActiveRagdoll003/DebugJoints.cs
-            Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles;
-            if (body.anchorRotation != Quaternion.identity)
-            {
-                Debug.Log($"{bone} anchor rotation is not identity");
-            } 
-            //TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot);
-            //TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * targetLocalRot * Quaternion.Inverse(body.parentAnchorRotation)).eulerAngles;
-            //TargetRotationInJointSpace = (targetLocalRot * Quaternion.Inverse(body.anchorRotation)).eulerAngles;
+            Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles ;
             TargetRotationInJointSpace = new Vector3(
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
@@ -207,12 +180,6 @@ public class SimCharController : MonoBehaviour
 
             if (body.dofCount == 3)
             {
-                //if (body.twistLock == ArticulationDofLock.LockedMotion)
-                //    TargetRotationInJointSpace.x = 0f;
-                //if (body.swingYLock == ArticulationDofLock.LockedMotion)
-                //    TargetRotationInJointSpace.y = 0f;
-                //if (body.swingZLock == ArticulationDofLock.LockedMotion)
-                //    TargetRotationInJointSpace.z = 0f;
                 body.resetJointPosition(TargetRotationInJointSpace);
                 var drive = body.xDrive;
                 drive.target = 0f;
@@ -220,13 +187,12 @@ public class SimCharController : MonoBehaviour
                   drive = body.yDrive;
                 drive.target = 0f;
                 body.yDrive = drive;
-                  drive = body.zDrive;
+                 drive = body.zDrive;
                 drive.target = 0f;
                 body.zDrive = drive;
             }
             else if (body.dofCount == 1)
             {
-                Debug.Log($"{bone} Target rotation in joint space: {TargetRotationInJointSpace}");
                 float new_target = 0f;
                 if (body.twistLock != ArticulationDofLock.LockedMotion)
                     new_target = TargetRotationInJointSpace.x;
@@ -235,23 +201,40 @@ public class SimCharController : MonoBehaviour
                 else if (body.swingZLock != ArticulationDofLock.LockedMotion)
                     new_target = TargetRotationInJointSpace.z;
                 body.resetJointPosition(new_target);
+                var drive = body.zDrive;
+                drive.target = 0f;
+                body.zDrive = drive;
             }
         }
 
     }
 
-    internal void remove_joint_limits(ArticulationBody[] bodies)
+    [ContextMenu("Remove joint limits")]
+    internal void removeJointLimits()
     {
         for(int i = 1; i < 23; i++)
         {
-            var body = bodies[i];
-            if (body.isRoot || !(body.jointType != ArticulationJointType.SphericalJoint))
+            var body = boneToTransform[i].GetComponent<ArticulationBody>();
+            if (body.isRoot ||  body.jointType != ArticulationJointType.SphericalJoint )
                 continue;
             body.twistLock = ArticulationDofLock.FreeMotion;
             body.swingYLock = ArticulationDofLock.FreeMotion;
             body.swingZLock = ArticulationDofLock.FreeMotion;
         }
     }
+
+    [ContextMenu("Remove all local positions and rotations")]
+    internal void removeAllLocalRotations()
+    {
+        foreach(Transform t in Utils.getAllChildren(transform))
+        {
+            if (t.name.StartsWith("Model") || t.name == transform.name)
+                continue;
+            t.localRotation = Quaternion.identity;
+            //t.localPosition = Vector3.zero;
+        }
+    }
+
     [ContextMenu("Setup art bodies stiffness damping and force limit")]
     void setup_art_bodies()
     {
