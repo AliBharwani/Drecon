@@ -179,8 +179,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5138958}
-  m_LocalRotation: {x: -0.28633255, y: 0.42485642, z: 0.1923885, w: 0.8369572}
-  m_LocalPosition: {x: -0.112841345, y: -0.00000020489097, z: -0.00000020861626}
+  m_LocalRotation: {x: -0.025066998, y: 0.27686122, z: 0.6938911, w: 0.664255}
+  m_LocalPosition: {x: -0.11284121, y: -0.00000021699816, z: 0.00000020116568}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -265,8 +265,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 24165588}
-  m_LocalRotation: {x: 0.06634351, y: -0.9961644, z: -0.056978915, w: -0.0029172006}
-  m_LocalPosition: {x: -0.0010346407, y: 0.018578203, z: -0.10548508}
+  m_LocalRotation: {x: -0.5591087, y: 0.82849026, z: -0.011171387, w: -0.029608041}
+  m_LocalPosition: {x: -0.0010346211, y: 0.01857844, z: -0.10548515}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -396,7 +396,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -436,7 +436,7 @@ GameObject:
   m_Component:
   - component: {fileID: 32378088}
   - component: {fileID: 32378089}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftShoulder_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -514,7 +514,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 38712746}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightInHandMiddle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -578,7 +578,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 58741726}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandRing4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -610,7 +610,7 @@ GameObject:
   m_Component:
   - component: {fileID: 65215393}
   - component: {fileID: 65215394}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftLeg_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -656,7 +656,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 65488846}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandRing2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -689,7 +689,7 @@ GameObject:
   m_Component:
   - component: {fileID: 79863944}
   - component: {fileID: 79863945}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightToe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -703,8 +703,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 79863943}
-  m_LocalRotation: {x: 0.000004887581, y: 0.00002666004, z: -0.18613435, w: 0.98252434}
-  m_LocalPosition: {x: -0.17299987, y: -0.00000017881393, z: 0.00000013643876}
+  m_LocalRotation: {x: 0.00000489084, y: 0.000026635822, z: -0.18613428, w: 0.9825243}
+  m_LocalPosition: {x: -0.17299998, y: -0.00000025331974, z: 0.00000011920929}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -741,7 +741,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 0.00001735999
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -0.000030517578
@@ -749,7 +749,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -0.000030517578
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: 0.0000037617529
@@ -757,13 +757,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 0.000016318952
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &84277436
 GameObject:
@@ -906,7 +906,7 @@ GameObject:
   m_Component:
   - component: {fileID: 98016588}
   - component: {fileID: 98016589}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightLeg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -920,8 +920,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 98016587}
-  m_LocalRotation: {x: 0.024682356, y: 0.048189856, z: 0.15216906, w: 0.9868704}
-  m_LocalPosition: {x: -0.43500116, y: -0.000000045169145, z: 0.00000004749745}
+  m_LocalRotation: {x: 0.051914304, y: 0.015364967, z: 0.81940204, w: 0.57065666}
+  m_LocalPosition: {x: -0.4350181, y: -0.0000150203705, z: -0.0000014156103}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -958,7 +958,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 3.7058105
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -6.553772
@@ -966,7 +966,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 8.339355
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: 4.802826
@@ -974,13 +974,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 92.78964
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &99228538
 GameObject:
@@ -991,7 +991,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 99228539}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftInHandPinky
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1024,7 +1024,7 @@ GameObject:
   m_Component:
   - component: {fileID: 104612426}
   - component: {fileID: 104612427}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftFoot_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1129,7 +1129,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1171,7 +1171,7 @@ GameObject:
   - component: {fileID: 112242900}
   - component: {fileID: 112242899}
   - component: {fileID: 112242898}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Spine_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1228,7 +1228,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1268,7 +1268,7 @@ GameObject:
   m_Component:
   - component: {fileID: 127900948}
   - component: {fileID: 127900949}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftForeArm_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1314,7 +1314,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 133670554}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightToeEnd
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1566,7 +1566,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1606,7 +1606,7 @@ GameObject:
   m_Component:
   - component: {fileID: 168468504}
   - component: {fileID: 168468505}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightHand_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1653,7 +1653,7 @@ GameObject:
   m_Component:
   - component: {fileID: 172395792}
   - component: {fileID: 172395793}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightToe_Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1768,7 +1768,7 @@ GameObject:
   - component: {fileID: 205317434}
   - component: {fileID: 205317433}
   - component: {fileID: 205317432}
-  m_Layer: 7
+  m_Layer: 10
   m_Name: sim char testbed(Clone)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1912,6 +1912,30 @@ MonoBehaviour:
   stiffness: 100
   damping: 20
   force_limit: 200
+  startingRotations:
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
+  - {x: 0, y: 0, z: 0, w: 0}
   boneToCollider: []
 --- !u!114 &205317434
 MonoBehaviour:
@@ -1940,7 +1964,7 @@ MonoBehaviour:
   debug: 0
   AVG_HUMAN_DENSITY: 985
   debug_to_local_pos: {fileID: 0}
-  useGravity: 1
+  useGravity: 0
 --- !u!114 &205317435
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2016,7 +2040,7 @@ ArticulationBody:
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
-  m_Immovable: 0
+  m_Immovable: 1
   m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!4 &205317437
@@ -2026,8 +2050,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 205317431}
-  m_LocalRotation: {x: 0, y: 0.7203597, z: 0, w: 0.6936007}
-  m_LocalPosition: {x: -1.4462736, y: -2.6531268e-15, z: 1.6918403}
+  m_LocalRotation: {x: 0, y: 0.30535105, z: 0, w: 0.9522399}
+  m_LocalPosition: {x: -3.4186015, y: 0, z: 0.14612356}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2045,7 +2069,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 207924330}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandMiddle4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2136,7 +2160,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2222,7 +2246,7 @@ GameObject:
   m_Component:
   - component: {fileID: 230631875}
   - component: {fileID: 230631876}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2236,8 +2260,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 230631874}
-  m_LocalRotation: {x: -0.100682184, y: -0.019270962, z: -0.09080314, w: 0.9905789}
-  m_LocalPosition: {x: -0.2519981, y: 0.0000013466924, z: 0.0000040978193}
+  m_LocalRotation: {x: -0.4787526, y: -0.13777526, z: -0.08147224, w: 0.8632359}
+  m_LocalPosition: {x: -0.25200596, y: 0.000002115965, z: 0.0000037457794}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2278,7 +2302,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -44.505157
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -172.83353
@@ -2286,7 +2310,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -18.306458
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -160.52147
@@ -2294,13 +2318,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -0.8403015
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &235630341
 GameObject:
@@ -2342,7 +2366,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 241645345}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandPinky4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2373,7 +2397,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 253921532}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftInHandIndex
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2420,8 +2444,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 254397299}
-  m_LocalRotation: {x: 0.5106675, y: -0.49532518, z: -0.50426644, w: 0.48947632}
-  m_LocalPosition: {x: -0.0047006616, y: 0.9199055, z: -0.016081758}
+  m_LocalRotation: {x: -0.35255426, y: 0.52122694, z: 0.6514443, w: -0.4238494}
+  m_LocalPosition: {x: -0.12282359, y: 0.63568825, z: -0.06138437}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2560,7 +2584,7 @@ GameObject:
   - component: {fileID: 287979296}
   - component: {fileID: 287979295}
   - component: {fileID: 287979294}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftShoulder_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2617,7 +2641,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2657,7 +2681,7 @@ GameObject:
   m_Component:
   - component: {fileID: 290366744}
   - component: {fileID: 290366745}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightArm_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2763,7 +2787,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2802,7 +2826,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 291044116}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandIndex3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2867,7 +2891,7 @@ GameObject:
   m_Component:
   - component: {fileID: 294407045}
   - component: {fileID: 294407046}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightForeArm_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2975,8 +2999,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 306602027}
-  m_LocalRotation: {x: -0.011747533, y: -0.010605423, z: -0.02263538, w: 0.9996186}
-  m_LocalPosition: {x: -0.12588103, y: 0.000000090149115, z: -0.00000001990702}
+  m_LocalRotation: {x: 0.07664806, y: 0.028197233, z: -0.10845546, w: 0.9907409}
+  m_LocalPosition: {x: -0.12588097, y: 0.00000012392411, z: -0.00000005727634}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3049,7 +3073,7 @@ GameObject:
   - component: {fileID: 313803858}
   - component: {fileID: 313803857}
   - component: {fileID: 313803856}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightUpLeg_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3106,7 +3130,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3146,7 +3170,7 @@ GameObject:
   m_Component:
   - component: {fileID: 316064717}
   - component: {fileID: 316064718}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Spine1_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3259,7 +3283,7 @@ GameObject:
   - component: {fileID: 335598040}
   - component: {fileID: 335598039}
   - component: {fileID: 335598038}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftLeg_Visualizer_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3316,7 +3340,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3356,7 +3380,7 @@ GameObject:
   m_Component:
   - component: {fileID: 335811394}
   - component: {fileID: 335811395}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Head_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3433,7 +3457,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 337853242}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandMiddle3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3512,7 +3536,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 369022409}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandThumb4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3545,7 +3569,7 @@ GameObject:
   - component: {fileID: 372428301}
   - component: {fileID: 372428303}
   - component: {fileID: 372428302}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: HipVisualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3587,7 +3611,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3626,7 +3650,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 385812700}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandIndex2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3720,8 +3744,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 391190344}
-  m_LocalRotation: {x: -0.0000050403173, y: -0.000026498918, z: -0.18613437, w: 0.98252434}
-  m_LocalPosition: {x: -0.17300016, y: -0.000000014901161, z: -0.00000007264316}
+  m_LocalRotation: {x: -0.000004820525, y: -0.000026658174, z: -0.18613434, w: 0.98252434}
+  m_LocalPosition: {x: -0.17299989, y: -0.00000008940697, z: -0.000000022351742}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3898,7 +3922,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3938,7 +3962,7 @@ GameObject:
   m_Component:
   - component: {fileID: 400677201}
   - component: {fileID: 400677202}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftShoulder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3952,8 +3976,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 400677200}
-  m_LocalRotation: {x: -0.60746616, y: -0.041819032, z: 0.7930062, w: 0.019421048}
-  m_LocalPosition: {x: -0.19745925, y: -0.014803767, z: 0.06000112}
+  m_LocalRotation: {x: -0.56615967, y: -0.02768041, z: 0.8237906, w: 0.008126151}
+  m_LocalPosition: {x: -0.19745907, y: -0.014803399, z: 0.060002994}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3990,7 +4014,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 0.7275696
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -26.7128
@@ -3998,7 +4022,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -5.9815063
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -21.81369
@@ -4006,13 +4030,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 1.8587646
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &421192052
 GameObject:
@@ -4038,8 +4062,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 421192052}
-  m_LocalRotation: {x: 0.000004928559, y: 0.000026674941, z: -0.18613438, w: 0.98252434}
-  m_LocalPosition: {x: -0.17299992, y: 0.000000029802322, z: 0.00000025471672}
+  m_LocalRotation: {x: 0.0000050147933, y: 0.000026419755, z: -0.18613425, w: 0.98252434}
+  m_LocalPosition: {x: -0.17300013, y: 0.000000059604645, z: 0.000000052154064}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4110,7 +4134,7 @@ GameObject:
   m_Component:
   - component: {fileID: 423879113}
   - component: {fileID: 423879114}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftForeArm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4124,8 +4148,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 423879112}
-  m_LocalRotation: {x: -0.00966927, y: 0.06769202, z: 0.22824667, w: 0.97119915}
-  m_LocalPosition: {x: -0.33000147, y: 0.00000010617077, z: 0.00000055134296}
+  m_LocalRotation: {x: 0.009855314, y: 0.06766277, z: 0.49340862, w: 0.8671059}
+  m_LocalPosition: {x: -0.33001685, y: -0.0000037625432, z: -0.00000093877316}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4162,7 +4186,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -2.7879333
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -2.8068848
@@ -4170,7 +4194,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 8.579529
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -0.6725464
@@ -4178,13 +4202,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 32.839478
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &431682316
 GameObject:
@@ -4196,7 +4220,7 @@ GameObject:
   m_Component:
   - component: {fileID: 431682317}
   - component: {fileID: 431682318}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftFoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4210,8 +4234,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 431682316}
-  m_LocalRotation: {x: -0.061290435, y: -0.012748357, z: -0.6358084, w: 0.7693041}
-  m_LocalPosition: {x: -0.42372283, y: 0.000000099651515, z: -0.000000078231096}
+  m_LocalRotation: {x: -0.22147384, y: 0.19052412, z: -0.8510184, w: 0.43636867}
+  m_LocalPosition: {x: -0.42373827, y: -0.00000086426735, z: -0.00000036135316}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4248,7 +4272,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -32.846283
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -23.650146
@@ -4256,7 +4280,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 7.543701
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -60.799194
@@ -4264,13 +4288,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -43.20108
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &446749763
 GameObject:
@@ -4329,7 +4353,7 @@ GameObject:
   m_Component:
   - component: {fileID: 451613584}
   - component: {fileID: 451613585}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightFoot_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4374,7 +4398,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 470478603}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandRing4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4406,7 +4430,7 @@ GameObject:
   m_Component:
   - component: {fileID: 483790608}
   - component: {fileID: 483790609}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftLeg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4420,8 +4444,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 483790607}
-  m_LocalRotation: {x: -0.082892194, y: -0.020999052, z: 0.10142156, w: 0.9911618}
-  m_LocalPosition: {x: -0.43500087, y: -0.00000031443778, z: -0.000000115484}
+  m_LocalRotation: {x: -0.08509891, y: 0.008365163, z: 0.43165067, w: 0.8979788}
+  m_LocalPosition: {x: -0.43501967, y: -0.000012554257, z: 0.000002016779}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4458,7 +4482,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 15.182159
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -14.329681
@@ -4466,7 +4490,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -13.447296
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: 4.8028564
@@ -4474,13 +4498,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 39.684204
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &487720209
 GameObject:
@@ -4538,8 +4562,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 506162956}
-  m_LocalRotation: {x: -0.009669362, y: 0.06769188, z: 0.22824663, w: 0.97119915}
-  m_LocalPosition: {x: -0.3300005, y: 0.00000010617077, z: 0.00000035762787}
+  m_LocalRotation: {x: -0.048229, y: 0.12034017, z: 0.49274173, w: 0.8604637}
+  m_LocalPosition: {x: -0.3300012, y: 0.00000022351742, z: 0.000000074505806}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4700,7 +4724,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4739,7 +4763,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 518124679}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftInHandRing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4962,7 +4986,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 592929046}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandPinky2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4996,7 +5020,7 @@ GameObject:
   - component: {fileID: 607777176}
   - component: {fileID: 607777178}
   - component: {fileID: 607777177}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftFoot_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5038,7 +5062,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5080,7 +5104,7 @@ GameObject:
   - component: {fileID: 611206624}
   - component: {fileID: 611206623}
   - component: {fileID: 611206622}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Head_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5137,7 +5161,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5177,7 +5201,7 @@ GameObject:
   m_Component:
   - component: {fileID: 645682381}
   - component: {fileID: 645682382}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Spine_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5315,7 +5339,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5357,7 +5381,7 @@ GameObject:
   - component: {fileID: 698924832}
   - component: {fileID: 698924831}
   - component: {fileID: 698924830}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightHand_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5414,7 +5438,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5453,7 +5477,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 707393732}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandMiddle1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5500,8 +5524,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 714185928}
-  m_LocalRotation: {x: -0.048057564, y: -0.054189555, z: -0.008093006, w: 0.9973407}
-  m_LocalPosition: {x: -0.117666036, y: 0.000000054875272, z: 0.00000009388896}
+  m_LocalRotation: {x: -0.15281235, y: -0.12880392, z: 0.19258596, w: 0.9607126}
+  m_LocalPosition: {x: -0.117666036, y: -0.00000003547757, z: -0.00000003306195}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5585,8 +5609,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 720036970}
-  m_LocalRotation: {x: 0.21465231, y: -0.43518844, z: 0.2566952, w: 0.83584875}
-  m_LocalPosition: {x: -0.11284138, y: -0.000000053085387, z: -0.00000017136335}
+  m_LocalRotation: {x: 0.28216627, y: -0.4357115, z: 0.059749335, w: 0.85262406}
+  m_LocalPosition: {x: -0.11284134, y: -0.00000004377216, z: -0.00000016391277}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5671,8 +5695,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 722906554}
-  m_LocalRotation: {x: -0.100682355, y: -0.01927093, z: -0.09080318, w: 0.9905789}
-  m_LocalPosition: {x: -0.2519977, y: 0.0000013131648, z: 0.0000043092296}
+  m_LocalRotation: {x: -0.47759578, y: -0.12130202, z: -0.022653017, w: 0.8698707}
+  m_LocalPosition: {x: -0.2519999, y: 0.0000002682209, z: 0.00000007264316}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5793,7 +5817,7 @@ GameObject:
   m_Component:
   - component: {fileID: 736702218}
   - component: {fileID: 736702219}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightShoulder_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5886,7 +5910,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 765961789}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandRing3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5955,7 +5979,7 @@ MonoBehaviour:
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalizeObservations: 1
-  simulated_char_prefab: {fileID: 2839190218147783641, guid: fe0990ed51c65481b94c27096f8da46d, type: 3}
+  simulated_char_prefab: {fileID: 3427690094537608281, guid: 6d1e1b549ff52614ab9b616ca3676ffe, type: 3}
   kinematic_char_prefab: {fileID: 254818087230740347, guid: 8a9c6205418b1964896513bde3554f57, type: 3}
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
@@ -6190,7 +6214,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 779634375}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandThumb1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6223,7 +6247,7 @@ GameObject:
   m_Component:
   - component: {fileID: 779713005}
   - component: {fileID: 779713006}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightFoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6237,8 +6261,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 779713004}
-  m_LocalRotation: {x: 0.050256718, y: -0.03304333, z: -0.64225596, w: 0.7641267}
-  m_LocalPosition: {x: -0.42372325, y: -0.000000013969839, z: 0.00000023795292}
+  m_LocalRotation: {x: -0.012079939, y: 0.074659124, z: -0.7222706, w: 0.6874629}
+  m_LocalPosition: {x: -0.4237353, y: -0.0000008940697, z: 0.00000077765435}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6275,7 +6299,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -13.32782
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -43.03595
@@ -6283,7 +6307,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 4.0961304
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -60.799225
@@ -6291,13 +6315,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -13.085876
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &788314966
 GameObject:
@@ -6403,7 +6427,7 @@ GameObject:
   m_Component:
   - component: {fileID: 845512933}
   - component: {fileID: 845512934}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightForeArm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6417,8 +6441,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 845512932}
-  m_LocalRotation: {x: 0.022372821, y: -0.11875659, z: 0.26618236, w: 0.9563176}
-  m_LocalPosition: {x: -0.33000147, y: 0.00000021606684, z: 0.000000059604645}
+  m_LocalRotation: {x: -0.051127154, y: -0.10949558, z: 0.7742013, w: 0.6212964}
+  m_LocalPosition: {x: -0.33000928, y: -0.0000032484531, z: 0.0000011920929}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6455,7 +6479,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 10.463867
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -24.664307
@@ -6463,7 +6487,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 0.98587036
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -0.67248535
@@ -6471,13 +6495,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 71.40613
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &847508541
 GameObject:
@@ -6488,7 +6512,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 847508542}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandPinky1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6661,7 +6685,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6773,7 +6797,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6892,7 +6916,7 @@ GameObject:
   m_Component:
   - component: {fileID: 895007972}
   - component: {fileID: 895007973}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftUpLeg_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6938,7 +6962,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 898000350}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandThumb2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6973,7 +6997,7 @@ GameObject:
   - component: {fileID: 899414033}
   - component: {fileID: 899414032}
   - component: {fileID: 899414031}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Spine2_Visaulizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7030,7 +7054,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7069,7 +7093,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 908861384}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandPinky1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7101,7 +7125,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 923226301}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandMiddle2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7225,7 +7249,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7264,7 +7288,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 931647503}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandPinky3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7311,8 +7335,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 942455495}
-  m_LocalRotation: {x: -0.006098494, y: -0.005044043, z: -0.054979295, w: 0.9984562}
-  m_LocalPosition: {x: -0.0690197, y: -0.02603735, z: 0.000000059604645}
+  m_LocalRotation: {x: 0.038989346, y: 0.012454675, z: -0.09787587, w: 0.99435663}
+  m_LocalPosition: {x: -0.0690197, y: -0.026037328, z: -0.000000067055225}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7397,8 +7421,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 947569431}
-  m_LocalRotation: {x: 0.022372782, y: -0.11875661, z: 0.26618233, w: 0.95631766}
-  m_LocalPosition: {x: -0.330001, y: 0.0000001937151, z: 0.00000011920929}
+  m_LocalRotation: {x: -0.0009936023, y: -0.033071082, z: 0.78102535, w: 0.62362224}
+  m_LocalPosition: {x: -0.33000052, y: -0.000000059604645, z: -0.00000032782555}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7468,7 +7492,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 958647745}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandThumb3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7500,7 +7524,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 959186845}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandMiddle2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7533,7 +7557,7 @@ GameObject:
   m_Component:
   - component: {fileID: 962875190}
   - component: {fileID: 962875191}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftUpLeg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7547,8 +7571,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 962875189}
-  m_LocalRotation: {x: 0.025374915, y: -0.9909444, z: -0.13183573, w: 0.0021799502}
-  m_LocalPosition: {x: -0.0010345542, y: 0.018578336, z: 0.10548492}
+  m_LocalRotation: {x: 0.0061486065, y: -0.9998174, z: -0.017773956, w: -0.0034124404}
+  m_LocalPosition: {x: -0.0010241233, y: 0.018577863, z: 0.10549105}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7585,7 +7609,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 13.271637
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -38.93445
@@ -7593,7 +7617,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -0.82333374
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -88.48575
@@ -7601,13 +7625,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 2.2114868
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &965144911
 GameObject:
@@ -7653,7 +7677,7 @@ GameObject:
   - component: {fileID: 973258622}
   - component: {fileID: 973258621}
   - component: {fileID: 973258620}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftLeg_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7710,7 +7734,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7749,7 +7773,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 980572089}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandMiddle4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7781,7 +7805,7 @@ GameObject:
   m_Component:
   - component: {fileID: 984618419}
   - component: {fileID: 984618420}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:Hips
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7795,8 +7819,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 984618418}
-  m_LocalRotation: {x: 0.5106674, y: -0.49532527, z: -0.5042664, w: 0.4894764}
-  m_LocalPosition: {x: -0.0047006616, y: 0.9199062, z: -0.016081758}
+  m_LocalRotation: {x: 0.37628862, y: -0.51402426, z: -0.6456105, w: 0.42115667}
+  m_LocalPosition: {x: -0.004699752, y: 0.919906, z: -0.016078949}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7835,7 +7859,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -11.340759
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -32.65512
@@ -7843,7 +7867,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -23.60672
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -31.238678
@@ -7851,13 +7875,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -3.9756775
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &987284657
 GameObject:
@@ -7899,7 +7923,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 988498827}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandIndex2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7932,7 +7956,7 @@ GameObject:
   m_Component:
   - component: {fileID: 988626654}
   - component: {fileID: 988626655}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7946,8 +7970,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 988626653}
-  m_LocalRotation: {x: -0.048057564, y: -0.054189578, z: -0.008092994, w: 0.99734074}
-  m_LocalPosition: {x: -0.11766633, y: 0.000000109153916, z: 0.000000047963113}
+  m_LocalRotation: {x: -0.16700381, y: -0.10863463, z: 0.18465877, w: 0.96239775}
+  m_LocalPosition: {x: -0.11766637, y: 0.00000008365896, z: 0.00000019476283}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7983,7 +8007,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -12.656128
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -46.518433
@@ -7991,7 +8015,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -7.6840515
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -25.460205
@@ -7999,13 +8023,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 22.645172
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &993010304
 GameObject:
@@ -8050,7 +8074,7 @@ GameObject:
   - component: {fileID: 995339355}
   - component: {fileID: 995339354}
   - component: {fileID: 995339353}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightForeArm_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8107,7 +8131,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -8149,7 +8173,7 @@ GameObject:
   - component: {fileID: 996803067}
   - component: {fileID: 996803066}
   - component: {fileID: 996803065}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightArm_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8206,7 +8230,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -8246,7 +8270,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1005495363}
   - component: {fileID: 1005495364}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Hip_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8397,7 +8421,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -8468,7 +8492,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1040677822}
   - component: {fileID: 1040677823}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightLeg_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8514,7 +8538,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1046772093}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandRing2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8578,7 +8602,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1121549518}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandThumb2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8764,7 +8788,7 @@ MonoBehaviour:
   set_target_fr: 0
   scene_view_on_start: 1
   test_obj: {fileID: 2088685309}
-  selected_material: {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  selected_material: {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   hips: {fileID: 254397299}
   torque: 0.1
   child_str: Model:LeftForeArm
@@ -8871,29 +8895,29 @@ MonoBehaviour:
   - {fileID: 722906555}
   motionDB: {fileID: 0}
   bone_rotations:
-  - {x: -0, y: 0.7203597, z: 0, w: 0.6936007}
-  - {x: 0.5106675, y: -0.49532518, z: -0.5042664, w: 0.4894763}
-  - {x: 0.025374852, y: -0.9909443, z: -0.13183567, w: 0.0021799568}
-  - {x: -0.08289217, y: -0.020999135, z: 0.1014215, w: 0.99116176}
-  - {x: -0.06129045, y: -0.012748236, z: -0.6358085, w: 0.76930386}
-  - {x: -0.0000050175513, y: -0.000026485524, z: -0.18613437, w: 0.9825243}
-  - {x: 0.06634353, y: -0.9961643, z: -0.056978896, w: -0.0029172087}
-  - {x: 0.024682388, y: 0.048189797, z: 0.15216912, w: 0.98687035}
-  - {x: 0.05025674, y: -0.033043284, z: -0.64225584, w: 0.76412684}
-  - {x: 0.000004902655, y: 0.000026676047, z: -0.18613441, w: 0.9825243}
-  - {x: -0.0060985275, y: -0.0050440435, z: -0.054979265, w: 0.9984561}
-  - {x: -0.011747552, y: -0.01060541, z: -0.022635376, w: 0.9996185}
-  - {x: -0.011782101, y: -0.010568204, z: -0.019860532, w: 0.9996775}
-  - {x: -0.002180325, y: 0.078705475, z: 0.06440851, w: 0.99481267}
-  - {x: -0.048057545, y: -0.054189514, z: -0.008092999, w: 0.9973407}
-  - {x: -0.6074658, y: -0.041819062, z: 0.7930065, w: 0.01942112}
-  - {x: 0.21465231, y: -0.43518838, z: 0.2566952, w: 0.8358487}
-  - {x: -0.009669333, y: 0.06769185, z: 0.2282467, w: 0.97119915}
-  - {x: 0.27763206, y: 0.016713006, z: -0.120311685, w: 0.95297754}
-  - {x: 0.605824, y: 0.041336156, z: 0.7942932, w: 0.01915425}
-  - {x: -0.28633246, y: 0.42485645, z: 0.19238853, w: 0.8369572}
-  - {x: 0.02237267, y: -0.1187566, z: 0.26618227, w: 0.9563176}
-  - {x: -0.100682385, y: -0.019270923, z: -0.09080317, w: 0.99057883}
+  - {x: 0, y: 0.30535105, z: 0, w: 0.9522399}
+  - {x: -0.35255423, y: 0.52122694, z: 0.65144426, w: -0.42384937}
+  - {x: -0.006633574, y: 0.99983853, z: 0.016387315, w: 0.0032135865}
+  - {x: 0.084011115, y: -0.04061433, z: 0.41999003, w: 0.90271866}
+  - {x: -0.12999746, y: 0.24312411, z: -0.85883224, w: 0.43173894}
+  - {x: -0.0000048739435, y: -0.00002666444, z: -0.18613444, w: 0.9825243}
+  - {x: -0.5591086, y: 0.82849026, z: -0.01117144, w: -0.029608091}
+  - {x: 0.010626251, y: 0.08307666, z: 0.8215729, w: 0.5639178}
+  - {x: -0.00040191083, y: 0.08176644, z: -0.7238658, w: 0.6850784}
+  - {x: 0.00000500609, y: 0.000026470576, z: -0.18613428, w: 0.9825243}
+  - {x: 0.038989343, y: 0.012454692, z: -0.09787582, w: 0.9943566}
+  - {x: 0.07664803, y: 0.028197214, z: -0.10845549, w: 0.99074084}
+  - {x: 0.07673979, y: 0.027948095, z: -0.10570482, w: 0.991038}
+  - {x: 0.12597992, y: -0.0050114165, z: -0.034108665, w: -0.99143356}
+  - {x: -0.15281236, y: -0.12880391, z: 0.19258599, w: 0.96071255}
+  - {x: -0.56578654, y: -0.027430365, z: 0.82404625, w: 0.00899771}
+  - {x: 0.28216624, y: -0.43571132, z: 0.059749346, w: 0.8526241}
+  - {x: -0.048228957, y: 0.120340146, z: 0.49274164, w: 0.86046374}
+  - {x: 0.0672531, y: 0.17724635, z: -0.09610539, w: 0.9771512}
+  - {x: -0.7081866, y: 0.042728376, z: -0.7025844, w: 0.05496464}
+  - {x: -0.025067057, y: 0.27686113, z: 0.69389117, w: 0.6642549}
+  - {x: -0.0009935519, y: -0.033071235, z: 0.78102535, w: 0.62362224}
+  - {x: -0.47759572, y: -0.12130194, z: -0.022653162, w: 0.86987066}
   desired_velocity: {x: 0, y: 0, z: 0}
   teleportedThisFixedUpdate: 0
   is_initalized: 0
@@ -8905,8 +8929,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1140959539}
-  m_LocalRotation: {x: -0, y: 0.7203597, z: 0, w: 0.6936007}
-  m_LocalPosition: {x: -1.4462736, y: 0, z: 1.6918403}
+  m_LocalRotation: {x: 0, y: 0.30535105, z: 0, w: 0.9522399}
+  m_LocalPosition: {x: -3.4186015, y: 0, z: 0.14612356}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -8925,7 +8949,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1141458477}
   - component: {fileID: 1141458478}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftToe_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8986,8 +9010,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1147594843}
-  m_LocalRotation: {x: 0.02468235, y: 0.048189774, z: 0.15216911, w: 0.9868704}
-  m_LocalPosition: {x: -0.43500057, y: -0.00000012031524, z: 0.000000030267984}
+  m_LocalRotation: {x: 0.010626294, y: 0.08307667, z: 0.82157296, w: 0.5639178}
+  m_LocalPosition: {x: -0.43500018, y: -0.00000047683716, z: -0.00000009685755}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9057,7 +9081,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1171987731}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightInHandPinky
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9089,7 +9113,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1172702237}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftInHandMiddle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9230,8 +9254,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1197970288}
-  m_LocalRotation: {x: 0.60582393, y: 0.0413362, z: 0.7942932, w: 0.019154238}
-  m_LocalPosition: {x: -0.19746089, y: -0.014803879, z: -0.060000684}
+  m_LocalRotation: {x: -0.7081866, y: 0.042728305, z: -0.70258445, w: 0.054964643}
+  m_LocalPosition: {x: -0.19745901, y: -0.014803773, z: -0.060000934}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9345,7 +9369,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9384,7 +9408,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1209079147}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandIndex4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9582,8 +9606,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1235388810}
-  m_LocalRotation: {x: 0.050256725, y: -0.03304326, z: -0.6422558, w: 0.76412684}
-  m_LocalPosition: {x: -0.4237226, y: -0.00000012014061, z: 0.00000023469329}
+  m_LocalRotation: {x: -0.00040188798, y: 0.08176646, z: -0.72386587, w: 0.6850784}
+  m_LocalPosition: {x: -0.42372215, y: 0.00000017881393, z: -0.0000000037252903}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9653,7 +9677,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1245096982}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandPinky3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9747,8 +9771,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1279033951}
-  m_LocalRotation: {x: -0.011782089, y: -0.010568153, z: -0.019860527, w: 0.9996775}
-  m_LocalPosition: {x: -0.123431996, y: 0.000000041749445, z: -0.00000007246854}
+  m_LocalRotation: {x: 0.0767398, y: 0.027948098, z: -0.1057048, w: 0.9910381}
+  m_LocalPosition: {x: -0.123431996, y: -0.00000006018672, z: -0.000000018626451}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9820,7 +9844,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1318866085}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightInHandIndex
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9885,7 +9909,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1332731490}
   - component: {fileID: 1332731491}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightArm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9899,8 +9923,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1332731489}
-  m_LocalRotation: {x: -0.28633252, y: 0.42485636, z: 0.19238864, w: 0.83695716}
-  m_LocalPosition: {x: -0.112841584, y: -0.0000002430752, z: -0.00000026077032}
+  m_LocalRotation: {x: -0.16350502, y: 0.40762395, z: 0.6825028, w: 0.58420783}
+  m_LocalPosition: {x: -0.11283834, y: -0.000008571893, z: 0.000007212162}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9937,7 +9961,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -21.88089
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -8.730621
@@ -9945,7 +9969,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -20.335846
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -33.153595
@@ -9953,13 +9977,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 61.31369
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &1339584047
 GameObject:
@@ -9970,7 +9994,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1339584048}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandIndex1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10062,7 +10086,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10161,7 +10185,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10200,7 +10224,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1381523956}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandRing1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10232,7 +10256,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1405607647}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightInHandRing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10267,7 +10291,7 @@ GameObject:
   - component: {fileID: 1411737192}
   - component: {fileID: 1411737191}
   - component: {fileID: 1411737190}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftHand_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10324,7 +10348,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10423,7 +10447,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10506,7 +10530,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10545,7 +10569,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1436171174}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandRing3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10577,7 +10601,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1440228233}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandRing1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10641,7 +10665,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1459912721}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandPinky4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10751,7 +10775,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1509194352}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandThumb4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10797,8 +10821,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1523142758}
-  m_LocalRotation: {x: -0.002180321, y: 0.0787055, z: 0.064408526, w: 0.9948127}
-  m_LocalPosition: {x: -0.25832897, y: -0.00000015278056, z: 0.000000005675247}
+  m_LocalRotation: {x: 0.12597997, y: -0.005011394, z: -0.034108613, w: -0.99143356}
+  m_LocalPosition: {x: -0.2583289, y: 0.0000001596054, z: -0.00000012200326}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10868,7 +10892,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1534069594}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandPinky2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10966,7 +10990,7 @@ GameObject:
   - component: {fileID: 1560276102}
   - component: {fileID: 1560276104}
   - component: {fileID: 1560276103}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftToe_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11008,7 +11032,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -11080,7 +11104,7 @@ GameObject:
   - component: {fileID: 1604622205}
   - component: {fileID: 1604622207}
   - component: {fileID: 1604622206}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11286,7 +11310,7 @@ GameObject:
   - component: {fileID: 1621591007}
   - component: {fileID: 1621591009}
   - component: {fileID: 1621591008}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightToe_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11328,7 +11352,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -11367,7 +11391,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1634403409}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandIndex1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11399,7 +11423,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1636022637}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandMiddle3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11479,7 +11503,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1662908139}
   - component: {fileID: 1662908140}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftArm_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11526,7 +11550,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1663984251}
   - component: {fileID: 1663984252}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Spine2_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11670,7 +11694,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1670185222}
   - component: {fileID: 1670185223}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:Neck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11684,8 +11708,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1670185221}
-  m_LocalRotation: {x: -0.0021803589, y: 0.07870554, z: 0.064408496, w: 0.99481267}
-  m_LocalPosition: {x: -0.25832924, y: -0.00000022162567, z: -0.000000018655555}
+  m_LocalRotation: {x: -0.123077735, y: -0.0010639391, z: 0.02481506, w: 0.9920862}
+  m_LocalPosition: {x: -0.25833005, y: -0.00000054074917, z: 0.000000009313226}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -11722,7 +11746,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -14.072693
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -39.52533
@@ -11730,7 +11754,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -8.215118
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -30.8891
@@ -11738,13 +11762,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -5.62735
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &1687571543
 GameObject:
@@ -11802,8 +11826,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1699342573}
-  m_LocalRotation: {x: 0.27763197, y: 0.016712926, z: -0.120311595, w: 0.95297754}
-  m_LocalPosition: {x: -0.25200018, y: 0.00000026263297, z: 0.0000000949949}
+  m_LocalRotation: {x: 0.06725317, y: 0.17724645, z: -0.09610551, w: 0.97715116}
+  m_LocalPosition: {x: -0.25199765, y: 0.0000012144446, z: -0.00000410527}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -11877,7 +11901,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1710950581}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftToeEnd
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11911,7 +11935,7 @@ GameObject:
   - component: {fileID: 1714070214}
   - component: {fileID: 1714070213}
   - component: {fileID: 1714070212}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftArm_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11968,7 +11992,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12051,7 +12075,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12091,7 +12115,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1725113270}
   - component: {fileID: 1725113271}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:Spine2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12105,8 +12129,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1725113269}
-  m_LocalRotation: {x: -0.011782063, y: -0.010568123, z: -0.01986056, w: 0.99967754}
-  m_LocalPosition: {x: -0.12343223, y: -0.000000009047653, z: -0.00000007414201}
+  m_LocalRotation: {x: 0.074408524, y: 0.04088902, z: -0.10971204, w: 0.9903306}
+  m_LocalPosition: {x: -0.123435274, y: -0.0000031807576, z: 0.000000042375177}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -12145,7 +12169,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 9.489288
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -11.304199
@@ -12153,7 +12177,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 5.6247253
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -19.855957
@@ -12161,13 +12185,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -10.434479
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &1737475584
 GameObject:
@@ -12181,7 +12205,7 @@ GameObject:
   - component: {fileID: 1737475588}
   - component: {fileID: 1737475587}
   - component: {fileID: 1737475586}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Spine1_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12238,7 +12262,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12374,7 +12398,7 @@ GameObject:
   - component: {fileID: 1777922771}
   - component: {fileID: 1777922770}
   - component: {fileID: 1777922769}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightShoulder_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12431,7 +12455,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12471,7 +12495,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1779339887}
   - component: {fileID: 1779339888}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftArm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12485,8 +12509,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1779339886}
-  m_LocalRotation: {x: 0.21465224, y: -0.43518868, z: 0.25669515, w: 0.8358485}
-  m_LocalPosition: {x: -0.112841606, y: -0.00000020954758, z: -0.00000033527613}
+  m_LocalRotation: {x: 0.29308766, y: -0.43684906, z: 0.061952166, w: 0.848189}
+  m_LocalPosition: {x: -0.112853006, y: 0.000002040062, z: -0.000012926757}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -12523,7 +12547,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -2.503357
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -107.41217
@@ -12531,7 +12555,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -6.6832275
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -33.16751
@@ -12539,13 +12563,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -23.05368
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &1786388687
 GameObject:
@@ -12696,7 +12720,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12779,7 +12803,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12957,7 +12981,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12997,7 +13021,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1817793889}
   - component: {fileID: 1817793890}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftToe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13011,8 +13035,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1817793888}
-  m_LocalRotation: {x: -0.0000050701187, y: -0.000026457006, z: -0.18613428, w: 0.98252434}
-  m_LocalPosition: {x: -0.1730007, y: -0.00000040233135, z: -0.00000008195639}
+  m_LocalRotation: {x: -0.0000050552185, y: -0.000026427206, z: -0.18613191, w: 0.98252475}
+  m_LocalPosition: {x: -0.17300077, y: -0.00000029802322, z: -0.0000001648441}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13049,7 +13073,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 0.0000312205
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -0.000030517578
@@ -13071,7 +13095,7 @@ ArticulationBody:
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &1820419805
 GameObject:
@@ -13083,7 +13107,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1820419806}
   - component: {fileID: 1820419807}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:Spine1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13097,8 +13121,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1820419805}
-  m_LocalRotation: {x: -0.011747531, y: -0.010605379, z: -0.022635344, w: 0.9996186}
-  m_LocalPosition: {x: -0.1258811, y: -0.00000004677713, z: -0.000000022846507}
+  m_LocalRotation: {x: 0.0770674, y: 0.046118952, z: -0.11098417, w: 0.98975563}
+  m_LocalPosition: {x: -0.12588447, y: -0.0000010308577, z: 0.00000083609484}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13135,7 +13159,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 9.4552
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -11.356781
@@ -13143,7 +13167,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 5.681885
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -19.855896
@@ -13151,13 +13175,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -10.4375305
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &1825110536
 GameObject:
@@ -13168,7 +13192,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1825110537}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHandMiddle1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13200,7 +13224,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1846341983}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandThumb1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13233,7 +13257,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1862820824}
   - component: {fileID: 1862820825}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Neck_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13281,7 +13305,7 @@ GameObject:
   - component: {fileID: 1914481923}
   - component: {fileID: 1914481925}
   - component: {fileID: 1914481924}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightFoot_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13323,7 +13347,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -13377,8 +13401,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1914550510}
-  m_LocalRotation: {x: 0.02537483, y: -0.9909444, z: -0.13183573, w: 0.0021799654}
-  m_LocalPosition: {x: -0.0010345599, y: 0.01857834, z: 0.10548504}
+  m_LocalRotation: {x: -0.00663355, y: 0.9998386, z: 0.016387314, w: 0.0032135695}
+  m_LocalPosition: {x: -0.0010346286, y: 0.018578358, z: 0.10548509}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13386,7 +13410,7 @@ Transform:
   - {fileID: 2088685310}
   m_Father: {fileID: 254397300}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -9.759, y: -191.93, z: -23.678}
 --- !u!171741748 &1914550512
 ArticulationBody:
   m_ObjectHideFlags: 0
@@ -13481,7 +13505,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1943006446}
   - component: {fileID: 1943006447}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:LeftHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13495,8 +13519,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1943006445}
-  m_LocalRotation: {x: 0.27763197, y: 0.016712826, z: -0.12031164, w: 0.95297766}
-  m_LocalPosition: {x: -0.25200102, y: 0.0000004163012, z: 0.00000008195639}
+  m_LocalRotation: {x: 0.0684915, y: 0.1727649, z: -0.064069524, w: 0.9804878}
+  m_LocalPosition: {x: -0.25201264, y: 0.0000013783574, z: 0.0000008447096}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13537,7 +13561,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -26.333862
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -178.1302
@@ -13545,7 +13569,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 16.09137
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -160.48752
@@ -13553,13 +13577,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 1.161377
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &1945438598
 GameObject:
@@ -13570,7 +13594,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1945438599}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandIndex3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13617,8 +13641,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1947349575}
-  m_LocalRotation: {x: -0.06129042, y: -0.012748256, z: -0.6358085, w: 0.7693039}
-  m_LocalPosition: {x: -0.42372206, y: 0.00000012665987, z: -0.000000049360096}
+  m_LocalRotation: {x: -0.12999749, y: 0.24312411, z: -0.85883236, w: 0.43173888}
+  m_LocalPosition: {x: -0.42372268, y: 0.0000001937151, z: -0.000000230968}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13689,7 +13713,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1950103676}
   - component: {fileID: 1950103677}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftHand_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13817,7 +13841,7 @@ GameObject:
   - component: {fileID: 1977735112}
   - component: {fileID: 1977735111}
   - component: {fileID: 1977735110}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftForeArm_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13874,7 +13898,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -13928,8 +13952,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1990310915}
-  m_LocalRotation: {x: -0.6074659, y: -0.04181904, z: 0.7930065, w: 0.019421041}
-  m_LocalPosition: {x: -0.19745898, y: -0.014803714, z: 0.060001004}
+  m_LocalRotation: {x: -0.5657867, y: -0.02743029, z: 0.8240462, w: 0.008997703}
+  m_LocalPosition: {x: -0.19746098, y: -0.014803607, z: 0.060000718}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14049,7 +14073,7 @@ GameObject:
   - component: {fileID: 1997070415}
   - component: {fileID: 1997070414}
   - component: {fileID: 1997070413}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: LeftUpLeg_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14106,7 +14130,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -14205,7 +14229,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e22a5546ffc27a46bfd6327bdf0162a, type: 2}
+  - {fileID: 2100000, guid: ed313c3379718474597d723a02912064, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -14245,7 +14269,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2005151157}
   - component: {fileID: 2005151158}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightShoulder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14259,8 +14283,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2005151156}
-  m_LocalRotation: {x: 0.60582393, y: 0.041336123, z: 0.7942934, w: 0.019154353}
-  m_LocalPosition: {x: -0.19746104, y: -0.014804042, z: -0.060000703}
+  m_LocalRotation: {x: 0.6484561, y: -0.045275647, z: 0.7581708, w: -0.051301297}
+  m_LocalPosition: {x: -0.19746155, y: -0.014804077, z: -0.06000147}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14297,7 +14321,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -3.5623474
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -6.375885
@@ -14305,7 +14329,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -15.275177
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -21.81366
@@ -14313,13 +14337,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 12.537231
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &2011691501
 GameObject:
@@ -14331,7 +14355,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2011691502}
   - component: {fileID: 2011691503}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightUpLeg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14345,8 +14369,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2011691501}
-  m_LocalRotation: {x: 0.066343315, y: -0.9961644, z: -0.056978934, w: -0.0029171852}
-  m_LocalPosition: {x: -0.0010345748, y: 0.018578215, z: -0.1054852}
+  m_LocalRotation: {x: 0.56275976, y: -0.8247093, z: -0.029141784, w: 0.048030138}
+  m_LocalPosition: {x: -0.0010298043, y: 0.018596819, z: -0.10549137}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14383,7 +14407,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 1.7066345
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -31.457947
@@ -14391,7 +14415,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 9.556793
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -88.48575
@@ -14399,13 +14423,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -60.426727
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &2020367290
 GameObject:
@@ -14623,7 +14647,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2030167353}
   - component: {fileID: 2030167354}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:Spine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14637,8 +14661,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2030167352}
-  m_LocalRotation: {x: -0.006098449, y: -0.005044028, z: -0.054979444, w: 0.9984562}
-  m_LocalPosition: {x: -0.06901983, y: -0.026037216, z: -0.00000005029142}
+  m_LocalRotation: {x: 0.046399683, y: 0.028805181, z: -0.09469123, w: 0.9940076}
+  m_LocalPosition: {x: -0.06902469, y: -0.026035182, z: 0.0000007636845}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14675,7 +14699,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 4.9164124
     targetVelocity: 0
   m_YDrive:
     lowerLimit: -5.4541626
@@ -14683,7 +14707,7 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: 2.5358582
     targetVelocity: 0
   m_ZDrive:
     lowerLimit: -9.918701
@@ -14691,13 +14715,13 @@ ArticulationBody:
     stiffness: 100
     damping: 20
     forceLimit: 200
-    target: 0
+    target: -5.063843
     targetVelocity: 0
   m_LinearDamping: 0.05
   m_AngularDamping: 0.05
   m_JointFriction: 0.05
   m_Immovable: 0
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_CollisionDetectionMode: 0
 --- !u!1 &2050980939
 GameObject:
@@ -14711,7 +14735,7 @@ GameObject:
   - component: {fileID: 2050980943}
   - component: {fileID: 2050980942}
   - component: {fileID: 2050980941}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Neck_Visualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14768,7 +14792,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
+  - {fileID: 2100000, guid: 4f2cb5bb860454f489c5c6b6d1915773, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -14919,7 +14943,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2056884870}
   - component: {fileID: 2056884871}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RightUpLeg_Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14965,7 +14989,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2066333309}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandThumb3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15044,8 +15068,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2088685309}
-  m_LocalRotation: {x: -0.08289217, y: -0.0209991, z: 0.101421505, w: 0.99116176}
-  m_LocalPosition: {x: -0.43500006, y: -0.0000004019821, z: -0.000000057742}
+  m_LocalRotation: {x: 0.08401112, y: -0.040614355, z: 0.41999003, w: 0.90271866}
+  m_LocalPosition: {x: -0.4350005, y: -0.00000023333996, z: -4.656613e-10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -15245,7 +15269,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2130322518}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Model:RightHandIndex4
   m_TagString: Untagged
   m_Icon: {fileID: 0}

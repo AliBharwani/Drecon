@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using static mm_v2.Bones;
 
@@ -18,7 +19,7 @@ public class TestDirector : MonoBehaviour
     private int nbodies;
 
     //private ArticulationBody sim_hip_bone; // root of ArticulationBody
-
+    private Quaternion[] startingRotations;
 
     [HideInInspector]
     public static mm_v2.Bones[] stateBones = new mm_v2.Bones[]
@@ -26,7 +27,7 @@ public class TestDirector : MonoBehaviour
     [HideInInspector]
     public static mm_v2.Bones[] allFullDOFBones = new mm_v2.Bones[]
     //{ Bone_LeftArm, Bone_RightArm, };
-    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Spine,  Bone_Spine1, Bone_Spine2, Bone_Neck,  Bone_LeftHand, Bone_RightHand};
+    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips, Bone_Spine,  Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand, mm_v2.Bones.Bone_LeftShoulder, mm_v2.Bones.Bone_RightShoulder};
     [HideInInspector]
     public static mm_v2.Bones[] allLimitedDOFBones = new mm_v2.Bones[]
     {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftToe, Bone_RightToe, Bone_LeftForeArm, Bone_RightForeArm};
@@ -102,6 +103,7 @@ public class TestDirector : MonoBehaviour
         simChar.boneSurfacePts = new Vector3[nbodies][];
         simChar.boneToArtBody = SimCharController.bone_to_art_body;
         simulatedChar.SetActive(true);
+        startingRotations = SimCharController.startingRotations;
 
         kinChar.boneWorldPos = new Vector3[stateBones.Length];
         simChar.boneWorldPos = new Vector3[stateBones.Length];
@@ -159,21 +161,40 @@ public class TestDirector : MonoBehaviour
         Transform kinRoot = kinChar.boneToTransform[(int)Bone_Entity];
         simChar.root.TeleportRoot(kinRoot.position, kinRoot.rotation);
         simChar.root.resetJointPhysics();
- 
+
+        ArticulationBody[] bodies = simChar.boneToArtBody;
+        Transform[] targetTransforms = kinChar.boneToTransform;
+        List<int> startIndexes = new List<int>();
+        List<float> driveTargets = new List<float>();
+
+        simChar.root.GetDofStartIndices(startIndexes);
+        simChar.root.GetDriveTargets(driveTargets);
+        //Debug.Log("Drive targets before");
+        //foreach (var target in driveTargets)
+        //    Debug.Log($"{target}");
+        //ArtBodyUtils.SetDriveRotations(ref bodies, ref targetTransforms, startingRotations, ref startIndexes, ref driveTargets);
+
+        //Debug.Log("Drive targets after");
+        //foreach (var target in driveTargets)
+        //    Debug.Log($"{target}");
+        //return;
         for (int i = 1; i < 23; i++)
         {
             ArticulationBody body = simChar.boneToArtBody[i];
             Quaternion targetLocalRot = kinChar.boneToTransform[i].localRotation;
-            mm_v2.Bones bone = (mm_v2.Bones)i;
-            Vector3 TargetRotationInJointSpace;
-            // from https://github.com/Unity-Technologies/marathon-envs/blob/58852e9ac22eac56ca46d1780573cc6c32278a71/UnitySDK/Assets/MarathonEnvs/Scripts/ActiveRagdoll003/DebugJoints.cs
-            //Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles;
-            TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot, false);
             body.SetDriveRotation(targetLocalRot);
         }
-        //Physics.autoSimulation = false;
-
+        Physics.autoSimulation = false;
     }
+    [ContextMenu("Teleport root of sim char to kin char root")]
+    private void teleportSimRootToKinRoot()
+    {
+        myInit();
+        Transform kinRoot = kinChar.boneToTransform[(int)Bone_Entity];
+        simChar.root.TeleportRoot(kinRoot.position, kinRoot.rotation);
+        simChar.root.resetJointPhysics();
+    }
+
 
     [ContextMenu("reset")]
     private void delete_sim_char()

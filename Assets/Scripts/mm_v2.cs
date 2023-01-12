@@ -237,7 +237,6 @@ public class mm_v2 : MonoBehaviour
         }
         // Set bone positions and bone rotations
         int random_frame = (int)Random.Range(0f, motionDB.numframes - 1);
-        random_frame = 0;
         bone_positions = motionDB.bone_positions[random_frame];
         bone_rotations = motionDB.bone_rotations[random_frame];
         forward_kinematics_full();

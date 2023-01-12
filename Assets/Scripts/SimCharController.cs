@@ -17,7 +17,7 @@ public class SimCharController : MonoBehaviour
     public float stiffness = 120f;
     public float damping = 3f;
     public float force_limit = 200f;
-
+    public Quaternion[] startingRotations = new Quaternion[23];
     void Awake()
     {
         db = database.Instance;
@@ -114,21 +114,6 @@ public class SimCharController : MonoBehaviour
 
             if (!set_target_velocities)
             {
-                // Angle is in range (-1, 1) => map to (-180, 180)
-                //Vector3 target = ab.ToTargetRotationInReducedSpace(local_rot);
-                //bool use_xdrive = bone == mm_v2.Bones.Bone_LeftLeg || bone == mm_v2.Bones.Bone_RightLeg;
-                //if (use_xdrive)
-                //{
-                //    ArticulationDrive drive = ab.xDrive;
-                //    drive.target = target.x;
-                //    ab.xDrive = drive;
-                //}
-                //else
-                //{
-                //    ArticulationDrive drive = ab.zDrive;
-                //    drive.target = target.z;
-                //    ab.zDrive = drive;
-                //}
                 ab.SetDriveRotation(local_rot);
             }
 
@@ -176,7 +161,6 @@ public class SimCharController : MonoBehaviour
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.z)) * Mathf.Deg2Rad;
-            //Debug.Log($"{bone} dof count: {body.dofCount}");
 
             if (body.dofCount == 3)
             {
@@ -238,18 +222,6 @@ public class SimCharController : MonoBehaviour
         Quaternion[] globalBoneRotations = new Quaternion[numBones];
         forward_kinematics_full(db, 0, ref globalBonePositions, ref globalBoneRotations);
         apply_global_pos_and_rot(globalBonePositions,   globalBoneRotations, boneToTransform);
-}
-
-    [ContextMenu("Remove all local positions and rotations")]
-    internal void removeAllLocalRotations()
-    {
-        foreach(Transform t in Utils.getAllChildren(transform))
-        {
-            if (t.name.StartsWith("Model") || t.name == transform.name)
-                continue;
-            t.localRotation = Quaternion.identity;
-            //t.localPosition = Vector3.zero;
-        }
     }
 
     [ContextMenu("Setup art bodies stiffness damping and force limit")]
@@ -342,7 +314,12 @@ public class SimCharController : MonoBehaviour
         }
     }
 
-
+    [ContextMenu("populateStartingRotations")]
+    private void populateStartingRotations()
+    {
+        for (int i = 0; i < 23; i++)
+            startingRotations[i] = boneToTransform[i].localRotation;
+    }
     // Useful for normalizing inputs 
     [ContextMenu("Find mins and maxes for velocities and positions")]
         public void min_max_debugger()
