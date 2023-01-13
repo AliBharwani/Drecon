@@ -46,19 +46,9 @@ public class TestDirector : MonoBehaviour
             int bone_idx = (int)allLimitedDOFBones[i];
             ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             Vector3 target = ab.ToTargetRotationInReducedSpace_OLD_DO_NOT_USE(cur_rotations[bone_idx]);
-            //bool use_xdrive = allLimitedDOFBones[i] == Bone_LeftLeg || allLimitedDOFBones[i] == Bone_RightLeg;
-            //if (use_xdrive)
-            //{
-                ArticulationDrive drive = ab.xDrive;
-                drive.target = target.x;
-                ab.xDrive = drive;
-            //}
-            //else
-            //{
-            //    ArticulationDrive drive = ab.zDrive;
-            //    drive.target = target.z;
-            //    ab.zDrive = drive;
-            //}
+            ArticulationDrive drive = ab.zDrive;
+            drive.target = target.z;
+            ab.zDrive = drive;
         }
         for (int i = 0; i < allFullDOFBones.Length; i++)
         {

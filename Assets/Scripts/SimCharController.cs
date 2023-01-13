@@ -22,6 +22,7 @@ public class SimCharController : MonoBehaviour
     {
         db = database.Instance;
         initBoneToCollider();
+        initBoneToArtBodies();
         setupIgnoreCollisions();
         if (!is_active)
             return;
@@ -71,6 +72,7 @@ public class SimCharController : MonoBehaviour
         }
     }
 
+    [ContextMenu("initBoneToArtBodies()")]
     public void initBoneToArtBodies()
     {
         for (int i = 0; i < 23; i++)
@@ -123,7 +125,7 @@ public class SimCharController : MonoBehaviour
 
     public static database db;
 
-    public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char)
+    public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char, bool setDriveTargets = false)
     {
         if (db == null)
             db = getDB();
@@ -166,13 +168,15 @@ public class SimCharController : MonoBehaviour
             {
                 body.resetJointPosition(TargetRotationInJointSpace);
                 var drive = body.xDrive;
-                drive.target = 0f;
+                drive.target = setDriveTargets ? TargetRotationInJointSpace.x : 0f;
                 body.xDrive = drive;
-                  drive = body.yDrive;
-                drive.target = 0f;
+
+                drive = body.yDrive;
+                drive.target = setDriveTargets ? TargetRotationInJointSpace.y : 0f;
                 body.yDrive = drive;
-                 drive = body.zDrive;
-                drive.target = 0f;
+
+                drive = body.zDrive;
+                drive.target = setDriveTargets ? TargetRotationInJointSpace.z : 0f;
                 body.zDrive = drive;
             }
             else if (body.dofCount == 1)
@@ -186,7 +190,7 @@ public class SimCharController : MonoBehaviour
                     new_target = TargetRotationInJointSpace.z;
                 body.resetJointPosition(new_target);
                 var drive = body.zDrive;
-                drive.target = 0f;
+                drive.target = setDriveTargets ? TargetRotationInJointSpace.z : 0f;
                 body.zDrive = drive;
             }
         }

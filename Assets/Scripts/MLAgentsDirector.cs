@@ -205,7 +205,6 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             ab.SetDriveRotation(final);
         }
-    //set_rewards();
     }
     public override void Heuristic(in ActionBuffers actionsout)
     {
@@ -355,7 +354,7 @@ public class MLAgentsDirector : Agent
             MMScript.Reset();
             MMScript.FixedUpdate();
         }
-        SimCharController.teleportSimChar(simChar, kinChar);
+        SimCharController.teleportSimChar(simChar, kinChar, true);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
     }
 
