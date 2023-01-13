@@ -442,8 +442,8 @@ MonoBehaviour:
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 1
   setDriveStiffnessAndDamping: 1
-  DriveStiffness: 100
-  DriveDamping: 20
+  DriveStiffness: 1000
+  DriveDamping: 100
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalizeObservations: 1
@@ -498,7 +498,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 1
-  m_BehaviorType: 1
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
