@@ -62,10 +62,10 @@ public class CalculateBoneMasses : MonoBehaviour
                                   (weight_dist[3] / total_collisions) * .25f * full_weight +
                                   (weight_dist[4] / total_collisions) * .2f * full_weight;
 
-            //Debug.Log($"Bone {(mm_v2.Bones)i} total_collisions: {total_collisions}  full weight: {full_weight} | final_weight: {final_weight}");
+            Debug.Log($"Bone {(mm_v2.Bones)i} total_collisions: {total_collisions}  full weight: {full_weight} | final_weight: {final_weight}");
             ArticulationBody ab = bone_to_transform[i].GetComponent<ArticulationBody>();
-            if (ab != null)
-                ab.mass = final_weight;
+            //if (ab != null)
+            //    ab.mass = final_weight;
             //Debug.Log($"| weight_dist[0]: {weight_dist[0]} weight_dist[1] : {weight_dist[1]}  weight_dist[2]: {weight_dist[2]} | weight_dist[3]: {weight_dist[3]} | weight_dist[4]: {weight_dist[4]}");
 
         }
@@ -128,7 +128,16 @@ public class CalculateBoneMasses : MonoBehaviour
         foreach (Vector3 point in gizmo_points)
             Gizmos.DrawSphere(point, .01f);
     }
-
+    [ContextMenu("Print total mass")]
+    private void printTotalMass()
+    {
+        float mass = 0f;
+        foreach (var body in GetComponentsInChildren<ArticulationBody>()) {
+            Debug.Log($"{body.transform.name} mass: {body.mass}");
+            mass += body.mass;
+        }
+        Debug.Log($"Total mass: {mass}");
+    }
 }
 
 public static class CapsuleColliderUtils

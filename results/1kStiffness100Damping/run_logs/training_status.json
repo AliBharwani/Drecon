@@ -1,0 +1,29 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 4808747,
+                "file_path": "results\\1kStiffness100Damping\\Drecon\\Drecon-4808747.onnx",
+                "reward": 3.8799252938479185,
+                "creation_time": 1673663212.3189468,
+                "auxillary_file_paths": [
+                    "results\\1kStiffness100Damping\\Drecon\\Drecon-4808747.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 4808747,
+            "file_path": "results\\1kStiffness100Damping\\Drecon.onnx",
+            "reward": 3.8799252938479185,
+            "creation_time": 1673663212.3189468,
+            "auxillary_file_paths": [
+                "results\\1kStiffness100Damping\\Drecon\\Drecon-4808747.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}
