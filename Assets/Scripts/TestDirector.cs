@@ -88,10 +88,10 @@ public class TestDirector : MonoBehaviour
         simChar = new CharInfo();
         simChar.trans = simulatedChar.transform;
         simChar.boneToTransform = SimCharController.boneToTransform;
-        simChar.root = SimCharController.bone_to_art_body[(int)Bone_Entity];
+        simChar.root = SimCharController.boneToArtBody[(int)Bone_Entity];
         simChar.charObj = simulatedChar;
         simChar.boneSurfacePts = new Vector3[nbodies][];
-        simChar.boneToArtBody = SimCharController.bone_to_art_body;
+        simChar.boneToArtBody = SimCharController.boneToArtBody;
         simulatedChar.SetActive(true);
         startingRotations = SimCharController.startingRotations;
 

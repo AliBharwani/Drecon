@@ -11,18 +11,20 @@ public class SimCharController : MonoBehaviour
     public mm_v2.Bones[] bones_to_apply;
     public mm_v2.Bones debug_bone;
     public Transform[] boneToTransform = new Transform[23];
-    public ArticulationBody[] bone_to_art_body = new ArticulationBody[23];
+    public ArticulationBody[] boneToArtBody = new ArticulationBody[23];
     public bool is_active = false;
     public int start_delay = 60;
     public float stiffness = 120f;
     public float damping = 3f;
     public float force_limit = 200f;
     public Quaternion[] startingRotations = new Quaternion[23];
+    public float[] boneToStiffness = new float[23];
     void Awake()
     {
         db = database.Instance;
         initBoneToCollider();
         initBoneToArtBodies();
+        initBoneStiffnesses();
         setupIgnoreCollisions();
         if (!is_active)
             return;
@@ -35,6 +37,16 @@ public class SimCharController : MonoBehaviour
             setArtBodyRotLimitsFromDB();
         }
     }
+
+    private void initBoneStiffnesses()
+    {
+        for(int i = 1; i < 23; i++)
+        {
+            boneToArtBody[i].SetAllDriveStiffness(boneToStiffness[i]);
+            boneToArtBody[i].SetAllForceLimit(float.MaxValue);
+        }
+    }
+
     public Collider[] boneToCollider;
     private void initBoneToCollider()
     {
@@ -79,7 +91,7 @@ public class SimCharController : MonoBehaviour
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
             ArticulationBody ab = boneToTransform[i].GetComponent<ArticulationBody>();
-            bone_to_art_body[i] = ab;
+            boneToArtBody[i] = ab;
         }
     }
 
@@ -110,7 +122,7 @@ public class SimCharController : MonoBehaviour
                 t.localRotation = local_rot;
                 continue;
             }
-            ArticulationBody ab = bone_to_art_body[i];
+            ArticulationBody ab = boneToArtBody[i];
             if (ab == null)
                 continue;
 
@@ -237,7 +249,7 @@ public class SimCharController : MonoBehaviour
             if (!apply_all_local_rots && !bones_to_apply.Contains(bone))
                 continue;
             ArticulationBody ab = boneToTransform[i].GetComponent<ArticulationBody>();
-            bone_to_art_body[i] = ab;
+            boneToArtBody[i] = ab;
             if (ab == null)
                 continue;
             ab.SetAllDriveStiffness(stiffness);

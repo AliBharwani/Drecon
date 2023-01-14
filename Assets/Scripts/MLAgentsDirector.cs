@@ -276,14 +276,14 @@ public class MLAgentsDirector : Agent
         simChar = new CharInfo(nbodies, stateBones.Length);
         simChar.trans = simulatedCharObj.transform;
         simChar.boneToTransform = SimCharController.boneToTransform;
-        simChar.root = SimCharController.bone_to_art_body[(int)Bone_Entity];
+        simChar.root = SimCharController.boneToArtBody[(int)Bone_Entity];
         foreach (var body in simulatedCharObj.GetComponentsInChildren<ArticulationBody>())
         {
             body.solverIterations = 255;
             body.solverVelocityIterations = 255;
         }
         simChar.charObj = simulatedCharObj;
-        simChar.boneToArtBody = SimCharController.bone_to_art_body;
+        simChar.boneToArtBody = SimCharController.boneToArtBody;
 
         for (int i = 0; i < nbodies; i++)
         {
