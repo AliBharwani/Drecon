@@ -23,11 +23,15 @@ public class CalculateBoneMasses : MonoBehaviour
             bone_to_points[i] = new float[5];
 
         int[] bone_collided = new int[n];
+        Debug.Log($"boxes.length: {boxes.Length}");
         foreach (BoxCollider box in boxes)
         {
             //float min_x, max_x, min_y, max_y, min_z, max_z;
-            Vector3 mins = box.transform.TransformPoint(box.center - box.size/2);
-            Vector3 maxes = box.transform.TransformPoint(box.center + box.size / 2);
+            Vector3 boxCenterWorldSpace = box.transform.TransformPoint(box.center);
+            Vector3 mins = boxCenterWorldSpace - box.size/2;
+            Vector3 maxes = boxCenterWorldSpace + box.size/2;
+            Debug.Log($"boxCenterWorldSpace: {boxCenterWorldSpace} box.size: {box.size}");
+            Debug.Log($"Mins: {mins} maxes: {maxes}");
             int num_points_checked = 0;
             for (float x = mins.x; x < maxes.x; x += INC)
                 for (float y = mins.y; y < maxes.y; y += INC)
@@ -49,26 +53,32 @@ public class CalculateBoneMasses : MonoBehaviour
                         num_points_checked += 1;
                         gizmo_points.Add(point);
                     }
-            //Debug.Log($"Num points checked: {num_points_checked}");
+            Debug.Log($"Num points checked: {num_points_checked}");
         }
+        float final_mass = 0f;
+        float final_unfiltered_mass = 0f;
         for (int i = 1; i < n; i++)
         {
             float[] weight_dist = bone_to_points[i];
             float total_collisions = weight_dist[0] + weight_dist[1] + weight_dist[2] + weight_dist[3] + weight_dist[4];
             float full_weight = get_full_weight((mm_v2.Bones)i);
-            float final_weight =  (weight_dist[0] / total_collisions) * full_weight +
+            float final_weight = total_collisions > 0 ? (weight_dist[0] / total_collisions) * full_weight +
                                   (weight_dist[1] / total_collisions) * .5f * full_weight +
                                   (weight_dist[2] / total_collisions) * .33f * full_weight +
                                   (weight_dist[3] / total_collisions) * .25f * full_weight +
-                                  (weight_dist[4] / total_collisions) * .2f * full_weight;
+                                  (weight_dist[4] / total_collisions) * .2f * full_weight
+                                  : full_weight;
 
             Debug.Log($"Bone {(mm_v2.Bones)i} total_collisions: {total_collisions}  full weight: {full_weight} | final_weight: {final_weight}");
+            final_unfiltered_mass += full_weight;
+            final_mass += final_weight;
             ArticulationBody ab = bone_to_transform[i].GetComponent<ArticulationBody>();
-            //if (ab != null)
-            //    ab.mass = final_weight;
-            //Debug.Log($"| weight_dist[0]: {weight_dist[0]} weight_dist[1] : {weight_dist[1]}  weight_dist[2]: {weight_dist[2]} | weight_dist[3]: {weight_dist[3]} | weight_dist[4]: {weight_dist[4]}");
-
+            if (ab != null)
+                ab.mass = final_weight;
+            Debug.Log($"| weight_dist[0]: {weight_dist[0]} weight_dist[1] : {weight_dist[1]}  weight_dist[2]: {weight_dist[2]} | weight_dist[3]: {weight_dist[3]} | weight_dist[4]: {weight_dist[4]}");
         }
+        Debug.Log($"final_unfiltered_mass mass {final_unfiltered_mass}kg or {2.20462f * final_unfiltered_mass}lbs");
+        Debug.Log($"Final mass {final_mass}kg or {2.20462f * final_mass}lbs");
     }
     public int AVG_HUMAN_DENSITY = 985; // kg / m^3
 
