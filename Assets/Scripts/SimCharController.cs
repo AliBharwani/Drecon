@@ -5,18 +5,15 @@ using static mm_v2.Bones;
 public class SimCharController : MonoBehaviour
 {
     public bool apply_all_local_rots;
-    public bool set_art_bodies;
-    public bool set_target_velocities;
+    public bool isKinematic;
     public int frameIdx = 500;
     public mm_v2.Bones[] bones_to_apply;
     public mm_v2.Bones debug_bone;
     public Transform[] boneToTransform = new Transform[23];
     public ArticulationBody[] boneToArtBody = new ArticulationBody[23];
     public bool is_active = false;
-    public int start_delay = 60;
-    public float stiffness = 120f;
-    public float damping = 3f;
-    public float force_limit = 200f;
+    public float forceLimit = 200f;
+    public float damping = 100f;
     public Quaternion[] startingRotations = new Quaternion[23];
     public float[] boneToStiffness = new float[23];
     void Awake()
@@ -24,7 +21,7 @@ public class SimCharController : MonoBehaviour
         db = database.Instance;
         initBoneToCollider();
         initBoneToArtBodies();
-        initBoneStiffnesses();
+        initArticulationDrives();
         setupIgnoreCollisions();
         if (!is_active)
             return;
@@ -32,18 +29,26 @@ public class SimCharController : MonoBehaviour
         if (Application.isEditor)
             UnityEditor.EditorWindow.FocusWindowIfItsOpen(typeof(UnityEditor.SceneView));
 #endif
-
-        if (set_art_bodies) { 
-            setArtBodyRotLimitsFromDB();
+        if (isKinematic)
+        {
+            foreach (var body in GetComponentsInChildren<ArticulationBody>())
+                body.enabled = false;
+            foreach (var collider in GetComponentsInChildren<Collider>())
+                collider.enabled = false;
         }
-    }
 
-    private void initBoneStiffnesses()
+    }
+    [ContextMenu("initArticulationDrives()")]
+
+    private void initArticulationDrives()
     {
         for(int i = 1; i < 23; i++)
         {
+            Debug.Log($"Setting {(mm_v2.Bones)i} to {boneToStiffness[i]}");
             boneToArtBody[i].SetAllDriveStiffness(boneToStiffness[i]);
-            boneToArtBody[i].SetAllForceLimit(float.MaxValue);
+            boneToArtBody[i].SetAllDriveDamping(damping);
+
+            boneToArtBody[i].SetAllForceLimit(forceLimit);
         }
     }
 
@@ -116,7 +121,7 @@ public class SimCharController : MonoBehaviour
             Quaternion local_rot = curr_bone_rotations[i];
             bool print_debug = bone == debug_bone;
 
-            if (!set_art_bodies)
+            if (isKinematic)
             {
                 t.localPosition = curr_bone_positions[i];
                 t.localRotation = local_rot;
@@ -125,11 +130,8 @@ public class SimCharController : MonoBehaviour
             ArticulationBody ab = boneToArtBody[i];
             if (ab == null)
                 continue;
-
-            if (!set_target_velocities)
-            {
-                ab.SetDriveRotation(local_rot);
-            }
+            ab.SetDriveRotation(local_rot);
+            
 
         }
 
@@ -240,26 +242,6 @@ public class SimCharController : MonoBehaviour
         apply_global_pos_and_rot(globalBonePositions,   globalBoneRotations, boneToTransform);
     }
 
-    [ContextMenu("Setup art bodies stiffness damping and force limit")]
-    void setup_art_bodies()
-    {
-        for (int i = 0; i < 23; i++)
-        {
-            mm_v2.Bones bone = (mm_v2.Bones)i;
-            if (!apply_all_local_rots && !bones_to_apply.Contains(bone))
-                continue;
-            ArticulationBody ab = boneToTransform[i].GetComponent<ArticulationBody>();
-            boneToArtBody[i] = ab;
-            if (ab == null)
-                continue;
-            ab.SetAllDriveStiffness(stiffness);
-            ab.SetAllDriveDamping(damping);
-            ab.SetAllForceLimit(force_limit);
-        }
-        // we need to make sure the body starts the right angles, because after this we will only be applying 
-        // velocities
-
-    }
     private static database getDB()
     {
         if (db == null)
@@ -336,6 +318,13 @@ public class SimCharController : MonoBehaviour
         for (int i = 0; i < 23; i++)
             startingRotations[i] = boneToTransform[i].localRotation;
     }
+    [ContextMenu("Turn off capsule renderers")]
+    private void turnOffCapsuleRenderers()
+    {
+        foreach (var rend in GetComponentsInChildren<MeshRenderer>())
+            rend.gameObject.SetActive(false);
+    }
+
     // Useful for normalizing inputs 
     [ContextMenu("Find mins and maxes for velocities and positions")]
         public void min_max_debugger()

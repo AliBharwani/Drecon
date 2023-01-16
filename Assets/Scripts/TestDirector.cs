@@ -36,7 +36,10 @@ public class TestDirector : MonoBehaviour
     public static mm_v2.Bones[] openloopBones = new mm_v2.Bones[]
       {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand};
 
-  // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
+    public static mm_v2.Bones[] debugBones = new mm_v2.Bones[]
+      {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand};
+
+    // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public void applyAction()
     {
@@ -120,6 +123,24 @@ public class TestDirector : MonoBehaviour
     }
 
 
+    int frame = 0;
+    private void FixedUpdate()
+    {
+        applyAction();
+        //// Make sure to teleport sim character if kin character teleported
+        //bool teleport_sim = MMScript.teleportedThisFixedUpdaet;
+        //if (teleport_sim)
+        //{
+        //    //sim_char.char_trans.rotation = kin_char.char_trans.rotation;
+        //    sim_char.root.TeleportRoot(origin, origin_rot);
+        //}
+        //return;
+    }
+    private void Update()
+    {
+        frame++;
+    }
+
     [ContextMenu("Create kin char and set to random pose")]
     private void createAndSetKinChar()
     {
@@ -195,29 +216,5 @@ public class TestDirector : MonoBehaviour
         simulatedChar = null;
     }
 
-    int frame = 0;
-    private void FixedUpdate()
-    {
-        if (frame % 5 == 0) {
-            Debug.Log($"Teleporting!");
-            SimCharController.teleportSimChar(simChar, kinChar);//teleport_sim_char();
-            //create_and_set_kin_char();
-            //Destroy(MMScript);
-        }
-        return;
-        //apply_action();
-        //// Make sure to teleport sim character if kin character teleported
-        //bool teleport_sim = MMScript.teleportedThisFixedUpdaet;
-        //if (teleport_sim)
-        //{
-        //    //sim_char.char_trans.rotation = kin_char.char_trans.rotation;
-        //    sim_char.root.TeleportRoot(origin, origin_rot);
-        //}
-        //return;
-    }
-    private void Update()
-    {
-        frame++;
-    }
 
 }

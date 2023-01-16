@@ -229,7 +229,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 41e12b5ffb33eb44a9b02b812ef7ec63, type: 2}
     - target: {fileID: -2775172455283170305, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2775172455283170305, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_RootBone
@@ -542,23 +542,23 @@ PrefabInstance:
     - target: {fileID: -2775172455283170305, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 7421904504903674559, guid: b9718434ca0c4284fb55add7b5d029c0, type: 3}
+      objectReference: {fileID: 7421904504903674559, guid: b4d946d1c4279ef4ea93e2b92f2bf609, type: 3}
     - target: {fileID: -2775172455283170305, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_Materials.Array.data[1]
       value: 
-      objectReference: {fileID: 8702818331753239217, guid: b9718434ca0c4284fb55add7b5d029c0, type: 3}
+      objectReference: {fileID: 8702818331753239217, guid: b4d946d1c4279ef4ea93e2b92f2bf609, type: 3}
     - target: {fileID: -2775172455283170305, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_Materials.Array.data[2]
       value: 
-      objectReference: {fileID: -6725855442565690163, guid: b9718434ca0c4284fb55add7b5d029c0, type: 3}
+      objectReference: {fileID: -6725855442565690163, guid: b4d946d1c4279ef4ea93e2b92f2bf609, type: 3}
     - target: {fileID: -2775172455283170305, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_Materials.Array.data[3]
       value: 
-      objectReference: {fileID: 7902821431039705909, guid: b9718434ca0c4284fb55add7b5d029c0, type: 3}
+      objectReference: {fileID: 7902821431039705909, guid: b4d946d1c4279ef4ea93e2b92f2bf609, type: 3}
     - target: {fileID: -2775172455283170305, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_Materials.Array.data[4]
       value: 
-      objectReference: {fileID: -4088579795455698855, guid: b9718434ca0c4284fb55add7b5d029c0, type: 3}
+      objectReference: {fileID: -4088579795455698855, guid: b4d946d1c4279ef4ea93e2b92f2bf609, type: 3}
     - target: {fileID: -2456677986765959375, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -822,6 +822,10 @@ PrefabInstance:
     - target: {fileID: 4922375052555398904, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_Layer
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4922375052555398904, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5194038799593780058, guid: a09266c4f1b60ec48942531e0ec24ac8, type: 3}
       propertyPath: m_Layer
@@ -3236,8 +3240,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   apply_all_local_rots: 1
-  set_art_bodies: 0
-  set_target_velocities: 0
+  isKinematic: 0
   frameIdx: 500
   bones_to_apply: 1000000011000000120000001400000015000000160000000a0000000b0000000c0000000d0000000e0000000f00000013000000
   debug_bone: 9
@@ -3290,10 +3293,8 @@ MonoBehaviour:
   - {fileID: 7436843235247800716}
   - {fileID: 2790157542716327678}
   is_active: 0
-  start_delay: 0
-  stiffness: 100
-  damping: 20
-  force_limit: 200
+  forceLimit: 1000
+  damping: 80
   startingRotations:
   - {x: 0, y: 0, z: 0, w: 0}
   - {x: 0, y: 0, z: 0, w: 0}
@@ -3320,28 +3321,28 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0, w: 0}
   boneToStiffness:
   - 0
-  - 40000
-  - 40000
-  - 40000
-  - 20000
+  - 4000
+  - 4000
+  - 4000
+  - 2000
   - 5000
-  - 40000
-  - 40000
-  - 20000
+  - 4000
+  - 4000
+  - 2000
   - 5000
-  - 40000
-  - 40000
-  - 40000
-  - 10000
-  - 10000
-  - 10000
-  - 20000
-  - 40000
-  - 10000
-  - 10000
-  - 20000
-  - 40000
-  - 10000
+  - 4000
+  - 4000
+  - 4000
+  - 1000
+  - 1000
+  - 1000
+  - 2000
+  - 4000
+  - 1000
+  - 1000
+  - 2000
+  - 4000
+  - 1000
   boneToCollider: []
 --- !u!1 &8129903424528214874 stripped
 GameObject:

@@ -147,19 +147,19 @@ public static class ArtBodyUtils
         zDrive.damping = damping;
         body.zDrive = zDrive;
     }
-    public static void SetAllForceLimit(this ArticulationBody body, float damping)
+    public static void SetAllForceLimit(this ArticulationBody body, float forceLimit)
     {
         // assign to the drive targets...
         ArticulationDrive xDrive = body.xDrive;
-        xDrive.forceLimit = 200;
+        xDrive.forceLimit = forceLimit;
         body.xDrive = xDrive;
 
         ArticulationDrive yDrive = body.yDrive;
-        yDrive.forceLimit = 200;
+        yDrive.forceLimit = forceLimit;
         body.yDrive = yDrive;
 
         ArticulationDrive zDrive = body.zDrive;
-        zDrive.forceLimit = 200;
+        zDrive.forceLimit = forceLimit;
         body.zDrive = zDrive;
     }
     /// <summary>

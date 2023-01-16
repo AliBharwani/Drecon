@@ -42,9 +42,9 @@ public class MLAgentsDirector : Agent
     public float EPISODE_END_REWARD = -.5f;
     public int MAX_EPISODE_LENGTH_SECONDS = 20;
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
-    public bool setDriveStiffnessAndDamping = false;
-    public float DriveStiffness = 150f;
-    public float DriveDamping = 20f;
+    //public bool setDriveStiffnessAndDamping = false;
+    //public float DriveStiffness = 150f;
+    //public float DriveDamping = 20f;
     public bool resetKinCharOnEpisodeEnd = false;
     public bool normalize_action_ouputs = true;
     public bool normalizeObservations = false;
@@ -300,13 +300,13 @@ public class MLAgentsDirector : Agent
             simChar.boneSurfacePts[i] = new Vector3[6];
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
-        if (setDriveStiffnessAndDamping)
-        {
-            foreach (var body in simulatedCharObj.GetComponentsInChildren<ArticulationBody>()) { 
-                body.SetAllDriveDamping(DriveDamping);
-                body.SetAllDriveStiffness(DriveStiffness);
-            }
-        }
+        //if (setDriveStiffnessAndDamping)
+        //{
+        //    foreach (var body in simulatedCharObj.GetComponentsInChildren<ArticulationBody>()) { 
+        //        body.SetAllDriveDamping(DriveDamping);
+        //        body.SetAllDriveStiffness(DriveStiffness);
+        //    }
+        //}
         projectile = Instantiate(projectilePrefab, simulatedCharObj.transform.position + Vector3.up, Quaternion.identity);
         projectileCollider = projectile.GetComponent<Collider>();
         projectileRB = projectile.GetComponent<Rigidbody>();
