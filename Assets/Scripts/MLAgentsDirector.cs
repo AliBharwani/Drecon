@@ -22,7 +22,6 @@ public struct CharInfo
     public Vector3[][] boneSurfaceVels;
     public ArticulationBody[] boneToArtBody;
     public float[] boneState;
-
     public CharInfo(int nbodies, int numStateBones) : this()
     {
         boneSurfacePts = new Vector3[nbodies][];
@@ -37,11 +36,11 @@ public struct CharInfo
 }
 public class MLAgentsDirector : Agent
 {
-    public int evaluateEveryKSteps = 1;
-    public int N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = 4;
-    public float EPISODE_END_REWARD = -.5f;
-    public int MAX_EPISODE_LENGTH_SECONDS = 20;
-    public float ACTION_STIFFNESS_HYPERPARAM = .2f;
+    internal int EVALUATE_EVERY_K_STEPS = 1;
+    internal int N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = 4;
+    internal float EPISODE_END_REWARD = -.5f;
+    internal int MAX_EPISODE_LENGTH_SECONDS = 20;
+    internal float ACTION_STIFFNESS_HYPERPARAM = .2f;
     //public bool setDriveStiffnessAndDamping = false;
     //public float DriveStiffness = 150f;
     //public float DriveDamping = 20f;
@@ -87,15 +86,19 @@ public class MLAgentsDirector : Agent
     // The cube is launched at 5 m/s, towards a uniformly sampled location on the vertical axis,
     // from −0.5 m to 0.5 m, centered on the character’s CM
     // Launches occur every second, with the cube remaining in the scene until it is relaunched
-    public bool projectileTraining = false;
     public GameObject projectilePrefab;
     internal GameObject projectile;
     internal Collider projectileCollider;
     internal Rigidbody projectileRB;
     private float lastProjectileLaunchtime = 0f;
-    public float LAUNCH_FREQUENCY = 1f;
-    public float LAUNCH_RADIUS = .66f;
-    public float LAUNCH_SPEED = 5f;
+
+    // OVERRIDEN SETTINGS
+    internal float LAUNCH_FREQUENCY = 1f;
+    internal float LAUNCH_RADIUS = .66f;
+    internal float LAUNCH_SPEED = 5f;
+    internal bool projectileTraining = false;
+    internal int solverIterations;
+
     public override void CollectObservations(VectorSensor sensor)
     {
         if (!isInitialized)
@@ -279,8 +282,8 @@ public class MLAgentsDirector : Agent
         simChar.root = SimCharController.boneToArtBody[(int)Bone_Entity];
         foreach (var body in simulatedCharObj.GetComponentsInChildren<ArticulationBody>())
         {
-            body.solverIterations = 255;
-            body.solverVelocityIterations = 255;
+            body.solverIterations = solverIterations;
+            body.solverVelocityIterations = solverIterations;
         }
         simChar.charObj = simulatedCharObj;
         simChar.boneToArtBody = SimCharController.boneToArtBody;
@@ -387,7 +390,7 @@ public class MLAgentsDirector : Agent
         if (episodeEnded)
             return;
         // request Decision
-        if (curFixedUpdate % evaluateEveryKSteps == 0)
+        if (curFixedUpdate % EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
         //updateMeanReward();
         if (genMinsAndMaxes && curFixedUpdate % 300 == 0)

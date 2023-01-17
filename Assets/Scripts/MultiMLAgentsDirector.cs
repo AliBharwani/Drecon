@@ -5,7 +5,6 @@ using UnityEngine;
 public class MultiMLAgentsDirector : MonoBehaviour
 {
     public int numAgents = 5;
-    private int solverIterations = 32;
     public GameObject modelDirector;
     private MLAgentsDirector[] directors;
     public int reportMeanRewardEveryNSteps = 10000;
@@ -13,18 +12,19 @@ public class MultiMLAgentsDirector : MonoBehaviour
     public int targetFrameRate = -1;
     private float meanReward;
     public int fps = 60;
-    public bool projectileTraining = true;
-    public float LAUNCH_FREQUENCY = 1f;
-    public float LAUNCH_RADIUS = .66f;
-    public float LAUNCH_SPEED = 5f;
+    private ConfigWriter _config;
+
+
     // Start is called before the first frame update
     void Awake()
     {
         if (modelDirector == null)
             return;
+        _config = ConfigWriter.Instance;
+
         Time.fixedDeltaTime = (1f / (float)fps);
-        Physics.defaultSolverIterations = solverIterations;
-        Physics.defaultSolverVelocityIterations = solverIterations;
+        Physics.defaultSolverIterations = _config.solverIterations;
+        Physics.defaultSolverVelocityIterations = _config.solverIterations;
         directors = new MLAgentsDirector[numAgents];
         for (int i = 0; i < numAgents; i++)
             directors[i] = createMLAgent();
@@ -44,9 +44,17 @@ public class MultiMLAgentsDirector : MonoBehaviour
         GameObject obj =  Instantiate(modelDirector);
         obj.SetActive(true);
         MLAgentsDirector director = obj.GetComponent<MLAgentsDirector>();
-        director.LAUNCH_FREQUENCY = LAUNCH_FREQUENCY;
-        director.LAUNCH_RADIUS = LAUNCH_RADIUS;
-        director.LAUNCH_SPEED = LAUNCH_SPEED;
+        director.EVALUATE_EVERY_K_STEPS = _config.EVALUATE_EVERY_K_STEPS;
+        director.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = _config.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT;
+        director.EPISODE_END_REWARD = _config.EPISODE_END_REWARD;
+        director.MAX_EPISODE_LENGTH_SECONDS = _config.MAX_EPISODE_LENGTH_SECONDS;
+        director.ACTION_STIFFNESS_HYPERPARAM = _config.ACTION_STIFFNESS_HYPERPARAM;
+
+        director.LAUNCH_FREQUENCY = _config.LAUNCH_FREQUENCY;
+        director.LAUNCH_RADIUS = _config.LAUNCH_RADIUS;
+        director.LAUNCH_SPEED = _config.LAUNCH_SPEED;
+        director.projectileTraining = _config.projectileTraining;
+        director.solverIterations = _config.solverIterations;
         return director;
     }
     void FixedUpdate()

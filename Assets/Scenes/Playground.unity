@@ -845,11 +845,6 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  evaluateEveryKSteps: 2
-  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
-  EPISODE_END_REWARD: 0
-  MAX_EPISODE_LENGTH_SECONDS: 20
-  ACTION_STIFFNESS_HYPERPARAM: 1
   resetKinCharOnEpisodeEnd: 0
   normalize_action_ouputs: 1
   normalizeObservations: 1
@@ -858,11 +853,7 @@ MonoBehaviour:
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
   genMinsAndMaxes: 0
-  projectileTraining: 1
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
-  LAUNCH_FREQUENCY: 1
-  LAUNCH_RADIUS: 1
-  LAUNCH_SPEED: 7.5
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &767361689
@@ -878,7 +869,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &767361690
 MonoBehaviour:
@@ -902,9 +893,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 84514d004c4a47d4daeed920b92163cd, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: a5856952b65bc8149a72845c7821c0ae, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -969,7 +960,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &870766689
 BoxCollider:
@@ -1156,7 +1147,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1239,7 +1230,113 @@ Transform:
   m_Children:
   - {fileID: 541777148655995783}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1357924713
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1357924715}
+  - component: {fileID: 1357924714}
+  m_Layer: 0
+  m_Name: ConfigWriter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1357924714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1357924713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  writeToFilePath: ../results/HighStiffness_NormalizedActions_0EndReward/
+  filename: unityconfig.json
+  loadFromFilePath: ../results/HighStiffness_NormalizedActions_0EndReward/
+  EVALUATE_EVERY_K_STEPS: 2
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: 0
+  MAX_EPISODE_LENGTH_SECONDS: 20
+  ACTION_STIFFNESS_HYPERPARAM: 0.2
+  projectileTraining: 1
+  LAUNCH_FREQUENCY: 1
+  LAUNCH_RADIUS: 0.5
+  LAUNCH_SPEED: 7.5
+  boneToNames:
+  - Bone_Entity
+  - Bone_Hips
+  - Bone_LeftUpLeg
+  - Bone_LeftLeg
+  - Bone_LeftFoot
+  - Bone_LeftToe
+  - Bone_RightUpLeg
+  - Bone_RightLeg
+  - Bone_RightFoot
+  - Bone_RightToe
+  - Bone_Spine
+  - Bone_Spine1
+  - Bone_Spine2
+  - Bone_Neck
+  - Bone_Head
+  - Bone_LeftShoulder
+  - Bone_LeftArm
+  - Bone_LeftForeArm
+  - Bone_LeftHand
+  - Bone_RightShoulder
+  - Bone_RightArm
+  - Bone_RightForeArm
+  - Bone_RightHand
+  boneToStiffness:
+  - 0
+  - 4000
+  - 4000
+  - 4000
+  - 2000
+  - 5000
+  - 4000
+  - 4000
+  - 2000
+  - 5000
+  - 4000
+  - 4000
+  - 4000
+  - 1000
+  - 1000
+  - 1000
+  - 2000
+  - 4000
+  - 1000
+  - 1000
+  - 2000
+  - 4000
+  - 1000
+  forceLimit: 200
+  damping: 20
+--- !u!4 &1357924715
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1357924713}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -5.8897147, y: -0.48495758, z: -1.5365863}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1394463713
 GameObject:
@@ -1272,8 +1369,69 @@ Transform:
   - {fileID: 965252872}
   - {fileID: 1249444428}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1413249960
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 3.6490273
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.017377598
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 6.559388
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.6936007
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7203597
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7967488750888317942, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_Name
+      value: sim char fixed manually adjusted
+      objectReference: {fileID: 0}
+    - target: {fileID: 7967488750888317942, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
 --- !u!1 &1664100943
 GameObject:
   m_ObjectHideFlags: 0
@@ -1406,6 +1564,11 @@ MonoBehaviour:
   reportMeanRewardEveryNSteps: 100000
   targetFrameRate: 30
   fps: 60
+  EVALUATE_EVERY_K_STEPS: 2
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 4
+  EPISODE_END_REWARD: 0
+  MAX_EPISODE_LENGTH_SECONDS: 20
+  ACTION_STIFFNESS_HYPERPARAM: 0.2
   projectileTraining: 1
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.5
@@ -1423,7 +1586,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2090630090
 MonoBehaviour:
@@ -1852,7 +2015,7 @@ Transform:
   m_Children:
   - {fileID: 2114283754330233426}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2114283754330233424
 GameObject:

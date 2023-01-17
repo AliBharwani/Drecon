@@ -12,12 +12,11 @@ public class SimCharController : MonoBehaviour
     public Transform[] boneToTransform = new Transform[23];
     public ArticulationBody[] boneToArtBody = new ArticulationBody[23];
     public bool is_active = false;
-    public float forceLimit = 200f;
-    public float damping = 100f;
-    public Quaternion[] startingRotations = new Quaternion[23];
-    public float[] boneToStiffness = new float[23];
+    internal Quaternion[] startingRotations = new Quaternion[23];
+    private ConfigWriter _config;
     void Awake()
     {
+        _config = ConfigWriter.Instance;
         db = database.Instance;
         initBoneToCollider();
         initBoneToArtBodies();
@@ -44,11 +43,10 @@ public class SimCharController : MonoBehaviour
     {
         for(int i = 1; i < 23; i++)
         {
-            Debug.Log($"Setting {(mm_v2.Bones)i} to {boneToStiffness[i]}");
-            boneToArtBody[i].SetAllDriveStiffness(boneToStiffness[i]);
-            boneToArtBody[i].SetAllDriveDamping(damping);
-
-            boneToArtBody[i].SetAllForceLimit(forceLimit);
+            Debug.Log($"Setting {(mm_v2.Bones)i} to {_config.boneToStiffness[i]}");
+            boneToArtBody[i].SetAllDriveStiffness(_config.boneToStiffness[i] * 2f);
+            boneToArtBody[i].SetAllDriveDamping(_config.damping);
+            boneToArtBody[i].SetAllForceLimit(_config.forceLimit);
         }
     }
 
