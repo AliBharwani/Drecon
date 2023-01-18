@@ -14,6 +14,7 @@ public class ConfigWriter : MonoBehaviour
     // HYPER PARAMS
     public int solverIterations = 32;
     public bool normalizeActions = true;
+    public bool applyActionsWith6DRotations = false;
     public bool normalizeObservations = true;
     public bool resetKinCharOnEpisodeEnd = false;
     public int EVALUATE_EVERY_K_STEPS = 2;

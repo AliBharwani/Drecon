@@ -45,7 +45,8 @@ public class MLAgentsDirector : Agent
     //public float DriveStiffness = 150f;
     //public float DriveDamping = 20f;
     internal bool resetKinCharOnEpisodeEnd = false;
-    internal bool normalizeActions = true;
+    internal bool normalizeActions = false;
+    internal bool applyActionsWith6DRotations = false;
     internal bool normalizeObservations = false;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
@@ -208,6 +209,62 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             ab.SetDriveRotation(final);
         }
+    }
+
+    
+    private void applyActionsAsEulerRotations(float[] finalActions)
+    {
+        Quaternion[] curRotations = MMScript.bone_rotations;
+        for (int i = 0; i < fullDOFBones.Length; i++)
+        {
+            int boneIdx = (int)fullDOFBones[i];
+            ArticulationBody ab = simChar.boneToArtBody[boneIdx];
+            Vector3 output = new Vector3(finalActions[i * 3], finalActions[i * 3 + 1], finalActions[i * 3 + 2]);
+            Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
+            var xdrive = ab.xDrive;
+            var scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
+            var midpoint = xdrive.lowerLimit + scale;
+            var outputX = (output.x * scale) + midpoint;
+            xdrive.target = targetRotationInJointSpace.x + outputX;
+            ab.xDrive = xdrive;
+
+            var ydrive = ab.yDrive;
+            scale = (ydrive.upperLimit - ydrive.lowerLimit) / 2f;
+            midpoint = ydrive.lowerLimit + scale;
+            var outputY = (output.y * scale) + midpoint;
+            ydrive.target = targetRotationInJointSpace.y + outputY;
+            ab.yDrive = ydrive;
+
+            var zdrive = ab.zDrive;
+            scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
+            midpoint = zdrive.lowerLimit + scale;
+            var outputZ = (output.z * scale) + midpoint;
+            zdrive.target = targetRotationInJointSpace.z + outputZ;
+            ab.zDrive = zdrive;    
+        }
+        for (int i = 0; i < limitedDOFBones.Length; i++)
+        {
+            int boneIdx = (int)limitedDOFBones[i];
+            ArticulationBody ab = simChar.boneToArtBody[boneIdx];
+            int finalActionsIdx = i + 21;
+            float output = finalActions[finalActionsIdx];
+            // parent anchor rotation = q(ab) 
+            // anchor rotation = q(a) 
+            // target local = q(c) 
+            // need q(x) s.t. a * x = a * c
+            // 
+            Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
+            var zDrive = ab.zDrive;
+            var scale = (zDrive.upperLimit - zDrive.lowerLimit) / 2f;
+            var midpoint = zDrive.lowerLimit + scale;
+            var outputZ = (output * scale) + midpoint;
+            zDrive.target = targetRotationInJointSpace.z + outputZ;
+            ab.zDrive = zDrive;
+        }
+    }
+    private void applyActionsWith6DRotations(float[] finalActions)
+    {
+
     }
     public override void Heuristic(in ActionBuffers actionsout)
     {

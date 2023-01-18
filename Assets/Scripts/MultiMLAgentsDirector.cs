@@ -47,7 +47,10 @@ public class MultiMLAgentsDirector : MonoBehaviour
         director.EVALUATE_EVERY_K_STEPS = _config.EVALUATE_EVERY_K_STEPS;
         director.normalizeActions = _config.normalizeActions;
         director.resetKinCharOnEpisodeEnd = _config.resetKinCharOnEpisodeEnd;
-        director.normalizeObservations = _config.normalizeObservations;
+        if (_config.normalizeObservations)
+            director.normalizeObservations = true;
+        else if (_config.applyActionsWith6DRotations)
+            director.applyActionsWith6DRotations = true;
         director.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = _config.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT;
         director.EPISODE_END_REWARD = _config.EPISODE_END_REWARD;
         director.MAX_EPISODE_LENGTH_SECONDS = _config.MAX_EPISODE_LENGTH_SECONDS;
