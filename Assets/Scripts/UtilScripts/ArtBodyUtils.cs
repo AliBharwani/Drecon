@@ -11,6 +11,26 @@ public static class ArtBodyUtils
         angle = angle_axis.magnitude;
         axis = angle_axis.normalized;
     }
+    public static Quaternion From6DRepresentation(Vector3 v1, Vector3 v2)
+    {
+        // Apply Gram-Schmidt process treating v1 - v2 as columns of new rotation matrix
+        Vector3 e1 = v1.normalized;
+        Vector3 u2 = v2 - (Vector3.Dot(e1, v2) * e1);
+        Vector3 e2 = u2.normalized;
+        Vector3 e3 = Vector3.Cross(e1, e2);
+        //float qw = Mathf.Sqrt(1f + m00 + m11 + m22) / 2f;
+        //float qx = (m21 - m12) / (4f * qw);
+        //float qy = (m02 - m20) / (4f * qw);
+        //float qz = (m10 - m01) / (4f * qw);
+
+        float qw = Mathf.Sqrt(1f + e1.x + e2.y + e3.z) / 2f;
+        float qx = (e2.z - e3.y) / (4f * qw);
+        float qy = (e3.x - e1.z) / (4f * qw);
+        float qz = (e1.y - e2.x) / (4f * qw);
+
+        Quaternion q = new Quaternion(qx, qy, qz, qw);
+        return q.normalized;
+    }
     public static void SetDriveTargetVelocity(this ArticulationBody body, Vector3 target_vel, bool debug = false)
     {
         /* Angular velocity appears in scaled angle axis representation 
@@ -211,7 +231,7 @@ public static class ArtBodyUtils
     {
         if (body.isRoot)
             return Vector3.zero;
-        Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation).eulerAngles;
+        Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation).normalized.eulerAngles;
         //TargetRotationInJointSpace = targetLocalRotation.eulerAngles;
         TargetRotationInJointSpace = new Vector3(
             Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),

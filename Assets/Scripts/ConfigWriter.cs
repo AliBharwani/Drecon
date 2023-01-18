@@ -13,8 +13,8 @@ public class ConfigWriter : MonoBehaviour
 
     // HYPER PARAMS
     public int solverIterations = 32;
-    public bool normalizeActions = true;
-    public bool applyActionsWith6DRotations = false;
+    public bool actionsAreEulerRotations = true;
+    public bool actionsAre6DRotations = false;
     public bool normalizeObservations = true;
     public bool resetKinCharOnEpisodeEnd = false;
     public int EVALUATE_EVERY_K_STEPS = 2;
@@ -55,6 +55,14 @@ public class ConfigWriter : MonoBehaviour
         for (int i = 0; i < 23; i++)
             boneToStiffness[i] *= pGainMultiplier;
     }
+
+    [ContextMenu("Multiply all Lower Body stiffness values by pGainMultiplier")]
+    public void multiplyAllLowerBodyStiffnessValues()
+    {
+        for (int i = 0; i < 10; i++)
+            boneToStiffness[i] *= pGainMultiplier;
+    }
+
 
     [ContextMenu("Init bone to string")]
     public void initBoneToString()

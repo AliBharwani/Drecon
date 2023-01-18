@@ -45,8 +45,8 @@ public class MLAgentsDirector : Agent
     //public float DriveStiffness = 150f;
     //public float DriveDamping = 20f;
     internal bool resetKinCharOnEpisodeEnd = false;
-    internal bool normalizeActions = false;
-    internal bool applyActionsWith6DRotations = false;
+    internal bool actionsAreEulerRotations = false;
+    internal bool actionsAre6DRotations = false;
     internal bool normalizeObservations = false;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
@@ -61,7 +61,9 @@ public class MLAgentsDirector : Agent
     private int lastSimCharTeleportFixedUpdate = 0;
     private bool isInitialized;
 
-    float[] prev_action_output = new float[25];
+    float[] prev_action_output;
+    int numActions;
+    int numObservations;
     database motionDB;
     public bool use_debug_mats = false;
     // Used for normalization
@@ -113,94 +115,46 @@ public class MLAgentsDirector : Agent
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        //if (!isInitialized)
-        //{
-        //    customInit();
-        //    return;
-        //}
+        if (!isInitialized)
+        {
+            customInit();
+            return;
+        }
         float[] curActions = actionBuffers.ContinuousActions.Array;
-        float[] finalActions = new float[25];
-        for (int i = 0; i < 25; i++)
+        float[] finalActions = new float[numActions];
+        for (int i = 0; i < numActions; i++)
            finalActions[i] = ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prev_action_output[i];
         prev_action_output = finalActions;
         Quaternion[] curRotations = MMScript.bone_rotations;
+        if (actionsAre6DRotations)
+            applyActionsWith6DRotations(finalActions, curRotations);
+        else if (actionsAreEulerRotations)
+            applyActionsAsEulerRotations(finalActions, curRotations);
+        else
+            applyActionsAsAxisAngleRotations(finalActions, curRotations);
 
-       for (int i = 0; i < fullDOFBones.Length; i ++)
-       {
-            int boneIdx = (int)fullDOFBones[i];
-            ArticulationBody ab = simChar.boneToArtBody[boneIdx];
-            Vector3 output = new Vector3(finalActions[i * 3], finalActions[i * 3 + 1], finalActions[i * 3 + 2]);
-            if (normalizeActions)
-            {
-                Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
-                var xdrive = ab.xDrive;
-                var scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
-                var midpoint = xdrive.lowerLimit + scale;
-                //var normalizedTargetX = (targetRotationInJointSpace.x - midpoint) / scale;
-                //normalizedTargetX += output.x;
-                var outputX = (output.x * scale) + midpoint;
-                xdrive.target = targetRotationInJointSpace.x + outputX;
-                ab.xDrive = xdrive;
 
-                var ydrive = ab.yDrive;
-                 scale = (ydrive.upperLimit - ydrive.lowerLimit) / 2f;
-                 midpoint = ydrive.lowerLimit + scale;
-                //var normalizedTargetY = (targetRotationInJointSpace.y - midpoint) / scale;
-                //normalizedTargetY += output.y;
-                var outputY = (output.y * scale) + midpoint;
-                ydrive.target = targetRotationInJointSpace.y + outputY ;
-                ab.yDrive = ydrive;
-
-                var zdrive = ab.zDrive;
-                scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
-                midpoint = zdrive.lowerLimit + scale;
-                //var normalizedTargetZ = (targetRotationInJointSpace.z - midpoint) / scale;
-                //normalizedTargetZ += output.z;
-                var outputZ = (output.z  * scale) + midpoint;
-                zdrive.target = targetRotationInJointSpace.z + outputZ;
-                ab.zDrive = zdrive;
-                continue;
-            }
-            float angle = output.sqrMagnitude;
-            // Angle is in range (0,3) => map to (-180, 180)
-            angle = (angle * 120) - 180;
-            output.Normalize();
-            Quaternion offset = Quaternion.AngleAxis(angle, output);
-            Quaternion final = curRotations[boneIdx] * offset;
-            ab.SetDriveRotation(final);
-        }
         for (int i = 0; i < limitedDOFBones.Length; i++)
         {
             int boneIdx = (int)limitedDOFBones[i];
-            //bool use_xdrive = limited_dof_bones[i] == Bone_LeftLeg || limited_dof_bones[i] == Bone_RightLeg;
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
-            int finalActionsIdx = i + 21;
-
-            if (normalizeActions)
-            {
-                float output = finalActions[finalActionsIdx];
-                // parent anchor rotation = q(ab) 
-                // anchor rotation = q(a) 
-                // target local = q(c) 
-                // need q(x) s.t. a * x = a * c
-                // 
-                Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
-                var zDrive = ab.zDrive;
+            int finalActionsIdx = i + fullDOFBones.Length * (actionsAre6DRotations ? 6 : 3);
+            float output = finalActions[finalActionsIdx];
+            Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
+            var zDrive = ab.zDrive;
+            if (actionsAreEulerRotations) { 
                 var scale = (zDrive.upperLimit - zDrive.lowerLimit) / 2f;
                 var midpoint = zDrive.lowerLimit + scale;
-                //var normalizedTargetX = (targetRotationInJointSpace.x - midpoint) / scale;
-                //normalizedTargetX += output.x;
-                var outputX = (output * scale) + midpoint;
-                zDrive.target = targetRotationInJointSpace.x + outputX;
+                var outputZ = (output * scale) + midpoint;
+                zDrive.target = targetRotationInJointSpace.z + outputZ;
                 ab.zDrive = zDrive;
-                continue;
+            } else
+            {
+                // Angle is in range (-1, 1) => map to (-180, 180)
+                float angle = output * 180;
+                zDrive.target = targetRotationInJointSpace.z + angle;
+                ab.zDrive = zDrive;
             }
-            // Angle is in range (-1, 1) => map to (-180, 180)
-            float angle = finalActions[finalActionsIdx] * 180;
-            Vector3 target = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
-            ArticulationDrive drive = ab.zDrive;
-            drive.target = target.z + angle;
-            ab.zDrive = drive;
         }
         for (int i = 0; i < openloopBones.Length; i++)
         {
@@ -211,10 +165,26 @@ public class MLAgentsDirector : Agent
         }
     }
 
-    
-    private void applyActionsAsEulerRotations(float[] finalActions)
+    private void applyActionsAsAxisAngleRotations(float[] finalActions, Quaternion[] curRotations)
     {
-        Quaternion[] curRotations = MMScript.bone_rotations;
+
+        for (int i = 0; i < fullDOFBones.Length; i++)
+        {
+            int boneIdx = (int)fullDOFBones[i];
+            ArticulationBody ab = simChar.boneToArtBody[boneIdx];
+            Vector3 output = new Vector3(finalActions[i * 3], finalActions[i * 3 + 1], finalActions[i * 3 + 2]);
+            float angle = output.magnitude;
+            // Angle is in range (0,3) => map to (-180, 180)
+            //angle = (angle * 120) - 180;
+            Vector3 normalizedOutput = output.normalized;
+            Quaternion offset = Quaternion.AngleAxis(angle, normalizedOutput);
+            Quaternion final = curRotations[boneIdx] * offset;
+            ab.SetDriveRotation(final);
+        }
+    }
+
+    private void applyActionsAsEulerRotations(float[] finalActions, Quaternion[] curRotations)
+    {
         for (int i = 0; i < fullDOFBones.Length; i++)
         {
             int boneIdx = (int)fullDOFBones[i];
@@ -242,42 +212,23 @@ public class MLAgentsDirector : Agent
             zdrive.target = targetRotationInJointSpace.z + outputZ;
             ab.zDrive = zdrive;    
         }
-        for (int i = 0; i < limitedDOFBones.Length; i++)
-        {
-            int boneIdx = (int)limitedDOFBones[i];
-            ArticulationBody ab = simChar.boneToArtBody[boneIdx];
-            int finalActionsIdx = i + 21;
-            float output = finalActions[finalActionsIdx];
-            // parent anchor rotation = q(ab) 
-            // anchor rotation = q(a) 
-            // target local = q(c) 
-            // need q(x) s.t. a * x = a * c
-            // 
-            Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
-            var zDrive = ab.zDrive;
-            var scale = (zDrive.upperLimit - zDrive.lowerLimit) / 2f;
-            var midpoint = zDrive.lowerLimit + scale;
-            var outputZ = (output * scale) + midpoint;
-            zDrive.target = targetRotationInJointSpace.z + outputZ;
-            ab.zDrive = zDrive;
-        }
     }
-    private void applyActionsWith6DRotations(float[] finalActions)
+    private void applyActionsWith6DRotations(float[] finalActions, Quaternion[] curRotations)
     {
-
+        for (int i = 0; i < fullDOFBones.Length; i++)
+        {
+            int boneIdx = (int)fullDOFBones[i];
+            ArticulationBody ab = simChar.boneToArtBody[boneIdx];
+            Vector3 outputV1 = new Vector3(finalActions[i * 6], finalActions[i * 6 + 1], finalActions[i * 6 + 2]);
+            Vector3 outputV2 = new Vector3(finalActions[i * 6 + 3], finalActions[i * 6 + 4], finalActions[i * 6 + 5]);
+            Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
+            Quaternion newTargetRot = curRotations[boneIdx] * networkAdjustment;
+            ab.SetDriveRotation(newTargetRot);
+        }
     }
     public override void Heuristic(in ActionBuffers actionsout)
     {
-        //if (!isInitialized)
-        //{
-        //    customInit();
-        //    return;
-        //}
-        float[] cur_actions = actionsout.ContinuousActions.Array;
-        float[] final_actions = new float[25];
-        for (int i = 0; i < 25; i++)
-            final_actions[i] = ACTION_STIFFNESS_HYPERPARAM * cur_actions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prev_action_output[i];
-        prev_action_output = final_actions;
+
         Quaternion[] cur_rotations = MMScript.bone_rotations;
         for (int i = 0; i < fullDOFBones.Length; i++)
         {
@@ -372,7 +323,11 @@ public class MLAgentsDirector : Agent
         if (!genMinsAndMaxes)
             ReadMinsAndMaxes();
         //else
-            //MMScript.run_max_speed = true;
+        //MMScript.run_max_speed = true;
+        numActions = (fullDOFBones.Length * (actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length;
+        Debug.Log($"numActions: {numActions}");
+        numObservations = 85 + numActions; // 131
+        prev_action_output = new float[numActions];
         isInitialized = true;
     }
 
@@ -740,7 +695,7 @@ public class MLAgentsDirector : Agent
     */
     float[] getState()
     {
-        float[] state = new float[110];
+        float[] state = new float[numObservations];
         int state_idx = 0;
 
         Vector3 kin_cm_vel_normalized = resolveVelInKinematicRefFrame(kinChar.cmVel);
@@ -778,12 +733,12 @@ public class MLAgentsDirector : Agent
         for (int i = 0; i < 36; i++)
             // In order to keep it between [-1, 1] 
             state[state_idx++] = normalizeObservations ? (simChar.boneState[i] - kinChar.boneState[i]) / 2 : simChar.boneState[i] - kinChar.boneState[i];
-        for (int i = 0; i < 25; i++)
+        for (int i = 0; i < numActions; i++)
             state[state_idx++] = prev_action_output[i];
 
    
-        if (state_idx != 110)
-            throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything");
+        if (state_idx != numObservations)
+            throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything, 6D: {actionsAre6DRotations}");
    
         //for(int i = 0; i < 110; i++)
         //{
@@ -796,7 +751,7 @@ public class MLAgentsDirector : Agent
         //    }
         //}
         if (genMinsAndMaxes)
-            state = new float[110];
+            state = new float[numObservations];
 
         return state;
 
