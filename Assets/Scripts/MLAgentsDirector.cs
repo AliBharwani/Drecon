@@ -44,9 +44,9 @@ public class MLAgentsDirector : Agent
     //public bool setDriveStiffnessAndDamping = false;
     //public float DriveStiffness = 150f;
     //public float DriveDamping = 20f;
-    public bool resetKinCharOnEpisodeEnd = false;
-    public bool normalize_action_ouputs = true;
-    public bool normalizeObservations = false;
+    internal bool resetKinCharOnEpisodeEnd = false;
+    internal bool normalizeActions = true;
+    internal bool normalizeObservations = false;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
     internal GameObject simulatedCharObj;
@@ -129,7 +129,7 @@ public class MLAgentsDirector : Agent
             int boneIdx = (int)fullDOFBones[i];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             Vector3 output = new Vector3(finalActions[i * 3], finalActions[i * 3 + 1], finalActions[i * 3 + 2]);
-            if (normalize_action_ouputs)
+            if (normalizeActions)
             {
                 Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
                 var xdrive = ab.xDrive;
@@ -175,7 +175,7 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             int finalActionsIdx = i + 21;
 
-            if (normalize_action_ouputs)
+            if (normalizeActions)
             {
                 float output = finalActions[finalActionsIdx];
                 // parent anchor rotation = q(ab) 

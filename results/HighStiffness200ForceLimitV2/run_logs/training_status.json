@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 21899997,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-21899997.onnx",
+                "reward": 1.9926825300254654,
+                "creation_time": 1673977081.6544664,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-21899997.pt"
+                ]
+            },
+            {
+                "steps": 21999996,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-21999996.onnx",
+                "reward": 1.1160053741621219,
+                "creation_time": 1673977252.6861005,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-21999996.pt"
+                ]
+            },
+            {
+                "steps": 22099990,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22099990.onnx",
+                "reward": 1.1710238025394508,
+                "creation_time": 1673977424.1978574,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22099990.pt"
+                ]
+            },
+            {
+                "steps": 22199992,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22199992.onnx",
+                "reward": 1.5215569802920024,
+                "creation_time": 1673977596.2858646,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22199992.pt"
+                ]
+            },
+            {
+                "steps": 22299986,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22299986.onnx",
+                "reward": 1.3405519333267868,
+                "creation_time": 1673977768.0630577,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22299986.pt"
+                ]
+            },
+            {
+                "steps": 22399982,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22399982.onnx",
+                "reward": 1.4911917250838207,
+                "creation_time": 1673977939.8561325,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22399982.pt"
+                ]
+            },
+            {
+                "steps": 22499987,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22499987.onnx",
+                "reward": 1.6718431616272593,
+                "creation_time": 1673978111.2510538,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22499987.pt"
+                ]
+            },
+            {
+                "steps": 22599975,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22599975.onnx",
+                "reward": 2.4838561541561424,
+                "creation_time": 1673978283.0693376,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22599975.pt"
+                ]
+            },
+            {
+                "steps": 22699988,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22699988.onnx",
+                "reward": 0.7857952966570605,
+                "creation_time": 1673978454.5437322,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22699988.pt"
+                ]
+            },
+            {
+                "steps": 22710815,
+                "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22710815.onnx",
+                "reward": 0.8606061526621495,
+                "creation_time": 1673978473.1082816,
+                "auxillary_file_paths": [
+                    "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22710815.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 22710815,
+            "file_path": "results\\HighStiffness200ForceLimitV2\\Drecon.onnx",
+            "reward": 0.8606061526621495,
+            "creation_time": 1673978473.1082816,
+            "auxillary_file_paths": [
+                "results\\HighStiffness200ForceLimitV2\\Drecon\\Drecon-22710815.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

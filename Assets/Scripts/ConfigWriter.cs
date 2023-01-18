@@ -13,6 +13,9 @@ public class ConfigWriter : MonoBehaviour
 
     // HYPER PARAMS
     public int solverIterations = 32;
+    public bool normalizeActions = true;
+    public bool normalizeObservations = true;
+    public bool resetKinCharOnEpisodeEnd = false;
     public int EVALUATE_EVERY_K_STEPS = 2;
     public int N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = 4;
     public float EPISODE_END_REWARD = -.5f;
@@ -42,6 +45,14 @@ public class ConfigWriter : MonoBehaviour
         {
             _instance = this;
         }
+    }
+
+    public float pGainMultiplier = 1f;
+    [ContextMenu("Multiply all stiffness values by pGainMultiplier")]
+    public void multiplyAllStiffnessValues()
+    {
+        for (int i = 0; i < 23; i++)
+            boneToStiffness[i] *= pGainMultiplier;
     }
 
     [ContextMenu("Init bone to string")]
