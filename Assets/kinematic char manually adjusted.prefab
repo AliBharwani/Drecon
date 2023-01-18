@@ -1449,94 +1449,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 564d9f0c5f5ba544b8d5dbd6ca70b0a7, type: 3}
   m_PrefabInstance: {fileID: 1674003725091159908}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &9131950815638022782
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2015968129522336309}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gen_inputs: 1
-  run_max_speed: 0
-  MAX_WANDERING_RADIUS: 10
-  toy_pointers:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  feature_weight_foot_position: 0.75
-  feature_weight_foot_velocity: 1
-  feature_weight_hip_velocity: 1
-  feature_weight_trajectory_positions: 1
-  feature_weight_trajectory_directions: 1.5
-  inertialize_blending_halflife: 0.1
-  simulation_rotation_halflife: 0.1
-  MoveSpeed: 3
-  frame_increments: 20
-  ignore_surrounding: 20
-  numNeigh: 1
-  searchEveryNFrames: 8
-  frameCounter: 1
-  boneToTransform:
-  - {fileID: 1203016326835099791}
-  - {fileID: 652865789798429822}
-  - {fileID: 8241012355678828656}
-  - {fileID: 7991976906804362845}
-  - {fileID: 3023652139285650439}
-  - {fileID: 2982531053027204121}
-  - {fileID: 1321586462060500594}
-  - {fileID: 7534910873763981300}
-  - {fileID: 1016212119523264880}
-  - {fileID: 1072723137920052169}
-  - {fileID: 6182093433263043533}
-  - {fileID: 8517934600415757276}
-  - {fileID: 1053634999542819190}
-  - {fileID: 1463750404674553826}
-  - {fileID: 7559120569990717130}
-  - {fileID: 3851707516096931138}
-  - {fileID: 2388688826911663077}
-  - {fileID: 8169214671312775041}
-  - {fileID: 6330261630447686773}
-  - {fileID: 8347684924424349037}
-  - {fileID: 9101877528998080216}
-  - {fileID: 6814592809145962147}
-  - {fileID: 4871817335049045049}
-  motionDB: {fileID: 0}
-  bone_rotations: []
-  desired_velocity: {x: 0, y: 0, z: 0}
-  teleportedThisFixedUpdate: 0
-  is_initalized: 0
-  simulation_velocity_halflife: 0.27
---- !u!114 &8433900239767628879
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2015968129522336309}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9089d05dab71b204db6d2bd560345ed3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  boneObjects: []
-  bone_ids: 
-  left_hand_bone_id: 9
-  right_hand_bone_id: 36
-  num_bones: 70
-  debug: 0
-  debug_bone_ids: 
-  bones_that_use_next_joints_verts: 410000003c000000
-  bones_that_use_prev_joints_verts: 2300000008000000
-  bone_ids_use_small_rad: 
-  boxed_bones: 
-  min_rad: 0.005
-  draw_gizmos: 0
-  do_not_filter: 0
 --- !u!114 &8202565943587829914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1576,6 +1488,92 @@ MonoBehaviour:
   AVG_HUMAN_DENSITY: 985
   debug_to_local_pos: {fileID: 1016212119523264880}
   useGravity: 1
+--- !u!114 &8433900239767628879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2015968129522336309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9089d05dab71b204db6d2bd560345ed3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boneObjects: []
+  bone_ids: 
+  left_hand_bone_id: 9
+  right_hand_bone_id: 36
+  num_bones: 70
+  debug: 0
+  debug_bone_ids: 
+  bones_that_use_next_joints_verts: 410000003c000000
+  bones_that_use_prev_joints_verts: 2300000008000000
+  bone_ids_use_small_rad: 
+  boxed_bones: 
+  min_rad: 0.005
+  draw_gizmos: 0
+  do_not_filter: 0
+--- !u!114 &9131950815638022782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2015968129522336309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gen_inputs: 1
+  MAX_WANDERING_RADIUS: 10
+  toy_pointers:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  feature_weight_foot_position: 0.75
+  feature_weight_foot_velocity: 1
+  feature_weight_hip_velocity: 1
+  feature_weight_trajectory_positions: 1
+  feature_weight_trajectory_directions: 1.5
+  inertialize_blending_halflife: 0.1
+  simulation_rotation_halflife: 0.1
+  frame_increments: 20
+  ignore_surrounding: 20
+  numNeigh: 1
+  searchEveryNFrames: 5
+  frameCounter: 1
+  boneToTransform:
+  - {fileID: 1203016326835099791}
+  - {fileID: 652865789798429822}
+  - {fileID: 8241012355678828656}
+  - {fileID: 7991976906804362845}
+  - {fileID: 3023652139285650439}
+  - {fileID: 2982531053027204121}
+  - {fileID: 1321586462060500594}
+  - {fileID: 7534910873763981300}
+  - {fileID: 1016212119523264880}
+  - {fileID: 1072723137920052169}
+  - {fileID: 6182093433263043533}
+  - {fileID: 8517934600415757276}
+  - {fileID: 1053634999542819190}
+  - {fileID: 1463750404674553826}
+  - {fileID: 7559120569990717130}
+  - {fileID: 3851707516096931138}
+  - {fileID: 2388688826911663077}
+  - {fileID: 8169214671312775041}
+  - {fileID: 6330261630447686773}
+  - {fileID: 8347684924424349037}
+  - {fileID: 9101877528998080216}
+  - {fileID: 6814592809145962147}
+  - {fileID: 4871817335049045049}
+  motionDB: {fileID: 0}
+  bone_rotations: []
+  desired_velocity: {x: 0, y: 0, z: 0}
+  teleportedThisFixedUpdate: 0
+  is_initalized: 0
+  simulation_velocity_halflife: 0.27
 --- !u!1 &2072822088478995908 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8358851119012476256, guid: 564d9f0c5f5ba544b8d5dbd6ca70b0a7, type: 3}

@@ -7,7 +7,6 @@ using UnityEngine.InputSystem;
 public class mm_v2 : MonoBehaviour
 {
     public bool gen_inputs = true;
-    public bool run_max_speed = false;
     public float MAX_WANDERING_RADIUS = 10f;
     private float prob_to_change_inputs = .001f;
     public enum Bones
@@ -44,7 +43,6 @@ public class mm_v2 : MonoBehaviour
     public float feature_weight_trajectory_directions = 1.5f;
     public float inertialize_blending_halflife = 0.1f;
     public float simulation_rotation_halflife = .1f;
-    public float MoveSpeed = 3;
     public int frame_increments = 10;
     public int ignore_surrounding = 10;
 
@@ -96,6 +94,15 @@ public class mm_v2 : MonoBehaviour
     Quaternion[] trajectory_rotations;
     Vector3[] trajectory_angular_velocities;
 
+
+    float desired_gait = 0.0f;
+    float desired_gait_velocity = 0.0f;
+    bool is_runbutton_pressed = false;
+
+    float simulation_fwrd_speed = 0f;
+    float simulation_side_speed = 0f;
+    float simulation_back_speed = 0f;
+
     Vector3 simulation_position;
     Vector3 simulation_velocity;
     Vector3 simulation_acceleration;
@@ -125,6 +132,7 @@ public class mm_v2 : MonoBehaviour
     internal bool debug_move_every_second = true;
     float time_since_last_move = 0f;
     float minimum_fixed_update_timer = 0f;
+
     void Awake()
     {
         gamepad = Gamepad.current;
@@ -194,7 +202,7 @@ public class mm_v2 : MonoBehaviour
         trajectory_accelerations = new Vector3[4];
         trajectory_rotations = identityQuatArray(4);
         trajectory_angular_velocities = new Vector3[4];
-        random_lstick_input = run_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
+        random_lstick_input =  Random.insideUnitCircle;
         simulation_position = origin;
         inertialize_pose_reset(bone_positions[0], bone_rotations[0]);
         inertialize_pose_update(
@@ -272,20 +280,26 @@ public class mm_v2 : MonoBehaviour
         // generating random inputs and every frame the user changes desires with P(.001)
         if (should_gen_inputs()) {
             //Debug.Log("Genning new inputs!");
-            random_lstick_input = run_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
+            random_lstick_input =  Random.insideUnitCircle;
             // Random chance of making desired rotation face direction of velocity  
             is_strafing = Random.value <= .5f;
+            is_runbutton_pressed = Random.value <= .5f;
             Vector2 rotation_vec = is_strafing ?  Random.insideUnitCircle : random_lstick_input;
             desired_rotation =  Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y) ;
         } else if (!gen_inputs && gamepad != null)
         {
             is_strafing = gamepad.leftTrigger.isPressed;
+            is_runbutton_pressed = gamepad.aButton.isPressed;
         }
+        desired_gait_update(Time.fixedDeltaTime);
+        simulation_fwrd_speed = Mathf.Lerp(simulation_run_fwrd_speed, simulation_walk_fwrd_speed, desired_gait);
+        simulation_side_speed = Mathf.Lerp(simulation_run_side_speed, simulation_walk_side_speed, desired_gait);
+        simulation_back_speed = Mathf.Lerp(simulation_run_back_speed, simulation_walk_back_speed, desired_gait);
+
         desired_velocity = desired_velocity_update(simulation_rotation);
         //Debug.Log($"Gamepad: {gamepad.leftStick.ReadValue()}");
         //desired_rotation = !gen_inputs ? desired_rotation_update(desired_rotation, desired_velocity) : desired_rotation;
         desired_rotation = desired_rotation_update(desired_rotation, desired_velocity);
-
         Vector3 world_space_position = bone_positions[0];
         bool end_of_anim = motionDB.database_trajectory_index_clamp(frameIdx, 1) == frameIdx;
         bool search = end_of_anim || (frameCounter % searchEveryNFrames) == 0;
@@ -485,24 +499,45 @@ public class mm_v2 : MonoBehaviour
             query[i] = (query[i] - motionDB.features_offset[i]) / motionDB.features_scale[i];
         }
     }
-    float fwrd_speed = 3f;// 1.75f;
-    float side_speed = 2.5f;//1.5f;
-    float back_speed = 2f;//1.25f;
+    float simulation_run_fwrd_speed = 4.0f;
+    float simulation_run_side_speed = 3.0f;
+    float simulation_run_back_speed = 2.5f;
+
+    float simulation_walk_fwrd_speed = 1.75f;
+    float simulation_walk_side_speed = 1.5f;
+    float simulation_walk_back_speed = 1.25f;
+
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)
     {
+        desired_gait_update(Time.fixedDeltaTime);
+
         Vector2 lstick = gen_inputs ? random_lstick_input : gamepad.leftStick.ReadValue();
 
         // Find stick position local to current facing direction
         Vector3 local_stick_dir = Utils.quat_inv_mul_vec3(sim_rotation, new Vector3(lstick.x, 0, lstick.y));
-        local_stick_dir.x *= side_speed;
-        local_stick_dir.z *= local_stick_dir.z > 0.0 ? fwrd_speed : back_speed;
+
+        local_stick_dir.x *= simulation_side_speed;
+        local_stick_dir.z *= local_stick_dir.z > 0.0 ? simulation_fwrd_speed : simulation_back_speed;
+
         //Vector3 local_desired_vel = local_stick_dir.z > 0.0 ?
         //        new Vector3(side_speed, 0.0f, fwrd_speed):
         //        new Vector3(side_speed, 0.0f, back_speed) ;
         //Vector3 local_desired_vel = local_stick_dir.Scale(scale_vec);
         //Vector3 local_desired_vel = (MoveSpeed * local_stick_dir.magnitude) * local_stick_dir.normalized;
         return Utils.quat_mul_vec3(sim_rotation, local_stick_dir);
+    }
+
+    void desired_gait_update(
+    float dt,
+    float gait_change_halflife = 0.1f)
+    {
+        SpringUtils.simple_spring_damper_exact(
+            ref desired_gait,
+            ref desired_gait_velocity,
+            is_runbutton_pressed ? 1.0f : 0.0f,
+            gait_change_halflife,
+            dt);
     }
 
     public float simulation_velocity_halflife = .27f;

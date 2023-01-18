@@ -101,22 +101,22 @@ public class MLAgentsDirector : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        if (!isInitialized)
-        {
-            customInit();
-            return;
-        }
+        //if (!isInitialized)
+        //{
+        //    customInit();
+        //    return;
+        //}
         sensor.AddObservation(getState());
     }
     // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        if (!isInitialized)
-        {
-            customInit();
-            return;
-        }
+        //if (!isInitialized)
+        //{
+        //    customInit();
+        //    return;
+        //}
         float[] curActions = actionBuffers.ContinuousActions.Array;
         float[] finalActions = new float[25];
         for (int i = 0; i < 25; i++)
@@ -211,11 +211,11 @@ public class MLAgentsDirector : Agent
     }
     public override void Heuristic(in ActionBuffers actionsout)
     {
-        if (!isInitialized)
-        {
-            customInit();
-            return;
-        }
+        //if (!isInitialized)
+        //{
+        //    customInit();
+        //    return;
+        //}
         float[] cur_actions = actionsout.ContinuousActions.Array;
         float[] final_actions = new float[25];
         for (int i = 0; i < 25; i++)
@@ -303,13 +303,7 @@ public class MLAgentsDirector : Agent
             simChar.boneSurfacePts[i] = new Vector3[6];
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
-        //if (setDriveStiffnessAndDamping)
-        //{
-        //    foreach (var body in simulatedCharObj.GetComponentsInChildren<ArticulationBody>()) { 
-        //        body.SetAllDriveDamping(DriveDamping);
-        //        body.SetAllDriveStiffness(DriveStiffness);
-        //    }
-        //}
+
         projectile = Instantiate(projectilePrefab, simulatedCharObj.transform.position + Vector3.up, Quaternion.identity);
         projectileCollider = projectile.GetComponent<Collider>();
         projectileRB = projectile.GetComponent<Rigidbody>();
@@ -318,15 +312,10 @@ public class MLAgentsDirector : Agent
         bone_pos_maxes = new Vector3[stateBones.Length];
         bone_vel_mins = new Vector3[stateBones.Length];
         bone_vel_maxes = new Vector3[stateBones.Length];
-        if (genMinsAndMaxes)
-            MMScript.run_max_speed = true;
-        else
+        if (!genMinsAndMaxes)
             ReadMinsAndMaxes();
-        //if (normalize_observations)
-        //    SimCharController.find_mins_and_maxes(kinChar.boneToTransform, ref MIN_VELOCITY, ref MAX_VELOCITY, ref bone_pos_mins, ref bone_pos_maxes, ref bone_vel_mins, ref bone_vel_maxes);
-        //Debug.Log($"Min velocity: {MIN_VELOCITY.ToString("f6")}");
-        //Debug.Log($"Max velocity: {MAX_VELOCITY.ToString("f6")}");
-
+        //else
+            //MMScript.run_max_speed = true;
         isInitialized = true;
     }
 
@@ -364,10 +353,10 @@ public class MLAgentsDirector : Agent
 
     private void FixedUpdate()
     {
-        if (!isInitialized) { 
-            customInit();
-            return;
-        }
+        //if (!isInitialized) { 
+        //    customInit();
+        //    return;
+        //}
         curFixedUpdate++;
 
         // Make sure to teleport sim character if kin character teleported
