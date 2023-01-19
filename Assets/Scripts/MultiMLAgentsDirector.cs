@@ -52,6 +52,7 @@ public class MultiMLAgentsDirector : MonoBehaviour
         director.actionsAreEulerRotations = _config.actionsAreEulerRotations;
         director.normalizeLimitedDOFOutputs = _config.normalizeLimitedDOFOutputs;
         director.useGeodesicForAngleDiff = _config.useGeodesicForAngleDiff;
+        director.poseRewardMultiplier = _config.poseRewardMultiplier;
         if (_config.actionsAre6DRotations)
         {
             //int numActions = MLAgentsDirector.fullDOFBones.Length * 6; // Should be 7 3-DOF bones, so 42 Actions
