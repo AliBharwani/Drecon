@@ -217,4 +217,29 @@ public class TestDirector : MonoBehaviour
     }
 
 
+    //struct TestStruct {
+    //    int value;
+    //    public TestStruct(int v)
+    //    {
+    //        value = v;
+    //    }
+    //    public static TestStruct operator -(TestStruct a) => new TestStruct(-a.value);
+
+    //    public void isNegative()
+    //    {
+    //        if (value < 0)
+    //        {
+    //            Debug.Log("Val is negative");
+    //        } else
+    //        {
+    //            Debug.Log("Val is POSITIVE");
+    //        }
+    //    }
+    //}
+    //[ContextMenu("Test c# order of operators")]
+    //private void testOperatorOrder()
+    //{
+    //    TestStruct t = new TestStruct(5);
+    //    -t.isNegative();
+    //}
 }

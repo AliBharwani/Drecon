@@ -16,6 +16,8 @@ public class ConfigWriter : MonoBehaviour
     public bool actionsAreEulerRotations = true;
     public bool actionsAre6DRotations = false;
     public bool normalizeObservations = true;
+    public bool normalizeLimitedDOFOutputs = true;
+    public bool useGeodesicForAngleDiff = false;
     public bool resetKinCharOnEpisodeEnd = false;
     public int EVALUATE_EVERY_K_STEPS = 2;
     public int N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = 4;

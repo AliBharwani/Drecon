@@ -43,10 +43,10 @@ behaviors:
     self_play: null
     behavioral_cloning: null
 env_settings:
-  env_path: null
+  env_path: Builds\Drecon
   env_args: null
   base_port: 5005
-  num_envs: 1
+  num_envs: 10
   num_areas: 1
   seed: -1
   max_lifetime_restarts: 10
@@ -59,14 +59,14 @@ engine_settings:
   time_scale: 1.0
   target_frame_rate: -1
   capture_frame_rate: 0
-  no_graphics: false
+  no_graphics: true
 environment_parameters: null
 checkpoint_settings:
-  run_id: ignore
+  run_id: 6DRotations
   initialize_from: null
   load_model: false
-  resume: false
-  force: true
+  resume: true
+  force: false
   train_model: false
   inference: false
   results_dir: results

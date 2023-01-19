@@ -22,12 +22,54 @@ public static class ArtBodyUtils
         //float qx = (m21 - m12) / (4f * qw);
         //float qy = (m02 - m20) / (4f * qw);
         //float qz = (m10 - m01) / (4f * qw);
+        
+        float qw, qx, qy, qz;
+        float m00 = e1.x;
+        float m10 = e1.y;
+        float m20 = e1.z;
 
-        float qw = Mathf.Sqrt(1f + e1.x + e2.y + e3.z) / 2f;
-        float qx = (e2.z - e3.y) / (4f * qw);
-        float qy = (e3.x - e1.z) / (4f * qw);
-        float qz = (e1.y - e2.x) / (4f * qw);
+        float m01 = e2.x;
+        float m11 = e2.y;
+        float m21 = e2.z;
 
+        float m02 = e3.x;
+        float m12 = e3.y;
+        float m22 = e3.z;
+        float tr = m00 + m11 + m22;
+
+        // https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+        if (tr > 0)
+        {
+            float S = Mathf.Sqrt(tr + 1.0f) * 2; // S=4*qw 
+            qw = 0.25f * S;
+            qx = (m21 - m12) / S;
+            qy = (m02 - m20) / S;
+            qz = (m10 - m01) / S;
+        }
+        else if ((m00 > m11) & (m00 > m22))
+        {
+            float S = Mathf.Sqrt(1.0f + m00 - m11 - m22) * 2; // S=4*qx 
+            qw = (m21 - m12) / S;
+            qx = 0.25f * S;
+            qy = (m01 + m10) / S;
+            qz = (m02 + m20) / S;
+        }
+        else if (m11 > m22)
+        {
+            float S = Mathf.Sqrt(1.0f + m11 - m00 - m22) * 2; // S=4*qy
+            qw = (m02 - m20) / S;
+            qx = (m01 + m10) / S;
+            qy = 0.25f * S;
+            qz = (m12 + m21) / S;
+        }
+        else
+        {
+            float S = Mathf.Sqrt(1.0f + m22 - m00 - m11) * 2; // S=4*qz
+            qw = (m10 - m01) / S;
+            qx = (m02 + m20) / S;
+            qy = (m12 + m21) / S;
+            qz = 0.25f * S;
+        }
         Quaternion q = new Quaternion(qx, qy, qz, qw);
         return q.normalized;
     }
@@ -231,7 +273,10 @@ public static class ArtBodyUtils
     {
         if (body.isRoot)
             return Vector3.zero;
-        Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation).normalized.eulerAngles;
+        Quaternion q = Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation;
+        q.Normalize();
+        Vector3 TargetRotationInJointSpace = -q.eulerAngles;
+        //Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation).normalized.eulerAngles;
         //TargetRotationInJointSpace = targetLocalRotation.eulerAngles;
         TargetRotationInJointSpace = new Vector3(
             Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),

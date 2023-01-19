@@ -48,6 +48,7 @@ public class MLAgentsDirector : Agent
     internal bool actionsAreEulerRotations = false;
     internal bool actionsAre6DRotations = false;
     internal bool normalizeObservations = false;
+    internal bool normalizeLimitedDOFOutputs = true;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
     internal GameObject simulatedCharObj;
@@ -142,7 +143,7 @@ public class MLAgentsDirector : Agent
             float output = finalActions[finalActionsIdx];
             Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
             var zDrive = ab.zDrive;
-            if (actionsAreEulerRotations) { 
+            if (normalizeLimitedDOFOutputs) { 
                 var scale = (zDrive.upperLimit - zDrive.lowerLimit) / 2f;
                 var midpoint = zDrive.lowerLimit + scale;
                 var outputZ = (output * scale) + midpoint;
@@ -223,7 +224,7 @@ public class MLAgentsDirector : Agent
             Vector3 outputV2 = new Vector3(finalActions[i * 6 + 3], finalActions[i * 6 + 4], finalActions[i * 6 + 5]);
             Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
             Quaternion newTargetRot = curRotations[boneIdx] * networkAdjustment;
-            ab.SetDriveRotation(newTargetRot);
+            ab.SetDriveRotation(newTargetRot.normalized);
         }
     }
     public override void Heuristic(in ActionBuffers actionsout)

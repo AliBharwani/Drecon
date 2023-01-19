@@ -48,8 +48,9 @@ public class MultiMLAgentsDirector : MonoBehaviour
         MLAgentsDirector director = obj.GetComponent<MLAgentsDirector>();
         director.EVALUATE_EVERY_K_STEPS = _config.EVALUATE_EVERY_K_STEPS;
         director.normalizeObservations = _config.normalizeObservations;
-        director.resetKinCharOnEpisodeEnd = _config.resetKinCharOnEpisodeEnd;
+        director.resetKinCharOnEpisodeEnd = _config.resetKinCharOnEpisodeEnd; 
         director.actionsAreEulerRotations = _config.actionsAreEulerRotations;
+        director.normalizeLimitedDOFOutputs = _config.normalizeLimitedDOFOutputs;
         if (_config.actionsAre6DRotations)
         {
             //int numActions = MLAgentsDirector.fullDOFBones.Length * 6; // Should be 7 3-DOF bones, so 42 Actions
