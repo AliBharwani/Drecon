@@ -19,6 +19,8 @@ behaviors:
       extrinsic:
         gamma: 0.99
         strength: 1.0
+        network_settings:
+          normalize: True
     keep_checkpoints: 10
     max_steps: 300000000
     checkpoint_interval: 100000 

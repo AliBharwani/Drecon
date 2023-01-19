@@ -107,11 +107,11 @@ public class MLAgentsDirector : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        //if (!isInitialized)
-        //{
-        //    customInit();
-        //    return;
-        //}
+        if (!isInitialized)
+        {
+            customInit();
+            return;
+        }
         sensor.AddObservation(getState());
     }
     // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
@@ -368,10 +368,11 @@ public class MLAgentsDirector : Agent
 
     private void FixedUpdate()
     {
-        //if (!isInitialized) { 
-        //    customInit();
-        //    return;
-        //}
+        if (!isInitialized)
+        {
+            customInit();
+            return;
+        }
         curFixedUpdate++;
 
         // Make sure to teleport sim character if kin character teleported
@@ -593,13 +594,14 @@ public class MLAgentsDirector : Agent
             finalReward = 0f;
         } else
         {
+            finalReward = 1f;
             calcPosAndVelReward(out pos_reward, out vel_reward);
             calcLocalPoseReward(out local_pose_reward);
             calcCMVelReward(out cm_vel_reward);
             finalReward = (float)(fall_factor * (pos_reward + vel_reward + local_pose_reward + cm_vel_reward));
-            Debug.Log($"fall_factor: {fall_factor}, pos_reward: {pos_reward}, vel_reward: {vel_reward}, local_pose_reward: {local_pose_reward}, cm_vel_reward: {cm_vel_reward}");
+            //Debug.Log($"fall_factor: {fall_factor}, pos_reward: {pos_reward}, vel_reward: {vel_reward}, local_pose_reward: {local_pose_reward}, cm_vel_reward: {cm_vel_reward}");
         }
-        Debug.Log($"final_reward: {finalReward}");
+        //Debug.Log($"final_reward: {finalReward}");
         //updateMeanReward(final_reward);
         SetReward(finalReward);
         return false;
@@ -844,14 +846,12 @@ public class MLAgentsDirector : Agent
             }
         }
         pos_reward = Math.Exp((-10f / (nbodies * 6)) *  pos_diffs_sum );
-        vel_reward = Math.Exp((- 1f / (nbodies * 6)) *  vel_diffs_sum );
+        vel_reward = Math.Exp((-1f / (nbodies * 6)) *  vel_diffs_sum );
     }
 
     void calcLocalPoseReward(out double pose_reward)
     {
         double totalLoss = 0;
-
-
         for (int i = 1; i < 23; i++)
         {
             Transform kin_bone = kinChar.boneToTransform[i];
@@ -865,7 +865,9 @@ public class MLAgentsDirector : Agent
                 Matrix4x4 simRotation = Matrix4x4.Rotate(sim_bone.localRotation);
                 Matrix4x4 lossMat = (simRotation * kinRotation.transpose);
                 float trace = lossMat[0, 0] + lossMat[1, 1] + lossMat[2, 2];
-                loss = Mathf.Acos((trace - 1) / 2);
+                // Need clamping because Acos will throw NAN for values outside [-1, 1]
+                float traceClamped = Mathf.Clamp((trace - 1) / 2, -1f, 1f);
+                loss = Mathf.Acos(traceClamped);
             //geodesicTotalRewardSum += loss;
             } else { 
 

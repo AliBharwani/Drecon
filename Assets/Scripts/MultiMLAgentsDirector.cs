@@ -30,17 +30,17 @@ public class MultiMLAgentsDirector : MonoBehaviour
         Physics.defaultSolverVelocityIterations = _config.solverIterations;
         directors = new MLAgentsDirector[numAgents];
         for (int i = 0; i < numAgents; i++)
+        {
             directors[i] = createMLAgent();
+            directors[i].AssignLayer(LayerMask.NameToLayer($"model_{i + 1}"));
+
+        }
         Application.targetFrameRate = targetFrameRate;
-        Physics.autoSimulation = false;
         //UnityEngine.Rendering.DebugManager.instance.enableRuntimeUI = false;
     }
 
     private void Start()
     {
-        for(int i = 0; i < numAgents; i++) 
-            directors[i].AssignLayer(LayerMask.NameToLayer($"model_{i + 1}"));
-        Physics.autoSimulation = true;
     }
     private MLAgentsDirector createMLAgent()
     {

@@ -1304,16 +1304,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   writeToFilePath: ../results/6DRotationsV2
   filename: unityconfig.json
-  loadFromFilePath: ../results/6DRotations
+  loadFromFilePath: ../results/6DRotationsV2
   solverIterations: 32
   actionsAreEulerRotations: 1
   actionsAre6DRotations: 1
   normalizeObservations: 1
   normalizeLimitedDOFOutputs: 1
-  useGeodesicForAngleDiff: 0
+  useGeodesicForAngleDiff: 1
+  poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 0
   EVALUATE_EVERY_K_STEPS: 2
-  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 0
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 3
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
@@ -1369,7 +1370,7 @@ MonoBehaviour:
   - 1000
   - 2000
   - 1000
-  forceLimit: 200
+  forceLimit: 1000
   damping: 50
   pGainMultiplier: 0.5
 --- !u!4 &1357924715
@@ -1857,7 +1858,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 28eb72de0d586e841b4532d752d0f1d8, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1932,7 +1933,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 1
+  numAgents: 2
   modelDirector: {fileID: 767361687}
   model6DDirector: {fileID: 2033970009}
   reportMeanRewardEveryNSteps: 100000
