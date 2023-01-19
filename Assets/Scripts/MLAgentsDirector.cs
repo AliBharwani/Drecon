@@ -49,6 +49,7 @@ public class MLAgentsDirector : Agent
     internal bool actionsAre6DRotations = false;
     internal bool normalizeObservations = false;
     internal bool normalizeLimitedDOFOutputs = true;
+    internal bool useGeodesicForAngleDiff = false;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
     internal GameObject simulatedCharObj;
@@ -847,31 +848,47 @@ public class MLAgentsDirector : Agent
 
     void calcLocalPoseReward(out double pose_reward)
     {
-        double pose_reward_sum = 0;
+        double totalLoss = 0;
+
         for (int i = 1; i < 23; i++)
         {
             Transform kin_bone = kinChar.boneToTransform[i];
             Transform sim_bone = simChar.boneToTransform[i];
-            // From Stack Overflow:
-            //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
-            // diff * q1 = q2  --->  diff = q2 * inverse(q1)
-            Quaternion diff = sim_bone.localRotation * Quaternion.Inverse(kin_bone.localRotation);
-            //Vector3 axis;
-            // https://stackoverflow.com/questions/21513637/dot-product-of-two-quaternion-rotations
-            // angle = 2*atan2(q.vec.length(), q.w)
-            //double sqrd_dot =  Math.Pow(Quaternion.Dot(kin_bone.localRotation, sim_bone.localRotation), 2);
-            //double angle = Math.Acos(2 * sqrd_dot - 1);
-            //diff.ToAngleAxis(out angle, out axis);
+            float loss;
+            if (useGeodesicForAngleDiff)
+            {
+                Matrix4x4 kinRotation = Matrix4x4.Rotate(kin_bone.localRotation);
+                Matrix4x4 simRotation = Matrix4x4.Rotate(sim_bone.localRotation);
+                Matrix4x4 lossMat = (simRotation * kinRotation.transpose);
+                float trace = lossMat[0, 0] + lossMat[1, 1] + lossMat[2, 2];
+                loss = Mathf.Acos((trace - 1) / 2);
+            } else { 
 
-            Vector3 diff_vec = new Vector3(diff.x, diff.y, diff.z);
-            double angle = 2 * Math.Atan2(diff_vec.magnitude, diff.w) * Mathf.Rad2Deg;
-            // We want the magnitude of the diff so we take abs value
-            angle = Math.Abs(GeoUtils.wrap_angle(angle));
-            //double unity_angle = Quaternion.Angle(sim_bone.localRotation, kin_bone.localRotation);
-            //Debug.Log($"Bone: {(mm_v2.Bones)i} Unity Angle: {unity_angle}, My Angle {angle}");
-            pose_reward_sum += GeoUtils.wrap_angle(angle);
+                // From Stack Overflow:
+                //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
+                // diff * q1 = q2  --->  diff = q2 * inverse(q1)
+                Quaternion diff = sim_bone.localRotation * Quaternion.Inverse(kin_bone.localRotation);
+                //Vector3 axis;
+                // https://stackoverflow.com/questions/21513637/dot-product-of-two-quaternion-rotations
+                // angle = 2*atan2(q.vec.length(), q.w)
+                //double sqrd_dot =  Math.Pow(Quaternion.Dot(kin_bone.localRotation, sim_bone.localRotation), 2);
+                //double angle = Math.Acos(2 * sqrd_dot - 1);
+                //diff.ToAngleAxis(out angle, out axis);
+
+                Vector3 diff_vec = new Vector3(diff.x, diff.y, diff.z);
+                double angle = 2 * Math.Atan2(diff_vec.magnitude, diff.w);
+                // We want the magnitude of the diff so we take abs value
+                angle = Math.Abs(GeoUtils.wrap_radians((float)angle));
+                //double unity_angle = Quaternion.Angle(sim_bone.localRotation, kin_bone.localRotation);
+                loss = (float) angle;
+            }
+            totalLoss += loss;
+            //Debug.Log($"Bone: {(mm_v2.Bones)i} Quaternion loss: {loss}, geoDesicloss {geoDesicloss}");
         }
-        pose_reward = Math.Exp((-10f / nbodies) * pose_reward_sum);
+        pose_reward = Math.Exp((-10f / nbodies) * totalLoss);
+        //double geodesicTotalReward  = Math.Exp((-10f / nbodies) * geodesicTotalRewardSum);
+        //Debug.Log($"pose_reward_sum: {pose_reward_sum} Quaternion reward: {pose_reward} " +
+        //    $"  geodesicTotalRewardSum: {geodesicTotalRewardSum} geodesicTotalReward: {geodesicTotalReward}");
 
     }
 

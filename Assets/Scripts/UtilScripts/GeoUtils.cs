@@ -349,6 +349,12 @@ public static class GeoUtils
         angle %= 360;
         return angle > 180 ? angle - 360 : angle;
     }
+
+    public static float wrap_radians(float rads)
+    {
+        rads %= Mathf.PI;
+        return rads > Mathf.PI / 2 ? rads - Mathf.PI : rads;
+    }
     public static float wrap_anglef (float angle) // f for float
     {
         angle %= 360;
