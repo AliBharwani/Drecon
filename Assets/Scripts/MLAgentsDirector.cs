@@ -50,6 +50,9 @@ public class MLAgentsDirector : Agent
     internal bool normalizeObservations = false;
     internal bool normalizeLimitedDOFOutputs = true;
     internal bool useGeodesicForAngleDiff = false;
+    internal bool normalizeRewardComponents = false;
+    internal bool networkControlsAllJoints = false;
+
     internal float poseRewardMultiplier = -10f / 23f;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
@@ -64,7 +67,7 @@ public class MLAgentsDirector : Agent
     private int lastSimCharTeleportFixedUpdate = 0;
     private bool isInitialized;
 
-    float[] prev_action_output;
+    float[] prevActionOutput;
     int numActions;
     int numObservations;
     database motionDB;
@@ -105,6 +108,13 @@ public class MLAgentsDirector : Agent
     internal bool projectileTraining = false;
     internal int solverIterations;
 
+    // Reward Normalizers 
+    //Normalizer posRewardNormalizer, velRewardNormalizer, localPoseRewardNormalizer, cmVelRewardNormalizer, fallFactorNormalizer;
+    Normalizer posRewardNormalizer = new Normalizer();
+    Normalizer velRewardNormalizer = new Normalizer();
+    Normalizer localPoseRewardNormalizer = new Normalizer();
+    Normalizer cmVelRewardNormalizer = new Normalizer();
+
     public override void CollectObservations(VectorSensor sensor)
     {
         if (!isInitialized)
@@ -126,22 +136,28 @@ public class MLAgentsDirector : Agent
         float[] curActions = actionBuffers.ContinuousActions.Array;
         float[] finalActions = new float[numActions];
         for (int i = 0; i < numActions; i++)
-           finalActions[i] = ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prev_action_output[i];
-        prev_action_output = finalActions;
+           finalActions[i] = ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
+        prevActionOutput = finalActions;
         Quaternion[] curRotations = MMScript.bone_rotations;
-        if (actionsAre6DRotations)
+
+        if (networkControlsAllJoints)
+            applyActionsToAllFullDOFJoints(finalActions, curRotations);
+        else if (actionsAre6DRotations)
             applyActionsWith6DRotations(finalActions, curRotations);
         else if (actionsAreEulerRotations)
             applyActionsAsEulerRotations(finalActions, curRotations);
         else
             applyActionsAsAxisAngleRotations(finalActions, curRotations);
 
+        mm_v2.Bones[] limitedDOFBonesToUse = networkControlsAllJoints ? TestDirector.allLimitedDOFBones : limitedDOFBones;
+        int limitedDOFActionOffset = networkControlsAllJoints ? TestDirector.allFullDOFBones.Length * 6 :
+                                        fullDOFBones.Length * (actionsAre6DRotations ? 6 : 3);
 
-        for (int i = 0; i < limitedDOFBones.Length; i++)
+        for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
         {
-            int boneIdx = (int)limitedDOFBones[i];
+            int boneIdx = (int)limitedDOFBonesToUse[i];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
-            int finalActionsIdx = i + fullDOFBones.Length * (actionsAre6DRotations ? 6 : 3);
+            int finalActionsIdx = i + limitedDOFActionOffset;
             float output = finalActions[finalActionsIdx];
             Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
             var zDrive = ab.zDrive;
@@ -229,6 +245,20 @@ public class MLAgentsDirector : Agent
             ab.SetDriveRotation(newTargetRot.normalized);
         }
     }
+    private void applyActionsToAllFullDOFJoints(float[] finalActions, Quaternion[] curRotations)
+    {
+        for (int i = 0; i < TestDirector.allFullDOFBones.Length; i++)
+        {
+            int boneIdx = (int)TestDirector.allFullDOFBones[i];
+            ArticulationBody ab = simChar.boneToArtBody[boneIdx];
+            Vector3 outputV1 = new Vector3(finalActions[i * 6], finalActions[i * 6 + 1], finalActions[i * 6 + 2]);
+            Vector3 outputV2 = new Vector3(finalActions[i * 6 + 3], finalActions[i * 6 + 4], finalActions[i * 6 + 5]);
+            Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
+            Quaternion newTargetRot = curRotations[boneIdx] * networkAdjustment;
+            ab.SetDriveRotation(newTargetRot.normalized);
+        }
+    }
+    
     public override void Heuristic(in ActionBuffers actionsout)
     {
 
@@ -314,11 +344,13 @@ public class MLAgentsDirector : Agent
             simChar.boneSurfacePts[i] = new Vector3[6];
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
-
         projectile = Instantiate(projectilePrefab, simulatedCharObj.transform.position + Vector3.up, Quaternion.identity);
         projectileCollider = projectile.GetComponent<Collider>();
         projectileRB = projectile.GetComponent<Rigidbody>();
-        UpdateCMData(false);
+        if (!projectileTraining)
+            projectile.SetActive(false);
+
+            UpdateCMData(false);
         bone_pos_mins = new Vector3[stateBones.Length];
         bone_pos_maxes = new Vector3[stateBones.Length];
         bone_vel_mins = new Vector3[stateBones.Length];
@@ -327,10 +359,13 @@ public class MLAgentsDirector : Agent
             ReadMinsAndMaxes();
         //else
         //MMScript.run_max_speed = true;
-        numActions = (fullDOFBones.Length * (actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length;
-        Debug.Log($"numActions: {numActions}");
-        numObservations = 85 + numActions; // 131
-        prev_action_output = new float[numActions];
+        if (networkControlsAllJoints)
+            numActions = TestDirector.allFullDOFBones.Length * 6 + TestDirector.allLimitedDOFBones.Length; // 102
+        else 
+            numActions = (fullDOFBones.Length * (actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length;
+        //Debug.Log($"numActions: {numActions}");
+        numObservations = 85 + numActions; // 131 or 187
+        prevActionOutput = new float[numActions];
         isInitialized = true;
     }
 
@@ -570,6 +605,7 @@ public class MLAgentsDirector : Agent
         simulatedCharObj.layer = layer;
         foreach (var child in simulatedCharObj.GetComponentsInChildren<Transform>())
             child.gameObject.layer = layer;
+
         projectile.layer = layer;
     }
 
@@ -579,27 +615,28 @@ public class MLAgentsDirector : Agent
     // returns TRUE if episode ended
     private bool calcAndSetRewards()
     {
-        bool heads_1m_apart;
-        double pos_reward, vel_reward, local_pose_reward, cm_vel_reward, fall_factor;
-        calcFallFactor(out fall_factor, out heads_1m_apart);
-        if (heads_1m_apart)
+        bool heads1mApart;
+        double posReward, velReward, localPoseReward, cmVelReward, fallFactor;
+        calcFallFactor(out fallFactor, out heads1mApart);
+        if (heads1mApart)
         {
             finalReward = EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
             SetReward(EPISODE_END_REWARD);
             EndEpisode();
             return true;
-        } else if (curFixedUpdate - N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT < lastSimCharTeleportFixedUpdate)
+        }
+        // Calc them even if we don't use them for normalizer sake
+        calcPosAndVelReward(out posReward, out velReward);
+        calcLocalPoseReward(out localPoseReward);
+        calcCMVelReward(out cmVelReward);
+        if (curFixedUpdate - N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT < lastSimCharTeleportFixedUpdate)
         {
             finalReward = 0f;
         } else
         {
-            finalReward = 1f;
-            calcPosAndVelReward(out pos_reward, out vel_reward);
-            calcLocalPoseReward(out local_pose_reward);
-            calcCMVelReward(out cm_vel_reward);
-            finalReward = (float)(fall_factor * (pos_reward + vel_reward + local_pose_reward + cm_vel_reward));
-            //Debug.Log($"fall_factor: {fall_factor}, pos_reward: {pos_reward}, vel_reward: {vel_reward}, local_pose_reward: {local_pose_reward}, cm_vel_reward: {cm_vel_reward}");
+            finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
+            //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         }
         //Debug.Log($"final_reward: {finalReward}");
         //updateMeanReward(final_reward);
@@ -739,7 +776,7 @@ public class MLAgentsDirector : Agent
             // In order to keep it between [-1, 1] 
             state[state_idx++] = normalizeObservations ? (simChar.boneState[i] - kinChar.boneState[i]) / 2 : simChar.boneState[i] - kinChar.boneState[i];
         for (int i = 0; i < numActions; i++)
-            state[state_idx++] = prev_action_output[i];
+            state[state_idx++] = prevActionOutput[i];
 
    
         if (state_idx != numObservations)
@@ -832,37 +869,42 @@ public class MLAgentsDirector : Agent
         return Vector3.zero;
     }
 
-    void calcPosAndVelReward(out double pos_reward, out double vel_reward)
+    void calcPosAndVelReward(out double posReward, out double velReward)
     {
         // Position reward
-        double pos_diffs_sum = 0f;
-        double vel_diffs_sum = 0f;
+        double posDiffsSum = 0f;
+        double velDiffsSum = 0f;
         for (int i = 1; i < 23; i++)
         {
             for (int j = 0; j < 6; j++)
             {
-                pos_diffs_sum += (kinChar.boneSurfacePts[i][j] - simChar.boneSurfacePts[i][j]).magnitude;
-                vel_diffs_sum += (kinChar.boneSurfaceVels[i][j] - simChar.boneSurfaceVels[i][j]).magnitude;
+                posDiffsSum += (kinChar.boneSurfacePts[i][j] - simChar.boneSurfacePts[i][j]).magnitude;
+                velDiffsSum += (kinChar.boneSurfaceVels[i][j] - simChar.boneSurfaceVels[i][j]).magnitude;
             }
         }
-        pos_reward = Math.Exp((-10f / (nbodies * 6)) *  pos_diffs_sum );
-        vel_reward = Math.Exp((-1f / (nbodies * 6)) *  vel_diffs_sum );
+        posReward = Math.Exp((-10f / (nbodies * 6)) *  posDiffsSum );
+        velReward = Math.Exp((-1f / (nbodies * 6)) *  velDiffsSum );
+        if (normalizeRewardComponents)
+        {
+            posReward = posRewardNormalizer.getNormalized((float)posReward);
+            velReward = velRewardNormalizer.getNormalized((float)velReward);
+        }
     }
 
-    void calcLocalPoseReward(out double pose_reward)
+    void calcLocalPoseReward(out double poseReward)
     {
         double totalLoss = 0;
         for (int i = 1; i < 23; i++)
         {
-            Transform kin_bone = kinChar.boneToTransform[i];
-            Transform sim_bone = simChar.boneToTransform[i];
+            Transform kinBone = kinChar.boneToTransform[i];
+            Transform simBone = simChar.boneToTransform[i];
             float loss;
             // After some testing, the results from either of these should be identical
 
             if (useGeodesicForAngleDiff)
             {
-                Matrix4x4 kinRotation = Matrix4x4.Rotate(kin_bone.localRotation);
-                Matrix4x4 simRotation = Matrix4x4.Rotate(sim_bone.localRotation);
+                Matrix4x4 kinRotation = Matrix4x4.Rotate(kinBone.localRotation);
+                Matrix4x4 simRotation = Matrix4x4.Rotate(simBone.localRotation);
                 Matrix4x4 lossMat = (simRotation * kinRotation.transpose);
                 float trace = lossMat[0, 0] + lossMat[1, 1] + lossMat[2, 2];
                 // Need clamping because Acos will throw NAN for values outside [-1, 1]
@@ -874,7 +916,7 @@ public class MLAgentsDirector : Agent
                 // From Stack Overflow:
                 //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
                 // diff * q1 = q2  --->  diff = q2 * inverse(q1)
-                Quaternion diff = sim_bone.localRotation * Quaternion.Inverse(kin_bone.localRotation);
+                Quaternion diff = simBone.localRotation * Quaternion.Inverse(kinBone.localRotation);
                 //Vector3 axis;
                 // https://stackoverflow.com/questions/21513637/dot-product-of-two-quaternion-rotations
                 // angle = 2*atan2(q.vec.length(), q.w)
@@ -892,25 +934,31 @@ public class MLAgentsDirector : Agent
             totalLoss += loss;
             //Debug.Log($"Bone: {(mm_v2.Bones)i} Quaternion loss: {loss}, geoDesicloss {geodesicLoss}");
         }
-        pose_reward = Math.Exp(-1f * poseRewardMultiplier * totalLoss);
+        poseReward = Math.Exp(-1f * poseRewardMultiplier * totalLoss);
+        if (normalizeRewardComponents)
+        {
+            poseReward = localPoseRewardNormalizer.getNormalized((float)poseReward);
+        }
         //double geodesicTotalReward = Math.Exp(-1f * poseRewardMultiplier * geodesicTotalRewardSum);
         //Debug.Log($"pose_reward_sum: {pose_reward_sum} Quaternion reward: {pose_reward} " +
         //    $"  geodesicTotalRewardSum: {geodesicTotalRewardSum} geodesicTotalReward: {geodesicTotalReward}");
 
     }
 
-    void calcCMVelReward(out double cm_vel_reward)
+    void calcCMVelReward(out double cmVelReward)
     {
-        cm_vel_reward = Math.Exp(-1d * (kinChar.cmVel - simChar.cmVel).magnitude);
+        cmVelReward = Math.Exp(-1d * (kinChar.cmVel - simChar.cmVel).magnitude);
+        if (normalizeRewardComponents)
+            cmVelReward = cmVelRewardNormalizer.getNormalized((float)cmVelReward);
     }
 
-    void calcFallFactor(out double fall_factor, out bool heads_1m_apart)
+    void calcFallFactor(out double fallFactor, out bool heads1mApart)
     {
-        Vector3 kin_head_pos = kinChar.boneToTransform[(int)Bone_Head].position;
-        Vector3 sim_head_pos = simChar.boneToTransform[(int)Bone_Head].position;
-        float head_distance = (kin_head_pos - sim_head_pos).magnitude;
-        heads_1m_apart = head_distance > 1f;
-        fall_factor = Math.Clamp(1.3 - 1.4 * head_distance, 0d, 1d);
+        Vector3 kinHeadPos = kinChar.boneToTransform[(int)Bone_Head].position;
+        Vector3 simHeadPos = simChar.boneToTransform[(int)Bone_Head].position;
+        float headDistance = (kinHeadPos - simHeadPos).magnitude;
+        heads1mApart = headDistance > 1f;
+        fallFactor = Math.Clamp(1.3 - 1.4 * headDistance, 0d, 1d);
     }
 
     // Get 6 points on capsule object

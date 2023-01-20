@@ -43,8 +43,11 @@ public class SimCharController : MonoBehaviour
     {
         for(int i = 1; i < 23; i++)
         {
-            Debug.Log($"Setting {(mm_v2.Bones)i} to {_config.boneToStiffness[i]}");
-            boneToArtBody[i].SetAllDriveStiffness(_config.boneToStiffness[i] * 2f);
+            //Debug.Log($"Setting {(mm_v2.Bones)i} to {_config.boneToStiffness[i
+            if (_config.MusclePowers.Any(x => x.Bone == (mm_v2.Bones)i))
+                boneToArtBody[i].SetAllDriveStiffness(_config.MusclePowers.First(x => x.Bone == (mm_v2.Bones)i).PowerVector);
+            else
+                boneToArtBody[i].SetAllDriveStiffness(_config.boneToStiffness[i]);
             boneToArtBody[i].SetAllDriveDamping(_config.damping);
             boneToArtBody[i].SetAllForceLimit(_config.forceLimit);
         }
@@ -141,7 +144,7 @@ public class SimCharController : MonoBehaviour
     {
         if (db == null)
             db = getDB();
-
+        //Debug.Log($"Teleport sim char called");
         //Destroy(simulated_char);
         //simulated_char = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
         //my_initalize();
@@ -155,7 +158,9 @@ public class SimCharController : MonoBehaviour
         // simRootPosition + simHipPositionOffset = kinHipPosition 
         // simRootPosition = kinHipPosition - simHipPositionOffset
         //Debug.Log($"simRootPosition: {sim_char.trans.position}  simHipPositionOffset : {simHipPositionOffset} kinHipPosition: {kinHips.position}");
-        sim_char.root.TeleportRoot(kinHips.position + simHipPositionOffset, kin_root.rotation);
+
+        // We teleport the sim char a little higher to prevent it from clipping into the ground and bouncing off
+        sim_char.root.TeleportRoot(kinHips.position + simHipPositionOffset + Vector3.up*.15f, kin_root.rotation);
         sim_char.root.resetJointPhysics();
 
         for (int i = 1; i < 23; i++)

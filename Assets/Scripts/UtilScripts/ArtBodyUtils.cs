@@ -193,6 +193,23 @@ public static class ArtBodyUtils
         zDrive.stiffness = stiffness;
         body.zDrive = zDrive;
     }
+
+    public static void SetAllDriveStiffness(this ArticulationBody body, Vector3 stiffness)
+    {
+
+        // assign to the drive targets...
+        ArticulationDrive xDrive = body.xDrive;
+        xDrive.stiffness = stiffness.x;
+        body.xDrive = xDrive;
+
+        ArticulationDrive yDrive = body.yDrive;
+        yDrive.stiffness = stiffness.y;
+        body.yDrive = yDrive;
+
+        ArticulationDrive zDrive = body.zDrive;
+        zDrive.stiffness = stiffness.z;
+        body.zDrive = zDrive;
+    }
     public static void SetAllDriveDamping(this ArticulationBody body, float damping)
     {
 

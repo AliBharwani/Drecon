@@ -2,22 +2,22 @@
     "Drecon": {
         "checkpoints": [
             {
-                "steps": 660,
-                "file_path": "results\\ignore\\Drecon\\Drecon-660.onnx",
-                "reward": 1.2569531513886019,
-                "creation_time": 1674032294.5690577,
+                "steps": 2410,
+                "file_path": "results\\ignore\\Drecon\\Drecon-2410.onnx",
+                "reward": 2.3468897767066954,
+                "creation_time": 1674208266.9307675,
                 "auxillary_file_paths": [
-                    "results\\ignore\\Drecon\\Drecon-660.pt"
+                    "results\\ignore\\Drecon\\Drecon-2410.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 660,
+            "steps": 2410,
             "file_path": "results\\ignore\\Drecon.onnx",
-            "reward": 1.2569531513886019,
-            "creation_time": 1674032294.5690577,
+            "reward": 2.3468897767066954,
+            "creation_time": 1674208266.9307675,
             "auxillary_file_paths": [
-                "results\\ignore\\Drecon\\Drecon-660.pt"
+                "results\\ignore\\Drecon\\Drecon-2410.pt"
             ]
         }
     },

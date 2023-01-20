@@ -810,6 +810,106 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 530870745}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &710360376
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 710360380}
+  - component: {fileID: 710360379}
+  - component: {fileID: 710360378}
+  - component: {fileID: 710360377}
+  m_Layer: 0
+  m_Name: ML_Director_AllJointsControlled
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &710360377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710360376}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 885ff57caa2445342b3bd4a3c63fbcac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &710360378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710360376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d1c4e0b1822b495aa52bc52839ecb30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_BrainParameters:
+    VectorObservationSize: 187
+    NumStackedVectorObservations: 1
+    m_ActionSpec:
+      m_NumContinuousActions: 102
+      BranchSizes: 
+    VectorActionSize: 66000000
+    VectorActionDescriptions: []
+    VectorActionSpaceType: 1
+    hasUpgradedBrainParametersWithActionSpec: 1
+  m_Model: {fileID: 0}
+  m_InferenceDevice: 1
+  m_BehaviorType: 0
+  m_BehaviorName: Drecon
+  TeamId: 0
+  m_UseChildSensors: 1
+  m_UseChildActuators: 1
+  m_ObservableAttributeHandling: 0
+--- !u!114 &710360379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710360376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38613307e25bf4af8afeae13fd7627f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
+  simulated_char_prefab: {fileID: 7967488750888317942, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+  kinematic_char_prefab: {fileID: 2015968129522336309, guid: 259da14d6aa2e5c4ba981ebc69ed148e, type: 3}
+  reportMeanRewardEveryNSteps: 10000
+  use_debug_mats: 1
+  genMinsAndMaxes: 0
+  projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  gizmoSphereRad: 0.01
+  drawGizmos: 0
+--- !u!4 &710360380
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 710360376}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &767361687
 GameObject:
   m_ObjectHideFlags: 0
@@ -957,7 +1057,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &870766689
 BoxCollider:
@@ -1234,7 +1334,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1249444428 stripped
 Transform:
@@ -1302,23 +1402,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/6DRotationsV2
+  writeToFilePath: ../results/AllJointsControlled
   filename: unityconfig.json
-  loadFromFilePath: ../results/6DRotationsV2
-  solverIterations: 32
-  actionsAreEulerRotations: 1
-  actionsAre6DRotations: 1
+  loadFromFilePath: ../results/AllJointsControlled
+  solverIterations: 255
+  actionsAreEulerRotations: 0
+  actionsAre6DRotations: 0
   normalizeObservations: 1
   normalizeLimitedDOFOutputs: 1
+  normalizeRewardComponents: 0
+  networkControlsAllJoints: 1
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 0
   EVALUATE_EVERY_K_STEPS: 2
-  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 3
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  projectileTraining: 1
+  projectileTraining: 0
   LAUNCH_FREQUENCY: 2
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
@@ -1370,8 +1472,35 @@ MonoBehaviour:
   - 1000
   - 2000
   - 1000
-  forceLimit: 1000
-  damping: 50
+  MusclePowers:
+  - Bone: 1
+    PowerVector: {x: 4000, y: 4000, z: 4000}
+  - Bone: 11
+    PowerVector: {x: 4000, y: 4000, z: 4000}
+  - Bone: 12
+    PowerVector: {x: 4000, y: 4000, z: 4000}
+  - Bone: 6
+    PowerVector: {x: 4000, y: 4000, z: 12000}
+  - Bone: 2
+    PowerVector: {x: 4000, y: 4000, z: 12000}
+  - Bone: 7
+    PowerVector: {x: 8000, y: 8000, z: 8000}
+  - Bone: 3
+    PowerVector: {x: 8000, y: 8000, z: 8000}
+  - Bone: 8
+    PowerVector: {x: 2000, y: 2000, z: 4000}
+  - Bone: 4
+    PowerVector: {x: 2000, y: 2000, z: 4000}
+  - Bone: 20
+    PowerVector: {x: 2000, y: 2000, z: 2000}
+  - Bone: 16
+    PowerVector: {x: 2000, y: 2000, z: 2000}
+  - Bone: 21
+    PowerVector: {x: 4000, y: 4000, z: 4000}
+  - Bone: 17
+    PowerVector: {x: 4000, y: 4000, z: 4000}
+  forceLimit: 3.402823e+38
+  damping: 100
   pGainMultiplier: 0.5
 --- !u!4 &1357924715
 Transform:
@@ -1386,7 +1515,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1394463713
 GameObject:
@@ -1419,7 +1548,7 @@ Transform:
   - {fileID: 965252872}
   - {fileID: 1249444428}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1413249960
 PrefabInstance:
@@ -1582,7 +1711,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_RootOrder
-      value: 11
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1856,9 +1985,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 28eb72de0d586e841b4532d752d0f1d8, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: b4f222e0bb34c91419f83af09707da56, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1936,6 +2065,7 @@ MonoBehaviour:
   numAgents: 2
   modelDirector: {fileID: 767361687}
   model6DDirector: {fileID: 2033970009}
+  modelAllJointsDirector: {fileID: 710360376}
   reportMeanRewardEveryNSteps: 100000
   targetFrameRate: 30
   fps: 60
@@ -2328,7 +2458,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1203016326835099791, guid: 259da14d6aa2e5c4ba981ebc69ed148e, type: 3}
       propertyPath: m_RootOrder
-      value: 10
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 1203016326835099791, guid: 259da14d6aa2e5c4ba981ebc69ed148e, type: 3}
       propertyPath: m_LocalPosition.x

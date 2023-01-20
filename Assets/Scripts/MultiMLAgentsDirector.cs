@@ -8,6 +8,7 @@ public class MultiMLAgentsDirector : MonoBehaviour
     public int numAgents = 5;
     public GameObject modelDirector;
     public GameObject model6DDirector;
+    public GameObject modelAllJointsDirector;
 
     private MLAgentsDirector[] directors;
     public int reportMeanRewardEveryNSteps = 10000;
@@ -44,23 +45,27 @@ public class MultiMLAgentsDirector : MonoBehaviour
     }
     private MLAgentsDirector createMLAgent()
     {
-        GameObject obj = _config.actionsAre6DRotations ? Instantiate(model6DDirector) : Instantiate(modelDirector);
+        GameObject obj = _config.networkControlsAllJoints ? Instantiate(modelAllJointsDirector) : _config.actionsAre6DRotations ? Instantiate(model6DDirector) : Instantiate(modelDirector);
         MLAgentsDirector director = obj.GetComponent<MLAgentsDirector>();
-        director.EVALUATE_EVERY_K_STEPS = _config.EVALUATE_EVERY_K_STEPS;
+        director.EVALUATE_EVERY_K_STEPS = _config.EVALUATE_EVERY_K_STEPS; 
         director.normalizeObservations = _config.normalizeObservations;
         director.resetKinCharOnEpisodeEnd = _config.resetKinCharOnEpisodeEnd; 
         director.actionsAreEulerRotations = _config.actionsAreEulerRotations;
         director.normalizeLimitedDOFOutputs = _config.normalizeLimitedDOFOutputs;
         director.useGeodesicForAngleDiff = _config.useGeodesicForAngleDiff;
-        director.poseRewardMultiplier = _config.poseRewardMultiplier;
-        if (_config.actionsAre6DRotations)
-        {
-            //int numActions = MLAgentsDirector.fullDOFBones.Length * 6; // Should be 7 3-DOF bones, so 42 Actions
-            //numActions += MLAgentsDirector.limitedDOFBones.Length;
-            //obj.GetComponent<BehaviorParameters>().BrainParameters.ActionSpec = new Unity.MLAgents.Actuators.ActionSpec(numActions);
-            //obj.GetComponent<BehaviorParameters>().BrainParameters.VectorObservationSize = 110 + 21;
-            director.actionsAre6DRotations = true;
-        }
+        director.poseRewardMultiplier = _config.poseRewardMultiplier; 
+        director.normalizeRewardComponents = _config.normalizeRewardComponents;
+        director.networkControlsAllJoints = _config.networkControlsAllJoints;
+        //if (_config.actionsAre6DRotations)
+        //{
+        //int numActions = MLAgentsDirector.fullDOFBones.Length * 6; // Should be 7 3-DOF bones, so 42 Actions
+        //numActions += MLAgentsDirector.limitedDOFBones.Length;
+        //obj.GetComponent<BehaviorParameters>().BrainParameters.ActionSpec = new Unity.MLAgents.Actuators.ActionSpec(numActions);
+        //obj.GetComponent<BehaviorParameters>().BrainParameters.VectorObservationSize = 110 + 21;
+        //director.actionsAre6DRotations = true;
+        //}
+        director.actionsAre6DRotations = _config.actionsAre6DRotations;
+
         director.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = _config.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT;
         director.EPISODE_END_REWARD = _config.EPISODE_END_REWARD;
         director.MAX_EPISODE_LENGTH_SECONDS = _config.MAX_EPISODE_LENGTH_SECONDS;

@@ -17,6 +17,9 @@ public class ConfigWriter : MonoBehaviour
     public bool actionsAre6DRotations = false;
     public bool normalizeObservations = true;
     public bool normalizeLimitedDOFOutputs = true;
+    public bool normalizeRewardComponents = false;
+    public bool networkControlsAllJoints = false;
+
     public bool useGeodesicForAngleDiff = false;
     public float poseRewardMultiplier = 1f / 10f;
     public bool resetKinCharOnEpisodeEnd = false;
@@ -33,7 +36,14 @@ public class ConfigWriter : MonoBehaviour
     // Art body params
     public string[] boneToNames = new string[23];
     public  float[] boneToStiffness = new float[23];
+    [System.Serializable]
+    public class MusclePower
+    {
+        public mm_v2.Bones Bone;
+        public Vector3 PowerVector;
+    }
 
+    public List<MusclePower> MusclePowers;
     public float forceLimit;
     public  float damping;
 
