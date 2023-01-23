@@ -863,7 +863,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: 6f516fb7d2b578f45a8df45b96b2f505, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 0
   m_BehaviorName: Drecon
@@ -1402,9 +1402,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/AllJointsControlled
+  writeToFilePath: ../results/AllJointsRestKin
   filename: unityconfig.json
-  loadFromFilePath: ../results/AllJointsControlled
+  loadFromFilePath: ../results/AllJointsRestKin
   solverIterations: 255
   actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
@@ -1414,14 +1414,14 @@ MonoBehaviour:
   networkControlsAllJoints: 1
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
-  resetKinCharOnEpisodeEnd: 0
+  resetKinCharOnEpisodeEnd: 1
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  projectileTraining: 0
-  LAUNCH_FREQUENCY: 2
+  projectileTraining: 1
+  LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
   boneToNames:
@@ -1987,7 +1987,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: b4f222e0bb34c91419f83af09707da56, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
