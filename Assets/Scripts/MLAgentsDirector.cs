@@ -52,11 +52,17 @@ public class MLAgentsDirector : Agent
     internal bool useGeodesicForAngleDiff = false;
     internal bool normalizeRewardComponents = false;
     internal bool networkControlsAllJoints = false;
+    internal float simulationVelocityHalflife;
+    internal bool walkOnly = false;
 
     internal float poseRewardMultiplier = -10f / 23f;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
     internal GameObject simulatedCharObj;
+
+    public BoxCollider groundCollider;
+    private float groundColliderY = 0f;
+    private float toeColliderRadius = 0f;
     public GameObject simulated_char_prefab;
     public GameObject kinematic_char_prefab;
     public int reportMeanRewardEveryNSteps = 10000;
@@ -304,9 +310,14 @@ public class MLAgentsDirector : Agent
             kinematicCharObj.GetComponent<ArtBodyTester>().set_all_material(WhiteMatTransparent);
             simulatedCharObj.GetComponent<ArtBodyTester>().set_all_material(RedMatTransparent);
         }
+
+
         MMScript = kinematicCharObj.GetComponent<mm_v2>();
         if (!MMScript.is_initalized)
             return;
+        MMScript.simulation_velocity_halflife = simulationVelocityHalflife;
+        MMScript.walk_only = walkOnly;
+
         kinChar = new CharInfo(nbodies, stateBones.Length);
         kinChar.trans = kinematicCharObj.transform;
         kinChar.boneToTransform = MMScript.boneToTransform;
@@ -344,6 +355,8 @@ public class MLAgentsDirector : Agent
             simChar.boneSurfacePts[i] = new Vector3[6];
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
+        groundColliderY = groundCollider.bounds.max.y;
+        toeColliderRadius = simChar.boneToCollider[(int)Bone_RightToe].GetComponent<CapsuleCollider>().radius;
         projectile = Instantiate(projectilePrefab, simulatedCharObj.transform.position + Vector3.up, Quaternion.identity);
         projectileCollider = projectile.GetComponent<Collider>();
         projectileRB = projectile.GetComponent<Rigidbody>();
@@ -364,7 +377,7 @@ public class MLAgentsDirector : Agent
         else 
             numActions = (fullDOFBones.Length * (actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length;
         //Debug.Log($"numActions: {numActions}");
-        numObservations = 85 + numActions; // 131 or 187
+        numObservations = 88 + numActions; // 131 or 187
         prevActionOutput = new float[numActions];
         isInitialized = true;
     }
@@ -396,7 +409,9 @@ public class MLAgentsDirector : Agent
             MMScript.Reset();
             MMScript.FixedUpdate();
         }
-        SimCharController.teleportSimChar(simChar, kinChar, true);
+        float verticalOffset = getVerticalOffset();
+        //Debug.Log($"Vertical offset: {verticalOffset}");
+        SimCharController.teleportSimChar(simChar, kinChar, true, verticalOffset + .025f);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
     }
 
@@ -695,6 +710,8 @@ public class MLAgentsDirector : Agent
 
     /*
     At each control step the policy is provided with a state s in R^110
+
+    adding my own: difference in center of mass for each character
    The state contains:
    Center of Mass velocity in R^3 for kinematic and simulated character
 
@@ -739,6 +756,8 @@ public class MLAgentsDirector : Agent
     {
         float[] state = new float[numObservations];
         int state_idx = 0;
+        Vector3 cm_distance = kinChar.cm - simChar.cm; // Since we terminate when head distance > 1, cm distance should be between 0~1 anyway
+        copyVecIntoArray(ref state, ref state_idx, cm_distance);
 
         Vector3 kin_cm_vel_normalized = resolveVelInKinematicRefFrame(kinChar.cmVel);
         AddGizmoLine(kinChar.cm, kinChar.cm + kinChar.cmVel, Color.red);
@@ -996,6 +1015,15 @@ public class MLAgentsDirector : Agent
             outputs[i * 2 + 1] = obj.transform.TransformPoint(center - variable * axis);
         }
 
+    }
+
+    private float getVerticalOffset()
+    {
+        Transform leftToe = simChar.boneToTransform[(int)Bone_LeftToe];
+        Transform rightToe = simChar.boneToTransform[(int)Bone_RightToe];
+        float minToeY = Mathf.Min(leftToe.position.y, rightToe.position.y) - toeColliderRadius;
+        float maxGroundPenetration = Mathf.Max(0f, groundColliderY - minToeY);
+        return maxGroundPenetration;
     }
     public static void getSixPointsOnCollider(GameObject obj, ref Vector3[] outputs, mm_v2.Bones bone)
     {

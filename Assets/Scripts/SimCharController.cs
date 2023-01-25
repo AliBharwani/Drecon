@@ -140,7 +140,7 @@ public class SimCharController : MonoBehaviour
 
     public static database db;
 
-    public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char, bool setDriveTargets = false)
+    public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char, bool setDriveTargets = false, float verticalOffset = .15f)
     {
         if (db == null)
             db = getDB();
@@ -160,7 +160,8 @@ public class SimCharController : MonoBehaviour
         //Debug.Log($"simRootPosition: {sim_char.trans.position}  simHipPositionOffset : {simHipPositionOffset} kinHipPosition: {kinHips.position}");
 
         // We teleport the sim char a little higher to prevent it from clipping into the ground and bouncing off
-        sim_char.root.TeleportRoot(kinHips.position + simHipPositionOffset + Vector3.up*.15f, kin_root.rotation);
+        //Vector3 verticalOffset = ;
+        sim_char.root.TeleportRoot(kinHips.position + simHipPositionOffset + Vector3.up * verticalOffset, kin_root.rotation);
         sim_char.root.resetJointPhysics();
 
         for (int i = 1; i < 23; i++)

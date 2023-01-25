@@ -64,12 +64,14 @@ public class MultiMLAgentsDirector : MonoBehaviour
         //obj.GetComponent<BehaviorParameters>().BrainParameters.VectorObservationSize = 110 + 21;
         //director.actionsAre6DRotations = true;
         //}
-        director.actionsAre6DRotations = _config.actionsAre6DRotations;
+        director.actionsAre6DRotations = _config.actionsAre6DRotations; 
 
         director.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = _config.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT;
         director.EPISODE_END_REWARD = _config.EPISODE_END_REWARD;
         director.MAX_EPISODE_LENGTH_SECONDS = _config.MAX_EPISODE_LENGTH_SECONDS;
         director.ACTION_STIFFNESS_HYPERPARAM = _config.ACTION_STIFFNESS_HYPERPARAM;
+        director.simulationVelocityHalflife = _config.simulationVelocityHalflife;
+        director.walkOnly = _config.walkOnly;
 
         director.LAUNCH_FREQUENCY = _config.LAUNCH_FREQUENCY;
         director.LAUNCH_RADIUS = _config.LAUNCH_RADIUS;

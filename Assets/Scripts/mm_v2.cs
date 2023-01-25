@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 public class mm_v2 : MonoBehaviour
 {
     public bool gen_inputs = true;
+    public bool walk_only = false;
     public float MAX_WANDERING_RADIUS = 10f;
     private float prob_to_change_inputs = .001f;
     public enum Bones
@@ -283,7 +284,7 @@ public class mm_v2 : MonoBehaviour
             random_lstick_input =  Random.insideUnitCircle;
             // Random chance of making desired rotation face direction of velocity  
             is_strafing = Random.value <= .5f;
-            is_runbutton_pressed = Random.value <= .5f;
+            is_runbutton_pressed = !walk_only && Random.value <= .5f;
             Vector2 rotation_vec = is_strafing ?  Random.insideUnitCircle : random_lstick_input;
             desired_rotation =  Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y) ;
         } else if (!gen_inputs && gamepad != null)
@@ -510,8 +511,6 @@ public class mm_v2 : MonoBehaviour
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)
     {
-        desired_gait_update(Time.fixedDeltaTime);
-
         Vector2 lstick = gen_inputs ? random_lstick_input : gamepad.leftStick.ReadValue();
 
         // Find stick position local to current facing direction

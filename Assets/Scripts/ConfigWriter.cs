@@ -28,6 +28,8 @@ public class ConfigWriter : MonoBehaviour
     public float EPISODE_END_REWARD = -.5f;
     public int MAX_EPISODE_LENGTH_SECONDS = 20;
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
+    public float simulationVelocityHalflife = .27f;
+    public bool walkOnly = false;
     // PROJECTILE HYPER PARAMS
     public bool projectileTraining = true;
     public float LAUNCH_FREQUENCY = 1f;
