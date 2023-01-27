@@ -924,7 +924,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: a5ae6fecf159e064b961eb3a7ab8ac3a, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 0
   m_BehaviorName: Drecon
@@ -1466,7 +1466,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   writeToFilePath: ../results/WalkOnlyV1
-  filename: unityconfig.json
+  filename: unityconfig-56535590.json
   loadFromFilePath: ../results/WalkOnlyV1
   solverIterations: 80
   actionsAreEulerRotations: 0
@@ -1564,7 +1564,7 @@ MonoBehaviour:
     PowerVector: {x: 4000, y: 4000, z: 4000}
   - Bone: 17
     PowerVector: {x: 4000, y: 4000, z: 4000}
-  forceLimit: 3.402823e+38
+  forceLimit: 200
   damping: 100
   pGainMultiplier: 0.5
 --- !u!4 &1357924715

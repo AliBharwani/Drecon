@@ -201,6 +201,14 @@ public class ArtBodyTester : MonoBehaviour
                 ab.useGravity = useGravity;
         }
     }
+
+    public float forceLimit = float.MaxValue;
+    [ContextMenu("Set all art bodies force limit to force limit param")]
+    private void setAllArtBodyForceLimits()
+    {
+        foreach (var body in GetComponentsInChildren<ArticulationBody>())
+            body.SetAllForceLimit(forceLimit);
+    }
     [ContextMenu("Remove all anchor positions and rotations")]
     private void removeAllAnchorPositionsAndRotations()
     {

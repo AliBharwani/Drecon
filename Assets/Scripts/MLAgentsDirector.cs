@@ -295,6 +295,7 @@ public class MLAgentsDirector : Agent
             ab.SetDriveRotation(final);
         }
     }
+    private Vector3 feetBozSize;
     void customInit()
     {
         if (use_debug_mats)
@@ -346,6 +347,7 @@ public class MLAgentsDirector : Agent
             {
                 kinChar.boneToCollider[i] = ArtBodyTester.getChildBoxCollider(kinChar.boneToTransform[i].gameObject);
                 simChar.boneToCollider[i] = ArtBodyTester.getChildBoxCollider(simChar.boneToTransform[i].gameObject);
+                feetBozSize = kinChar.boneToCollider[i].GetComponent<BoxCollider>().size;
             } else { 
                 kinChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(kinChar.boneToTransform[i].gameObject);
                 simChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(simChar.boneToTransform[i].gameObject);
@@ -651,7 +653,7 @@ public class MLAgentsDirector : Agent
         } else
         {
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
-            //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
+            Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         }
         //Debug.Log($"final_reward: {finalReward}");
         //updateMeanReward(final_reward);
@@ -1017,12 +1019,33 @@ public class MLAgentsDirector : Agent
 
     }
 
+    private float getBottomMostPointOnFoot(Transform foot)
+    {
+        float x = feetBozSize.x / 2;
+        float y = feetBozSize.y / 2;
+        float z = feetBozSize.z / 2;
+        Vector3 topLeft = foot.TransformPoint(new Vector3(x, -y, z));
+        Vector3 topRight = foot.TransformPoint(new Vector3(x, -y, -z));
+        Vector3 bottomLeft = foot.TransformPoint(new Vector3(-x, -y, z));
+        Vector3 bottomRight = foot.TransformPoint(new Vector3(-x, -y, -z));
+        AddGizmoSphere(topLeft, Color.red);
+        AddGizmoSphere(topRight, Color.red);
+        AddGizmoSphere(bottomLeft, Color.red);
+        AddGizmoSphere(bottomRight, Color.red);
+
+        return Mathf.Min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+    }
+
     private float getVerticalOffset()
     {
-        Transform leftToe = simChar.boneToTransform[(int)Bone_LeftToe];
-        Transform rightToe = simChar.boneToTransform[(int)Bone_RightToe];
+        ClearGizmos();
+        Transform leftFoot = kinChar.boneToCollider[(int)Bone_LeftFoot].transform;
+        Transform rightFoot = kinChar.boneToCollider[(int)Bone_RightFoot].transform;
+        float minPointOnFoot = Mathf.Min(getBottomMostPointOnFoot(leftFoot), getBottomMostPointOnFoot(rightFoot));
+        Transform leftToe = kinChar.boneToTransform[(int)Bone_LeftToe];
+        Transform rightToe = kinChar.boneToTransform[(int)Bone_RightToe];
         float minToeY = Mathf.Min(leftToe.position.y, rightToe.position.y) - toeColliderRadius;
-        float maxGroundPenetration = Mathf.Max(0f, groundColliderY - minToeY);
+        float maxGroundPenetration = Mathf.Max(0f, groundColliderY - Mathf.Min(minPointOnFoot , minToeY));
         return maxGroundPenetration;
     }
     public static void getSixPointsOnCollider(GameObject obj, ref Vector3[] outputs, mm_v2.Bones bone)
@@ -1124,7 +1147,7 @@ public class MLAgentsDirector : Agent
             foreach ((Vector3 v, Color c) in gizmoSpheres)
             {
                 Gizmos.color = c;
-                Gizmos.DrawSphere(v, .1f);
+                Gizmos.DrawSphere(v, gizmoSphereRad);
             }
         }
 

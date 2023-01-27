@@ -330,9 +330,11 @@ public class mm_v2 : MonoBehaviour
         frameCounter++;
     }
 
+    public bool drawGizmos;
+
     private void OnDrawGizmos()
     {
-        if (!Application.isPlaying || trajectory_positions == null)
+        if (!drawGizmos || !Application.isPlaying || trajectory_positions == null)
             return;
         Gizmos.color = Color.blue;
         for (int i = 0; i < 4; i++)
