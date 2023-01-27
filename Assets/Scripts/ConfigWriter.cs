@@ -30,6 +30,7 @@ public class ConfigWriter : MonoBehaviour
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
     public float simulationVelocityHalflife = .27f;
     public bool walkOnly = false;
+    public bool useHandmadeColliders = false;
     // PROJECTILE HYPER PARAMS
     public bool projectileTraining = true;
     public float LAUNCH_FREQUENCY = 1f;

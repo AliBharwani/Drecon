@@ -54,7 +54,7 @@ public class MLAgentsDirector : Agent
     internal bool networkControlsAllJoints = false;
     internal float simulationVelocityHalflife;
     internal bool walkOnly = false;
-
+    internal bool useHandmadeColliders = false;
     internal float poseRewardMultiplier = -10f / 23f;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
@@ -65,6 +65,8 @@ public class MLAgentsDirector : Agent
     private float toeColliderRadius = 0f;
     public GameObject simulated_char_prefab;
     public GameObject kinematic_char_prefab;
+    public GameObject simulated_handmade_char_prefab;
+    public GameObject kinematic_handmade_char_prefab;
     public int reportMeanRewardEveryNSteps = 10000;
     private mm_v2 MMScript;
     private SimCharController SimCharController;
@@ -392,8 +394,8 @@ public class MLAgentsDirector : Agent
         if (motionDB == null)
             motionDB = database.Instance;
         nbodies = motionDB.nbones();
-        kinematicCharObj = Instantiate(kinematic_char_prefab, Vector3.zero, Quaternion.identity);
-        simulatedCharObj = Instantiate(simulated_char_prefab, Vector3.zero, Quaternion.identity);
+        kinematicCharObj = Instantiate(useHandmadeColliders ? kinematic_handmade_char_prefab : kinematic_char_prefab, Vector3.zero, Quaternion.identity);
+        simulatedCharObj = Instantiate(useHandmadeColliders ? simulated_handmade_char_prefab : simulated_char_prefab, Vector3.zero, Quaternion.identity);
         if (Academy.Instance.IsCommunicatorOn)
         {
             int numFixedUpdatesPerSecond = Mathf.CeilToInt(1f / Time.fixedDeltaTime);

@@ -72,6 +72,7 @@ public class MultiMLAgentsDirector : MonoBehaviour
         director.ACTION_STIFFNESS_HYPERPARAM = _config.ACTION_STIFFNESS_HYPERPARAM;
         director.simulationVelocityHalflife = _config.simulationVelocityHalflife;
         director.walkOnly = _config.walkOnly;
+        director.useHandmadeColliders = _config.useHandmadeColliders;
 
         director.LAUNCH_FREQUENCY = _config.LAUNCH_FREQUENCY;
         director.LAUNCH_RADIUS = _config.LAUNCH_RADIUS;
