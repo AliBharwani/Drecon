@@ -181,6 +181,9 @@ public class SimCharController : MonoBehaviour
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
                 Mathf.DeltaAngle(0, TargetRotationInJointSpace.z)) * Mathf.Deg2Rad;
+            bool isFootBone = bone == mm_v2.Bones.Bone_LeftFoot || bone == mm_v2.Bones.Bone_RightFoot;
+            if (isFootBone)
+                TargetRotationInJointSpace.z = 0f;
 
             if (body.dofCount == 3)
             {
@@ -194,7 +197,7 @@ public class SimCharController : MonoBehaviour
                 body.yDrive = drive;
 
                 drive = body.zDrive;
-                drive.target = setDriveTargets ? TargetRotationInJointSpace.z : 0f;
+                drive.target = setDriveTargets  && !isFootBone ? TargetRotationInJointSpace.z : 0f;
                 body.zDrive = drive;
             }
             else if (body.dofCount == 1)

@@ -89,12 +89,19 @@ public class MLAgentsDirector : Agent
     [HideInInspector]
     public static mm_v2.Bones[] fullDOFBones = new mm_v2.Bones[]
     {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Spine};
+
+    [HideInInspector]
+    public static mm_v2.Bones[] extendedfullDOFBones = new mm_v2.Bones[]
+    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips, Bone_Spine,  Bone_Spine1, Bone_Spine2, Bone_LeftShoulder, Bone_RightShoulder};
     [HideInInspector]
     public static mm_v2.Bones[] limitedDOFBones = new mm_v2.Bones[]
     {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftToe, Bone_RightToe };
     [HideInInspector]
     public static mm_v2.Bones[] openloopBones = new mm_v2.Bones[]
       {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand, Bone_LeftShoulder, Bone_RightShoulder};
+
+    public static mm_v2.Bones[] alwaysOpenloopBones = new mm_v2.Bones[]
+    { Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand};
 
     Vector3[] bone_pos_mins, bone_pos_maxes, bone_vel_mins, bone_vel_maxes;
     long timeAtStart;
@@ -158,7 +165,7 @@ public class MLAgentsDirector : Agent
             applyActionsAsAxisAngleRotations(finalActions, curRotations);
 
         mm_v2.Bones[] limitedDOFBonesToUse = networkControlsAllJoints ? TestDirector.allLimitedDOFBones : limitedDOFBones;
-        int limitedDOFActionOffset = networkControlsAllJoints ? TestDirector.allFullDOFBones.Length * 6 :
+        int limitedDOFActionOffset = networkControlsAllJoints ? extendedfullDOFBones.Length * 6 :
                                         fullDOFBones.Length * (actionsAre6DRotations ? 6 : 3);
 
         for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
@@ -183,13 +190,17 @@ public class MLAgentsDirector : Agent
                 ab.zDrive = zDrive;
             }
         }
-        for (int i = 0; i < openloopBones.Length; i++)
+        mm_v2.Bones[] openloopBonesBonesToUse = networkControlsAllJoints ? alwaysOpenloopBones : openloopBones;
+        for (int i = 0; i < openloopBonesBonesToUse.Length; i++)
         {
-            int boneIdx = (int)openloopBones[i];
+            int boneIdx = (int)openloopBonesBonesToUse[i];
             Quaternion final = curRotations[boneIdx];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             ab.SetDriveRotation(final);
         }
+        bool episodeEnded = calcAndSetRewards();
+        //if (episodeEnded)
+        //    return;
     }
 
     private void applyActionsAsAxisAngleRotations(float[] finalActions, Quaternion[] curRotations)
@@ -255,9 +266,9 @@ public class MLAgentsDirector : Agent
     }
     private void applyActionsToAllFullDOFJoints(float[] finalActions, Quaternion[] curRotations)
     {
-        for (int i = 0; i < TestDirector.allFullDOFBones.Length; i++)
+        for (int i = 0; i < extendedfullDOFBones.Length; i++)
         {
-            int boneIdx = (int)TestDirector.allFullDOFBones[i];
+            int boneIdx = (int)extendedfullDOFBones[i];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             Vector3 outputV1 = new Vector3(finalActions[i * 6], finalActions[i * 6 + 1], finalActions[i * 6 + 2]);
             Vector3 outputV2 = new Vector3(finalActions[i * 6 + 3], finalActions[i * 6 + 4], finalActions[i * 6 + 5]);
@@ -377,11 +388,11 @@ public class MLAgentsDirector : Agent
         //else
         //MMScript.run_max_speed = true;
         if (networkControlsAllJoints)
-            numActions = TestDirector.allFullDOFBones.Length * 6 + TestDirector.allLimitedDOFBones.Length; // 102
+            numActions = extendedfullDOFBones.Length * 6 + TestDirector.allLimitedDOFBones.Length; // 78
         else 
             numActions = (fullDOFBones.Length * (actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length;
         //Debug.Log($"numActions: {numActions}");
-        numObservations = 88 + numActions; // 131 or 187
+        numObservations = 88 + numActions; // 134 or 166
         prevActionOutput = new float[numActions];
         isInitialized = true;
     }
@@ -415,8 +426,10 @@ public class MLAgentsDirector : Agent
         }
         float verticalOffset = getVerticalOffset();
         //Debug.Log($"Vertical offset: {verticalOffset}");
-        SimCharController.teleportSimChar(simChar, kinChar, true, verticalOffset + .025f);
+        projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + Vector3.right;
+        SimCharController.teleportSimChar(simChar, kinChar, true, verticalOffset + .1f);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
+        //Debug.Log($"Teleoport happens on {curFixedUpdate}");
     }
 
 
@@ -442,15 +455,18 @@ public class MLAgentsDirector : Agent
             updateVelocity = false;
         }
         // Update CMs 
+        //Debug.Log($"curFixedUpdate: {curFixedUpdate} updateVelocity: {updateVelocity}");
         UpdateCMData(updateVelocity);
         UpdateBoneObsState(updateVelocity);
         UpdateBoneSurfacePts(updateVelocity);
-        bool episodeEnded = calcAndSetRewards();
-        if (episodeEnded)
-            return;
+        //bool episodeEnded = calcAndSetRewards();
+        //if (episodeEnded)
+        //    return;
         // request Decision
         if (curFixedUpdate % EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
+        else
+            calcAndSetRewards(true);
         //updateMeanReward();
         if (genMinsAndMaxes && curFixedUpdate % 300 == 0)
             WriteMinsAndMaxes();
@@ -573,6 +589,7 @@ public class MLAgentsDirector : Agent
                 if (updateVelocity) {
                     kinChar.boneSurfaceVels[i][j] = (newKinBoneSurfacePts[j] - prevKinSurfacePts[j]) / Time.fixedDeltaTime;
                     simChar.boneSurfaceVels[i][j] = (newSimBoneSurfacePts[j] - prevSimSurfacePts[j]) / Time.fixedDeltaTime;
+                    //Debug.Log($"simChar.boneSurfaceVels[i][j] : {simChar.boneSurfaceVels[i][j]}");
                 }
             }
             kinChar.boneSurfacePts[i] = newKinBoneSurfacePts;
@@ -632,7 +649,7 @@ public class MLAgentsDirector : Agent
     private float meanReward = 0f;
     internal float finalReward = 0f;
     // returns TRUE if episode ended
-    private bool calcAndSetRewards()
+    private bool calcAndSetRewards(bool add = false)
     {
         bool heads1mApart;
         double posReward, velReward, localPoseReward, cmVelReward, fallFactor;
@@ -641,7 +658,11 @@ public class MLAgentsDirector : Agent
         {
             finalReward = EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
-            SetReward(EPISODE_END_REWARD);
+            if (add)
+                AddReward(EPISODE_END_REWARD);
+            else
+                SetReward(EPISODE_END_REWARD);
+            //Debug.Log($"Calling end epsidoe on: {curFixedUpdate}");
             EndEpisode();
             return true;
         }
@@ -655,11 +676,14 @@ public class MLAgentsDirector : Agent
         } else
         {
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
-            Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
+            //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         }
         //Debug.Log($"final_reward: {finalReward}");
         //updateMeanReward(final_reward);
-        SetReward(finalReward);
+        if (add)
+            AddReward(finalReward);
+        else
+            SetReward(finalReward);
         return false;
     }
 
@@ -1048,6 +1072,7 @@ public class MLAgentsDirector : Agent
         Transform rightToe = kinChar.boneToTransform[(int)Bone_RightToe];
         float minToeY = Mathf.Min(leftToe.position.y, rightToe.position.y) - toeColliderRadius;
         float maxGroundPenetration = Mathf.Max(0f, groundColliderY - Mathf.Min(minPointOnFoot , minToeY));
+        //Debug.Log($"minToeY: {minToeY} minPointOnFoot: {minPointOnFoot} maxGroundPenetration: {maxGroundPenetration}");
         return maxGroundPenetration;
     }
     public static void getSixPointsOnCollider(GameObject obj, ref Vector3[] outputs, mm_v2.Bones bone)

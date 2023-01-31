@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 45299973,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45299973.onnx",
+                "reward": 74.99689617156983,
+                "creation_time": 1675039311.3479977,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45299973.pt"
+                ]
+            },
+            {
+                "steps": 45399986,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45399986.onnx",
+                "reward": 92.95142227060654,
+                "creation_time": 1675039425.94896,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45399986.pt"
+                ]
+            },
+            {
+                "steps": 45499938,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45499938.onnx",
+                "reward": 73.1928845573874,
+                "creation_time": 1675039545.6555817,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45499938.pt"
+                ]
+            },
+            {
+                "steps": 45599993,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45599993.onnx",
+                "reward": 85.70471622961031,
+                "creation_time": 1675039660.2982223,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45599993.pt"
+                ]
+            },
+            {
+                "steps": 45699960,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45699960.onnx",
+                "reward": 85.87243543352399,
+                "creation_time": 1675039779.2373471,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45699960.pt"
+                ]
+            },
+            {
+                "steps": 45799954,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45799954.onnx",
+                "reward": 89.05520790575189,
+                "creation_time": 1675039893.5685434,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45799954.pt"
+                ]
+            },
+            {
+                "steps": 45899971,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45899971.onnx",
+                "reward": 83.95852438608806,
+                "creation_time": 1675040012.4330058,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45899971.pt"
+                ]
+            },
+            {
+                "steps": 45999967,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45999967.onnx",
+                "reward": 87.4681093925173,
+                "creation_time": 1675040127.4508672,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-45999967.pt"
+                ]
+            },
+            {
+                "steps": 46099953,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-46099953.onnx",
+                "reward": 91.53379779391818,
+                "creation_time": 1675040246.7451725,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-46099953.pt"
+                ]
+            },
+            {
+                "steps": 46170961,
+                "file_path": "results\\6DJointsSimEveryStep\\Drecon\\Drecon-46170961.onnx",
+                "reward": 86.78164983254213,
+                "creation_time": 1675040324.2579908,
+                "auxillary_file_paths": [
+                    "results\\6DJointsSimEveryStep\\Drecon\\Drecon-46170961.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 46170961,
+            "file_path": "results\\6DJointsSimEveryStep\\Drecon.onnx",
+            "reward": 86.78164983254213,
+            "creation_time": 1675040324.2579908,
+            "auxillary_file_paths": [
+                "results\\6DJointsSimEveryStep\\Drecon\\Drecon-46170961.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}
