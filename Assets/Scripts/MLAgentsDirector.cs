@@ -309,6 +309,8 @@ public class MLAgentsDirector : Agent
         }
     }
     private Vector3 feetBozSize;
+    private Vector3 leftfootColliderCenter;
+    private Vector3 rightfootColliderCenter;
     void customInit()
     {
         if (use_debug_mats)
@@ -361,6 +363,10 @@ public class MLAgentsDirector : Agent
                 kinChar.boneToCollider[i] = ArtBodyTester.getChildBoxCollider(kinChar.boneToTransform[i].gameObject);
                 simChar.boneToCollider[i] = ArtBodyTester.getChildBoxCollider(simChar.boneToTransform[i].gameObject);
                 feetBozSize = kinChar.boneToCollider[i].GetComponent<BoxCollider>().size;
+                if (i == (int)Bone_LeftFoot)
+                    leftfootColliderCenter = simChar.boneToCollider[i].GetComponent<BoxCollider>().center;
+                else if (i == (int)Bone_RightFoot)
+                    rightfootColliderCenter = simChar.boneToCollider[i].GetComponent<BoxCollider>().center;
             } else { 
                 kinChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(kinChar.boneToTransform[i].gameObject);
                 simChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(simChar.boneToTransform[i].gameObject);
@@ -788,7 +794,7 @@ public class MLAgentsDirector : Agent
         copyVecIntoArray(ref state, ref state_idx, cm_distance);
 
         Vector3 kin_cm_vel_normalized = resolveVelInKinematicRefFrame(kinChar.cmVel);
-        AddGizmoLine(kinChar.cm, kinChar.cm + kinChar.cmVel, Color.red);
+        //AddGizmoLine(kinChar.cm, kinChar.cm + kinChar.cmVel, Color.red);
         if (normalizeObservations)
             kin_cm_vel_normalized = normalizeCMVelocity(kin_cm_vel_normalized);
         
@@ -1045,19 +1051,19 @@ public class MLAgentsDirector : Agent
 
     }
 
-    private float getBottomMostPointOnFoot(Transform foot)
+    private float getBottomMostPointOnFoot(Transform foot, Vector3 center)
     {
         float x = feetBozSize.x / 2;
         float y = feetBozSize.y / 2;
         float z = feetBozSize.z / 2;
-        Vector3 topLeft = foot.TransformPoint(new Vector3(x, -y, z));
-        Vector3 topRight = foot.TransformPoint(new Vector3(x, -y, -z));
-        Vector3 bottomLeft = foot.TransformPoint(new Vector3(-x, -y, z));
-        Vector3 bottomRight = foot.TransformPoint(new Vector3(-x, -y, -z));
-        AddGizmoSphere(topLeft, Color.red);
-        AddGizmoSphere(topRight, Color.red);
-        AddGizmoSphere(bottomLeft, Color.red);
-        AddGizmoSphere(bottomRight, Color.red);
+        Vector3 topLeft = foot.TransformPoint(center + new Vector3(x, -y, z));
+        Vector3 topRight = foot.TransformPoint(center + new Vector3(x, -y, -z));
+        Vector3 bottomLeft = foot.TransformPoint(center + new Vector3(-x, -y, z));
+        Vector3 bottomRight = foot.TransformPoint(center + new Vector3(-x, -y, -z));
+        //AddGizmoSphere(topLeft, Color.red);
+        //AddGizmoSphere(topRight, Color.red);
+        //AddGizmoSphere(bottomLeft, Color.red);
+        //AddGizmoSphere(bottomRight, Color.red);
 
         return Mathf.Min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
     }
@@ -1067,7 +1073,7 @@ public class MLAgentsDirector : Agent
         ClearGizmos();
         Transform leftFoot = kinChar.boneToCollider[(int)Bone_LeftFoot].transform;
         Transform rightFoot = kinChar.boneToCollider[(int)Bone_RightFoot].transform;
-        float minPointOnFoot = Mathf.Min(getBottomMostPointOnFoot(leftFoot), getBottomMostPointOnFoot(rightFoot));
+        float minPointOnFoot = Mathf.Min(getBottomMostPointOnFoot(leftFoot, leftfootColliderCenter), getBottomMostPointOnFoot(rightFoot, rightfootColliderCenter));
         Transform leftToe = kinChar.boneToTransform[(int)Bone_LeftToe];
         Transform rightToe = kinChar.boneToTransform[(int)Bone_RightToe];
         float minToeY = Mathf.Min(leftToe.position.y, rightToe.position.y) - toeColliderRadius;

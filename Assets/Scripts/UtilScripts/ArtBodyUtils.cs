@@ -36,7 +36,8 @@ public static class ArtBodyUtils
         float m12 = e3.y;
         float m22 = e3.z;
         float tr = m00 + m11 + m22;
-
+        //Quaternion q;
+        //float t;
         // https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
         if (tr > 0)
         {
