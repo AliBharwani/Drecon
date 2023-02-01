@@ -2970,6 +2970,68 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 245e08365585458408e7a0469afde3f3, type: 3}
   m_PrefabInstance: {fileID: 8995922837590568838}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &494562485187286925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8076812278296859351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gen_inputs: 1
+  walk_only: 0
+  MAX_WANDERING_RADIUS: 10
+  toy_pointers:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  feature_weight_foot_position: 0.75
+  feature_weight_foot_velocity: 1
+  feature_weight_hip_velocity: 1
+  feature_weight_trajectory_positions: 1
+  feature_weight_trajectory_directions: 1.5
+  inertialize_blending_halflife: 0.1
+  simulation_rotation_halflife: 0.1
+  frame_increments: 20
+  ignore_surrounding: 20
+  numNeigh: 1
+  searchEveryNFrames: 5
+  frameCounter: 1
+  boneToTransform:
+  - {fileID: 8889341873078241389}
+  - {fileID: 7125750512324273308}
+  - {fileID: 1851336510599768210}
+  - {fileID: 361841627446587071}
+  - {fileID: 4763289110564392165}
+  - {fileID: 4794263895061023995}
+  - {fileID: 8771752372436272784}
+  - {fileID: 251586028165134102}
+  - {fileID: 7347339279711099282}
+  - {fileID: 7282221293146274603}
+  - {fileID: 4478694131844965167}
+  - {fileID: 2150884230737924926}
+  - {fileID: 7310453661312678292}
+  - {fileID: 9204505038442190592}
+  - {fileID: 219503991085649448}
+  - {fileID: 6816393991231976864}
+  - {fileID: 5389368914710262535}
+  - {fileID: 1923688889454966627}
+  - {fileID: 4338420844486935703}
+  - {fileID: 1744122970057979279}
+  - {fileID: 1566387147624136250}
+  - {fileID: 3854797202191179329}
+  - {fileID: 2914002276440184027}
+  motionDB: {fileID: 0}
+  bone_rotations: []
+  desired_velocity: {x: 0, y: 0, z: 0}
+  teleportedThisFixedUpdate: 0
+  is_initalized: 0
+  drawGizmos: 0
+  simulation_velocity_halflife: 0.27
 --- !u!114 &1408820120477169652
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3036,68 +3098,6 @@ MonoBehaviour:
   min_rad: 0.005
   draw_gizmos: 0
   do_not_filter: 0
---- !u!114 &494562485187286925
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8076812278296859351}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gen_inputs: 1
-  walk_only: 0
-  MAX_WANDERING_RADIUS: 10
-  toy_pointers:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  feature_weight_foot_position: 0.75
-  feature_weight_foot_velocity: 1
-  feature_weight_hip_velocity: 1
-  feature_weight_trajectory_positions: 1
-  feature_weight_trajectory_directions: 1.5
-  inertialize_blending_halflife: 0.1
-  simulation_rotation_halflife: 0.1
-  frame_increments: 20
-  ignore_surrounding: 20
-  numNeigh: 1
-  searchEveryNFrames: 5
-  frameCounter: 1
-  boneToTransform:
-  - {fileID: 8889341873078241389}
-  - {fileID: 7125750512324273308}
-  - {fileID: 1851336510599768210}
-  - {fileID: 361841627446587071}
-  - {fileID: 4763289110564392165}
-  - {fileID: 4794263895061023995}
-  - {fileID: 8771752372436272784}
-  - {fileID: 251586028165134102}
-  - {fileID: 7347339279711099282}
-  - {fileID: 7282221293146274603}
-  - {fileID: 4478694131844965167}
-  - {fileID: 2150884230737924926}
-  - {fileID: 7310453661312678292}
-  - {fileID: 9204505038442190592}
-  - {fileID: 219503991085649448}
-  - {fileID: 6816393991231976864}
-  - {fileID: 5389368914710262535}
-  - {fileID: 1923688889454966627}
-  - {fileID: 4338420844486935703}
-  - {fileID: 1744122970057979279}
-  - {fileID: 1566387147624136250}
-  - {fileID: 3854797202191179329}
-  - {fileID: 2914002276440184027}
-  motionDB: {fileID: 0}
-  bone_rotations: []
-  desired_velocity: {x: 0, y: 0, z: 0}
-  teleportedThisFixedUpdate: 0
-  is_initalized: 0
-  drawGizmos: 0
-  simulation_velocity_halflife: 0.27
 --- !u!4 &8116840848278882586 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 897130671458477724, guid: 245e08365585458408e7a0469afde3f3, type: 3}

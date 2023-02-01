@@ -9,6 +9,7 @@ public class MultiMLAgentsDirector : MonoBehaviour
     public GameObject modelDirector;
     public GameObject model6DDirector;
     public GameObject modelAllJointsDirector;
+    public GameObject modelAllJoints3DDirector;
 
     private MLAgentsDirector[] directors;
     public int reportMeanRewardEveryNSteps = 10000;
@@ -45,7 +46,12 @@ public class MultiMLAgentsDirector : MonoBehaviour
     }
     private MLAgentsDirector createMLAgent()
     {
-        GameObject obj = _config.networkControlsAllJoints ? Instantiate(modelAllJointsDirector) : _config.actionsAre6DRotations ? Instantiate(model6DDirector) : Instantiate(modelDirector);
+        GameObject obj;
+        //obj = _config.networkControlsAllJoints ? Instantiate(modelAllJointsDirector) : _config.actionsAre6DRotations ? Instantiate(model6DDirector) : Instantiate(modelDirector);
+        if (_config.networkControlsAllJoints)
+            obj = _config.actionsAre6DRotations ? Instantiate(modelAllJointsDirector) : Instantiate(modelAllJoints3DDirector);
+        else
+            obj = _config.actionsAre6DRotations ? Instantiate(model6DDirector) : Instantiate(modelDirector);
         MLAgentsDirector director = obj.GetComponent<MLAgentsDirector>();
         director.EVALUATE_EVERY_K_STEPS = _config.EVALUATE_EVERY_K_STEPS; 
         director.normalizeObservations = _config.normalizeObservations;
