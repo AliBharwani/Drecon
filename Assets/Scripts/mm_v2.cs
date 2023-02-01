@@ -43,12 +43,15 @@ public class mm_v2 : MonoBehaviour
     public float feature_weight_trajectory_positions = 1.0f;
     public float feature_weight_trajectory_directions = 1.5f;
     public float inertialize_blending_halflife = 0.1f;
-    public float simulation_rotation_halflife = .1f;
+    public float simulation_rotation_halflife = .27f;
     public int frame_increments = 10;
     public int ignore_surrounding = 10;
 
     public int numNeigh = 1;
-    public int searchEveryNFrames = 1;
+    public float search_time = 5f / 60f;
+    float search_timer;
+    float force_search_timer;
+
     public int frameCounter = 1;
 
     public Transform[] boneToTransform = new Transform[23];
@@ -60,6 +63,7 @@ public class mm_v2 : MonoBehaviour
     Vector3[] curr_bone_velocities;
     Quaternion[] curr_bone_rotations;
     Vector3[] curr_bone_angular_velocities;
+    bool[] curr_bone_contacts;
 
     Vector3[] trns_bone_positions;
     Vector3[] trns_bone_velocities;
@@ -95,7 +99,14 @@ public class mm_v2 : MonoBehaviour
     Quaternion[] trajectory_rotations;
     Vector3[] trajectory_angular_velocities;
 
-
+    //bool contact_state = false;
+    //bool contact_lock = false;
+    //Vector3 contact_position;
+    //Vector3 contact_velocity;
+    //Vector3 contact_point;
+    //Vector3 contact_target;
+    //Vector3 contact_offset_position;
+    //Vector3 contact_offset_velocity;
     float desired_gait = 0.0f;
     float desired_gait_velocity = 0.0f;
     bool is_runbutton_pressed = false;
@@ -111,7 +122,14 @@ public class mm_v2 : MonoBehaviour
     Vector3 simulation_angular_velocity;
     [HideInInspector]
     public Vector3 desired_velocity;
+    Vector3 desired_velocity_change_curr;
+    Vector3 desired_velocity_change_prev;
+    float desired_velocity_change_threshold = 50.0f;
+
     Quaternion desired_rotation = Quaternion.identity;
+    Vector3 desired_rotation_change_curr = Vector3.zero;
+    Vector3 desired_rotation_change_prev = Vector3.zero;
+    float desired_rotation_change_threshold = 50.0f;
 
     Vector3[] local_bone_positions;
     Quaternion[] local_bone_rotations;
@@ -119,6 +137,27 @@ public class mm_v2 : MonoBehaviour
     int best_idx;
     int numBones;
     Gamepad gamepad;
+
+    // IK 
+    public bool ik_enabled = true;
+    float ik_max_length_buffer = 0.015f;
+    float ik_foot_height = 0.02f;
+    float ik_toe_length = 0.15f;
+    float ik_unlock_radius = 0.2f;
+    float ik_blending_halflife = 0.1f;
+    static mm_v2.Bones[] contact_bones =  { Bones.Bone_LeftToe, Bones.Bone_RightToe};
+    bool[] contact_states = new bool[contact_bones.Length];
+    bool[] contact_locks = new bool[contact_bones.Length];
+    Vector3[] contact_positions = new Vector3[contact_bones.Length];
+    Vector3[] contact_velocities = new Vector3[contact_bones.Length];
+    Vector3[] contact_points = new Vector3[contact_bones.Length];
+    Vector3[] contact_targets = new Vector3[contact_bones.Length];
+    Vector3[] contact_offset_positions = new Vector3[contact_bones.Length];
+    Vector3[] contact_offset_velocities = new Vector3[contact_bones.Length];
+    bool[] global_bone_computed = new bool[23];
+
+    Vector3[] adjusted_bone_positions;
+    Quaternion[] adjusted_bone_rotations;
 
     // ====================== Stuff added for ML
     Vector2 random_lstick_input;
@@ -163,6 +202,7 @@ public class mm_v2 : MonoBehaviour
         curr_bone_velocities = motionDB.bone_velocities[frameIdx];
         curr_bone_rotations = motionDB.bone_rotations[frameIdx];
         curr_bone_angular_velocities = motionDB.bone_angular_velocities[frameIdx];
+        curr_bone_contacts = motionDB.contact_states[frameIdx];
 
         trns_bone_positions = motionDB.bone_positions[frameIdx];
         trns_bone_velocities = motionDB.bone_velocities[frameIdx];
@@ -214,6 +254,40 @@ public class mm_v2 : MonoBehaviour
             inertialize_blending_halflife,
             0f
         );
+        for (int i = 0; i < contact_bones.Length; i++)
+        {
+            Vector3 bone_position = Vector3.zero;
+            Vector3 bone_velocity = Vector3.zero;
+            Quaternion bone_rotation = Quaternion.identity;
+            Vector3 bone_angular_velocity = Vector3.zero;
+            motionDB.forward_kinematics_velocity(
+                ref bone_position,
+                ref bone_velocity,
+                ref bone_rotation,
+                ref bone_angular_velocity,
+                bone_positions,
+                bone_velocities,
+                bone_rotations,
+                bone_angular_velocities,
+                (int)contact_bones[i]);
+
+            contact_reset(
+                ref contact_states[i],
+                ref contact_locks[i],
+                ref contact_positions[i],
+                ref contact_velocities[i],
+                ref contact_points[i],
+                ref contact_targets[i],
+                ref contact_offset_positions[i],
+                ref contact_offset_velocities[i],
+                bone_position,
+                bone_velocity);
+        }
+
+        adjusted_bone_positions = bone_positions;
+        adjusted_bone_rotations = bone_rotations;
+        search_timer = search_time;
+        force_search_timer = search_time;
         //time_since_last_check = 0f;
     }
     public void Reset()
@@ -297,18 +371,44 @@ public class mm_v2 : MonoBehaviour
         simulation_side_speed = Mathf.Lerp(simulation_run_side_speed, simulation_walk_side_speed, desired_gait);
         simulation_back_speed = Mathf.Lerp(simulation_run_back_speed, simulation_walk_back_speed, desired_gait);
 
-        desired_velocity = desired_velocity_update(simulation_rotation);
+        Vector3 desired_velocity_curr = desired_velocity_update(simulation_rotation);
         //Debug.Log($"Gamepad: {gamepad.leftStick.ReadValue()}");
         //desired_rotation = !gen_inputs ? desired_rotation_update(desired_rotation, desired_velocity) : desired_rotation;
-        desired_rotation = desired_rotation_update(desired_rotation, desired_velocity);
+        Quaternion desired_rotation_curr = desired_rotation_update(desired_rotation, desired_velocity);
         Vector3 world_space_position = bone_positions[0];
         bool end_of_anim = motionDB.database_trajectory_index_clamp(frameIdx, 1) == frameIdx;
-        bool search = end_of_anim || (frameCounter % searchEveryNFrames) == 0;
+
+
+        // Check if we should force a search because input changed quickly
+        desired_velocity_change_prev = desired_velocity_change_curr;
+        desired_velocity_change_curr = (desired_velocity_curr - desired_velocity) / Time.fixedDeltaTime;
+        desired_velocity = desired_velocity_curr;
+
+        desired_rotation_change_prev = desired_rotation_change_curr;
+        desired_rotation_change_curr = Utils.quat_to_scaled_angle_axis(Utils.quat_abs(Utils.quat_mul_inv(desired_rotation_curr, desired_rotation))) / Time.fixedDeltaTime;
+        desired_rotation = desired_rotation_curr;
+
+        bool force_search = false;
+
+        if (force_search_timer <= 0.0f && (
+            ((desired_velocity_change_prev).magnitude >= desired_velocity_change_threshold &&
+             (desired_velocity_change_curr).magnitude < desired_velocity_change_threshold)
+        || ((desired_rotation_change_prev).magnitude >= desired_rotation_change_threshold &&
+             (desired_rotation_change_curr).magnitude < desired_rotation_change_threshold)))
+        {
+            force_search = true;
+            force_search_timer = search_time;
+        }
+        else if (force_search_timer > 0)
+        {
+            force_search_timer -= Time.fixedDeltaTime;
+        }
+        //bool search = end_of_anim || (frameCounter % searchEveryNFrames) == 0;
         if (is_out_of_bounds(world_space_position))
         {
             bone_positions[0] = origin;
             simulation_position =  origin;
-            search = true;
+            force_search = true;
             teleportedThisFixedUpdate = true;
         }
         // Get the desired velocity
@@ -317,16 +417,18 @@ public class mm_v2 : MonoBehaviour
         trajectory_rotations_predict(frame_increments * (Time.fixedDeltaTime));
         trajectory_desired_velocities_predict();
         trajectory_positions_predict(frame_increments * (Time.fixedDeltaTime));
-        if (search)
+        if (force_search || search_timer <= 0.0f || end_of_anim)
         {
             // Search database and update frame idx 
             motionMatch();
+            search_timer = search_time;
         }
         else
             frameIdx++;
         //motionDB.setDataToFrame(ref local_bone_positions, ref local_bone_rotations, frameIdx);
         //frameIdx++;
         playFrameIdx();
+        search_timer -= Time.fixedDeltaTime;
         frameCounter++;
     }
 
@@ -350,6 +452,8 @@ public class mm_v2 : MonoBehaviour
         curr_bone_velocities = motionDB.bone_velocities[frameIdx];
         curr_bone_rotations = motionDB.bone_rotations[frameIdx];
         curr_bone_angular_velocities = motionDB.bone_angular_velocities[frameIdx];
+        curr_bone_contacts = motionDB.contact_states[frameIdx];
+
         inertialize_pose_update(
             curr_bone_positions,
             curr_bone_velocities,
@@ -373,6 +477,140 @@ public class mm_v2 : MonoBehaviour
             simulation_rotation_halflife,
             Time.fixedDeltaTime);
         //inertialize_root_adjust(ref bone_offset_positions[0], ref bone_positions[0], ref bone_rotations[0], simulation_position, simulation_rotation);
+
+
+
+        Vector3[] adjusted_bone_positions = bone_positions;
+        Quaternion[] adjusted_bone_rotations = bone_rotations;
+
+        if (ik_enabled)
+        {
+            for (int i = 0; i < contact_bones.Length; i++)
+            {
+                // Find all the relevant bone indices
+                int toe_bone = (int) contact_bones[i];
+                int heel_bone = motionDB.bone_parents[toe_bone];
+                int knee_bone = motionDB.bone_parents[heel_bone];
+                int hip_bone = motionDB.bone_parents[knee_bone];
+                int root_bone = motionDB.bone_parents[hip_bone];
+
+                // Compute the world space position for the toe
+                global_bone_computed = new bool[23];
+
+                motionDB.forward_kinematics_partial(
+                    global_bone_positions,
+                    global_bone_rotations,
+                    global_bone_computed,
+                    bone_positions,
+                    bone_rotations,
+                    toe_bone);
+
+                // Update the contact state
+                contact_update(
+                    ref contact_states[i],
+                    ref contact_locks[i],
+                    ref contact_positions[i],
+                    ref contact_velocities[i],
+                    ref contact_points[i],
+                    ref contact_targets[i],
+                    ref contact_offset_positions[i],
+                    ref contact_offset_velocities[i],
+                    global_bone_positions[toe_bone],
+                    curr_bone_contacts[i],
+                    ik_unlock_radius,
+                    ik_foot_height,
+                    ik_blending_halflife,
+                    Time.fixedDeltaTime);
+
+                // Ensure contact position never goes through floor
+                Vector3 contact_position_clamp = contact_positions[i];
+                contact_position_clamp.y = Mathf.Max(contact_position_clamp.y, ik_foot_height);
+
+                // Re-compute toe, heel, knee, hip, and root bone positions
+                int[] feet_bones = { heel_bone, knee_bone, hip_bone, root_bone };
+                foreach (int bone in feet_bones)
+                {
+                    motionDB.forward_kinematics_partial(
+                        global_bone_positions,
+                        global_bone_rotations,
+                        global_bone_computed,
+                        bone_positions,
+                        bone_rotations,
+                        bone);
+                }
+
+                // Perform simple two-joint IK to place heel
+                ik_two_bone(
+                    ref adjusted_bone_rotations[hip_bone],
+                    ref adjusted_bone_rotations[knee_bone],
+                    global_bone_positions[hip_bone],
+                    global_bone_positions[knee_bone],
+                    global_bone_positions[heel_bone],
+                    contact_position_clamp + (global_bone_positions[heel_bone] - global_bone_positions[toe_bone]),
+                    Utils.quat_mul_vec3(global_bone_rotations[knee_bone], new Vector3(0.0f, 1.0f, 0.0f)),
+                    global_bone_rotations[hip_bone],
+                    global_bone_rotations[knee_bone],
+                    global_bone_rotations[root_bone],
+                    ik_max_length_buffer);
+
+                // Re-compute toe, heel, and knee positions 
+                global_bone_computed = new bool[23];
+                int[] toe_heel_and_knee_bones = { toe_bone, heel_bone, knee_bone };
+                foreach (int bone in toe_heel_and_knee_bones) {
+                motionDB.forward_kinematics_partial(
+                    global_bone_positions,
+                    global_bone_rotations,
+                    global_bone_computed,
+                    adjusted_bone_positions,
+                    adjusted_bone_rotations,
+                    bone);
+                }
+
+                // Rotate heel so toe is facing toward contact point
+                ik_look_at(
+                    ref adjusted_bone_rotations[heel_bone],
+                    global_bone_rotations[knee_bone],
+                    global_bone_rotations[heel_bone],
+                    global_bone_positions[heel_bone],
+                    global_bone_positions[toe_bone],
+                    contact_position_clamp);
+
+                // Re-compute toe and heel positions
+                global_bone_computed = new bool[23];
+                int[] toe_and_heel_bones = { toe_bone, heel_bone };
+                foreach (int bone in toe_and_heel_bones)
+                {
+                    motionDB.forward_kinematics_partial(
+                        global_bone_positions,
+                        global_bone_rotations,
+                        global_bone_computed,
+                        adjusted_bone_positions,
+                        adjusted_bone_rotations,
+                        bone);
+                }
+
+                // Rotate toe bone so that the end of the toe 
+                // does not intersect with the ground
+                Vector3 toe_end_curr = Utils.quat_mul_vec3(
+                    global_bone_rotations[toe_bone], new Vector3(ik_toe_length, 0.0f, 0.0f)) +
+                    global_bone_positions[toe_bone];
+
+                Vector3 toe_end_targ = toe_end_curr;
+                toe_end_targ.y = Mathf.Max(toe_end_targ.y, ik_foot_height);
+
+                ik_look_at(
+                    ref adjusted_bone_rotations[toe_bone],
+                    global_bone_rotations[heel_bone],
+                    global_bone_rotations[toe_bone],
+                    global_bone_positions[toe_bone],
+                    toe_end_curr,
+                    toe_end_targ);
+            }
+            bone_positions = adjusted_bone_positions;
+            bone_rotations = adjusted_bone_rotations;
+        }
+
+
         forward_kinematics_full();
         apply_global_pos_and_rot();
     }
@@ -592,6 +830,187 @@ public class mm_v2 : MonoBehaviour
         }
 
 
+    }
+
+    private void contact_reset(
+        ref bool contact_state,
+        ref bool contact_lock,
+        ref Vector3 contact_position,
+        ref Vector3 contact_velocity,
+        ref Vector3 contact_point,
+        ref Vector3 contact_target,
+        ref Vector3 contact_offset_position,
+        ref Vector3 contact_offset_velocity,
+        Vector3 input_contact_position, 
+        Vector3 input_contact_velocity)
+    {
+        contact_state = false;
+        contact_lock = false;
+        contact_position = input_contact_position;
+        contact_velocity = input_contact_velocity;
+        contact_point = input_contact_position;
+        contact_target = input_contact_position;
+        contact_offset_position = Vector3.zero;
+        contact_offset_velocity = Vector3.zero;
+    }
+
+    private void contact_update(
+        ref bool contact_state,
+        ref bool contact_lock,
+        ref Vector3 contact_position,
+        ref Vector3 contact_velocity,
+        ref Vector3 contact_point,
+        ref Vector3 contact_target,
+        ref Vector3 contact_offset_position,
+        ref Vector3 contact_offset_velocity,
+        Vector3 input_contact_position,
+        bool input_contact_state,
+        float unlock_radius,
+        float foot_height,
+        float halflife,
+        float dt,
+        float eps = 1e-8f)
+    {
+        // First compute the input contact position velocity via finite difference
+        Vector3 input_contact_velocity =
+        (input_contact_position - contact_target) / (dt + eps);
+        contact_target = input_contact_position;
+
+        // Update the inertializer to tick forward in time
+        SpringUtils.inertialize_update(
+        ref contact_position,
+        ref contact_velocity,
+        ref contact_offset_position,
+        ref contact_offset_velocity,
+        // If locked we feed the contact point and zero velocity, 
+        // otherwise we feed the input from the animation
+        contact_lock? contact_point : input_contact_position,
+        contact_lock? Vector3.zero : input_contact_velocity,
+        halflife,
+        dt);
+
+    // If the contact point is too far from the current input position 
+    // then we need to unlock the contact
+    bool unlock_contact = contact_lock && (
+        (contact_point - input_contact_position).magnitude > unlock_radius);
+    
+    // If the contact was previously inactive but is now active we 
+    // need to transition to the locked contact state
+    if (!contact_state && input_contact_state)
+    {
+        // Contact point is given by the current position of 
+        // the foot projected onto the ground plus foot height
+        contact_lock = true;
+        contact_point = contact_position;
+        contact_point.y = foot_height;
+
+            SpringUtils.inertialize_transition(
+            ref contact_offset_position,
+            ref contact_offset_velocity,
+            input_contact_position,
+            input_contact_velocity,
+            contact_point,
+            Vector3.zero);
+    }
+
+        // Otherwise if we need to unlock or we were previously in 
+        // contact but are no longer we transition to just taking 
+        // the input position as-is
+    else if ((contact_lock && contact_state && !input_contact_state)
+             || unlock_contact)
+    {
+        contact_lock = false;
+
+         SpringUtils.inertialize_transition(
+            ref contact_offset_position,
+            ref contact_offset_velocity,
+            contact_point,
+            Vector3.zero,
+            input_contact_position,
+            input_contact_velocity);
+    }
+
+    // Update contact state
+    contact_state = input_contact_state;
+    }
+
+    // Rotate a joint to look toward some 
+    // given target position
+    private void ik_look_at(
+        ref Quaternion bone_rotation,
+        Quaternion global_parent_rotation,
+        Quaternion global_rotation,
+        Vector3 global_position,
+        Vector3 child_position,
+        Vector3 target_position,
+         float eps = 1e-5f)
+    {
+        Vector3 curr_dir = (child_position - global_position).normalized;
+        Vector3 targ_dir = (target_position - global_position).normalized;
+
+        if (1f - Vector3.Dot(curr_dir, targ_dir) > eps)
+        {
+            bone_rotation = Utils.quat_inv_mul(global_parent_rotation,
+                Utils.quat_between(curr_dir, targ_dir) * global_rotation );
+        }
+    }
+    // Basic two-joint IK in the style of https://theorangeduck.com/page/simple-two-joint
+    // Here I add a basic "forward vector" which acts like a kind of pole-vetor
+    // to control the bending direction
+    void ik_two_bone(
+        ref Quaternion bone_root_lr,
+        ref Quaternion bone_mid_lr,
+        Vector3 bone_root,
+        Vector3 bone_mid,
+        Vector3 bone_end,
+        Vector3 target,
+        Vector3 fwd,
+        Quaternion bone_root_gr,
+        Quaternion bone_mid_gr,
+        Quaternion bone_par_gr,
+        float max_length_buffer)
+    {
+        float max_extension =
+            (bone_root - bone_mid).magnitude +
+            (bone_mid - bone_end).magnitude -
+            max_length_buffer;
+
+        Vector3 target_clamp = target;
+        if ((target - bone_root).magnitude > max_extension)
+        {
+            target_clamp = bone_root + max_extension*  (target - bone_root).normalized;
+        }
+
+        Vector3 axis_dwn = (bone_end - bone_root).normalized;
+        Vector3 axis_rot = (Vector3.Cross(axis_dwn, fwd)).normalized;
+
+        Vector3 a = bone_root;
+        Vector3 b = bone_mid;
+        Vector3 c = bone_end;
+        Vector3 t = target_clamp;
+
+        float lab =  (b - a).magnitude;
+        float lcb =  (b - c).magnitude;
+        float lat =  (t - a).magnitude;
+
+        float ac_ab_0 = Mathf.Acos(Mathf.Clamp(Vector3.Dot((c - a).normalized, (b - a).normalized), -1.0f, 1.0f));
+        float ba_bc_0 = Mathf.Acos(Mathf.Clamp(Vector3.Dot((a - b).normalized, (c - b).normalized), -1.0f, 1.0f));
+
+        float ac_ab_1 = Mathf.Acos(Mathf.Clamp((lab * lab + lat * lat - lcb * lcb) / (2.0f * lab * lat), -1.0f, 1.0f));
+        float ba_bc_1 = Mathf.Acos(Mathf.Clamp((lab * lab + lcb * lcb - lat * lat) / (2.0f * lab * lcb), -1.0f, 1.0f));
+
+        Quaternion r0 = Utils.quat_from_angle_axis(ac_ab_1 - ac_ab_0, axis_rot);
+        Quaternion r1 = Utils.quat_from_angle_axis(ba_bc_1 - ba_bc_0, axis_rot);
+
+        Vector3 c_a =  (bone_end - bone_root).normalized;
+        Vector3 t_a =  (target_clamp - bone_root).normalized;
+
+        Quaternion r2 = Utils.quat_from_angle_axis(
+            Mathf.Acos(Mathf.Clamp(Vector3.Dot(c_a, t_a), -1.0f, 1.0f)),
+           Vector3.Cross(c_a, t_a).normalized);
+
+        bone_root_lr = Utils.quat_inv_mul(bone_par_gr,  r2 * (r0 * bone_root_gr));
+        bone_mid_lr = Utils.quat_inv_mul(bone_root_gr,  r1 * bone_mid_gr);
     }
     private void simulation_rotations_update(ref Quaternion rotation, ref Vector3 angular_velocity, in Quaternion desired_rot, float halflife, float dt)
     {

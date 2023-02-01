@@ -47,6 +47,22 @@ public static class Utils
     {
         return quat_inv(q) *  p;
     }
+    public static Quaternion quat_between(Vector3 p, Vector3 q)
+    {
+        Vector3 c = Vector3.Cross(p, q);
+
+        return new Quaternion(
+            c.x,
+            c.y,
+            c.z,
+            Mathf.Sqrt(Vector3.Dot(p, p) * Vector3.Dot(q, q)) + Vector3.Dot(p, q)).normalized;
+    }
+    public static Quaternion quat_from_angle_axis(float angle, Vector3 axis)
+    {
+        float c = Mathf.Cos(angle / 2.0f);
+        float s = Mathf.Sin(angle / 2.0f);
+        return new Quaternion(s * axis.x, s * axis.y, s * axis.z, c);
+    }
     public static Quaternion quat_exp(Vector3 v, float eps = 1e-8f)
     {
         float halfangle = Mathf.Sqrt(v.x * v.x + v.y * v.y + v.z * v.z);

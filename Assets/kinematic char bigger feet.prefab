@@ -1525,7 +1525,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd47671e79967ce4c9036591bf9efdd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gen_inputs: 1
+  gen_inputs: 0
   walk_only: 0
   MAX_WANDERING_RADIUS: 10
   toy_pointers:
@@ -1538,11 +1538,11 @@ MonoBehaviour:
   feature_weight_trajectory_positions: 1
   feature_weight_trajectory_directions: 1.5
   inertialize_blending_halflife: 0.1
-  simulation_rotation_halflife: 0.1
+  simulation_rotation_halflife: 0.27
   frame_increments: 20
   ignore_surrounding: 20
   numNeigh: 1
-  searchEveryNFrames: 5
+  search_time: 0.1
   frameCounter: 1
   boneToTransform:
   - {fileID: 2241818812940926812}
@@ -1571,9 +1571,10 @@ MonoBehaviour:
   motionDB: {fileID: 0}
   bone_rotations: []
   desired_velocity: {x: 0, y: 0, z: 0}
+  ik_enabled: 1
   teleportedThisFixedUpdate: 0
   is_initalized: 0
-  drawGizmos: 0
+  drawGizmos: 1
   simulation_velocity_halflife: 0.27
 --- !u!114 &6572924355493366906
 MonoBehaviour:

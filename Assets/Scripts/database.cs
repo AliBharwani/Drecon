@@ -14,7 +14,8 @@ public class database : MonoBehaviour
     public Quaternion[][] bone_rotations;
     [HideInInspector]
     public Vector3[][] bone_angular_velocities;
-    //[HideInInspector]
+    [HideInInspector]
+    public bool[][] contact_states;
     internal int[] bone_parents;
     internal int numframes;
 
@@ -263,7 +264,7 @@ public class database : MonoBehaviour
         offset += 3;
     }
 
-    private void forward_kinematics_velocity(
+    public void forward_kinematics_velocity(
         ref Vector3 bone_position,
         ref Vector3 bone_velocity,
         ref Quaternion bone_rotation,
@@ -334,6 +335,34 @@ public class database : MonoBehaviour
         }
     }
 
+    internal void forward_kinematics_partial(Vector3[] global_bone_positions, Quaternion[] global_bone_rotations, bool[] global_bone_computed, Vector3[] local_bone_positions,
+        Quaternion[] local_bone_rotations, int bone)
+    {
+        if (bone_parents[bone] == -1)
+        {
+            global_bone_positions[bone] = local_bone_positions[bone];
+            global_bone_rotations[bone] = local_bone_rotations[bone];
+            global_bone_computed[bone] = true;
+            return;
+        }
+
+        if (!global_bone_computed[bone_parents[bone]])
+        {
+            forward_kinematics_partial(
+                global_bone_positions,
+                global_bone_rotations,
+                global_bone_computed,
+                local_bone_positions,
+                local_bone_rotations,
+                bone_parents[bone]);
+        }
+
+        Vector3 parent_position = global_bone_positions[bone_parents[bone]];
+        Quaternion parent_rotation = global_bone_rotations[bone_parents[bone]];
+        global_bone_positions[bone] = Utils.quat_mul_vec3(parent_rotation, local_bone_positions[bone]) + parent_position;
+        global_bone_rotations[bone] = parent_rotation * local_bone_rotations[bone];
+        global_bone_computed[bone] = true;
+    }
     void normalize_feature(
             in int size,
             in float weight = 1.0f)
@@ -455,6 +484,25 @@ public class database : MonoBehaviour
         }
     }
 
+    private void load2Darray(BinaryReader reader, ref bool[][] arr)
+    {
+        // rows = num_frames, cols = num_bones
+        uint rows, cols;
+        rows = reader.ReadUInt32();
+        cols = reader.ReadUInt32();
+        //Debug.Log($"Rows: {rows} , Cols: {cols}");
+        arr = new bool[rows][];
+        for (int i = 0; i < rows; i++)
+        {
+            arr[i] = new bool[cols];
+            for (int j = 0; j < cols; j++)
+            {
+                arr[i][j] = reader.ReadBoolean();
+            }
+
+        }
+    }
+
     private void loadArray(BinaryReader reader, ref int[] arr)
     {
         uint size;
@@ -489,6 +537,8 @@ public class database : MonoBehaviour
                 // as an unsigned int, need to convert it
                 loadArray(reader, ref  range_starts);
                 loadArray(reader, ref range_stops);
+                load2Darray(reader, ref contact_states);
+
             }
         }
         bone_parents[0] = -1;
