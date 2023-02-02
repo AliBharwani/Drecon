@@ -245,6 +245,7 @@ public class mm_v2 : MonoBehaviour
         trajectory_angular_velocities = new Vector3[4];
         random_lstick_input =  Random.insideUnitCircle;
         simulation_position = origin;
+        simulation_rotation = Quaternion.identity;
         inertialize_pose_reset(bone_positions[0], bone_rotations[0]);
         inertialize_pose_update(
             motionDB.bone_positions[frameIdx],
@@ -254,6 +255,32 @@ public class mm_v2 : MonoBehaviour
             inertialize_blending_halflife,
             0f
         );
+        reset_contact_state();
+
+        adjusted_bone_positions = bone_positions;
+        adjusted_bone_rotations = bone_rotations;
+        search_timer = search_time;
+        force_search_timer = search_time;
+        //time_since_last_check = 0f;
+    }
+    public void Reset()
+    {
+        //Debug.Log("Reset called");
+        frameIdx = 0;
+        frameCounter = 1;
+        //transform.position = origin;
+        //transform.rotation = origin_rot;
+        simulation_velocity = Vector3.zero;
+        simulation_acceleration = Vector3.zero;
+        simulation_rotation = Quaternion.identity;
+        simulation_angular_velocity = Vector3.zero;
+        desired_velocity = Vector3.zero;
+        desired_rotation = Quaternion.identity;
+        init();
+    }
+
+    internal void reset_contact_state()
+    {
         for (int i = 0; i < contact_bones.Length; i++)
         {
             Vector3 bone_position = Vector3.zero;
@@ -283,27 +310,6 @@ public class mm_v2 : MonoBehaviour
                 bone_position,
                 bone_velocity);
         }
-
-        adjusted_bone_positions = bone_positions;
-        adjusted_bone_rotations = bone_rotations;
-        search_timer = search_time;
-        force_search_timer = search_time;
-        //time_since_last_check = 0f;
-    }
-    public void Reset()
-    {
-        //Debug.Log("Reset called");
-        frameIdx = 0;
-        frameCounter = 1;
-        //transform.position = origin;
-        //transform.rotation = origin_rot;
-        simulation_velocity = Vector3.zero;
-        simulation_acceleration = Vector3.zero;
-        simulation_rotation = Quaternion.identity;
-        simulation_angular_velocity = Vector3.zero;
-        desired_velocity = Vector3.zero;
-        desired_rotation = Quaternion.identity;
-        init();
     }
     internal void set_random_pose()
     {
@@ -339,6 +345,7 @@ public class mm_v2 : MonoBehaviour
         //}
         //return false;
     }
+    public bool debug_always_max_speed = false;
 
     internal void FixedUpdate()
     {
@@ -355,7 +362,7 @@ public class mm_v2 : MonoBehaviour
         // generating random inputs and every frame the user changes desires with P(.001)
         if (should_gen_inputs()) {
             //Debug.Log("Genning new inputs!");
-            random_lstick_input =  Random.insideUnitCircle;
+            random_lstick_input = debug_always_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
             // Random chance of making desired rotation face direction of velocity  
             is_strafing = Random.value <= .5f;
             is_runbutton_pressed = !walk_only && Random.value <= .5f;
@@ -409,6 +416,7 @@ public class mm_v2 : MonoBehaviour
             bone_positions[0] = origin;
             simulation_position =  origin;
             force_search = true;
+            reset_contact_state();
             teleportedThisFixedUpdate = true;
         }
         // Get the desired velocity

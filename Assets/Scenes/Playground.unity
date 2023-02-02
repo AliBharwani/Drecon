@@ -357,9 +357,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: f6a0491678c9f65428594618240273d1, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: b06fd606ec5439442804403d9c70f2fa, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 1
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1719,28 +1719,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/3DAllJointsFootLocking
+  writeToFilePath: ../results/AllHopeIsLost
   filename: unityconfig.json
-  loadFromFilePath: ../results/AllJoints3D
+  loadFromFilePath: ../results/AllHopeIsLost
   solverIterations: 128
-  actionsAreEulerRotations: 0
+  actionsAreEulerRotations: 1
   actionsAre6DRotations: 0
   normalizeObservations: 1
-  normalizeLimitedDOFOutputs: 0
+  normalizeLimitedDOFOutputs: 1
   normalizeRewardComponents: 0
   networkControlsAllJoints: 1
-  useGeodesicForAngleDiff: 1
+  useGeodesicForAngleDiff: 0
   poseRewardMultiplier: 0.1
-  resetKinCharOnEpisodeEnd: 1
+  resetKinCharOnEpisodeEnd: 0
   EVALUATE_EVERY_K_STEPS: 1
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -1
-  MAX_EPISODE_LENGTH_SECONDS: 20
+  MAX_EPISODE_LENGTH_SECONDS: 60
   ACTION_STIFFNESS_HYPERPARAM: 0.5
   simulationVelocityHalflife: 0.5
   walkOnly: 1
   useHandmadeColliders: 1
-  projectileTraining: 0
+  projectileTraining: 1
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
@@ -1980,7 +1980,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1810728709180460642, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
       propertyPath: drawGizmos
@@ -2103,7 +2103,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 48cd2ca3150806e45a937698b55748e2, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2168,7 +2168,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2090630088
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2181,7 +2181,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 1
+  numAgents: 2
   modelDirector: {fileID: 767361687}
   model6DDirector: {fileID: 2033970009}
   modelAllJointsDirector: {fileID: 710360376}
@@ -2761,7 +2761,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
       propertyPath: m_RootOrder

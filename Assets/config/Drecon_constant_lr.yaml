@@ -23,6 +23,6 @@ behaviors:
           normalize: True
     keep_checkpoints: 10
     max_steps: 300000000
-    checkpoint_interval: 100000 
+    checkpoint_interval: 500000 
     time_horizon: 240
     summary_freq: 100000
