@@ -349,6 +349,8 @@ public class mm_v2 : MonoBehaviour
 
     internal void FixedUpdate()
     {
+        //Debug.Log("======================");
+        //Debug.Log($"{Time.frameCount} : Kinematic character updated");
         if (debug_move_every_second )// && Time.realtimeSinceStartup > 2f)
         {
             time_since_last_move += Time.fixedDeltaTime;

@@ -176,11 +176,12 @@ public class SimCharController : MonoBehaviour
             }
             Quaternion targetLocalRot = kin_char.boneToTransform[i].localRotation;
             // from https://github.com/Unity-Technologies/marathon-envs/blob/58852e9ac22eac56ca46d1780573cc6c32278a71/UnitySDK/Assets/MarathonEnvs/Scripts/ActiveRagdoll003/DebugJoints.cs
-            Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles ;
-            TargetRotationInJointSpace = new Vector3(
-                Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
-                Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
-                Mathf.DeltaAngle(0, TargetRotationInJointSpace.z)) * Mathf.Deg2Rad;
+            //Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles ;
+            //TargetRotationInJointSpace = new Vector3(
+            //    Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
+            //    Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
+            //    Mathf.DeltaAngle(0, TargetRotationInJointSpace.z)) * Mathf.Deg2Rad;
+            Vector3 TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot, false);
             bool isFootBone = bone == mm_v2.Bones.Bone_LeftFoot || bone == mm_v2.Bones.Bone_RightFoot;
             if (isFootBone)
                 TargetRotationInJointSpace.z = 0f;

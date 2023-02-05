@@ -13,6 +13,8 @@ public class PhysicsManager : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        //Debug.Log($"{Time.frameCount} : PhysicsManager updated");
+
         Physics.Simulate(Time.fixedDeltaTime);
     }
 }

@@ -2,8 +2,8 @@ behaviors:
   Drecon:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 2000
-      buffer_size: 40000
+      batch_size: 2048
+      buffer_size: 40960
       learning_rate: 0.0003
       beta: 0.005
       epsilon: 0.25
@@ -23,6 +23,6 @@ behaviors:
           normalize: True
     keep_checkpoints: 10
     max_steps: 300000000
-    checkpoint_interval: 500000 
-    time_horizon: 240
+    checkpoint_interval: 100000 
+    time_horizon: 32
     summary_freq: 100000

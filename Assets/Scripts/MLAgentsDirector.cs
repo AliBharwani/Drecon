@@ -139,20 +139,9 @@ public class MLAgentsDirector : Agent
         }
         sensor.AddObservation(getState());
     }
-    // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
-    // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
-    public override void OnActionReceived(ActionBuffers actionBuffers)
+    private void applyActions(float[] finalActions)
     {
-        if (!isInitialized)
-        {
-            customInit();
-            return;
-        }
-        float[] curActions = actionBuffers.ContinuousActions.Array;
-        float[] finalActions = new float[numActions];
-        for (int i = 0; i < numActions; i++)
-           finalActions[i] = ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
-        prevActionOutput = finalActions;
+
         Quaternion[] curRotations = MMScript.bone_rotations;
 
         mm_v2.Bones[] fullDOFBonesToUse = networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
@@ -174,13 +163,15 @@ public class MLAgentsDirector : Agent
             actionIdx++;
             Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
             var zDrive = ab.zDrive;
-            if (normalizeLimitedDOFOutputs) { 
+            if (normalizeLimitedDOFOutputs)
+            {
                 var scale = (zDrive.upperLimit - zDrive.lowerLimit) / 2f;
                 var midpoint = zDrive.lowerLimit + scale;
                 var outputZ = (output * scale) + midpoint;
                 zDrive.target = targetRotationInJointSpace.z + outputZ;
                 ab.zDrive = zDrive;
-            } else
+            }
+            else
             {
                 // Angle is in range (-1, 1) => map to (-180, 180)
                 float angle = output * 180;
@@ -196,8 +187,24 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             ab.SetDriveRotation(final);
         }
-        calcAndSetRewards();
-        
+    }
+    // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
+    // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
+    public override void OnActionReceived(ActionBuffers actionBuffers)
+    {
+        if (!isInitialized)
+        {
+            customInit();
+            return;
+        }
+        //Debug.Log($"{Time.frameCount} : Applying Python Action on ML Agent");
+
+        float[] curActions = actionBuffers.ContinuousActions.Array;
+        float[] finalActions = new float[numActions];
+        for (int i = 0; i < numActions; i++)
+           finalActions[i] = ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
+        prevActionOutput = finalActions;
+        applyActions(finalActions);
     }
 
     private void applyActionsAsAxisAngleRotations(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
@@ -421,12 +428,12 @@ public class MLAgentsDirector : Agent
         float verticalOffset = getVerticalOffset();
         //Debug.Log($"Vertical offset: {verticalOffset}");
         projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + Vector3.right;
-        SimCharController.teleportSimChar(simChar, kinChar, true, verticalOffset + .1f);
+        SimCharController.teleportSimChar(simChar, kinChar, true, verticalOffset + .025f);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
         //Debug.Log($"Teleoport happens on {curFixedUpdate}");
     }
 
-
+    bool updateVelocity;
     private void FixedUpdate()
     {
         if (!isInitialized)
@@ -435,32 +442,35 @@ public class MLAgentsDirector : Agent
             return;
         }
         curFixedUpdate++;
+        //Debug.Log($"{Time.frameCount} : ML Agent updated");
 
         // Make sure to teleport sim character if kin character teleported
         //Debug.Log($"simCharTeleported: {simCharTeleported}");
         //if (simCharTeleported)
         //    Debug.Log($"BOOM : {simCharTeleported}");
         // only update velocity if we did not teleport last frame
-        bool updateVelocity = lastSimCharTeleportFixedUpdate + 1 != curFixedUpdate;
+        updateVelocity = lastSimCharTeleportFixedUpdate + 1 != curFixedUpdate;
         if (MMScript.teleportedThisFixedUpdate)
         {
             //sim_char.char_trans.rotation = kin_char.char_trans.rotation;
-            simChar.root.TeleportRoot(Vector3.zero, kinChar.trans.rotation);
+            Vector3 newRootPosition = kinChar.cm - simChar.cm + Vector3.zero;
+            simChar.root.TeleportRoot(newRootPosition, kinChar.trans.rotation);
             updateVelocity = false;
         }
         // Update CMs 
         //Debug.Log($"curFixedUpdate: {curFixedUpdate} updateVelocity: {updateVelocity}");
         UpdateCMData(updateVelocity);
         UpdateBoneObsState(updateVelocity);
-        UpdateBoneSurfacePts(updateVelocity);
+        // UpdateBoneSurfacePts(updateVelocity);
         //bool episodeEnded = calcAndSetRewards();
         //if (episodeEnded)
         //    return;
         // request Decision
         if (curFixedUpdate % EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
-        else
-            calcAndSetRewards(true);
+        else {
+            applyActions(prevActionOutput);
+        }
         //updateMeanReward();
         if (genMinsAndMaxes && curFixedUpdate % 300 == 0)
             WriteMinsAndMaxes();
@@ -643,7 +653,7 @@ public class MLAgentsDirector : Agent
     private float meanReward = 0f;
     internal float finalReward = 0f;
     // returns TRUE if episode ended
-    private bool calcAndSetRewards(bool add = false)
+    public bool calcAndSetRewards()
     {
         bool heads1mApart;
         double posReward, velReward, localPoseReward, cmVelReward, fallFactor;
@@ -652,14 +662,13 @@ public class MLAgentsDirector : Agent
         {
             finalReward = EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
-            if (add)
-                AddReward(EPISODE_END_REWARD);
-            else
-                SetReward(EPISODE_END_REWARD);
+            SetReward(EPISODE_END_REWARD);
             //Debug.Log($"Calling end epsidoe on: {curFixedUpdate}");
             EndEpisode();
             return true;
         }
+        UpdateCMData(updateVelocity);
+        UpdateBoneSurfacePts(updateVelocity);
         // Calc them even if we don't use them for normalizer sake
         calcPosAndVelReward(out posReward, out velReward);
         calcLocalPoseReward(out localPoseReward);
@@ -674,10 +683,7 @@ public class MLAgentsDirector : Agent
         }
         //Debug.Log($"final_reward: {finalReward}");
         //updateMeanReward(final_reward);
-        if (add)
-            AddReward(finalReward);
-        else
-            SetReward(finalReward);
+        SetReward(finalReward);
         return false;
     }
 

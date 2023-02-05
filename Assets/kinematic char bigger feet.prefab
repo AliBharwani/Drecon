@@ -1574,6 +1574,7 @@ MonoBehaviour:
   ik_enabled: 1
   teleportedThisFixedUpdate: 0
   is_initalized: 0
+  debug_always_max_speed: 0
   drawGizmos: 1
   simulation_velocity_halflife: 0.27
 --- !u!114 &6572924355493366906
@@ -2858,7 +2859,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 0
-  m_Radius: 0.025
+  m_Radius: 0.05
   m_Height: 0.15
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}

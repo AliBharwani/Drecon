@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 22799917,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-22799917.onnx",
+                "reward": 110.51898284281107,
+                "creation_time": 1675475757.1383762,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-22799917.pt"
+                ]
+            },
+            {
+                "steps": 22899993,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-22899993.onnx",
+                "reward": 111.01272627647887,
+                "creation_time": 1675475897.239521,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-22899993.pt"
+                ]
+            },
+            {
+                "steps": 22999958,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-22999958.onnx",
+                "reward": 111.58700364774411,
+                "creation_time": 1675476034.9354873,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-22999958.pt"
+                ]
+            },
+            {
+                "steps": 23099964,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23099964.onnx",
+                "reward": 108.98131467940959,
+                "creation_time": 1675476175.2586226,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23099964.pt"
+                ]
+            },
+            {
+                "steps": 23199996,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23199996.onnx",
+                "reward": 109.6826209594316,
+                "creation_time": 1675476312.7644367,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23199996.pt"
+                ]
+            },
+            {
+                "steps": 23299977,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23299977.onnx",
+                "reward": 112.3989921692879,
+                "creation_time": 1675476453.0208964,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23299977.pt"
+                ]
+            },
+            {
+                "steps": 23399985,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23399985.onnx",
+                "reward": 110.90016765995426,
+                "creation_time": 1675476590.498586,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23399985.pt"
+                ]
+            },
+            {
+                "steps": 23499976,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23499976.onnx",
+                "reward": 108.16043404609927,
+                "creation_time": 1675476730.6981444,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23499976.pt"
+                ]
+            },
+            {
+                "steps": 23599993,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23599993.onnx",
+                "reward": 111.67536364548079,
+                "creation_time": 1675476868.2463658,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23599993.pt"
+                ]
+            },
+            {
+                "steps": 23656921,
+                "file_path": "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23656921.onnx",
+                "reward": 109.24759389703924,
+                "creation_time": 1675476949.2791293,
+                "auxillary_file_paths": [
+                    "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23656921.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 23656921,
+            "file_path": "results\\V2ResetAllHopeIsLost\\Drecon.onnx",
+            "reward": 109.24759389703924,
+            "creation_time": 1675476949.2791293,
+            "auxillary_file_paths": [
+                "results\\V2ResetAllHopeIsLost\\Drecon\\Drecon-23656921.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

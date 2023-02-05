@@ -357,7 +357,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: b06fd606ec5439442804403d9c70f2fa, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 0781b99833f823846bdac4557ccfc1cf, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 0
   m_BehaviorName: Drecon
@@ -448,7 +448,7 @@ MonoBehaviour:
   networkControlsAllJoints: 1
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
-  resetKinCharOnEpisodeEnd: 1
+  resetKinCharOnEpisodeEnd: 0
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
@@ -536,7 +536,7 @@ MonoBehaviour:
     PowerVector: {x: 4000, y: 4000, z: 4000}
   - Bone: 17
     PowerVector: {x: 4000, y: 4000, z: 4000}
-  forceLimit: 3.402823e+38
+  forceLimit: 200
   damping: 100
   pGainMultiplier: 0.5
 --- !u!4 &381966280
@@ -1658,6 +1658,50 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7339148180391340364, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
   m_PrefabInstance: {fileID: 529752456}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1313389652
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1313389654}
+  - component: {fileID: 1313389653}
+  m_Layer: 0
+  m_Name: AcademyManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1313389653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313389652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65edcbf8b429ee74caadf430bb32d46f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1313389654
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1313389652}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.3158383, y: 0.31696188, z: 0.012842655}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 20
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1327619676
 GameObject:
   m_ObjectHideFlags: 0
@@ -1719,25 +1763,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/AllHopeIsLost
+  writeToFilePath: ../results/NonReset
   filename: unityconfig.json
-  loadFromFilePath: ../results/AllHopeIsLost
-  solverIterations: 128
+  loadFromFilePath: ../results/NonReset
+  solverIterations: 256
   actionsAreEulerRotations: 1
   actionsAre6DRotations: 0
   normalizeObservations: 1
   normalizeLimitedDOFOutputs: 1
   normalizeRewardComponents: 0
   networkControlsAllJoints: 1
-  useGeodesicForAngleDiff: 0
+  useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 0
-  EVALUATE_EVERY_K_STEPS: 1
+  EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -1
   MAX_EPISODE_LENGTH_SECONDS: 60
   ACTION_STIFFNESS_HYPERPARAM: 0.5
-  simulationVelocityHalflife: 0.5
+  simulationVelocityHalflife: 0.7
   walkOnly: 1
   useHandmadeColliders: 1
   projectileTraining: 1
@@ -1819,7 +1863,7 @@ MonoBehaviour:
     PowerVector: {x: 4000, y: 4000, z: 4000}
   - Bone: 17
     PowerVector: {x: 4000, y: 4000, z: 4000}
-  forceLimit: 3.402823e+38
+  forceLimit: 1000
   damping: 100
   pGainMultiplier: 0.5
 --- !u!4 &1357924715
