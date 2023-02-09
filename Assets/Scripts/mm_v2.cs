@@ -42,7 +42,7 @@ public class mm_v2 : MonoBehaviour
     public float feature_weight_hip_velocity = 1.0f;
     public float feature_weight_trajectory_positions = 1.0f;
     public float feature_weight_trajectory_directions = 1.5f;
-    public float inertialize_blending_halflife = 0.1f;
+    public float inertialize_blending_halflife = .25f; //0.1f;
     public float simulation_rotation_halflife = .27f;
     public int frame_increments = 10;
     public int ignore_surrounding = 10;
@@ -60,9 +60,9 @@ public class mm_v2 : MonoBehaviour
     int frameIdx = 0;
 
     Vector3[] curr_bone_positions;
-    Vector3[] curr_bone_velocities;
+    internal Vector3[] curr_bone_velocities;
     Quaternion[] curr_bone_rotations;
-    Vector3[] curr_bone_angular_velocities;
+    internal Vector3[] curr_bone_angular_velocities;
     bool[] curr_bone_contacts;
 
     Vector3[] trns_bone_positions;
@@ -376,9 +376,9 @@ public class mm_v2 : MonoBehaviour
             is_runbutton_pressed = gamepad.aButton.isPressed;
         }
         desired_gait_update(Time.fixedDeltaTime);
-        simulation_fwrd_speed = Mathf.Lerp(simulation_run_fwrd_speed, simulation_walk_fwrd_speed, desired_gait);
-        simulation_side_speed = Mathf.Lerp(simulation_run_side_speed, simulation_walk_side_speed, desired_gait);
-        simulation_back_speed = Mathf.Lerp(simulation_run_back_speed, simulation_walk_back_speed, desired_gait);
+        simulation_fwrd_speed = Mathf.Lerp(simulation_walk_fwrd_speed, simulation_run_fwrd_speed, desired_gait);
+        simulation_side_speed = Mathf.Lerp(simulation_walk_side_speed, simulation_run_side_speed, desired_gait);
+        simulation_back_speed = Mathf.Lerp( simulation_walk_back_speed, simulation_run_back_speed, desired_gait);
 
         Vector3 desired_velocity_curr = desired_velocity_update(simulation_rotation);
         //Debug.Log($"Gamepad: {gamepad.leftStick.ReadValue()}");
@@ -755,8 +755,8 @@ public class mm_v2 : MonoBehaviour
     float simulation_run_back_speed = 2.5f;
 
     float simulation_walk_fwrd_speed = 1.75f;
-    float simulation_walk_side_speed = 1.5f;
-    float simulation_walk_back_speed = 1.25f;
+    float simulation_walk_side_speed = 1.5f ;
+    float simulation_walk_back_speed = 1.25f ;
 
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)

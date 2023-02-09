@@ -72,6 +72,13 @@ public class ConfigWriter : MonoBehaviour
             boneToStiffness[i] *= pGainMultiplier;
     }
 
+    [ContextMenu("Multiply all muscle power values by pGainMultiplier")]
+    public void multiplyAllMusclePowerValues()
+    {
+        foreach (var mp in MusclePowers)
+            mp.PowerVector *= pGainMultiplier;
+    }
+
     [ContextMenu("Multiply all Lower Body stiffness values by pGainMultiplier")]
     public void multiplyAllLowerBodyStiffnessValues()
     {

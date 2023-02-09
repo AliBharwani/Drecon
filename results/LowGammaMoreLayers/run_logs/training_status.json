@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 20399988,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-20399988.onnx",
+                "reward": 232.49684465651544,
+                "creation_time": 1675873528.3648255,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-20399988.pt"
+                ]
+            },
+            {
+                "steps": 20499985,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-20499985.onnx",
+                "reward": 240.34580366075346,
+                "creation_time": 1675873665.1119726,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-20499985.pt"
+                ]
+            },
+            {
+                "steps": 20599972,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-20599972.onnx",
+                "reward": 234.58952461466902,
+                "creation_time": 1675873805.4849925,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-20599972.pt"
+                ]
+            },
+            {
+                "steps": 20699989,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-20699989.onnx",
+                "reward": 221.29983689042623,
+                "creation_time": 1675873942.8793306,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-20699989.pt"
+                ]
+            },
+            {
+                "steps": 20799990,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-20799990.onnx",
+                "reward": 179.21269350627372,
+                "creation_time": 1675874083.62926,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-20799990.pt"
+                ]
+            },
+            {
+                "steps": 20899987,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-20899987.onnx",
+                "reward": 247.96600365189332,
+                "creation_time": 1675874219.8533323,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-20899987.pt"
+                ]
+            },
+            {
+                "steps": 20999993,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-20999993.onnx",
+                "reward": 221.32792437682718,
+                "creation_time": 1675874357.6889856,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-20999993.pt"
+                ]
+            },
+            {
+                "steps": 21099991,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-21099991.onnx",
+                "reward": 227.21187143679708,
+                "creation_time": 1675874497.0815153,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-21099991.pt"
+                ]
+            },
+            {
+                "steps": 21199997,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-21199997.onnx",
+                "reward": 220.723445992677,
+                "creation_time": 1675874635.3993824,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-21199997.pt"
+                ]
+            },
+            {
+                "steps": 21201014,
+                "file_path": "results\\LowGammaMoreLayers\\Drecon\\Drecon-21201014.onnx",
+                "reward": 220.4742405315655,
+                "creation_time": 1675874636.9627347,
+                "auxillary_file_paths": [
+                    "results\\LowGammaMoreLayers\\Drecon\\Drecon-21201014.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 21201014,
+            "file_path": "results\\LowGammaMoreLayers\\Drecon.onnx",
+            "reward": 220.4742405315655,
+            "creation_time": 1675874636.9627347,
+            "auxillary_file_paths": [
+                "results\\LowGammaMoreLayers\\Drecon\\Drecon-21201014.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

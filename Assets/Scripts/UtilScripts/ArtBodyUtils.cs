@@ -6,7 +6,7 @@ using UnityEngine;
 public static class ArtBodyUtils
 {
 
-    public static void deconstructScaledAngleAxis(Vector3 angle_axis, out float angle, out Vector3 axis)
+    public static void deconstructScaledAngleAxis(this Vector3 angle_axis, out float angle, out Vector3 axis)
     {
         angle = angle_axis.magnitude;
         axis = angle_axis.normalized;

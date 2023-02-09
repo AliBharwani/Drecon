@@ -357,7 +357,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 0781b99833f823846bdac4557ccfc1cf, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 5b28841331e65b04bb8df961a0a0df4b, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 0
   m_BehaviorName: Drecon
@@ -381,6 +381,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  resetKinCharOnEpisodeEnd: 0
   groundCollider: {fileID: 870766689}
   simulated_char_prefab: {fileID: 7967488750888317942, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
   kinematic_char_prefab: {fileID: 2015968129522336309, guid: 259da14d6aa2e5c4ba981ebc69ed148e, type: 3}
@@ -390,6 +391,7 @@ MonoBehaviour:
   use_debug_mats: 1
   genMinsAndMaxes: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &214671238
@@ -448,7 +450,7 @@ MonoBehaviour:
   networkControlsAllJoints: 1
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
-  resetKinCharOnEpisodeEnd: 0
+  resetKinCharOnEpisodeEnd: 1
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
@@ -511,32 +513,32 @@ MonoBehaviour:
   - 1000
   MusclePowers:
   - Bone: 1
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 11
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 12
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 6
-    PowerVector: {x: 4000, y: 4000, z: 12000}
+    PowerVector: {x: 2000, y: 2000, z: 6000}
   - Bone: 2
-    PowerVector: {x: 4000, y: 4000, z: 12000}
+    PowerVector: {x: 2000, y: 2000, z: 6000}
   - Bone: 7
-    PowerVector: {x: 8000, y: 8000, z: 8000}
+    PowerVector: {x: 4000, y: 4000, z: 4000}
   - Bone: 3
-    PowerVector: {x: 8000, y: 8000, z: 8000}
+    PowerVector: {x: 4000, y: 4000, z: 4000}
   - Bone: 8
-    PowerVector: {x: 2000, y: 2000, z: 4000}
+    PowerVector: {x: 1000, y: 1000, z: 2000}
   - Bone: 4
-    PowerVector: {x: 2000, y: 2000, z: 4000}
+    PowerVector: {x: 1000, y: 1000, z: 2000}
   - Bone: 20
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1000, y: 1000, z: 1000}
   - Bone: 16
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1000, y: 1000, z: 1000}
   - Bone: 21
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 17
-    PowerVector: {x: 4000, y: 4000, z: 4000}
-  forceLimit: 200
+    PowerVector: {x: 2000, y: 2000, z: 2000}
+  forceLimit: 3.402823e+38
   damping: 100
   pGainMultiplier: 0.5
 --- !u!4 &381966280
@@ -1198,6 +1200,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  resetKinCharOnEpisodeEnd: 0
   groundCollider: {fileID: 870766689}
   simulated_char_prefab: {fileID: 7967488750888317942, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
   kinematic_char_prefab: {fileID: 2015968129522336309, guid: 259da14d6aa2e5c4ba981ebc69ed148e, type: 3}
@@ -1207,6 +1210,7 @@ MonoBehaviour:
   use_debug_mats: 1
   genMinsAndMaxes: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &710360380
@@ -1259,6 +1263,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  resetKinCharOnEpisodeEnd: 0
   groundCollider: {fileID: 870766689}
   simulated_char_prefab: {fileID: 7967488750888317942, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
   kinematic_char_prefab: {fileID: 2015968129522336309, guid: 259da14d6aa2e5c4ba981ebc69ed148e, type: 3}
@@ -1268,6 +1273,7 @@ MonoBehaviour:
   use_debug_mats: 1
   genMinsAndMaxes: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &767361689
@@ -1763,28 +1769,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/NonReset
+  writeToFilePath: ../results/MoreLayers
   filename: unityconfig.json
-  loadFromFilePath: ../results/NonReset
+  loadFromFilePath: ../results/MoreLayers
   solverIterations: 256
   actionsAreEulerRotations: 1
   actionsAre6DRotations: 0
-  normalizeObservations: 1
+  normalizeObservations: 0
   normalizeLimitedDOFOutputs: 1
   normalizeRewardComponents: 0
   networkControlsAllJoints: 1
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
-  resetKinCharOnEpisodeEnd: 0
+  resetKinCharOnEpisodeEnd: 1
   EVALUATE_EVERY_K_STEPS: 2
-  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
-  EPISODE_END_REWARD: -1
-  MAX_EPISODE_LENGTH_SECONDS: 60
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 2
+  EPISODE_END_REWARD: -0.5
+  MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.5
   simulationVelocityHalflife: 0.7
   walkOnly: 1
   useHandmadeColliders: 1
-  projectileTraining: 1
+  projectileTraining: 0
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
@@ -1838,32 +1844,32 @@ MonoBehaviour:
   - 1000
   MusclePowers:
   - Bone: 1
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 11
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 12
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 6
-    PowerVector: {x: 4000, y: 4000, z: 12000}
+    PowerVector: {x: 2000, y: 2000, z: 6000}
   - Bone: 2
-    PowerVector: {x: 4000, y: 4000, z: 12000}
+    PowerVector: {x: 2000, y: 2000, z: 6000}
   - Bone: 7
-    PowerVector: {x: 8000, y: 8000, z: 8000}
+    PowerVector: {x: 4000, y: 4000, z: 4000}
   - Bone: 3
-    PowerVector: {x: 8000, y: 8000, z: 8000}
+    PowerVector: {x: 4000, y: 4000, z: 4000}
   - Bone: 8
-    PowerVector: {x: 2000, y: 2000, z: 4000}
+    PowerVector: {x: 1000, y: 1000, z: 2000}
   - Bone: 4
-    PowerVector: {x: 2000, y: 2000, z: 4000}
+    PowerVector: {x: 1000, y: 1000, z: 2000}
   - Bone: 20
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1000, y: 1000, z: 1000}
   - Bone: 16
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1000, y: 1000, z: 1000}
   - Bone: 21
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 17
-    PowerVector: {x: 4000, y: 4000, z: 4000}
-  forceLimit: 1000
+    PowerVector: {x: 2000, y: 2000, z: 2000}
+  forceLimit: 200
   damping: 100
   pGainMultiplier: 0.5
 --- !u!4 &1357924715
@@ -2169,6 +2175,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  resetKinCharOnEpisodeEnd: 0
   groundCollider: {fileID: 870766689}
   simulated_char_prefab: {fileID: 7967488750888317942, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
   kinematic_char_prefab: {fileID: 2015968129522336309, guid: 259da14d6aa2e5c4ba981ebc69ed148e, type: 3}
@@ -2178,6 +2185,7 @@ MonoBehaviour:
   use_debug_mats: 1
   genMinsAndMaxes: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &2033970013

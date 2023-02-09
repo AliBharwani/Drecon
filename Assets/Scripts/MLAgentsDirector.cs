@@ -12,6 +12,7 @@ public struct CharInfo
 {
     public Transform[]  boneToTransform;
     public GameObject[] boneToCollider;
+    public mm_v2 MMScript;
     public GameObject charObj;
     public Transform  trans;
     public ArticulationBody root;
@@ -44,7 +45,7 @@ public class MLAgentsDirector : Agent
     //public bool setDriveStiffnessAndDamping = false;
     //public float DriveStiffness = 150f;
     //public float DriveDamping = 20f;
-    internal bool resetKinCharOnEpisodeEnd = false;
+    public bool resetKinCharOnEpisodeEnd = false;
     internal bool actionsAreEulerRotations = false;
     internal bool actionsAre6DRotations = false;
     internal bool normalizeObservations = false;
@@ -333,6 +334,7 @@ public class MLAgentsDirector : Agent
         kinChar.trans = kinematicCharObj.transform;
         kinChar.boneToTransform = MMScript.boneToTransform;
         kinChar.charObj = kinematicCharObj;
+        kinChar.MMScript = MMScript;
         //nbodies = kinChar.boneToTransform.Length;
         //kinChar.boneSurfacePts = new Vector3[nbodies][];
 
@@ -416,7 +418,7 @@ public class MLAgentsDirector : Agent
         customInit();
         //SimCharController.set_art_body_rot_limits();
     }
-
+    public bool updateVelOnTeleport = true;
     public override void OnEpisodeBegin()
     {
         //Debug.Log("OnEpisodeBegin() called");
@@ -427,9 +429,10 @@ public class MLAgentsDirector : Agent
         }
         float verticalOffset = getVerticalOffset();
         //Debug.Log($"Vertical offset: {verticalOffset}");
-        projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + Vector3.right;
-        SimCharController.teleportSimChar(simChar, kinChar, true, verticalOffset + .025f);
+        projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + 2 * Vector3.right;
+        SimCharController.teleportSimChar(simChar, kinChar, true, verticalOffset + .01f, !resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
+        RequestDecision();
         //Debug.Log($"Teleoport happens on {curFixedUpdate}");
     }
 
@@ -652,6 +655,7 @@ public class MLAgentsDirector : Agent
 
     private float meanReward = 0f;
     internal float finalReward = 0f;
+    internal int lastEpisodeEndingFrame = 0;
     // returns TRUE if episode ended
     public bool calcAndSetRewards()
     {
@@ -663,7 +667,8 @@ public class MLAgentsDirector : Agent
             finalReward = EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
             SetReward(EPISODE_END_REWARD);
-            //Debug.Log($"Calling end epsidoe on: {curFixedUpdate}");
+            Debug.Log($"Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames");
+            lastEpisodeEndingFrame = curFixedUpdate;
             EndEpisode();
             return true;
         }
@@ -683,7 +688,9 @@ public class MLAgentsDirector : Agent
         }
         //Debug.Log($"final_reward: {finalReward}");
         //updateMeanReward(final_reward);
-        SetReward(finalReward);
+        AddReward(finalReward);
+
+        //SetReward(finalReward);
         return false;
     }
 

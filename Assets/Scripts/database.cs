@@ -92,6 +92,21 @@ public class database : MonoBehaviour
         ignore_surrounding = _ignore_surrounding;
         num_neigh = _num_neigh;
         load_db(filename);
+        offset_foot_rots();
+    }
+
+    // The motion data foot rotations have the feet at a slight angle when touching the ground, so the heel is slightly off the ground
+    // This does not match the training clips that the original Drecon paper used, and also makes it hard for the sim character to balance
+    // This should improve balance by offsetting them 20 deg towards the ground 
+    // Note: this needs to be called before database_build_matching_features() and will also skew angular velocity  
+    public void offset_foot_rots(float num_deg = 20)
+    {
+        Quaternion offset = Quaternion.AngleAxis(-20f, Vector3.forward);
+        for(int i = 0; i < numframes; i++)
+        {
+            bone_rotations[i][(int)Bone_LeftFoot] *= offset;
+            bone_rotations[i][(int)Bone_RightFoot] *= offset;
+        }
     }
     public void database_build_matching_features(
         in float feature_weight_foot_position,
@@ -530,6 +545,8 @@ public class database : MonoBehaviour
             {
                 load2Darray(reader, ref bone_positions, false);
                 load2Darray(reader, ref bone_velocities);
+                //for (int i = 0; i < 1000; i++)
+                //    Utils.debugVector3Array(bone_velocities[i], "Bone Velocities " + i.ToString(), "f12");
                 load2Darray(reader, ref bone_rotations);
                 load2Darray(reader, ref bone_angular_velocities);
                 loadArray(reader, ref bone_parents);

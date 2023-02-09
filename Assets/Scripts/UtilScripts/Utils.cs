@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -122,6 +123,12 @@ public static class Utils
     {
         Debug.Log(name + string.Join(" , ", data));
     }
+
+    public static void debugVector3Array(Vector3 [] data, string name, string argument = "f6")
+    {
+        Debug.Log(name + string.Join(" , ", data.Select(vec => vec.ToString(argument))));
+    }
+
 
     public static Quaternion[] identity_quat_arr(int size)
     {

@@ -77,9 +77,13 @@ public class SimCharController : MonoBehaviour
 
         int[] torsoColliders = new int[] { (int)Bone_Neck, (int)Bone_LeftShoulder, (int)Bone_RightShoulder, (int) Bone_Spine2,
                                             (int) Bone_Spine1, (int) Bone_Spine, (int) Bone_Hips, (int) Bone_Head};
+        int[] feetColliders = new int[] { (int)Bone_LeftFoot, (int)Bone_LeftToe, (int)Bone_RightFoot, (int)Bone_RightToe };
         for (int i = 0; i < torsoColliders.Length; i++)
             for (int j = i + 1; j < torsoColliders.Length; j++)
                 Physics.IgnoreCollision(boneToCollider[torsoColliders[i]], boneToCollider[torsoColliders[j]]);
+        for (int i = 0; i < feetColliders.Length; i++)
+            for (int j = i + 1; j < feetColliders.Length; j++)
+                Physics.IgnoreCollision(boneToCollider[feetColliders[i]], boneToCollider[feetColliders[j]]);
         for (int i = 2; i < db.nbones(); i++) // start at 2 because hip has no parent collider
         {
             int parent = db.bone_parents[i];
@@ -140,7 +144,7 @@ public class SimCharController : MonoBehaviour
 
     public static database db;
 
-    public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char, bool setDriveTargets = false, float verticalOffset = .15f)
+    public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char, bool setDriveTargets = false, float verticalOffset = .15f, bool setVelocities = false)
     {
         if (db == null)
             db = getDB();
@@ -163,18 +167,32 @@ public class SimCharController : MonoBehaviour
         //Vector3 verticalOffset = ;
         sim_char.root.TeleportRoot(kinHips.position + simHipPositionOffset + Vector3.up * verticalOffset, kin_root.rotation);
         sim_char.root.resetJointPhysics();
-
+        if (setVelocities)
+        {
+            sim_char.root.velocity = kin_char.MMScript.curr_bone_velocities[0];
+            //Vector3 targetLocalAngularVel = kin_char.MMScript.curr_bone_angular_velocities[0];
+            //Vector3 axis;
+            //float angle;
+            //targetLocalAngularVel.deconstructScaledAngleAxis(out angle, out axis);
+            //Vector3 finalTargetLocalAngularVel = -(Quaternion.AngleAxis(angle, axis).eulerAngles) * Mathf.Deg2Rad;
+            //sim_char.root.angularVelocity = finalTargetLocalAngularVel;
+        }
+        //Utils.debugVector3Array(kin_char.MMScript.curr_bone_angular_velocities, "kin_char.MMScript.curr_bone_angular_velocities", "f6");
         for (int i = 1; i < 23; i++)
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
             ArticulationBody body = sim_char.boneToArtBody[i];
-
+            //if (setVelocities) { 
+            //    body.velocity = kin_char.MMScript.curr_bone_velocities[0] + kin_char.MMScript.curr_bone_velocities[i] + (i > 1 ? kin_char.MMScript.curr_bone_velocities[1] : Vector3.zero);
+                
+            //}
             if (body.jointType != ArticulationJointType.SphericalJoint)
             {
                 body.resetJointPhysics();
                 continue;
             }
             Quaternion targetLocalRot = kin_char.boneToTransform[i].localRotation;
+
             // from https://github.com/Unity-Technologies/marathon-envs/blob/58852e9ac22eac56ca46d1780573cc6c32278a71/UnitySDK/Assets/MarathonEnvs/Scripts/ActiveRagdoll003/DebugJoints.cs
             //Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRot) * body.parentAnchorRotation).eulerAngles ;
             //TargetRotationInJointSpace = new Vector3(
@@ -183,12 +201,17 @@ public class SimCharController : MonoBehaviour
             //    Mathf.DeltaAngle(0, TargetRotationInJointSpace.z)) * Mathf.Deg2Rad;
             Vector3 TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot, false);
             bool isFootBone = bone == mm_v2.Bones.Bone_LeftFoot || bone == mm_v2.Bones.Bone_RightFoot;
-            if (isFootBone)
-                TargetRotationInJointSpace.z = 0f;
+            //Vector3 targetLocalAngularVel = kin_char.MMScript.curr_bone_angular_velocities[i];
+            //Vector3 axis;
+            //float angle;
+            //targetLocalAngularVel.deconstructScaledAngleAxis(out angle, out axis);
+            //Vector3 finalTargetLocalAngularVel = -(Quaternion.AngleAxis(angle, axis).eulerAngles) * Mathf.Deg2Rad;
+            //if (isFootBone)
+            //    TargetRotationInJointSpace.z = 0f;
 
             if (body.dofCount == 3)
             {
-                body.resetJointPosition(TargetRotationInJointSpace);
+                body.resetJointPosition(isFootBone ? new Vector3(TargetRotationInJointSpace.x, TargetRotationInJointSpace.y, 0f) : TargetRotationInJointSpace);
                 var drive = body.xDrive;
                 drive.target = setDriveTargets ? TargetRotationInJointSpace.x : 0f;
                 body.xDrive = drive;
@@ -198,8 +221,13 @@ public class SimCharController : MonoBehaviour
                 body.yDrive = drive;
 
                 drive = body.zDrive;
-                drive.target = setDriveTargets  && !isFootBone ? TargetRotationInJointSpace.z : 0f;
+                drive.target = setDriveTargets ? TargetRotationInJointSpace.z : 0f;
                 body.zDrive = drive;
+                //if (setVelocities)
+                //{
+                //    //Vector3 targetLocalAngularVel = kin_char.MMScript.curr_bone_angular_velocities[i];
+                //    body.jointVelocity = new ArticulationReducedSpace(finalTargetLocalAngularVel.x, finalTargetLocalAngularVel.y, finalTargetLocalAngularVel.z);
+                //}
             }
             else if (body.dofCount == 1)
             {
@@ -214,7 +242,13 @@ public class SimCharController : MonoBehaviour
                 var drive = body.zDrive;
                 drive.target = setDriveTargets ? TargetRotationInJointSpace.z : 0f;
                 body.zDrive = drive;
+                //if (setVelocities)
+                //{
+                //    //Vector3 targetLocalAngularVel = kin_char.MMScript.curr_bone_angular_velocities[i];
+                //    body.jointVelocity = new ArticulationReducedSpace(finalTargetLocalAngularVel.z);
+                //}
             }
+
         }
 
     }

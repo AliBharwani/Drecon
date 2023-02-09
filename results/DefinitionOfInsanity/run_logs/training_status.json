@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 23699973,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-23699973.onnx",
+                "reward": 145.55462606870938,
+                "creation_time": 1675709431.1590028,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-23699973.pt"
+                ]
+            },
+            {
+                "steps": 23799997,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-23799997.onnx",
+                "reward": 132.37926395462213,
+                "creation_time": 1675709578.867405,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-23799997.pt"
+                ]
+            },
+            {
+                "steps": 23899970,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-23899970.onnx",
+                "reward": 136.7377944249577,
+                "creation_time": 1675709731.2972784,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-23899970.pt"
+                ]
+            },
+            {
+                "steps": 23999982,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-23999982.onnx",
+                "reward": 138.49228110440492,
+                "creation_time": 1675709878.7389255,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-23999982.pt"
+                ]
+            },
+            {
+                "steps": 24099977,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-24099977.onnx",
+                "reward": 141.35341045405806,
+                "creation_time": 1675710030.3024938,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-24099977.pt"
+                ]
+            },
+            {
+                "steps": 24199991,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-24199991.onnx",
+                "reward": 148.88234200240936,
+                "creation_time": 1675710177.567943,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-24199991.pt"
+                ]
+            },
+            {
+                "steps": 24299969,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-24299969.onnx",
+                "reward": 133.86240718416545,
+                "creation_time": 1675710329.617779,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-24299969.pt"
+                ]
+            },
+            {
+                "steps": 24399990,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-24399990.onnx",
+                "reward": 146.61306106780555,
+                "creation_time": 1675710476.9859228,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-24399990.pt"
+                ]
+            },
+            {
+                "steps": 24499975,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-24499975.onnx",
+                "reward": 141.46882730117568,
+                "creation_time": 1675710619.6842513,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-24499975.pt"
+                ]
+            },
+            {
+                "steps": 24549060,
+                "file_path": "results\\DefinitionOfInsanity\\Drecon\\Drecon-24549060.onnx",
+                "reward": 133.18928408527628,
+                "creation_time": 1675710692.3007755,
+                "auxillary_file_paths": [
+                    "results\\DefinitionOfInsanity\\Drecon\\Drecon-24549060.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 24549060,
+            "file_path": "results\\DefinitionOfInsanity\\Drecon.onnx",
+            "reward": 133.18928408527628,
+            "creation_time": 1675710692.3007755,
+            "auxillary_file_paths": [
+                "results\\DefinitionOfInsanity\\Drecon\\Drecon-24549060.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}
