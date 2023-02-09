@@ -357,7 +357,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 5b28841331e65b04bb8df961a0a0df4b, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 9c0ab5e9e07fc9340a1817a642e3f6df, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 0
   m_BehaviorName: Drecon
@@ -1429,7 +1429,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc92cf45f459cea48bd0af43edbec20d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  use60fps: 0
+  use60fps: 1
 --- !u!4 &1013764259
 Transform:
   m_ObjectHideFlags: 0
@@ -1769,9 +1769,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/MoreLayers
+  writeToFilePath: ../results/60fps
   filename: unityconfig.json
-  loadFromFilePath: ../results/MoreLayers
+  loadFromFilePath: ../results/60fps
   solverIterations: 256
   actionsAreEulerRotations: 1
   actionsAre6DRotations: 0
@@ -1787,7 +1787,7 @@ MonoBehaviour:
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.5
-  simulationVelocityHalflife: 0.7
+  simulationVelocityHalflife: 0.27
   walkOnly: 1
   useHandmadeColliders: 1
   projectileTraining: 0

@@ -43,11 +43,11 @@ public class mm_v2 : MonoBehaviour
     public float feature_weight_trajectory_positions = 1.0f;
     public float feature_weight_trajectory_directions = 1.5f;
     public float inertialize_blending_halflife = .25f; //0.1f;
+    public float simulation_velocity_halflife = .27f;
     public float simulation_rotation_halflife = .27f;
     public int frame_increments = 10;
     public int ignore_surrounding = 10;
 
-    public int numNeigh = 1;
     public float search_time = 5f / 60f;
     float search_timer;
     float force_search_timer;
@@ -789,7 +789,6 @@ public class mm_v2 : MonoBehaviour
             dt);
     }
 
-    public float simulation_velocity_halflife = .27f;
     private void trajectory_positions_predict(float dt)
     {
         trajectory_positions[0] = simulation_position;
