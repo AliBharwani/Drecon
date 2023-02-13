@@ -161,7 +161,7 @@ public class mm_v2 : MonoBehaviour
 
     // ====================== Stuff added for ML
     Vector2 random_lstick_input;
-    Vector3 origin;
+    internal Vector3 origin;
     Quaternion origin_rot;
     //float time_since_last_check = 0f;
     bool is_strafing;

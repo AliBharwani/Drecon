@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 5099999,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5099999.onnx",
+                "reward": 235.43803344436668,
+                "creation_time": 1675997617.3676386,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5099999.pt"
+                ]
+            },
+            {
+                "steps": 5199996,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5199996.onnx",
+                "reward": 232.5917018219187,
+                "creation_time": 1675997754.1055117,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5199996.pt"
+                ]
+            },
+            {
+                "steps": 5299994,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5299994.onnx",
+                "reward": 272.50630122362764,
+                "creation_time": 1675997893.003471,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5299994.pt"
+                ]
+            },
+            {
+                "steps": 5399989,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5399989.onnx",
+                "reward": 246.45254560225996,
+                "creation_time": 1675998030.7983928,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5399989.pt"
+                ]
+            },
+            {
+                "steps": 5499977,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5499977.onnx",
+                "reward": 248.83593318473945,
+                "creation_time": 1675998170.5313203,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5499977.pt"
+                ]
+            },
+            {
+                "steps": 5599976,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5599976.onnx",
+                "reward": 237.708315003984,
+                "creation_time": 1675998306.898357,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5599976.pt"
+                ]
+            },
+            {
+                "steps": 5699997,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5699997.onnx",
+                "reward": 211.69875165394373,
+                "creation_time": 1675998447.3346965,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5699997.pt"
+                ]
+            },
+            {
+                "steps": 5799997,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5799997.onnx",
+                "reward": 245.80590550213302,
+                "creation_time": 1675998583.2592268,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5799997.pt"
+                ]
+            },
+            {
+                "steps": 5899994,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5899994.onnx",
+                "reward": 222.23565543431985,
+                "creation_time": 1675998721.0190604,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5899994.pt"
+                ]
+            },
+            {
+                "steps": 5960457,
+                "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5960457.onnx",
+                "reward": 220.57010353701534,
+                "creation_time": 1675998805.531022,
+                "auxillary_file_paths": [
+                    "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5960457.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 5960457,
+            "file_path": "results\\60fpsReInitWithLowerBeta\\Drecon.onnx",
+            "reward": 220.57010353701534,
+            "creation_time": 1675998805.531022,
+            "auxillary_file_paths": [
+                "results\\60fpsReInitWithLowerBeta\\Drecon\\Drecon-5960457.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

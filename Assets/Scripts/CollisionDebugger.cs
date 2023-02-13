@@ -6,6 +6,6 @@ public class CollisionDebugger : MonoBehaviour
 {
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log($"{gameObject.name} collided with {collision.gameObject.name}");
+        Debug.Log($"{Time.frameCount}: {gameObject.name} collided with {collision.gameObject.name}");
     }
 }

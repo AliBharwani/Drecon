@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 28099998,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28099998.onnx",
+                "reward": 48.26336458099644,
+                "creation_time": 1676059204.2579043,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28099998.pt"
+                ]
+            },
+            {
+                "steps": 28199995,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28199995.onnx",
+                "reward": 51.98213655305146,
+                "creation_time": 1676059350.6538105,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28199995.pt"
+                ]
+            },
+            {
+                "steps": 28299999,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28299999.onnx",
+                "reward": 51.86117722028338,
+                "creation_time": 1676059493.326023,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28299999.pt"
+                ]
+            },
+            {
+                "steps": 28399993,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28399993.onnx",
+                "reward": 50.31586473860911,
+                "creation_time": 1676059640.1105828,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28399993.pt"
+                ]
+            },
+            {
+                "steps": 28499979,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28499979.onnx",
+                "reward": 49.66748321143356,
+                "creation_time": 1676059782.4768338,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28499979.pt"
+                ]
+            },
+            {
+                "steps": 28599992,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28599992.onnx",
+                "reward": 54.39206753224134,
+                "creation_time": 1676059932.755233,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28599992.pt"
+                ]
+            },
+            {
+                "steps": 28699990,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28699990.onnx",
+                "reward": 45.44726835927744,
+                "creation_time": 1676060073.464163,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28699990.pt"
+                ]
+            },
+            {
+                "steps": 28799980,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28799980.onnx",
+                "reward": 45.08836973534338,
+                "creation_time": 1676060215.2080016,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28799980.pt"
+                ]
+            },
+            {
+                "steps": 28899988,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28899988.onnx",
+                "reward": 46.53051745676871,
+                "creation_time": 1676060360.7336953,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28899988.pt"
+                ]
+            },
+            {
+                "steps": 28940079,
+                "file_path": "results\\60fpsNoReset\\Drecon\\Drecon-28940079.onnx",
+                "reward": 48.665155535122025,
+                "creation_time": 1676060418.926924,
+                "auxillary_file_paths": [
+                    "results\\60fpsNoReset\\Drecon\\Drecon-28940079.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 28940079,
+            "file_path": "results\\60fpsNoReset\\Drecon.onnx",
+            "reward": 48.665155535122025,
+            "creation_time": 1676060418.926924,
+            "auxillary_file_paths": [
+                "results\\60fpsNoReset\\Drecon\\Drecon-28940079.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

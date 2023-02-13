@@ -1,0 +1,87 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1676246828",
+        "python_version": "3.9.0 (tags/v3.9.0:9cf6752, Oct  5 2020, 15:34:40) [MSC v.1927 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Users\\ali\\AppData\\Local\\Programs\\Python\\Python39\\Scripts\\mlagents-learn Assets\\config\\Drecon_more_layers.yaml --run-id=6dTest --initialize-from=EulerNoLimit --time-scale=0 --capture-frame-rate=0 --force",
+        "mlagents_version": "0.28.0",
+        "mlagents_envs_version": "0.28.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "1.7.1+cu110",
+        "numpy_version": "1.23.4",
+        "end_time_seconds": "1676246860"
+    },
+    "total": 31.897239900000002,
+    "count": 1,
+    "self": 0.002352000000001908,
+    "children": {
+        "run_training.setup": {
+            "total": 0.07667619999999964,
+            "count": 1,
+            "self": 0.07667619999999964
+        },
+        "TrainerController.start_learning": {
+            "total": 31.818211700000003,
+            "count": 1,
+            "self": 0.0002671999999996899,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 14.5437722,
+                    "count": 1,
+                    "self": 14.5437722
+                },
+                "TrainerController.advance": {
+                    "total": 17.214812600000002,
+                    "count": 1,
+                    "self": 1.1200000002986599e-05,
+                    "children": {
+                        "env_step": {
+                            "total": 17.2148014,
+                            "count": 1,
+                            "self": 16.829995399999998,
+                            "children": {
+                                "SubprocessEnvManager._take_step": {
+                                    "total": 0.3848060000000011,
+                                    "count": 1,
+                                    "self": 7.130000000188375e-05,
+                                    "children": {
+                                        "TorchPolicy.evaluate": {
+                                            "total": 0.3847346999999992,
+                                            "count": 1,
+                                            "self": 0.00039989999999789916,
+                                            "children": {
+                                                "TorchPolicy.sample_actions": {
+                                                    "total": 0.3843348000000013,
+                                                    "count": 1,
+                                                    "self": 0.3843348000000013
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "trainer_threads": {
+                    "total": 5.999999999062311e-07,
+                    "count": 1,
+                    "self": 5.999999999062311e-07
+                },
+                "TrainerController._save_models": {
+                    "total": 0.059359100000001774,
+                    "count": 1,
+                    "self": 0.007692000000005805,
+                    "children": {
+                        "RLTrainer._checkpoint": {
+                            "total": 0.05166709999999597,
+                            "count": 1,
+                            "self": 0.05166709999999597
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

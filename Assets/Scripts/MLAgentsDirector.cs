@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static mm_v2.Bones;
 using UnityEditor;
+using System.Text;
 
 public struct CharInfo
 {
@@ -83,6 +84,7 @@ public class MLAgentsDirector : Agent
     public bool use_debug_mats = false;
     // Used for normalization
     public bool genMinsAndMaxes = false;
+    private Vector3 lastKinRootPos = Vector3.zero;
 
     [HideInInspector]
     public static mm_v2.Bones[] stateBones = new mm_v2.Bones[] 
@@ -189,6 +191,7 @@ public class MLAgentsDirector : Agent
             ab.SetDriveRotation(final);
         }
     }
+    bool isFirstAction = true;
     // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -201,11 +204,48 @@ public class MLAgentsDirector : Agent
         //Debug.Log($"{Time.frameCount} : Applying Python Action on ML Agent");
 
         float[] curActions = actionBuffers.ContinuousActions.Array;
+        //Utils.debugArray(curActions, "curActions: ");
+        //StringBuilder debugStr = new StringBuilder();
+        //int actionIdx = 0;
+        //for (int i = 0; i < extendedfullDOFBones.Length; i++)
+        //{
+        //    mm_v2.Bones bone = extendedfullDOFBones[i];
+        //    Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
+        //    debugStr.Append($"{bone}: {output} ");
+        //    actionIdx += 3;
+        //}
+        //for (int i = 0; i < TestDirector.allLimitedDOFBones.Length; i++)
+        //{
+        //    mm_v2.Bones bone = TestDirector.allLimitedDOFBones[i];
+        //    debugStr.Append($"{bone}: {curActions[actionIdx]} ");
+        //    actionIdx += 1;
+        //}
+        //Debug.Log(debugStr.ToString());
+
+        // TODO: Exp. with different methods of low pass filtering; instead of filtering the floats
+        // one by one maybe I should slerp the resultant quaternions instead? 
+        if (actionsAre6DRotations && isFirstAction)
+        {
+            setFirstActionsAsIdentityRots(curActions);
+            isFirstAction = false;
+        }
         float[] finalActions = new float[numActions];
         for (int i = 0; i < numActions; i++)
            finalActions[i] = ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
         prevActionOutput = finalActions;
         applyActions(finalActions);
+    }
+    private void setFirstActionsAsIdentityRots(float[] actions)
+    {
+        mm_v2.Bones[] extendedBonesToUse = networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
+        int actionIdx = 0;
+        for(int i = 0; i < extendedBonesToUse.Length; i++)
+        {
+            Vector3 v1 = new Vector3(actions[actionIdx++], actions[actionIdx++], actions[actionIdx++]);
+            Vector3 v2 = new Vector3(actions[actionIdx++], actions[actionIdx++], actions[actionIdx++]);
+            initialRotInverses[i] = ArtBodyUtils.MatrixFrom6DRepresentation(v1, v2).transpose;
+            //Debug.Log($"Initial geodesics for {i}: {ArtBodyUtils.geodesicBetweenTwoRotationMatrices(Matrix4x4.identity, initialRotInverses[i].transpose)}");
+        }
     }
 
     private void applyActionsAsAxisAngleRotations(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
@@ -217,14 +257,15 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             Vector3 output = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
             actionIdx += 3;
-            float angle = output.magnitude;
+            float angle = output.sqrMagnitude;
             // Angle is in range (0,3) => map to (-180, 180)
-            //angle = (angle * 120) - 180;
+            angle = (angle * 120) - 180;
             Vector3 normalizedOutput = output.normalized;
             Quaternion offset = Quaternion.AngleAxis(angle, normalizedOutput);
             Quaternion final = curRotations[boneIdx] * offset;
             ab.SetDriveRotation(final);
         }
+
     }
 
     private void applyActionsAsEulerRotations(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
@@ -267,13 +308,13 @@ public class MLAgentsDirector : Agent
             Vector3 outputV1 = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
             Vector3 outputV2 = new Vector3(finalActions[actionIdx + 3], finalActions[actionIdx + 4], finalActions[actionIdx + 5]);
             actionIdx += 6;
-            Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
+            Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i]);
             Quaternion newTargetRot = curRotations[boneIdx] * networkAdjustment;
             ab.SetDriveRotation(newTargetRot.normalized);
         }
     }
-  
-    
+
+
     public override void Heuristic(in ActionBuffers actionsout)
     {
 
@@ -398,8 +439,12 @@ public class MLAgentsDirector : Agent
         numObservations = 88 + numActions; // 113 or 134 or 130 or 166
         prevActionOutput = new float[numActions];
         isInitialized = true;
+        if (actionsAre6DRotations)
+        {
+            initialRotInverses = new Matrix4x4[networkControlsAllJoints ? extendedfullDOFBones.Length : fullDOFBones.Length];
+        }
     }
-
+    Matrix4x4[] initialRotInverses;
     public void Awake()
     {
         timeAtStart = DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -430,7 +475,7 @@ public class MLAgentsDirector : Agent
         float verticalOffset = getVerticalOffset();
         //Debug.Log($"Vertical offset: {verticalOffset}");
         projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + 2 * Vector3.right;
-        SimCharController.teleportSimChar(simChar, kinChar, true, verticalOffset + .01f, !resetKinCharOnEpisodeEnd && updateVelOnTeleport);
+        SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .01f, !resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
         RequestDecision();
         //Debug.Log($"Teleoport happens on {curFixedUpdate}");
@@ -453,11 +498,14 @@ public class MLAgentsDirector : Agent
         //    Debug.Log($"BOOM : {simCharTeleported}");
         // only update velocity if we did not teleport last frame
         updateVelocity = lastSimCharTeleportFixedUpdate + 1 != curFixedUpdate;
+        //Debug.Log($"lastKinRootPos: {lastKinRootPos} simChar.root.transform.position: {simChar.root.transform.position} ");
         if (MMScript.teleportedThisFixedUpdate)
         {
-            //sim_char.char_trans.rotation = kin_char.char_trans.rotation;
-            Vector3 newRootPosition = kinChar.cm - simChar.cm + Vector3.zero;
-            simChar.root.TeleportRoot(newRootPosition, kinChar.trans.rotation);
+            Vector3 preTeleportSimCharPosOffset = lastKinRootPos - simChar.root.transform.position;
+            //Debug.Log($"preTeleportSimCharPosOffset: {preTeleportSimCharPosOffset} lastKinRootPos: {lastKinRootPos} simChar.root.transform.position: {simChar.root.transform.position} ");
+            //simChar.root.TeleportRoot(newRootPosition, kinChar.trans.rotation);
+            SimCharController.teleportSimCharRoot(simChar, MMScript.origin, preTeleportSimCharPosOffset);
+            //Debug.Log($"{Time.frameCount}: Teleporting sim char root");
             updateVelocity = false;
         }
         // Update CMs 
@@ -479,7 +527,7 @@ public class MLAgentsDirector : Agent
             WriteMinsAndMaxes();
         if (projectileTraining)
             FireProjectile();
-        
+        lastKinRootPos = kinChar.trans.position;
     }
 
     private void FireProjectile()
@@ -562,6 +610,7 @@ public class MLAgentsDirector : Agent
 
     private void UpdateCMData(bool updateVelocity)
     {
+        //Debug.Log($"Updating CM data, update vel: {updateVelocity}");
         Vector3 newSimCM = getCM(simChar.boneToTransform);
         simChar.cmVel = updateVelocity ? (newSimCM - simChar.cm) / Time.fixedDeltaTime : simChar.cmVel;
         simChar.cm = newSimCM;
@@ -667,7 +716,7 @@ public class MLAgentsDirector : Agent
             finalReward = EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
             SetReward(EPISODE_END_REWARD);
-            Debug.Log($"Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames");
+            Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames");
             lastEpisodeEndingFrame = curFixedUpdate;
             EndEpisode();
             return true;
@@ -681,11 +730,12 @@ public class MLAgentsDirector : Agent
         if (curFixedUpdate - N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT < lastSimCharTeleportFixedUpdate)
         {
             finalReward = 0f;
-        } else
+        }
+        else
         {
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
-            //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         }
+        //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         //Debug.Log($"final_reward: {finalReward}");
         //updateMeanReward(final_reward);
         AddReward(finalReward);
@@ -959,11 +1009,12 @@ public class MLAgentsDirector : Agent
             {
                 Matrix4x4 kinRotation = Matrix4x4.Rotate(kinBone.localRotation);
                 Matrix4x4 simRotation = Matrix4x4.Rotate(simBone.localRotation);
-                Matrix4x4 lossMat = (simRotation * kinRotation.transpose);
-                float trace = lossMat[0, 0] + lossMat[1, 1] + lossMat[2, 2];
+                //Matrix4x4 lossMat = (simRotation * kinRotation.transpose);
+                //float trace = lossMat[0, 0] + lossMat[1, 1] + lossMat[2, 2];
                 // Need clamping because Acos will throw NAN for values outside [-1, 1]
-                float traceClamped = Mathf.Clamp((trace - 1) / 2, -1f, 1f);
-                loss = Mathf.Acos(traceClamped);
+                //float traceClamped = Mathf.Clamp((trace - 1) / 2, -1f, 1f);
+                //loss = Mathf.Acos(traceClamped);
+                loss = ArtBodyUtils.geodesicBetweenTwoRotationMatrices(kinRotation, simRotation);
             //geodesicTotalRewardSum += loss;
             } else { 
 

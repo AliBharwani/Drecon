@@ -6,12 +6,49 @@ using UnityEngine;
 public static class ArtBodyUtils
 {
 
+    public static float geodesicBetweenTwoRotationMatrices(Matrix4x4 a, Matrix4x4 b, bool inDeg = false)
+    {
+        //Matrix4x4 kinRotation = Matrix4x4.Rotate(kinBone.localRotation);
+        //Matrix4x4 simRotation = Matrix4x4.Rotate(simBone.localRotation);
+        Matrix4x4 lossMat = (b * a.transpose);
+        float trace = lossMat[0, 0] + lossMat[1, 1] + lossMat[2, 2];
+        // Need clamping because Acos will throw NAN for values outside [-1, 1]
+        float traceClamped = Mathf.Clamp((trace - 1) / 2, -1f, 1f);
+        return Mathf.Acos(traceClamped) * (inDeg ? Mathf.Rad2Deg : 1f);
+    }
     public static void deconstructScaledAngleAxis(this Vector3 angle_axis, out float angle, out Vector3 axis)
     {
         angle = angle_axis.magnitude;
         axis = angle_axis.normalized;
     }
-    public static Quaternion From6DRepresentation(Vector3 v1, Vector3 v2)
+    public static Matrix4x4 MatrixFrom6DRepresentation(Vector3 v1, Vector3 v2)
+    {
+        // Apply Gram-Schmidt process treating v1 - v2 as columns of new rotation matrix
+        Vector3 e1 = v1.normalized;
+        Vector3 u2 = v2 - (Vector3.Dot(e1, v2) * e1);
+        Vector3 e2 = u2.normalized;
+        Vector3 e3 = Vector3.Cross(e1, e2);
+        //float qw = Mathf.Sqrt(1f + m00 + m11 + m22) / 2f;
+        //float qx = (m21 - m12) / (4f * qw);
+        //float qy = (m02 - m20) / (4f * qw);
+        //float qz = (m10 - m01) / (4f * qw);
+
+        Matrix4x4 rotMatrix = Matrix4x4.identity;
+        rotMatrix[0,0] = e1.x;
+        rotMatrix[1, 0] = e1.y;
+        rotMatrix[2, 0] = e1.z;
+
+        rotMatrix[0,1] = e2.x;
+        rotMatrix[1, 1] = e2.y;
+        rotMatrix[2, 1] = e2.z;
+
+        rotMatrix[0, 2] = e3.x;
+        rotMatrix[1, 2] = e3.y;
+        rotMatrix[2, 2] = e3.z;
+        return rotMatrix;
+    }
+
+    public static Quaternion From6DRepresentation(Vector3 v1, Vector3 v2, ref Matrix4x4 adjustmentMat)
     {
         // Apply Gram-Schmidt process treating v1 - v2 as columns of new rotation matrix
         Vector3 e1 = v1.normalized;
@@ -24,17 +61,36 @@ public static class ArtBodyUtils
         //float qz = (m10 - m01) / (4f * qw);
         
         float qw, qx, qy, qz;
-        float m00 = e1.x;
-        float m10 = e1.y;
-        float m20 = e1.z;
+        Matrix4x4 mat = Matrix4x4.identity;
+        mat[0, 0] = e1.x;
+        mat[1, 0] = e1.y;
+        mat[2, 0] = e1.z;
 
-        float m01 = e2.x;
-        float m11 = e2.y;
-        float m21 = e2.z;
+        mat[0, 1] = e2.x;
+        mat[1, 1] = e2.y;
+        mat[2, 1] = e2.z;
+        //mlagents - learn Assets\config\Drecon_more_layers.yaml--env = "Builds\Drecon"--run - id = AxisAngleAngleRenormalized--time - scale 1--capture - frame - rate = 0--no - graphics--num - env = 12
+        //mlagents - learn Assets\config\Drecon_6d.yaml--run - id = 6DTest--time - scale 1--capture - frame - rate = 0--force
+                  mat[0, 2] = e3.x;
+        mat[1, 2] = e3.y;
+        mat[2, 2] = e3.z;
+        if (adjustmentMat != null)
+        {
+            //Debug.Log($"Geodesic between identity and unadjusted: {geodesicBetweenTwoRotationMatrices(Matrix4x4.identity, mat, true)} adjusted: {geodesicBetweenTwoRotationMatrices(Matrix4x4.identity, mat * adjustmentMat, true)} v1: {v1} v2: {v2} e1: {e1} e2: {e2} e3: {e3} ");
+            mat = mat * adjustmentMat;
+        }
 
-        float m02 = e3.x;
-        float m12 = e3.y;
-        float m22 = e3.z;
+        float m00 = mat[0, 0];
+        float m10 = mat[1, 0];
+        float m20 = mat[2, 0];
+
+        float m01 = mat[0, 1];
+        float m11 = mat[1, 1];
+        float m21 = mat[2, 1];
+
+        float m02 = mat[0, 2];
+        float m12 = mat[1, 2];
+        float m22 = mat[2, 2];
         float tr = m00 + m11 + m22;
         //Quaternion q;
         //float t;
@@ -318,22 +374,26 @@ public static class ArtBodyUtils
             return angle > 180 ? angle - 360 : angle;
         }
     }
-    public static void resetJointPosition(this ArticulationBody body, Vector3 newJointPositions)
+    public static void resetJointPosition(this ArticulationBody body, Vector3 newJointPositions, bool resetEverything = true)
     {
         if (body.jointType != ArticulationJointType.SphericalJoint)
             throw new System.Exception("Attempting to reset joint phyiscs with Vector3 on non spherical articulation body: " + body.gameObject.name);
         body.jointPosition = new ArticulationReducedSpace(newJointPositions.x, newJointPositions.y, newJointPositions.z);
+        if (!resetEverything)
+            return;
         body.jointAcceleration = new ArticulationReducedSpace(0f, 0f, 0f);
         body.jointVelocity = new ArticulationReducedSpace(0f, 0f, 0f);
         body.jointForce = new ArticulationReducedSpace(0f, 0f, 0f);
         body.velocity = Vector3.zero;
         body.angularVelocity = Vector3.zero;
     }
-    public static void resetJointPosition(this ArticulationBody body, float newJointPosition)
+    public static void resetJointPosition(this ArticulationBody body, float newJointPosition, bool resetEverything = true)
     {
         if (body.dofCount != 1)
             throw new System.Exception($"Attempting to reset joint phyiscs with float on non articulation body with != 1 DOF: DOF: {body.dofCount} name: {body.gameObject.name}");
         body.jointPosition = new ArticulationReducedSpace(newJointPosition);
+        if (!resetEverything)
+            return;
         body.jointAcceleration = new ArticulationReducedSpace(0);
         body.jointVelocity = new ArticulationReducedSpace(0);
         body.jointForce = new ArticulationReducedSpace(0);

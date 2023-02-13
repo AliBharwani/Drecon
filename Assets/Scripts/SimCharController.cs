@@ -18,6 +18,8 @@ public class SimCharController : MonoBehaviour
     {
         _config = ConfigWriter.Instance;
         db = database.Instance;
+        //foreach (var t in GetComponentsInChildren<Transform>())
+        //    t.gameObject.AddComponent<CollisionDebugger>();
         initBoneToCollider();
         initBoneToArtBodies();
         initArticulationDrives();
@@ -77,7 +79,7 @@ public class SimCharController : MonoBehaviour
 
         int[] torsoColliders = new int[] { (int)Bone_Neck, (int)Bone_LeftShoulder, (int)Bone_RightShoulder, (int) Bone_Spine2,
                                             (int) Bone_Spine1, (int) Bone_Spine, (int) Bone_Hips, (int) Bone_Head};
-        int[] feetColliders = new int[] { (int)Bone_LeftFoot, (int)Bone_LeftToe, (int)Bone_RightFoot, (int)Bone_RightToe };
+        int[] feetColliders = new int[] { (int)Bone_LeftLeg, (int)Bone_RightLeg, (int)Bone_LeftFoot, (int)Bone_LeftToe, (int)Bone_RightFoot, (int)Bone_RightToe };
         for (int i = 0; i < torsoColliders.Length; i++)
             for (int j = i + 1; j < torsoColliders.Length; j++)
                 Physics.IgnoreCollision(boneToCollider[torsoColliders[i]], boneToCollider[torsoColliders[j]]);
@@ -88,6 +90,8 @@ public class SimCharController : MonoBehaviour
         {
             int parent = db.bone_parents[i];
             Physics.IgnoreCollision(boneToCollider[i], boneToCollider[parent]);
+            Physics.IgnoreCollision(boneToCollider[i], boneToCollider[(int)Bone_Head]);
+            Physics.IgnoreCollision(boneToCollider[i], boneToCollider[(int)Bone_Neck]);
             if (i == (int) Bone_LeftUpLeg || i == (int) Bone_RightUpLeg)
                 Physics.IgnoreCollision(boneToCollider[i], boneToCollider[(int)Bone_Spine]);
            
@@ -143,9 +147,61 @@ public class SimCharController : MonoBehaviour
     }
 
     public static database db;
-
-    public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char, bool setDriveTargets = false, float verticalOffset = .15f, bool setVelocities = false)
+    public static void teleportSimCharRoot(CharInfo simChar, Vector3 newKinCharPos, Vector3 simCharPosOffset)
     {
+        if (db == null)
+            db = getDB();
+
+        // simPosOffset = how far off was the sim char from the kin char before teleport? 
+        // Before teleport: simCharPos + simCharPosOffset = kinCharPos ; simCharPosOffset = kinCharPos - simCharPos
+        // After teleport: newSimCharPos + simCharPosOffset = newKinCharPos ; newSimCharPos = newKinCharPos - simCharPosOffset
+        Vector3 newSimCharPos = newKinCharPos - simCharPosOffset;
+        simChar.root.TeleportRoot(newSimCharPos, simChar.root.transform.rotation);
+        //Utils.debugVector3Array(kin_char.MMScript.curr_bone_angular_velocities, "kin_char.MMScript.curr_bone_angular_velocities", "f6");
+        for (int i = 1; i < 23; i++)
+        {
+            mm_v2.Bones bone = (mm_v2.Bones)i;
+            ArticulationBody body = simChar.boneToArtBody[i];
+            if (body.jointType != ArticulationJointType.SphericalJoint)
+            {
+                continue;
+            }
+            Quaternion targetLocalRot = simChar.boneToTransform[i].localRotation;
+            Vector3 TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot, false);
+            if (body.dofCount == 3)
+            {
+                body.resetJointPosition(TargetRotationInJointSpace, false);
+                var drive = body.xDrive;
+                drive.target = TargetRotationInJointSpace.x;
+                body.xDrive = drive;
+
+                drive = body.yDrive;
+                drive.target = TargetRotationInJointSpace.y;
+                body.yDrive = drive;
+
+                drive = body.zDrive;
+                drive.target = TargetRotationInJointSpace.z;
+                body.zDrive = drive;
+            }
+            else if (body.dofCount == 1)
+            {
+                float new_target = 0f;
+                if (body.twistLock != ArticulationDofLock.LockedMotion)
+                    new_target = TargetRotationInJointSpace.x;
+                else if (body.swingYLock != ArticulationDofLock.LockedMotion)
+                    new_target = TargetRotationInJointSpace.y;
+                else if (body.swingZLock != ArticulationDofLock.LockedMotion)
+                    new_target = TargetRotationInJointSpace.z;
+                body.resetJointPosition(new_target, false);
+                var drive = body.zDrive;
+                drive.target = TargetRotationInJointSpace.z;
+                body.zDrive = drive;
+            }
+
+        }
+    }
+    public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char,  float verticalOffset = .15f, bool setVelocities = false)
+        {
         if (db == null)
             db = getDB();
         //Debug.Log($"Teleport sim char called");
@@ -213,15 +269,15 @@ public class SimCharController : MonoBehaviour
             {
                 body.resetJointPosition(isFootBone ? new Vector3(TargetRotationInJointSpace.x, TargetRotationInJointSpace.y, 0f) : TargetRotationInJointSpace);
                 var drive = body.xDrive;
-                drive.target = setDriveTargets ? TargetRotationInJointSpace.x : 0f;
+                drive.target =  TargetRotationInJointSpace.x;
                 body.xDrive = drive;
 
                 drive = body.yDrive;
-                drive.target = setDriveTargets ? TargetRotationInJointSpace.y : 0f;
+                drive.target = TargetRotationInJointSpace.y;
                 body.yDrive = drive;
 
                 drive = body.zDrive;
-                drive.target = setDriveTargets ? TargetRotationInJointSpace.z : 0f;
+                drive.target = TargetRotationInJointSpace.z;
                 body.zDrive = drive;
                 //if (setVelocities)
                 //{
@@ -240,7 +296,7 @@ public class SimCharController : MonoBehaviour
                     new_target = TargetRotationInJointSpace.z;
                 body.resetJointPosition(new_target);
                 var drive = body.zDrive;
-                drive.target = setDriveTargets ? TargetRotationInJointSpace.z : 0f;
+                drive.target =TargetRotationInJointSpace.z;
                 body.zDrive = drive;
                 //if (setVelocities)
                 //{
@@ -359,6 +415,13 @@ public class SimCharController : MonoBehaviour
     {
         for (int i = 0; i < 23; i++)
             startingRotations[i] = boneToTransform[i].localRotation;
+    }
+
+
+    [ContextMenu("Debug function")]
+    private void debugFunction()
+    {
+        GetComponent<ArticulationBody>().TeleportRoot(transform.position + Vector3.right, transform.rotation);
     }
     [ContextMenu("Turn off capsule renderers")]
     private void turnOffCapsuleRenderers()
