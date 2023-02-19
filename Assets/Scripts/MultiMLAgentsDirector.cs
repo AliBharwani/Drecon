@@ -34,7 +34,10 @@ public class MultiMLAgentsDirector : MonoBehaviour
         for (int i = 0; i < numAgents; i++)
         {
             directors[i] = createMLAgent();
-            directors[i].AssignLayer(LayerMask.NameToLayer($"model_{i + 1}"));
+            if (_config.selfCollision)
+                directors[i].AssignLayer(LayerMask.NameToLayer($"model_{i + 1}"), LayerMask.NameToLayer($"model_{i + 1}"));
+            else
+                directors[i].AssignLayer(LayerMask.NameToLayer($"test_model"), LayerMask.NameToLayer($"Default"));
 
         }
         Application.targetFrameRate = targetFrameRate;
@@ -53,38 +56,6 @@ public class MultiMLAgentsDirector : MonoBehaviour
         else
             obj = _config.actionsAre6DRotations ? Instantiate(model6DDirector) : Instantiate(modelDirector);
         MLAgentsDirector director = obj.GetComponent<MLAgentsDirector>();
-        director.EVALUATE_EVERY_K_STEPS = _config.EVALUATE_EVERY_K_STEPS; 
-        director.normalizeObservations = _config.normalizeObservations;
-        director.resetKinCharOnEpisodeEnd = _config.resetKinCharOnEpisodeEnd; 
-        director.actionsAreEulerRotations = _config.actionsAreEulerRotations;
-        director.normalizeLimitedDOFOutputs = _config.normalizeLimitedDOFOutputs;
-        director.useGeodesicForAngleDiff = _config.useGeodesicForAngleDiff;
-        director.poseRewardMultiplier = _config.poseRewardMultiplier; 
-        director.normalizeRewardComponents = _config.normalizeRewardComponents;
-        director.networkControlsAllJoints = _config.networkControlsAllJoints;
-        //if (_config.actionsAre6DRotations)
-        //{
-        //int numActions = MLAgentsDirector.fullDOFBones.Length * 6; // Should be 7 3-DOF bones, so 42 Actions
-        //numActions += MLAgentsDirector.limitedDOFBones.Length;
-        //obj.GetComponent<BehaviorParameters>().BrainParameters.ActionSpec = new Unity.MLAgents.Actuators.ActionSpec(numActions);
-        //obj.GetComponent<BehaviorParameters>().BrainParameters.VectorObservationSize = 110 + 21;
-        //director.actionsAre6DRotations = true;
-        //}
-        director.actionsAre6DRotations = _config.actionsAre6DRotations; 
-
-        director.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = _config.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT;
-        director.EPISODE_END_REWARD = _config.EPISODE_END_REWARD;
-        director.MAX_EPISODE_LENGTH_SECONDS = _config.MAX_EPISODE_LENGTH_SECONDS;
-        director.ACTION_STIFFNESS_HYPERPARAM = _config.ACTION_STIFFNESS_HYPERPARAM;
-        director.simulationVelocityHalflife = _config.simulationVelocityHalflife;
-        director.walkOnly = _config.walkOnly;
-        director.useHandmadeColliders = _config.useHandmadeColliders;
-
-        director.LAUNCH_FREQUENCY = _config.LAUNCH_FREQUENCY;
-        director.LAUNCH_RADIUS = _config.LAUNCH_RADIUS;
-        director.LAUNCH_SPEED = _config.LAUNCH_SPEED;
-        director.projectileTraining = _config.projectileTraining;
-        director.solverIterations = _config.solverIterations;
         obj.SetActive(true);
         return director;
     }

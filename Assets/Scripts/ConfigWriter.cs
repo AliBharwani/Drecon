@@ -23,6 +23,8 @@ public class ConfigWriter : MonoBehaviour
     public bool useGeodesicForAngleDiff = false;
     public float poseRewardMultiplier = 1f / 10f;
     public bool resetKinCharOnEpisodeEnd = false;
+    public bool selfCollision;
+    public bool useUnnormalizedEulerOffsets = false;
     public int EVALUATE_EVERY_K_STEPS = 2;
     public int N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = 4;
     public float EPISODE_END_REWARD = -.5f;
@@ -60,11 +62,13 @@ public class ConfigWriter : MonoBehaviour
         }
         else
         {
+            Application.targetFrameRate = 60;
             _instance = this;
         }
     }
 
     public float pGainMultiplier = 1f;
+
     [ContextMenu("Multiply all stiffness values by pGainMultiplier")]
     public void multiplyAllStiffnessValues()
     {

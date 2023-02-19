@@ -5,7 +5,7 @@ behaviors:
       batch_size: 2048
       buffer_size: 40960
       learning_rate: 0.0003
-      beta: 0.005
+      beta: 0.003
       epsilon: 0.2
       lambd: 0.95
       num_epoch: 3
@@ -18,7 +18,7 @@ behaviors:
       init_near_zero: true
     reward_signals:
       extrinsic:
-        gamma: 0.99
+        gamma: 0.95
         strength: 1.0
     keep_checkpoints: 10
     max_steps: 300000000

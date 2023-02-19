@@ -10,6 +10,8 @@ public class mm_v2 : MonoBehaviour
     public bool walk_only = false;
     public float MAX_WANDERING_RADIUS = 10f;
     private float prob_to_change_inputs = .001f;
+    private ConfigWriter _config;
+
     public enum Bones
     {
         Bone_Entity = 0,
@@ -175,6 +177,8 @@ public class mm_v2 : MonoBehaviour
 
     void Awake()
     {
+        Application.targetFrameRate = 60;
+        Time.fixedDeltaTime = 1f / 60f;
         gamepad = Gamepad.current;
         origin = transform.position;
         origin_rot = transform.rotation;
@@ -184,6 +188,9 @@ public class mm_v2 : MonoBehaviour
         {
             motionDB = database.Instance;
         }
+        _config = ConfigWriter.Instance;
+        simulation_velocity_halflife = _config.simulationVelocityHalflife;
+        walk_only = _config.walkOnly;
         motionDB.database_build_matching_features(
             feature_weight_foot_position,
             feature_weight_foot_velocity,
@@ -470,7 +477,6 @@ public class mm_v2 : MonoBehaviour
             curr_bone_rotations,
             curr_bone_angular_velocities,
             inertialize_blending_halflife,
-            //1f/30f
             Time.fixedDeltaTime
             );
         simulation_positions_update(

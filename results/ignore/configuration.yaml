@@ -6,7 +6,7 @@ behaviors:
       batch_size: 2048
       buffer_size: 40960
       learning_rate: 0.0003
-      beta: 0.005
+      beta: 0.003
       epsilon: 0.2
       lambd: 0.95
       num_epoch: 3
@@ -21,10 +21,10 @@ behaviors:
       memory: null
       goal_conditioning_type: hyper
       deterministic: false
-      init_near_zero: true
+      init_near_zero: false
     reward_signals:
       extrinsic:
-        gamma: 0.99
+        gamma: 0.95
         strength: 1.0
         network_settings:
           normalize: false
@@ -35,13 +35,13 @@ behaviors:
           goal_conditioning_type: hyper
           deterministic: false
           init_near_zero: false
-    init_path: results\EulerNoLimit\Drecon\checkpoint.pt
+    init_path: null
     keep_checkpoints: 10
     checkpoint_interval: 100000
     max_steps: 300000000
     time_horizon: 32
     summary_freq: 100000
-    threaded: false
+    threaded: true
     self_play: null
     behavioral_cloning: null
 env_settings:
@@ -65,7 +65,7 @@ engine_settings:
 environment_parameters: null
 checkpoint_settings:
   run_id: ignore
-  initialize_from: EulerNoLimit
+  initialize_from: null
   load_model: false
   resume: false
   force: true

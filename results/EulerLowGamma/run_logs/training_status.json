@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 24799980,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-24799980.onnx",
+                "reward": 264.4166379534281,
+                "creation_time": 1676734083.9115024,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-24799980.pt"
+                ]
+            },
+            {
+                "steps": 24899970,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-24899970.onnx",
+                "reward": 236.79522086778402,
+                "creation_time": 1676734219.8852055,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-24899970.pt"
+                ]
+            },
+            {
+                "steps": 24999983,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-24999983.onnx",
+                "reward": 159.76460228328193,
+                "creation_time": 1676734361.8128345,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-24999983.pt"
+                ]
+            },
+            {
+                "steps": 25099968,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-25099968.onnx",
+                "reward": 248.73177858378926,
+                "creation_time": 1676734497.5863268,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-25099968.pt"
+                ]
+            },
+            {
+                "steps": 25199984,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-25199984.onnx",
+                "reward": 259.54463223517894,
+                "creation_time": 1676734633.996929,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-25199984.pt"
+                ]
+            },
+            {
+                "steps": 25299980,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-25299980.onnx",
+                "reward": 237.38176186827582,
+                "creation_time": 1676734774.6501815,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-25299980.pt"
+                ]
+            },
+            {
+                "steps": 25399973,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-25399973.onnx",
+                "reward": 235.56267361050925,
+                "creation_time": 1676734911.2297478,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-25399973.pt"
+                ]
+            },
+            {
+                "steps": 25499984,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-25499984.onnx",
+                "reward": 194.5671809065131,
+                "creation_time": 1676735052.0934587,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-25499984.pt"
+                ]
+            },
+            {
+                "steps": 25599999,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-25599999.onnx",
+                "reward": 230.64778082453057,
+                "creation_time": 1676735188.38383,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-25599999.pt"
+                ]
+            },
+            {
+                "steps": 25637628,
+                "file_path": "results\\EulerLowGamma\\Drecon\\Drecon-25637628.onnx",
+                "reward": 243.07422271289607,
+                "creation_time": 1676735240.9741902,
+                "auxillary_file_paths": [
+                    "results\\EulerLowGamma\\Drecon\\Drecon-25637628.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 25637628,
+            "file_path": "results\\EulerLowGamma\\Drecon.onnx",
+            "reward": 243.07422271289607,
+            "creation_time": 1676735240.9741902,
+            "auxillary_file_paths": [
+                "results\\EulerLowGamma\\Drecon\\Drecon-25637628.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

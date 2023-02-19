@@ -73,6 +73,8 @@ public class SimCharController : MonoBehaviour
 
     private void setupIgnoreCollisions()
     {
+        if (!_config.selfCollision)
+            return;
         Physics.IgnoreCollision(boneToCollider[(int)Bone_LeftUpLeg], boneToCollider[(int)Bone_RightUpLeg]);
         Physics.IgnoreCollision(boneToCollider[(int)Bone_LeftArm], boneToCollider[(int)Bone_Spine2]);
         Physics.IgnoreCollision(boneToCollider[(int)Bone_RightArm], boneToCollider[(int)Bone_Spine2]);
