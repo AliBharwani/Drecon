@@ -3,6 +3,8 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 
+results/
+
 # Pycharm stuff
 .idea
 .idea_modules/
