@@ -4,7 +4,7 @@
 #
 
 results/
-
+old_results/
 # Pycharm stuff
 .idea
 .idea_modules/
