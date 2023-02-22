@@ -9,7 +9,6 @@ public class mm_v2 : MonoBehaviour
     public bool gen_inputs = true;
     public bool walk_only = false;
     public float MAX_WANDERING_RADIUS = 10f;
-    private float prob_to_change_inputs = .001f;
     private ConfigWriter _config;
 
     public enum Bones
@@ -343,7 +342,7 @@ public class mm_v2 : MonoBehaviour
     {
         if (!gen_inputs)
             return false;
-        return Random.value <= prob_to_change_inputs;
+        return Random.value <= _config.prob_to_change_inputs;
         //time_since_last_check += Time.fixedDeltaTime;
         //if (time_since_last_check > 1f / 60f)
         //{

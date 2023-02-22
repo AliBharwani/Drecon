@@ -503,7 +503,7 @@ public class MLAgentsDirector : Agent
         //Debug.Log($"curFixedUpdate: {curFixedUpdate} updateVelocity: {updateVelocity}");
         UpdateKinCMData(updateVelocity);
         //Debug.Log($"{Time.frameCount}: FixedUpdate kin cm: {kinChar.cm} kin cm vel: {kinChar.cmVel} sim cm: {simChar.cm} sim cm vel: {simChar.cmVel} ");
-        UpdateBoneObsState(updateVelocity);
+        //UpdateBoneObsState(updateVelocity);
         // UpdateBoneSurfacePts(updateVelocity);
         //bool episodeEnded = calcAndSetRewards();
         //if (episodeEnded)
@@ -650,7 +650,7 @@ public class MLAgentsDirector : Agent
         }
     }
 
-    private void UpdateBoneObsState(bool updateVelocity)
+    private void UpdateBoneObsState(bool updateVelocity, float dt)
     {
         foreach (bool isKinChar in new bool[]{true, false}) {
             CharInfo curInfo = isKinChar ? kinChar : simChar;
@@ -664,7 +664,7 @@ public class MLAgentsDirector : Agent
                 Vector3 boneLocalPos = isKinChar ? resolvePosInKinematicRefFrame(boneWorldPos) : resolvePosInSimRefFrame(boneWorldPos);
                 //Vector3 bone_relative_pos = Utils.quat_inv_mul_vec3(relative_rot, bone_local_pos);
                 Vector3 prevBonePos = curInfo.boneWorldPos[j];
-                Vector3 boneVel = (boneWorldPos - prevBonePos) / Time.fixedDeltaTime;
+                Vector3 boneVel = (boneWorldPos - prevBonePos) / dt;
                 boneVel = resolveVelInKinematicRefFrame(boneVel);
                 if (genMinsAndMaxes && curFixedUpdate > 30)
                 {
@@ -832,21 +832,21 @@ public class MLAgentsDirector : Agent
         //bool updateVel = curFixedUpdate - lastSimCharTeleportFixedUpdate < _config.EVALUATE_EVERY_K_STEPS;
         float decisionPeriod = Time.fixedDeltaTime * _config.EVALUATE_EVERY_K_STEPS;
         kinCMVelLastGetState = teleportSinceLastGetState ? kinCMVelLastGetState : (kinChar.cm - kinCMLastGetState) / decisionPeriod;
-        simCMVelLastGetState = teleportSinceLastGetState ? simCMVelLastGetState : (kinChar.cm - kinCMLastGetState) / decisionPeriod;
-
+        simCMVelLastGetState = teleportSinceLastGetState ? simCMVelLastGetState : (simChar.cm - simCMLastGetState) / decisionPeriod;
+        UpdateBoneObsState(!teleportSinceLastGetState, decisionPeriod);
         //ClearGizmos();
         float[] state = new float[numObservations];
         int state_idx = 0;
         Vector3 cm_distance = kinChar.cm - simChar.cm; // Since we terminate when head distance > 1, cm distance should be between 0~1 anyway
         copyVecIntoArray(ref state, ref state_idx, cm_distance);
         //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel}");
-        Vector3 kin_cm_vel_normalized = resolveVelInKinematicRefFrame(kinChar.cmVel);
+        Vector3 kin_cm_vel_normalized = resolveVelInKinematicRefFrame(kinCMVelLastGetState);
         //AddGizmoLine(kinChar.cm, kinChar.cm + kinChar.cmVel, Color.red);
         if (_config.normalizeObservations)
             kin_cm_vel_normalized = normalizeCMVelocity(kin_cm_vel_normalized);
         
         copyVecIntoArray(ref state, ref state_idx, kin_cm_vel_normalized);
-        Vector3 sim_cm_vel_normalized = resolveVelInKinematicRefFrame(simChar.cmVel);
+        Vector3 sim_cm_vel_normalized = resolveVelInKinematicRefFrame(simCMVelLastGetState);
         if (_config.normalizeObservations)
             sim_cm_vel_normalized = normalizeCMVelocity(sim_cm_vel_normalized);
         copyVecIntoArray(ref state, ref state_idx, sim_cm_vel_normalized);

@@ -12,6 +12,7 @@ public class ConfigWriter : MonoBehaviour
     public string loadFromFilePath = "";
 
     // HYPER PARAMS
+    public float prob_to_change_inputs = .001f;
     public int solverIterations = 32;
     public bool actionsAreEulerRotations = true;
     public bool actionsAre6DRotations = false;
