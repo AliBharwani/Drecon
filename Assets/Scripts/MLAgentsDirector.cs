@@ -465,6 +465,7 @@ public class MLAgentsDirector : Agent
         projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + 2 * Vector3.right;
         SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .01f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
+        teleportSinceLastGetState = true;
         RequestDecision();
         //Debug.Log($"Teleoport happens on {curFixedUpdate}");
     }
@@ -494,6 +495,8 @@ public class MLAgentsDirector : Agent
             //simChar.root.TeleportRoot(newRootPosition, kinChar.trans.rotation);
             SimCharController.teleportSimCharRoot(simChar, MMScript.origin, preTeleportSimCharPosOffset);
             //Debug.Log($"{Time.frameCount}: Teleporting sim char root");
+                    teleportSinceLastGetState = true;
+
             updateVelocity = false;
         }
         // Update CMs 
@@ -737,15 +740,6 @@ public class MLAgentsDirector : Agent
         return false;
     }
 
-    private void updateMeanReward()
-    {
-        if (curFixedUpdate % reportMeanRewardEveryNSteps == 0)
-        {
-            Debug.Log($"Step {curFixedUpdate} mean reward last {reportMeanRewardEveryNSteps} is: {meanReward}");
-            meanReward = 0f;
-        }
-        meanReward += (finalReward / (float)reportMeanRewardEveryNSteps);
-    }
    
     // Roughly 6.81 m/s
     Vector3 MAX_VELOCITY = new Vector3(4.351938f, 1.454015f, 5.032811f);
@@ -830,14 +824,22 @@ public class MLAgentsDirector : Agent
     11-12 : the diff between sim cm horizontal vel and desired vel
 
     */
+    Vector3 kinCMVelLastGetState, simCMVelLastGetState;
+    Vector3 kinCMLastGetState, simCMLastGetState;
+    bool teleportSinceLastGetState = true;
     float[] getState()
     {
+        //bool updateVel = curFixedUpdate - lastSimCharTeleportFixedUpdate < _config.EVALUATE_EVERY_K_STEPS;
+        float decisionPeriod = Time.fixedDeltaTime * _config.EVALUATE_EVERY_K_STEPS;
+        kinCMVelLastGetState = teleportSinceLastGetState ? kinCMVelLastGetState : (kinChar.cm - kinCMLastGetState) / decisionPeriod;
+        simCMVelLastGetState = teleportSinceLastGetState ? simCMVelLastGetState : (kinChar.cm - kinCMLastGetState) / decisionPeriod;
+
         //ClearGizmos();
         float[] state = new float[numObservations];
         int state_idx = 0;
         Vector3 cm_distance = kinChar.cm - simChar.cm; // Since we terminate when head distance > 1, cm distance should be between 0~1 anyway
         copyVecIntoArray(ref state, ref state_idx, cm_distance);
-        Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel}");
+        //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel}");
         Vector3 kin_cm_vel_normalized = resolveVelInKinematicRefFrame(kinChar.cmVel);
         //AddGizmoLine(kinChar.cm, kinChar.cm + kinChar.cmVel, Color.red);
         if (_config.normalizeObservations)
@@ -895,6 +897,9 @@ public class MLAgentsDirector : Agent
         if (genMinsAndMaxes)
             state = new float[numObservations];
 
+        kinCMLastGetState = kinChar.cm;
+        simCMLastGetState = simChar.cm;
+        teleportSinceLastGetState = false;
         return state;
 
     }

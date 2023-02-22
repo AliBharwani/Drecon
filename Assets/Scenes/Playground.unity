@@ -357,7 +357,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: e07afbfd902cd07499feaf96f2cf8b94, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 880bee8a743d1584ca0c1bcb93143cbf, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -1790,7 +1790,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/EulerLowGamma
+  writeToFilePath: ../results/CoMVelFixed
   filename: unityconfig.json
   loadFromFilePath: ../results/V3OutputNormalization
   solverIterations: 256
@@ -1801,12 +1801,12 @@ MonoBehaviour:
   normalizeRewardComponents: 0
   networkControlsAllJoints: 1
   useGeodesicForAngleDiff: 1
-  poseRewardMultiplier: 1
+  poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 1
   useUnnormalizedEulerOffsets: 1
   EVALUATE_EVERY_K_STEPS: 2
-  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 0
+  N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
