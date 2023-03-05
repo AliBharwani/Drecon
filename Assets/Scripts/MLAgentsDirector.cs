@@ -64,7 +64,6 @@ public class MLAgentsDirector : Agent
     database motionDB;
     public bool use_debug_mats = false;
     // Used for normalization
-    public bool genMinsAndMaxes = false;
     private Vector3 lastKinRootPos = Vector3.zero;
 
     [HideInInspector]
@@ -109,11 +108,6 @@ public class MLAgentsDirector : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        //if (!isInitialized)
-        //{
-        //    customInit();
-        //    return;
-        //}
         sensor.AddObservation(getState());
     }
     private void applyActions(float[] finalActions)
@@ -170,11 +164,6 @@ public class MLAgentsDirector : Agent
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        //if (!isInitialized)
-        //{
-        //    customInit();
-        //    return;
-        //}
         //Debug.Log($"{Time.frameCount} : Applying Python Action on ML Agent");
 
         float[] curActions = actionBuffers.ContinuousActions.Array;
@@ -410,14 +399,6 @@ public class MLAgentsDirector : Agent
 
         UpdateKinCMData(false);
         UpdateSimCMData(false);
-        bone_pos_mins = new Vector3[stateBones.Length];
-        bone_pos_maxes = new Vector3[stateBones.Length];
-        bone_vel_mins = new Vector3[stateBones.Length];
-        bone_vel_maxes = new Vector3[stateBones.Length];
-        if (!genMinsAndMaxes)
-            ReadMinsAndMaxes();
-        //else
-        //MMScript.run_max_speed = true;
         if (_config.networkControlsAllJoints)
             numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + TestDirector.allLimitedDOFBones.Length; // 42 or 78
         else 
@@ -515,8 +496,6 @@ public class MLAgentsDirector : Agent
             applyActions(prevActionOutput);
         }
         //updateMeanReward();
-        if (genMinsAndMaxes && curFixedUpdate % 300 == 0)
-            WriteMinsAndMaxes();
         if (_config.projectileTraining)
             FireProjectile();
         lastKinRootPos = kinChar.trans.position;
@@ -545,69 +524,12 @@ public class MLAgentsDirector : Agent
         projectileRB.AddForce(-randomUnitCircle.x * _config.LAUNCH_SPEED, curYVelocity, -randomUnitCircle.y * _config.LAUNCH_SPEED, ForceMode.VelocityChange);
     }
 
-    private void WriteMinsAndMaxes()
-    {
-        Stream stream;
-#if UNITY_EDITOR
-        stream = File.Open(@"Assets/Normalization/NormalizationData-" + timeAtStart.ToString() + ".bin", FileMode.Create);
-#else
-        throw new Exception("Should not be recording mins and maxes outside of Editor");
-#endif
-        using (stream)
-        {
-            using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8))
-            {
-                FileUtils.WriteVector(writer, MIN_VELOCITY);
-                FileUtils.WriteVector(writer, MAX_VELOCITY);
-                for (int i = 0; i < stateBones.Length; i++ )
-                {
-                    FileUtils.WriteVector(writer, bone_pos_mins[i]);
-                    FileUtils.WriteVector(writer, bone_pos_maxes[i]);
-                    FileUtils.WriteVector(writer, bone_vel_mins[i]);
-                    FileUtils.WriteVector(writer, bone_vel_maxes[i]);
-                    //Debug.Log($"{state_bones[i]} Min vel: {bone_vel_mins[i]} Max Vel: {bone_vel_maxes[i]}");
-                }
-            }
-        }
-
-    }
-    private void ReadMinsAndMaxes()
-    {
-        Stream stream;
-#if UNITY_EDITOR
-        stream = File.Open(@"Assets/Normalization/NormalizationData.bin", FileMode.Open);
-#else
-        var textAsset = Resources.Load<TextAsset>("NormalizationData");
-        stream = new MemoryStream(textAsset.bytes);
-#endif
-        using (stream)
-        {
-            using (var reader = new BinaryReader(stream, System.Text.Encoding.UTF8))
-            {
-                FileUtils.ReadVector(reader, ref MIN_VELOCITY);
-                FileUtils.ReadVector(reader, ref MAX_VELOCITY);
-                //Debug.Log($"Min vel: {MIN_VELOCITY} Max Vel: {MAX_VELOCITY}");
-                for (int i = 0; i < stateBones.Length; i++)
-                {
-                    FileUtils.ReadVector(reader, ref bone_pos_mins[i]);
-                    FileUtils.ReadVector(reader, ref bone_pos_maxes[i]);
-                    FileUtils.ReadVector(reader, ref bone_vel_mins[i]);
-                    FileUtils.ReadVector(reader, ref bone_vel_maxes[i]);
-                    //Debug.Log($"{state_bones[i]} Min Pos: {bone_pos_mins[i]} Max Pos: {bone_pos_maxes[i]}");
-                    //Debug.Log($"{state_bones[i]} Min vel: {bone_vel_mins[i]} Max Vel: {bone_vel_maxes[i]}");
-                }
-            }
-        }
-    }
-
     private void UpdateKinCMData(bool updateVelocity)
     {
         //Debug.Log($"Updating CM data, update vel: {updateVelocity}");
         Vector3 newKinCM = getCM(kinChar.boneToTransform);
         kinChar.cmVel = updateVelocity ? (newKinCM - kinChar.cm) / Time.fixedDeltaTime : kinChar.cmVel;
         kinChar.cm = newKinCM;
-        if (genMinsAndMaxes && updateVelocity) 
-            SimCharController.updated_mins_and_maxes(kinChar.cmVel, ref MIN_VELOCITY, ref MAX_VELOCITY);
         
     }
     private void UpdateSimCMData(bool updateVelocity)
@@ -616,8 +538,6 @@ public class MLAgentsDirector : Agent
         Vector3 newSimCM = getCM(simChar.boneToTransform);
         simChar.cmVel = updateVelocity ? (newSimCM - simChar.cm) / Time.fixedDeltaTime : simChar.cmVel;
         simChar.cm = newSimCM;
-        if (genMinsAndMaxes && updateVelocity)
-            SimCharController.updated_mins_and_maxes(simChar.cmVel, ref MIN_VELOCITY, ref MAX_VELOCITY);
     }
 
     private void UpdateBoneSurfacePts(bool updateVelocity)
@@ -666,17 +586,6 @@ public class MLAgentsDirector : Agent
                 Vector3 prevBonePos = curInfo.boneWorldPos[j];
                 Vector3 boneVel = (boneWorldPos - prevBonePos) / dt;
                 boneVel = resolveVelInKinematicRefFrame(boneVel);
-                if (genMinsAndMaxes && curFixedUpdate > 30)
-                {
-                    SimCharController.updated_mins_and_maxes(boneLocalPos, ref bone_pos_mins[j], ref bone_pos_maxes[j]);
-                    if (updateVelocity)
-                        SimCharController.updated_mins_and_maxes(boneVel, ref bone_vel_mins[j], ref bone_vel_maxes[j]);
-                }
-                if (_config.normalizeObservations)
-                {
-                    boneLocalPos = normalizeBonePos(boneLocalPos, j);
-                    boneVel = normalizeBoneVel(boneVel, j);
-                }
                 copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
                 if (updateVelocity)
                     copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
@@ -740,46 +649,6 @@ public class MLAgentsDirector : Agent
         return false;
     }
 
-   
-    // Roughly 6.81 m/s
-    Vector3 MAX_VELOCITY = new Vector3(4.351938f, 1.454015f, 5.032811f);
-    Vector3 MIN_VELOCITY = new Vector3(-4.351710f, -1.688771f, -4.900798f);
-    Vector3 normalizeCMVelocity(Vector3 vel)
-    {
-        float new_x = normalizeFloat(vel.x, MIN_VELOCITY.x, MAX_VELOCITY.x);
-        float new_y = normalizeFloat(vel.y, MIN_VELOCITY.y, MAX_VELOCITY.y);
-        float new_z = normalizeFloat(vel.z, MIN_VELOCITY.z, MAX_VELOCITY.z);
-        return new Vector3(new_x, new_y, new_z);
-    }
-    Vector2 MIN_DESIRED_SPEED = new Vector2(-2.5f, -2f);
-    Vector2 MAX_DESIRED_SPEED = new Vector2(2.5f, 3f);
-
-    Vector2 normalizeDesiredVelocity(Vector3 vel)
-    {
-        float new_x = normalizeFloat(vel.x, MIN_DESIRED_SPEED.x, MAX_DESIRED_SPEED.x);
-        float new_z = normalizeFloat(vel.z, MIN_DESIRED_SPEED.y, MAX_DESIRED_SPEED.y);
-        return new Vector3(new_x, 0f, new_z);
-    }
-    Vector3 normalizeBonePos(Vector3 pos, int idx)
-    {
-        float new_x = normalizeFloat(pos.x, bone_pos_mins[idx].x, bone_pos_maxes[idx].x);
-        float new_y = normalizeFloat(pos.y, bone_pos_mins[idx].y, bone_pos_maxes[idx].y);
-        float new_z = normalizeFloat(pos.z, bone_pos_mins[idx].z, bone_pos_maxes[idx].z);
-        return new Vector3(new_x, new_y, new_z);
-    }
-    Vector3 normalizeBoneVel(Vector3 vel, int idx)
-    {
-        float new_x = normalizeFloat(vel.x, bone_vel_mins[idx].x, bone_vel_maxes[idx].x);
-        float new_y = normalizeFloat(vel.y, bone_vel_mins[idx].y, bone_vel_maxes[idx].y);
-        float new_z = normalizeFloat(vel.z, bone_vel_mins[idx].z, bone_vel_maxes[idx].z);
-        return new Vector3(new_x, new_y, new_z);
-    }
-    float normalizeFloat(float f, float min, float max)
-    {
-        return (f - min) / (max - min + float.Epsilon);
-    }
-
-
     /*
     At each control step the policy is provided with a state s in R^110
 
@@ -835,67 +704,36 @@ public class MLAgentsDirector : Agent
         simCMVelLastGetState = teleportSinceLastGetState ? simCMVelLastGetState : (simChar.cm - simCMLastGetState) / decisionPeriod;
         UpdateBoneObsState(!teleportSinceLastGetState, decisionPeriod);
         //ClearGizmos();
+
+        Vector3 cmDistance = kinChar.cm - simChar.cm; 
+        //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel}");
+        Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinCMVelLastGetState);        
+        Vector3 simCMVelInKinRefFrame = resolveVelInKinematicRefFrame(simCMVelLastGetState);
+        Vector3 cmVelDiff = simCMVelInKinRefFrame - kinCMVelInKinRefFrame; // simChar.cmVel - kinChar.cmVel;
+        Vector3 desiredVel = resolveVelInKinematicRefFrame(MMScript.desired_velocity);
+        Vector3 velDiffSimMinusDesired = simCMVelInKinRefFrame - desiredVel;
+
         float[] state = new float[numObservations];
         int state_idx = 0;
-        Vector3 cm_distance = kinChar.cm - simChar.cm; // Since we terminate when head distance > 1, cm distance should be between 0~1 anyway
-        copyVecIntoArray(ref state, ref state_idx, cm_distance);
-        //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel}");
-        Vector3 kin_cm_vel_normalized = resolveVelInKinematicRefFrame(kinCMVelLastGetState);
-        //AddGizmoLine(kinChar.cm, kinChar.cm + kinChar.cmVel, Color.red);
-        if (_config.normalizeObservations)
-            kin_cm_vel_normalized = normalizeCMVelocity(kin_cm_vel_normalized);
-        
-        copyVecIntoArray(ref state, ref state_idx, kin_cm_vel_normalized);
-        Vector3 sim_cm_vel_normalized = resolveVelInKinematicRefFrame(simCMVelLastGetState);
-        if (_config.normalizeObservations)
-            sim_cm_vel_normalized = normalizeCMVelocity(sim_cm_vel_normalized);
-        copyVecIntoArray(ref state, ref state_idx, sim_cm_vel_normalized);
-
-        // Copy v (sim) - v(kin)
-        Vector3 vel_diff = sim_cm_vel_normalized - kin_cm_vel_normalized; // simChar.cmVel - kinChar.cmVel;
-        copyVecIntoArray(ref state, ref state_idx, _config.normalizeObservations ? normalizeCMVelocity(vel_diff) : vel_diff);
-
-        // The desired horizontal CM velocity from user-input is also considered v(des) - R^2
-        Vector3 desired_vel = MMScript.desired_velocity;
-        //AddGizmoLine(kinChar.cm, kinChar.cm + desired_vel, Color.red);
-        desired_vel = resolveVelInKinematicRefFrame(desired_vel);
-        //AddGizmoLine(kinChar.cm, kinChar.cm + desired_vel, Color.blue);
-
-        Vector3 desired_vel_normalized = desired_vel;
-        if (_config.normalizeObservations)
-            desired_vel_normalized = normalizeDesiredVelocity(desired_vel);
-        copyVecIntoArray(ref state, ref state_idx, new Vector2(desired_vel_normalized.x, desired_vel_normalized.z));
-
-        //The diff between current simulated character horizontal
-        //CM velocity and v(des) = v(diff) R ^ 2
-        Vector3 v_diff = sim_cm_vel_normalized - desired_vel_normalized;
-        copyVecIntoArray(ref state, ref state_idx, new Vector2(v_diff.x, v_diff.z));
+        copyVecIntoArray(ref state, ref state_idx, cmDistance);
+        copyVecIntoArray(ref state, ref state_idx, kinCMVelInKinRefFrame);
+        copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame);
+        copyVecIntoArray(ref state, ref state_idx, cmVelDiff);
+        copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
+        copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
 
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
         for (int i = 0; i < 36; i++)
             state[state_idx++] = kinChar.boneState[i];
         for (int i = 0; i < 36; i++)
             // In order to keep it between [-1, 1] 
-            state[state_idx++] = _config.normalizeObservations ? (simChar.boneState[i] - kinChar.boneState[i]) / 2 : simChar.boneState[i] - kinChar.boneState[i];
+            state[state_idx++] = simChar.boneState[i] - kinChar.boneState[i];
         for (int i = 0; i < numActions; i++)
             state[state_idx++] = prevActionOutput[i];
 
    
         if (state_idx != numObservations)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything, 6D: {_config.actionsAre6DRotations}");
-   
-        //for(int i = 0; i < 110; i++)
-        //{
-        //    if (state[i] > 1 || state[i] < -1) { 
-        //        Debug.Log($"State[{i}] is {state[i]}");
-        //        if (i >= 9 && i <= 10)
-        //        {
-        //            Debug.Log($"Desired vel: {desired_vel} ");
-        //        }
-        //    }
-        //}
-        if (genMinsAndMaxes)
-            state = new float[numObservations];
 
         kinCMLastGetState = kinChar.cm;
         simCMLastGetState = simChar.cm;
