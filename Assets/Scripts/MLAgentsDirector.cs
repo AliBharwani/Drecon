@@ -179,22 +179,22 @@ public class MLAgentsDirector : Agent
 
         float[] curActions = actionBuffers.ContinuousActions.Array;
         //Utils.debugArray(curActions, "curActions: ");
-        //StringBuilder debugStr = new StringBuilder();
-        //int actionIdx = 0;
-        //for (int i = 0; i < extendedfullDOFBones.Length; i++)
-        //{
-        //    mm_v2.Bones bone = extendedfullDOFBones[i];
-        //    Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
-        //    debugStr.Append($"{bone}: {output} ");
-        //    actionIdx += 3;
-        //}
-        //for (int i = 0; i < TestDirector.allLimitedDOFBones.Length; i++)
-        //{
-        //    mm_v2.Bones bone = TestDirector.allLimitedDOFBones[i];
-        //    debugStr.Append($"{bone}: {curActions[actionIdx]} ");
-        //    actionIdx += 1;
-        //}
-        //Debug.Log(debugStr.ToString());
+        StringBuilder debugStr = new StringBuilder();
+        int actionIdx = 0;
+        for (int i = 0; i < extendedfullDOFBones.Length; i++)
+        {
+            mm_v2.Bones bone = extendedfullDOFBones[i];
+            Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
+            debugStr.Append($"{bone}: {output} ");
+            actionIdx += 3;
+        }
+        for (int i = 0; i < TestDirector.allLimitedDOFBones.Length; i++)
+        {
+            mm_v2.Bones bone = TestDirector.allLimitedDOFBones[i];
+            debugStr.Append($"{bone}: {curActions[actionIdx]} ");
+            actionIdx += 1;
+        }
+        Debug.Log(debugStr.ToString());
 
         // TODO: Exp. with different methods of low pass filtering; instead of filtering the floats
         // one by one maybe I should slerp the resultant quaternions instead? 
@@ -229,11 +229,11 @@ public class MLAgentsDirector : Agent
         {
             int boneIdx = (int)fullDOFBonesToUse[i];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
-            Vector3 output = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
+            Vector3 output = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]) * 120;
             actionIdx += 3;
-            float angle = output.sqrMagnitude;
+            float angle = output.magnitude;
             // Angle is in range (0,3) => map to (-180, 180)
-            angle = (angle * 120) - 180;
+            //angle = (angle * 120) - 180;
             //Vector3 normalizedOutput = output.normalized;
             Quaternion offset = Quaternion.AngleAxis(angle, output);
             Quaternion final = curRotations[boneIdx] * offset;
