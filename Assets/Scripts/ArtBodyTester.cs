@@ -291,8 +291,6 @@ public class ArtBodyTester : MonoBehaviour
     }
     public static GameObject getChildCapsuleCollider(GameObject child)
     {
-        ConfigWriter _config = getConfig();
-        bool useHandmadeColliders = _config.useHandmadeColliders;
         foreach (Transform grandchild in child.transform)
         {
             if (grandchild.GetComponent<CapsuleCollider>() != null)
@@ -303,8 +301,6 @@ public class ArtBodyTester : MonoBehaviour
 
     public static GameObject getChildBoxCollider(GameObject child)
     {
-        ConfigWriter _config = getConfig();
-
         foreach (Transform grandchild in child.transform)
         {
             if (grandchild.GetComponent<BoxCollider>() != null)

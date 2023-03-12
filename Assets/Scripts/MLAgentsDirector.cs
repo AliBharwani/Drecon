@@ -46,8 +46,8 @@ public class MLAgentsDirector : Agent
     public BoxCollider groundCollider;
     private float groundColliderY = 0f;
     private float toeColliderRadius = 0f;
-    public GameObject simulated_char_prefab;
-    public GameObject kinematic_char_prefab;
+    public GameObject simulated_char_type2_prefab;
+    public GameObject kinematic_char_type2_prefab;
     public GameObject simulated_handmade_char_prefab;
     public GameObject kinematic_handmade_char_prefab;
     public int reportMeanRewardEveryNSteps = 10000;
@@ -168,22 +168,22 @@ public class MLAgentsDirector : Agent
 
         float[] curActions = actionBuffers.ContinuousActions.Array;
         //Utils.debugArray(curActions, "curActions: ");
-        StringBuilder debugStr = new StringBuilder();
-        int actionIdx = 0;
-        for (int i = 0; i < extendedfullDOFBones.Length; i++)
-        {
-            mm_v2.Bones bone = extendedfullDOFBones[i];
-            Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
-            debugStr.Append($"{bone}: {output} ");
-            actionIdx += 3;
-        }
-        for (int i = 0; i < TestDirector.allLimitedDOFBones.Length; i++)
-        {
-            mm_v2.Bones bone = TestDirector.allLimitedDOFBones[i];
-            debugStr.Append($"{bone}: {curActions[actionIdx]} ");
-            actionIdx += 1;
-        }
-        Debug.Log(debugStr.ToString());
+        //StringBuilder debugStr = new StringBuilder();
+        //int actionIdx = 0;
+        //for (int i = 0; i < extendedfullDOFBones.Length; i++)
+        //{
+        //    mm_v2.Bones bone = extendedfullDOFBones[i];
+        //    Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
+        //    debugStr.Append($"{bone}: {output} ");
+        //    actionIdx += 3;
+        //}
+        //for (int i = 0; i < TestDirector.allLimitedDOFBones.Length; i++)
+        //{
+        //    mm_v2.Bones bone = TestDirector.allLimitedDOFBones[i];
+        //    debugStr.Append($"{bone}: {curActions[actionIdx]} ");
+        //    actionIdx += 1;
+        //}
+        //Debug.Log(debugStr.ToString());
 
         // TODO: Exp. with different methods of low pass filtering; instead of filtering the floats
         // one by one maybe I should slerp the resultant quaternions instead? 
@@ -343,6 +343,7 @@ public class MLAgentsDirector : Agent
 
 
         MMScript = kinematicCharObj.GetComponent<mm_v2>();
+        MMScript.search_time = _config.searchTime;
         if (!MMScript.is_initalized)
             return;
 
@@ -384,10 +385,6 @@ public class MLAgentsDirector : Agent
                 kinChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(kinChar.boneToTransform[i].gameObject);
                 simChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(simChar.boneToTransform[i].gameObject);
             }
-            kinChar.boneSurfacePts[i] = new Vector3[6];
-            kinChar.boneSurfaceVels[i] = new Vector3[6];
-            simChar.boneSurfacePts[i] = new Vector3[6];
-            simChar.boneSurfaceVels[i] = new Vector3[6];
         }
         groundColliderY = groundCollider.bounds.max.y;
         toeColliderRadius = simChar.boneToCollider[(int)Bone_RightToe].GetComponent<CapsuleCollider>().radius;
@@ -405,12 +402,23 @@ public class MLAgentsDirector : Agent
             numActions = (fullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length; // 25 or 46
         //Debug.Log($"numActions: {numActions}");
         numObservations = 88 + numActions; // 113 or 134 or 130 or 166
-        prevActionOutput = new float[numActions];
         isInitialized = true;
         if (_config.actionsAre6DRotations)
         {
             initialRotInverses = new Matrix4x4[_config.networkControlsAllJoints ? extendedfullDOFBones.Length : fullDOFBones.Length];
         }
+        resetData();
+    }
+    private void resetData()
+    {
+        for (int i = 0; i < nbodies; i++)
+        {
+            kinChar.boneSurfacePts[i] = new Vector3[6];
+            kinChar.boneSurfaceVels[i] = new Vector3[6];
+            simChar.boneSurfacePts[i] = new Vector3[6];
+            simChar.boneSurfaceVels[i] = new Vector3[6];
+        }
+        prevActionOutput = new float[numActions];
     }
     Matrix4x4[] initialRotInverses;
     public void Awake()
@@ -422,8 +430,8 @@ public class MLAgentsDirector : Agent
             motionDB = database.Instance;
         _config = ConfigWriter.Instance;
         nbodies = motionDB.nbones();
-        kinematicCharObj = Instantiate(_config.useHandmadeColliders ? kinematic_handmade_char_prefab : kinematic_char_prefab, Vector3.zero, Quaternion.identity);
-        simulatedCharObj = Instantiate(_config.useHandmadeColliders ? simulated_handmade_char_prefab : simulated_char_prefab, Vector3.zero, Quaternion.identity);
+        kinematicCharObj = Instantiate(_config.useCapsuleFeet ? kinematic_char_type2_prefab : kinematic_handmade_char_prefab  , Vector3.zero, Quaternion.identity);
+        simulatedCharObj = Instantiate(_config.useCapsuleFeet ? simulated_char_type2_prefab : simulated_handmade_char_prefab  , Vector3.zero, Quaternion.identity);
         if (Academy.Instance.IsCommunicatorOn)
         {
             int numFixedUpdatesPerSecond = Mathf.CeilToInt(1f / Time.fixedDeltaTime);
@@ -444,9 +452,10 @@ public class MLAgentsDirector : Agent
         float verticalOffset = getVerticalOffset();
         //Debug.Log($"Vertical offset: {verticalOffset}");
         projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + 2 * Vector3.right;
-        SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .01f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
+        SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .02f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
         teleportSinceLastGetState = true;
+        resetData();
         RequestDecision();
         //Debug.Log($"Teleoport happens on {curFixedUpdate}");
     }
@@ -706,10 +715,9 @@ public class MLAgentsDirector : Agent
         //ClearGizmos();
 
         Vector3 cmDistance = kinChar.cm - simChar.cm; 
-        //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel}");
+        //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel} kinCMVelLastGetState: {kinCMVelLastGetState} simCMVelLastGetState: {simCMVelLastGetState}");
         Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinCMVelLastGetState);        
         Vector3 simCMVelInKinRefFrame = resolveVelInKinematicRefFrame(simCMVelLastGetState);
-        Vector3 cmVelDiff = simCMVelInKinRefFrame - kinCMVelInKinRefFrame; // simChar.cmVel - kinChar.cmVel;
         Vector3 desiredVel = resolveVelInKinematicRefFrame(MMScript.desired_velocity);
         Vector3 velDiffSimMinusDesired = simCMVelInKinRefFrame - desiredVel;
 
@@ -718,7 +726,7 @@ public class MLAgentsDirector : Agent
         copyVecIntoArray(ref state, ref state_idx, cmDistance);
         copyVecIntoArray(ref state, ref state_idx, kinCMVelInKinRefFrame);
         copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame);
-        copyVecIntoArray(ref state, ref state_idx, cmVelDiff);
+        copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame - kinCMVelInKinRefFrame);
         copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
         copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
 
@@ -730,7 +738,6 @@ public class MLAgentsDirector : Agent
             state[state_idx++] = simChar.boneState[i] - kinChar.boneState[i];
         for (int i = 0; i < numActions; i++)
             state[state_idx++] = prevActionOutput[i];
-
    
         if (state_idx != numObservations)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything, 6D: {_config.actionsAre6DRotations}");
@@ -879,7 +886,7 @@ public class MLAgentsDirector : Agent
             totalLoss += loss;
             //Debug.Log($"Bone: {(mm_v2.Bones)i} Quaternion loss: {loss}, geoDesicloss {geodesicLoss}");
         }
-        poseReward = Math.Exp(-1f * _config.poseRewardMultiplier * totalLoss);
+        poseReward = Math.Exp((-10f/nbodies) * _config.poseRewardMultiplier * totalLoss);
         if (_config.normalizeRewardComponents)
         {
             poseReward = localPoseRewardNormalizer.getNormalized((float)poseReward);
@@ -973,7 +980,7 @@ public class MLAgentsDirector : Agent
         //Debug.Log($"minToeY: {minToeY} minPointOnFoot: {minPointOnFoot} maxGroundPenetration: {maxGroundPenetration}");
         return maxGroundPenetration;
     }
-    public static void getSixPointsOnCollider(GameObject obj, ref Vector3[] outputs, mm_v2.Bones bone)
+    public void getSixPointsOnCollider(GameObject obj, ref Vector3[] outputs, mm_v2.Bones bone)
     {
         if (bone == Bone_LeftFoot || bone == Bone_RightFoot)
             getSixPointsOnBox(obj, ref outputs);
@@ -981,6 +988,7 @@ public class MLAgentsDirector : Agent
             getSixPointsOnCapsule(obj, ref outputs);
 
     }
+
     public static void getSixPointsOnBox(GameObject obj, ref Vector3[] outputs)
     {
         BoxCollider box = obj.GetComponent<BoxCollider>();
@@ -1094,5 +1102,14 @@ public class MLAgentsDirector : Agent
         Debug.Log($"{Quaternion.Dot(q1, q2)}");
         Debug.Log($"{Quaternion.Dot(q1, q2)}");
 
+    }
+
+    private void OnGUI()
+    {
+        if (!_config.rewardsInGUI)
+            return;
+        GUIStyle fontSize = new GUIStyle(GUI.skin.GetStyle("label"));
+        fontSize.fontSize = 16;
+        GUI.Label(new Rect(100, 175, 600, 100), "Last Reward: " + finalReward.ToString(), fontSize);
     }
 }

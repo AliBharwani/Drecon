@@ -16,7 +16,6 @@ public class ConfigWriter : MonoBehaviour
     public int solverIterations = 32;
     public bool actionsAreEulerRotations = true;
     public bool actionsAre6DRotations = false;
-    public bool normalizeObservations = true;
     public bool normalizeLimitedDOFOutputs = true;
     public bool normalizeRewardComponents = false;
     public bool networkControlsAllJoints = false;
@@ -33,7 +32,6 @@ public class ConfigWriter : MonoBehaviour
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
     public float simulationVelocityHalflife = .27f;
     public bool walkOnly = false;
-    public bool useHandmadeColliders = false;
     // PROJECTILE HYPER PARAMS
     public bool projectileTraining = true;
     public float LAUNCH_FREQUENCY = 1f;
@@ -42,6 +40,9 @@ public class ConfigWriter : MonoBehaviour
     // Art body params
     public string[] boneToNames = new string[23];
     public  float[] boneToStiffness = new float[23];
+    public bool useCapsuleFeet;
+    public float searchTime = .2f;
+
     [System.Serializable]
     public class MusclePower
     {
@@ -69,6 +70,7 @@ public class ConfigWriter : MonoBehaviour
     }
 
     public float pGainMultiplier = 1f;
+    public bool rewardsInGUI;
 
     [ContextMenu("Multiply all stiffness values by pGainMultiplier")]
     public void multiplyAllStiffnessValues()

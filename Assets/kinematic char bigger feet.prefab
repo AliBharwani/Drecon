@@ -1586,11 +1586,11 @@ MonoBehaviour:
   feature_weight_trajectory_positions: 1
   feature_weight_trajectory_directions: 1.5
   inertialize_blending_halflife: 0.1
+  simulation_velocity_halflife: 0.27
   simulation_rotation_halflife: 0.27
   frame_increments: 20
   ignore_surrounding: 20
-  numNeigh: 1
-  search_time: 0.1
+  search_time: 0.2
   frameCounter: 1
   boneToTransform:
   - {fileID: 2241818812940926812}
@@ -1624,7 +1624,6 @@ MonoBehaviour:
   is_initalized: 0
   debug_always_max_speed: 0
   drawGizmos: 1
-  simulation_velocity_halflife: 0.27
 --- !u!114 &6572924355493366906
 MonoBehaviour:
   m_ObjectHideFlags: 0
