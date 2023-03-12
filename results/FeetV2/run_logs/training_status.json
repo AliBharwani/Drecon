@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 30099985,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30099985.onnx",
+                "reward": 152.6482309581978,
+                "creation_time": 1678605223.365014,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30099985.pt"
+                ]
+            },
+            {
+                "steps": 30199994,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30199994.onnx",
+                "reward": 152.8935710380753,
+                "creation_time": 1678605388.761014,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30199994.pt"
+                ]
+            },
+            {
+                "steps": 30299987,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30299987.onnx",
+                "reward": 151.83958120710454,
+                "creation_time": 1678605554.1452343,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30299987.pt"
+                ]
+            },
+            {
+                "steps": 30399992,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30399992.onnx",
+                "reward": 152.90266258083977,
+                "creation_time": 1678605719.4696066,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30399992.pt"
+                ]
+            },
+            {
+                "steps": 30499994,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30499994.onnx",
+                "reward": 143.39840070702877,
+                "creation_time": 1678605884.9938014,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30499994.pt"
+                ]
+            },
+            {
+                "steps": 30599983,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30599983.onnx",
+                "reward": 161.84925885326058,
+                "creation_time": 1678606050.0729144,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30599983.pt"
+                ]
+            },
+            {
+                "steps": 30699973,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30699973.onnx",
+                "reward": 183.34304713509803,
+                "creation_time": 1678606217.4863532,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30699973.pt"
+                ]
+            },
+            {
+                "steps": 30799986,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30799986.onnx",
+                "reward": 153.76298865416433,
+                "creation_time": 1678606380.723324,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30799986.pt"
+                ]
+            },
+            {
+                "steps": 30899994,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30899994.onnx",
+                "reward": 158.578743994236,
+                "creation_time": 1678606550.2576091,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30899994.pt"
+                ]
+            },
+            {
+                "steps": 30987820,
+                "file_path": "results\\FeetV2\\Drecon\\Drecon-30987820.onnx",
+                "reward": 163.28261990376092,
+                "creation_time": 1678606692.7036815,
+                "auxillary_file_paths": [
+                    "results\\FeetV2\\Drecon\\Drecon-30987820.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 30987820,
+            "file_path": "results\\FeetV2\\Drecon.onnx",
+            "reward": 163.28261990376092,
+            "creation_time": 1678606692.7036815,
+            "auxillary_file_paths": [
+                "results\\FeetV2\\Drecon\\Drecon-30987820.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

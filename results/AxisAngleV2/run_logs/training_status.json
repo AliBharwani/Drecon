@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 43799974,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-43799974.onnx",
+                "reward": 183.30881482277942,
+                "creation_time": 1677361503.0801308,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-43799974.pt"
+                ]
+            },
+            {
+                "steps": 43899974,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-43899974.onnx",
+                "reward": 185.92578196367114,
+                "creation_time": 1677361668.5517864,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-43899974.pt"
+                ]
+            },
+            {
+                "steps": 43999986,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-43999986.onnx",
+                "reward": 202.906611411724,
+                "creation_time": 1677361834.101117,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-43999986.pt"
+                ]
+            },
+            {
+                "steps": 44099989,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-44099989.onnx",
+                "reward": 190.81943426638148,
+                "creation_time": 1677361999.5256574,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-44099989.pt"
+                ]
+            },
+            {
+                "steps": 44199970,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-44199970.onnx",
+                "reward": 184.54052888474814,
+                "creation_time": 1677362165.1988466,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-44199970.pt"
+                ]
+            },
+            {
+                "steps": 44299969,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-44299969.onnx",
+                "reward": 186.02647460895042,
+                "creation_time": 1677362330.6332204,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-44299969.pt"
+                ]
+            },
+            {
+                "steps": 44399970,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-44399970.onnx",
+                "reward": 202.76647116890493,
+                "creation_time": 1677362497.075531,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-44399970.pt"
+                ]
+            },
+            {
+                "steps": 44499988,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-44499988.onnx",
+                "reward": 182.34878421048325,
+                "creation_time": 1677362661.7936623,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-44499988.pt"
+                ]
+            },
+            {
+                "steps": 44599969,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-44599969.onnx",
+                "reward": 184.6271988770554,
+                "creation_time": 1677362827.3383715,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-44599969.pt"
+                ]
+            },
+            {
+                "steps": 44641606,
+                "file_path": "results\\AxisAngleV2\\Drecon\\Drecon-44641606.onnx",
+                "reward": null,
+                "creation_time": 1677362899.4039338,
+                "auxillary_file_paths": [
+                    "results\\AxisAngleV2\\Drecon\\Drecon-44641606.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 44641606,
+            "file_path": "results\\AxisAngleV2\\Drecon.onnx",
+            "reward": null,
+            "creation_time": 1677362899.4039338,
+            "auxillary_file_paths": [
+                "results\\AxisAngleV2\\Drecon\\Drecon-44641606.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

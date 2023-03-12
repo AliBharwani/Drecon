@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 24399997,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24399997.onnx",
+                "reward": 255.016979539745,
+                "creation_time": 1677126075.200935,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24399997.pt"
+                ]
+            },
+            {
+                "steps": 24499978,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24499978.onnx",
+                "reward": 244.4692919934664,
+                "creation_time": 1677126240.2364771,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24499978.pt"
+                ]
+            },
+            {
+                "steps": 24599971,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24599971.onnx",
+                "reward": 270.4114563683184,
+                "creation_time": 1677126407.8306804,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24599971.pt"
+                ]
+            },
+            {
+                "steps": 24699990,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24699990.onnx",
+                "reward": 246.92006154781387,
+                "creation_time": 1677126571.9541276,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24699990.pt"
+                ]
+            },
+            {
+                "steps": 24799997,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24799997.onnx",
+                "reward": 236.97895391966617,
+                "creation_time": 1677126740.380292,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24799997.pt"
+                ]
+            },
+            {
+                "steps": 24899973,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24899973.onnx",
+                "reward": 250.5360273144735,
+                "creation_time": 1677126903.800561,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24899973.pt"
+                ]
+            },
+            {
+                "steps": 24999980,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24999980.onnx",
+                "reward": 241.00189295852627,
+                "creation_time": 1677127073.4428225,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-24999980.pt"
+                ]
+            },
+            {
+                "steps": 25099989,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-25099989.onnx",
+                "reward": 241.95756669623265,
+                "creation_time": 1677127236.0184996,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-25099989.pt"
+                ]
+            },
+            {
+                "steps": 25199990,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-25199990.onnx",
+                "reward": 247.16450507081586,
+                "creation_time": 1677127401.215137,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-25199990.pt"
+                ]
+            },
+            {
+                "steps": 25255281,
+                "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-25255281.onnx",
+                "reward": 246.82952359719437,
+                "creation_time": 1677127494.9028971,
+                "auxillary_file_paths": [
+                    "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-25255281.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 25255281,
+            "file_path": "results\\id=MoreStiffnessNoLimitV2\\Drecon.onnx",
+            "reward": 246.82952359719437,
+            "creation_time": 1677127494.9028971,
+            "auxillary_file_paths": [
+                "results\\id=MoreStiffnessNoLimitV2\\Drecon\\Drecon-25255281.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

@@ -837,7 +837,7 @@ public class MLAgentsDirector : Agent
         int state_idx = 0;
         Vector3 cm_distance = kinChar.cm - simChar.cm; // Since we terminate when head distance > 1, cm distance should be between 0~1 anyway
         copyVecIntoArray(ref state, ref state_idx, cm_distance);
-        Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel}");
+        //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel}");
         Vector3 kin_cm_vel_normalized = resolveVelInKinematicRefFrame(kinChar.cmVel);
         //AddGizmoLine(kinChar.cm, kinChar.cm + kinChar.cmVel, Color.red);
         if (_config.normalizeObservations)

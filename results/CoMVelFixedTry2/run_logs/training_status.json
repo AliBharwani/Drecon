@@ -1,0 +1,110 @@
+{
+    "Drecon": {
+        "checkpoints": [
+            {
+                "steps": 26299970,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-26299970.onnx",
+                "reward": 294.45153167983244,
+                "creation_time": 1678650260.1870816,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-26299970.pt"
+                ]
+            },
+            {
+                "steps": 26399993,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-26399993.onnx",
+                "reward": 285.6058628740264,
+                "creation_time": 1678650426.0107489,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-26399993.pt"
+                ]
+            },
+            {
+                "steps": 26499973,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-26499973.onnx",
+                "reward": 309.3675289781631,
+                "creation_time": 1678650591.7869153,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-26499973.pt"
+                ]
+            },
+            {
+                "steps": 26599992,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-26599992.onnx",
+                "reward": 305.0649313058172,
+                "creation_time": 1678650757.660783,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-26599992.pt"
+                ]
+            },
+            {
+                "steps": 26699993,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-26699993.onnx",
+                "reward": 281.96066361298926,
+                "creation_time": 1678650923.3196294,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-26699993.pt"
+                ]
+            },
+            {
+                "steps": 26799994,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-26799994.onnx",
+                "reward": 297.3527697014782,
+                "creation_time": 1678651089.006651,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-26799994.pt"
+                ]
+            },
+            {
+                "steps": 26899977,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-26899977.onnx",
+                "reward": 309.39493238220933,
+                "creation_time": 1678651254.711693,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-26899977.pt"
+                ]
+            },
+            {
+                "steps": 26999990,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-26999990.onnx",
+                "reward": 266.7079338604845,
+                "creation_time": 1678651420.3755133,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-26999990.pt"
+                ]
+            },
+            {
+                "steps": 27099987,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-27099987.onnx",
+                "reward": 272.13817918142587,
+                "creation_time": 1678651586.3324735,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-27099987.pt"
+                ]
+            },
+            {
+                "steps": 27111201,
+                "file_path": "results\\CoMVelFixedTry2\\Drecon\\Drecon-27111201.onnx",
+                "reward": 289.6473046920839,
+                "creation_time": 1678651604.700292,
+                "auxillary_file_paths": [
+                    "results\\CoMVelFixedTry2\\Drecon\\Drecon-27111201.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 27111201,
+            "file_path": "results\\CoMVelFixedTry2\\Drecon.onnx",
+            "reward": 289.6473046920839,
+            "creation_time": 1678651604.700292,
+            "auxillary_file_paths": [
+                "results\\CoMVelFixedTry2\\Drecon\\Drecon-27111201.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}
