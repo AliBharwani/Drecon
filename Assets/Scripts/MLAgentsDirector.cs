@@ -134,11 +134,9 @@ public class MLAgentsDirector : Agent
             actionIdx++;
             Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
             var zDrive = ab.zDrive;
-            if (_config.normalizeLimitedDOFOutputs)
+            if (_config.fullRangeEulerOutputs)
             {
-                var scale = (zDrive.upperLimit - zDrive.lowerLimit) / 2f;
-                var midpoint = zDrive.lowerLimit + scale;
-                var outputZ = (output * scale) + midpoint;
+                var outputZ = output * 180f;
                 zDrive.target = targetRotationInJointSpace.z + outputZ;
                 ab.zDrive = zDrive;
             }
@@ -167,23 +165,6 @@ public class MLAgentsDirector : Agent
         //Debug.Log($"{Time.frameCount} : Applying Python Action on ML Agent");
 
         float[] curActions = actionBuffers.ContinuousActions.Array;
-        //Utils.debugArray(curActions, "curActions: ");
-        //StringBuilder debugStr = new StringBuilder();
-        //int actionIdx = 0;
-        //for (int i = 0; i < extendedfullDOFBones.Length; i++)
-        //{
-        //    mm_v2.Bones bone = extendedfullDOFBones[i];
-        //    Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
-        //    debugStr.Append($"{bone}: {output} ");
-        //    actionIdx += 3;
-        //}
-        //for (int i = 0; i < TestDirector.allLimitedDOFBones.Length; i++)
-        //{
-        //    mm_v2.Bones bone = TestDirector.allLimitedDOFBones[i];
-        //    debugStr.Append($"{bone}: {curActions[actionIdx]} ");
-        //    actionIdx += 1;
-        //}
-        //Debug.Log(debugStr.ToString());
 
         // TODO: Exp. with different methods of low pass filtering; instead of filtering the floats
         // one by one maybe I should slerp the resultant quaternions instead? 
@@ -196,6 +177,26 @@ public class MLAgentsDirector : Agent
         for (int i = 0; i < numActions; i++)
            finalActions[i] = _config.ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - _config.ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
         prevActionOutput = finalActions;
+        if (debug)
+        {
+            //Utils.debugArray(curActions, "curActions: ");
+            StringBuilder debugStr = new StringBuilder();
+            int actionIdx = 0;
+            for (int i = 0; i < extendedfullDOFBones.Length; i++)
+            {
+                mm_v2.Bones bone = extendedfullDOFBones[i];
+                Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
+                debugStr.Append($"{bone}: {output} ");
+                actionIdx += 3;
+            }
+            for (int i = 0; i < TestDirector.allLimitedDOFBones.Length; i++)
+            {
+                mm_v2.Bones bone = TestDirector.allLimitedDOFBones[i];
+                debugStr.Append($"{bone}: {curActions[actionIdx]} | {finalActions[actionIdx]} ");
+                actionIdx += 1;
+            }
+            Debug.Log(debugStr.ToString());
+        }
         applyActions(finalActions);
     }
     private void setFirstActionsAsIdentityRots(float[] actions)
@@ -240,15 +241,14 @@ public class MLAgentsDirector : Agent
             Vector3 output = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
             actionIdx += 3;
             Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
-            float scale, midpoint;
+            float scale;
 
             var xdrive = ab.xDrive;
             scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
             float outputX = output.x * scale*2;
-            if (!_config.useUnnormalizedEulerOffsets)
+            if (_config.fullRangeEulerOutputs)
             {
-                midpoint = xdrive.lowerLimit + scale;
-                outputX = (output.x * scale) + midpoint;
+                outputX = output.x * 180f;
             }
             xdrive.target = targetRotationInJointSpace.x + outputX;
             ab.xDrive = xdrive;
@@ -256,10 +256,9 @@ public class MLAgentsDirector : Agent
             var ydrive = ab.yDrive;
             scale = (ydrive.upperLimit - ydrive.lowerLimit) / 2f;
             float outputY = output.y * scale * 2;
-            if (!_config.useUnnormalizedEulerOffsets)
+            if (_config.fullRangeEulerOutputs)
             {
-                midpoint = ydrive.lowerLimit + scale;
-                outputY = (output.y * scale) + midpoint;
+                outputY = output.y * 180f;
             }
             ydrive.target = targetRotationInJointSpace.y + outputY;
             ab.yDrive = ydrive;
@@ -267,10 +266,9 @@ public class MLAgentsDirector : Agent
             var zdrive = ab.zDrive;
             scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
             float outputZ = output.z * scale * 2;
-            if (!_config.useUnnormalizedEulerOffsets)
+            if (_config.fullRangeEulerOutputs)
             {
-                midpoint = zdrive.lowerLimit + scale;
-                outputZ = (output.z * scale) + midpoint;
+                outputZ = output.z * 180f;
             }
             zdrive.target = targetRotationInJointSpace.z + outputZ;
             ab.zDrive = zdrive;    
@@ -421,6 +419,7 @@ public class MLAgentsDirector : Agent
         prevActionOutput = new float[numActions];
     }
     Matrix4x4[] initialRotInverses;
+    public bool debug;
     public void Awake()
     {
         timeAtStart = DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -432,6 +431,7 @@ public class MLAgentsDirector : Agent
         nbodies = motionDB.nbones();
         kinematicCharObj = Instantiate(_config.useCapsuleFeet ? kinematic_char_type2_prefab : kinematic_handmade_char_prefab  , Vector3.zero, Quaternion.identity);
         simulatedCharObj = Instantiate(_config.useCapsuleFeet ? simulated_char_type2_prefab : simulated_handmade_char_prefab  , Vector3.zero, Quaternion.identity);
+        debug = debug && !Academy.Instance.IsCommunicatorOn;
         if (Academy.Instance.IsCommunicatorOn)
         {
             int numFixedUpdatesPerSecond = Mathf.CeilToInt(1f / Time.fixedDeltaTime);

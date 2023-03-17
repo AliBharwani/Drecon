@@ -92,7 +92,9 @@ public class database : MonoBehaviour
         ignore_surrounding = _ignore_surrounding;
         num_neigh = _num_neigh;
         load_db(filename);
-        offset_foot_rots();
+        ConfigWriter _config = ConfigWriter.Instance;
+        if (!_config.useCapsuleFeet)
+            offset_foot_rots();
     }
 
     // The motion data foot rotations have the feet at a slight angle when touching the ground, so the heel is slightly off the ground

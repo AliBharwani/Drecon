@@ -130,13 +130,12 @@ public static class ArtBodyUtils
         Quaternion q = new Quaternion(qx, qy, qz, qw);
         return q.normalized;
     }
-    public static void SetDriveTargetVelocity(this ArticulationBody body, Vector3 target_vel, bool debug = false)
+    public static void SetDriveTargetVelocity(this ArticulationBody body, Quaternion targetLocalVel, bool debug = false)
     {
         /* Angular velocity appears in scaled angle axis representation 
          * 
          */
-        if (debug)
-            Debug.Log($"Target rot velocity: {target_vel.ToString("f6")}");
+        Vector3 target_vel = body.ToTargetRotationInReducedSpace(targetLocalVel, true);
 
         //body.angularVelocity = target_vel;
         //return;
@@ -153,6 +152,7 @@ public static class ArtBodyUtils
         zDrive.targetVelocity = target_vel.z;
         body.zDrive = zDrive;
     }
+
     public static void SetDriveRotation(this ArticulationBody body, Quaternion targetLocalRotation, bool debug = false)
     {
         Vector3 target = body.ToTargetRotationInReducedSpace(targetLocalRotation, true);

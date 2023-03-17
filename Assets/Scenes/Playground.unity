@@ -123,6 +123,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &57304036 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7967488750888317942, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+  m_PrefabInstance: {fileID: 529752456}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &97353462
 GameObject:
   m_ObjectHideFlags: 0
@@ -357,7 +362,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 1dda23b06ec42ce458e0980ee7851f97, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: e87b483b22807c549addef9c28a89451, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 0
   m_BehaviorName: Drecon
@@ -389,6 +394,7 @@ MonoBehaviour:
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  debug: 0
   updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 1
@@ -543,6 +549,7 @@ MonoBehaviour:
   damping: 100
   pGainMultiplier: 0.5
   rewardsInGUI: 0
+  fullRangeEulerOutputs: 0
 --- !u!4 &381966280
 Transform:
   m_ObjectHideFlags: 0
@@ -1169,6 +1176,7 @@ MonoBehaviour:
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  debug: 0
   updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 0
@@ -1223,13 +1231,14 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   groundCollider: {fileID: 870766689}
-  simulated_char_type2_prefab: {fileID: 0}
-  kinematic_char_type2_prefab: {fileID: 0}
+  simulated_char_type2_prefab: {fileID: 919132149155446097, guid: b1938e8ecd88b564ca534c27680a635f, type: 3}
+  kinematic_char_type2_prefab: {fileID: 919132149155446097, guid: 9b09244f4601b4449a579f7c7a337fb6, type: 3}
   simulated_handmade_char_prefab: {fileID: 1107187257722840432, guid: 8950e19069782b14f8477bced81923f1, type: 3}
   kinematic_handmade_char_prefab: {fileID: 8076812278296859351, guid: ce2d80a0955c13d439b4c3cf4a368b3d, type: 3}
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  debug: 0
   updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 0
@@ -1728,16 +1737,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/CoMVelFixedTry2
+  writeToFilePath: ../results/LimitedJoints
   filename: unityconfig.json
-  loadFromFilePath: ../results/CoMVelFixed
-  prob_to_change_inputs: 0.005
+  loadFromFilePath: ../results/CoMVelFixed+Revert2
+  prob_to_change_inputs: 0.001
   solverIterations: 256
   actionsAreEulerRotations: 1
   actionsAre6DRotations: 0
   normalizeLimitedDOFOutputs: 0
   normalizeRewardComponents: 0
-  networkControlsAllJoints: 1
+  networkControlsAllJoints: 0
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 1
@@ -1802,7 +1811,7 @@ MonoBehaviour:
   - 1000
   - 2000
   - 1000
-  useCapsuleFeet: 0
+  useCapsuleFeet: 1
   searchTime: 0.2
   MusclePowers:
   - Bone: 1
@@ -1837,6 +1846,7 @@ MonoBehaviour:
   damping: 100
   pGainMultiplier: 0.8
   rewardsInGUI: 0
+  fullRangeEulerOutputs: 0
 --- !u!4 &1357924715
 Transform:
   m_ObjectHideFlags: 0
@@ -1885,6 +1895,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1516560503 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7967488750888317942, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+  m_PrefabInstance: {fileID: 2119537293}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1516560510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1516560503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2463d39eca092c644acbf4f01c031e79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 57304036}
+  numFramesToReport: 300
 --- !u!1 &1664100943
 GameObject:
   m_ObjectHideFlags: 0
@@ -2067,6 +2096,7 @@ MonoBehaviour:
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  debug: 0
   updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 0

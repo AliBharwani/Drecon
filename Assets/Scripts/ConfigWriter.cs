@@ -71,6 +71,7 @@ public class ConfigWriter : MonoBehaviour
 
     public float pGainMultiplier = 1f;
     public bool rewardsInGUI;
+    public bool fullRangeEulerOutputs;
 
     [ContextMenu("Multiply all stiffness values by pGainMultiplier")]
     public void multiplyAllStiffnessValues()

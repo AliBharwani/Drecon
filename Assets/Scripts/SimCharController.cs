@@ -123,6 +123,8 @@ public class SimCharController : MonoBehaviour
     {
         Vector3[] curr_bone_positions = db.bone_positions[frameIdx];
         Quaternion[] curr_bone_rotations = db.bone_rotations[frameIdx];
+        Vector3[] curr_bone_angular_vel = db.bone_angular_velocities[frameIdx];
+        //Utils.debugVector3Array(curr_bone_angular_vel, "curr_bone_angular_vel");
         for (int i = 1; i < 23; i++)
         {
             mm_v2.Bones bone = (mm_v2.Bones)i;
@@ -130,6 +132,7 @@ public class SimCharController : MonoBehaviour
                 continue;
             Transform t = boneToTransform[i];
             Quaternion local_rot = curr_bone_rotations[i];
+            Quaternion local_angular_vel = Utils.quat_from_scaled_angle_axis(curr_bone_angular_vel[i]);
             bool print_debug = bone == debug_bone;
 
             if (isKinematic)
@@ -142,7 +145,7 @@ public class SimCharController : MonoBehaviour
             if (ab == null)
                 continue;
             ab.SetDriveRotation(local_rot);
-            
+            ab.SetDriveTargetVelocity(local_angular_vel);
 
         }
 
