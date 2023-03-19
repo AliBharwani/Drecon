@@ -78,13 +78,16 @@ public class MLAgentsDirector : Agent
     {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips, Bone_Spine,  Bone_Spine1, Bone_Spine2, Bone_LeftShoulder, Bone_RightShoulder};
     [HideInInspector]
     public static mm_v2.Bones[] limitedDOFBones = new mm_v2.Bones[]
-    {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftToe, Bone_RightToe };
+    {  Bone_LeftLeg, Bone_RightLeg };
+    [HideInInspector]
+    public static mm_v2.Bones[] extendedLimitedDOFBones = new mm_v2.Bones[]
+    {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftForeArm, Bone_RightForeArm};
     [HideInInspector]
     public static mm_v2.Bones[] openloopBones = new mm_v2.Bones[]
       {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand, Bone_LeftShoulder, Bone_RightShoulder};
 
     public static mm_v2.Bones[] alwaysOpenloopBones = new mm_v2.Bones[]
-    { Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand};
+    { Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand, Bone_LeftToe, Bone_RightToe};
 
     Vector3[] bone_pos_mins, bone_pos_maxes, bone_vel_mins, bone_vel_maxes;
     long timeAtStart;
@@ -124,7 +127,7 @@ public class MLAgentsDirector : Agent
         else
             applyActionsAsAxisAngleRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
 
-        mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? TestDirector.allLimitedDOFBones : limitedDOFBones;
+        mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
 
         for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
         {
@@ -182,16 +185,18 @@ public class MLAgentsDirector : Agent
             //Utils.debugArray(curActions, "curActions: ");
             StringBuilder debugStr = new StringBuilder();
             int actionIdx = 0;
-            for (int i = 0; i < extendedfullDOFBones.Length; i++)
+            mm_v2.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
+            for (int i = 0; i < fullDOFBonesToUse.Length; i++)
             {
-                mm_v2.Bones bone = extendedfullDOFBones[i];
+                mm_v2.Bones bone = fullDOFBonesToUse[i];
                 Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
                 debugStr.Append($"{bone}: {output} ");
                 actionIdx += 3;
             }
-            for (int i = 0; i < TestDirector.allLimitedDOFBones.Length; i++)
+            mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
+            for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
             {
-                mm_v2.Bones bone = TestDirector.allLimitedDOFBones[i];
+                mm_v2.Bones bone = limitedDOFBonesToUse[i];
                 debugStr.Append($"{bone}: {curActions[actionIdx]} | {finalActions[actionIdx]} ");
                 actionIdx += 1;
             }
@@ -339,8 +344,10 @@ public class MLAgentsDirector : Agent
             simulatedCharObj.GetComponent<ArtBodyTester>().set_all_material(RedMatTransparent);
         }
 
-
+        Debug.Log($"Kinematic character is null: {kinematicCharObj == null}");
         MMScript = kinematicCharObj.GetComponent<mm_v2>();
+        Debug.Log($"MMScript is null: {MMScript == null}");
+
         MMScript.search_time = _config.searchTime;
         if (!MMScript.is_initalized)
             return;
@@ -395,7 +402,7 @@ public class MLAgentsDirector : Agent
         UpdateKinCMData(false);
         UpdateSimCMData(false);
         if (_config.networkControlsAllJoints)
-            numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + TestDirector.allLimitedDOFBones.Length; // 42 or 78
+            numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + extendedLimitedDOFBones.Length; // 42 or 78
         else 
             numActions = (fullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length; // 25 or 46
         //Debug.Log($"numActions: {numActions}");
