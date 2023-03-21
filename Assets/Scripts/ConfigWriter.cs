@@ -14,6 +14,7 @@ public class ConfigWriter : MonoBehaviour
     // HYPER PARAMS
     public float prob_to_change_inputs = .001f;
     public int solverIterations = 32;
+    public bool noStrafing = false;
     public bool actionsAreEulerRotations = true;
     public bool actionsAre6DRotations = false;
     public bool normalizeLimitedDOFOutputs = true;
@@ -31,6 +32,7 @@ public class ConfigWriter : MonoBehaviour
     public int MAX_EPISODE_LENGTH_SECONDS = 20;
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
     public float simulationVelocityHalflife = .27f;
+    public float simulation_rotation_halflife = .27f;
     public bool walkOnly = false;
     // PROJECTILE HYPER PARAMS
     public bool projectileTraining = true;

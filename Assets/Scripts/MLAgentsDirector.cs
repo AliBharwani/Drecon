@@ -131,6 +131,9 @@ public class MLAgentsDirector : Agent
 
         for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
         {
+            // Only inlcuded for compatibility with CoMVelFixed Run - skip toe input steps
+            //if (i == 2 && numActions == 42)
+            //    actionIdx += 2;
             int boneIdx = (int)limitedDOFBonesToUse[i];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             float output = finalActions[actionIdx];
@@ -344,9 +347,7 @@ public class MLAgentsDirector : Agent
             simulatedCharObj.GetComponent<ArtBodyTester>().set_all_material(RedMatTransparent);
         }
 
-        Debug.Log($"Kinematic character is null: {kinematicCharObj == null}");
         MMScript = kinematicCharObj.GetComponent<mm_v2>();
-        Debug.Log($"MMScript is null: {MMScript == null}");
 
         MMScript.search_time = _config.searchTime;
         if (!MMScript.is_initalized)
@@ -401,10 +402,11 @@ public class MLAgentsDirector : Agent
 
         UpdateKinCMData(false);
         UpdateSimCMData(false);
-        if (_config.networkControlsAllJoints)
-            numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + extendedLimitedDOFBones.Length; // 42 or 78
-        else 
-            numActions = (fullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length; // 25 or 46
+        numActions = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>().BrainParameters.ActionSpec.NumContinuousActions;
+        //if (_config.networkControlsAllJoints)
+        //    numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + extendedLimitedDOFBones.Length; // 42 or 78
+        //else 
+        //    numActions = (fullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length; // 25 or 46
         //Debug.Log($"numActions: {numActions}");
         numObservations = 88 + numActions; // 113 or 134 or 130 or 166
         isInitialized = true;
@@ -636,7 +638,7 @@ public class MLAgentsDirector : Agent
             finalReward = _config.EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
             SetReward(_config.EPISODE_END_REWARD);
-            Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames");
+            Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
             lastEpisodeEndingFrame = curFixedUpdate;
             EndEpisode();
             return true;

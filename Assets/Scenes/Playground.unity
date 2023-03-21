@@ -356,15 +356,15 @@ MonoBehaviour:
     VectorObservationSize: 128
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 40
+      m_NumContinuousActions: 10
       BranchSizes: 
-    VectorActionSize: 28000000
+    VectorActionSize: 0a000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: d991dd4643aa9d2468afa597506bda81, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: d8c484281c845464d9997ef2dde05a5c, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -447,6 +447,7 @@ MonoBehaviour:
   loadFromFilePath: ../results/AllJointsResetKin
   prob_to_change_inputs: 0.001
   solverIterations: 255
+  noStrafing: 0
   actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
   normalizeLimitedDOFOutputs: 1
@@ -463,6 +464,7 @@ MonoBehaviour:
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
   simulationVelocityHalflife: 0.5
+  simulation_rotation_halflife: 0.27
   walkOnly: 1
   projectileTraining: 1
   LAUNCH_FREQUENCY: 3
@@ -1737,11 +1739,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/AllJointsLowStiffnessHighEval
+  writeToFilePath: ../results/NoStrafing
   filename: unityconfig.json
-  loadFromFilePath: ../results/CoMVelFixed+Revert2
+  loadFromFilePath: ../results/CoMVelFixed+Laptop1
   prob_to_change_inputs: 0.001
   solverIterations: 256
+  noStrafing: 1
   actionsAreEulerRotations: 1
   actionsAre6DRotations: 0
   normalizeLimitedDOFOutputs: 0
@@ -1752,12 +1755,13 @@ MonoBehaviour:
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 1
   useUnnormalizedEulerOffsets: 1
-  EVALUATE_EVERY_K_STEPS: 1
+  EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
   simulationVelocityHalflife: 0.4
+  simulation_rotation_halflife: 0.4
   walkOnly: 1
   projectileTraining: 0
   LAUNCH_FREQUENCY: 3
@@ -1815,36 +1819,36 @@ MonoBehaviour:
   searchTime: 0.2
   MusclePowers:
   - Bone: 1
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1600, y: 1600, z: 1600}
   - Bone: 10
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1600, y: 1600, z: 1600}
   - Bone: 11
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1600, y: 1600, z: 1600}
   - Bone: 12
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1600, y: 1600, z: 1600}
   - Bone: 6
-    PowerVector: {x: 2000, y: 2000, z: 6000}
+    PowerVector: {x: 1600, y: 1600, z: 4800}
   - Bone: 2
-    PowerVector: {x: 2000, y: 2000, z: 6000}
+    PowerVector: {x: 1600, y: 1600, z: 4800}
   - Bone: 7
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 3200, y: 3200, z: 3200}
   - Bone: 3
-    PowerVector: {x: 4000, y: 4000, z: 4000}
+    PowerVector: {x: 3200, y: 3200, z: 3200}
   - Bone: 8
-    PowerVector: {x: 1000, y: 1000, z: 2000}
+    PowerVector: {x: 800, y: 800, z: 1600}
   - Bone: 4
-    PowerVector: {x: 1000, y: 1000, z: 2000}
+    PowerVector: {x: 800, y: 800, z: 1600}
   - Bone: 20
-    PowerVector: {x: 1000, y: 1000, z: 1000}
+    PowerVector: {x: 800, y: 800, z: 800}
   - Bone: 16
-    PowerVector: {x: 1000, y: 1000, z: 1000}
+    PowerVector: {x: 800, y: 800, z: 800}
   - Bone: 21
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1600, y: 1600, z: 1600}
   - Bone: 17
-    PowerVector: {x: 2000, y: 2000, z: 2000}
+    PowerVector: {x: 1600, y: 1600, z: 1600}
   forceLimit: 200
-  damping: 50
-  pGainMultiplier: 1.25
+  damping: 100
+  pGainMultiplier: 0.8
   rewardsInGUI: 0
   fullRangeEulerOutputs: 0
 --- !u!4 &1357924715

@@ -189,6 +189,8 @@ public class mm_v2 : MonoBehaviour
         }
         _config = ConfigWriter.Instance;
         simulation_velocity_halflife = _config.simulationVelocityHalflife;
+        simulation_rotation_halflife = _config.simulation_rotation_halflife;
+
         walk_only = _config.walkOnly;
         motionDB.database_build_matching_features(
             feature_weight_foot_position,
@@ -372,7 +374,7 @@ public class mm_v2 : MonoBehaviour
             //Debug.Log("Genning new inputs!");
             random_lstick_input = debug_always_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
             // Random chance of making desired rotation face direction of velocity  
-            is_strafing = Random.value <= .5f;
+            is_strafing = !_config.noStrafing && Random.value <= .5f;
             is_runbutton_pressed = !walk_only && Random.value <= .5f;
             Vector2 rotation_vec = is_strafing ?  Random.insideUnitCircle : random_lstick_input;
             desired_rotation =  Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y) ;
