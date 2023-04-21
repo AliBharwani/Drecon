@@ -193,7 +193,7 @@ public class MLAgentsDirector : Agent
             {
                 mm_v2.Bones bone = fullDOFBonesToUse[i];
                 Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
-                debugStr.Append($"{bone}: {output} ");
+                debugStr.Append($"{bone.ToString().Substring(5)}: {output} ");
                 actionIdx += 3;
             }
             mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
@@ -291,7 +291,7 @@ public class MLAgentsDirector : Agent
             Vector3 outputV1 = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
             Vector3 outputV2 = new Vector3(finalActions[actionIdx + 3], finalActions[actionIdx + 4], finalActions[actionIdx + 5]);
             actionIdx += 6;
-            Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i]);
+            Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i], _config.adjust6DRots);
             Quaternion newTargetRot = curRotations[boneIdx] * networkAdjustment;
             ab.SetDriveRotation(newTargetRot.normalized);
         }
@@ -404,11 +404,11 @@ public class MLAgentsDirector : Agent
         UpdateSimCMData(false);
         numActions = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>().BrainParameters.ActionSpec.NumContinuousActions;
         //if (_config.networkControlsAllJoints)
-        //    numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + extendedLimitedDOFBones.Length; // 42 or 78
+        //    numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + extendedLimitedDOFBones.Length; // 40 or 76
         //else 
-        //    numActions = (fullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length; // 25 or 46
+        //    numActions = (fullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length; // 25 or 44
         //Debug.Log($"numActions: {numActions}");
-        numObservations = 88 + numActions; // 113 or 134 or 130 or 166
+        numObservations = 88 + numActions; // 111 or 132 or 128 or 164
         isInitialized = true;
         if (_config.actionsAre6DRotations)
         {
@@ -508,6 +508,9 @@ public class MLAgentsDirector : Agent
         //if (episodeEnded)
         //    return;
         // request Decision
+        ClearGizmos();
+        AddGizmoSphere(kinChar.cm, Color.blue);
+        AddGizmoSphere(simChar.cm, Color.red);
         if (curFixedUpdate % _config.EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
         else {
@@ -718,8 +721,8 @@ public class MLAgentsDirector : Agent
     {
         //bool updateVel = curFixedUpdate - lastSimCharTeleportFixedUpdate < _config.EVALUATE_EVERY_K_STEPS;
         float decisionPeriod = Time.fixedDeltaTime * _config.EVALUATE_EVERY_K_STEPS;
-        kinCMVelLastGetState = teleportSinceLastGetState ? kinCMVelLastGetState : (kinChar.cm - kinCMLastGetState) / decisionPeriod;
-        simCMVelLastGetState = teleportSinceLastGetState ? simCMVelLastGetState : (simChar.cm - simCMLastGetState) / decisionPeriod;
+        kinCMVelLastGetState = teleportSinceLastGetState ? kinCMVelLastGetState : ((kinChar.cm - kinCMLastGetState) / decisionPeriod);
+        simCMVelLastGetState = teleportSinceLastGetState ? simCMVelLastGetState : ((simChar.cm - simCMLastGetState) / decisionPeriod);
         UpdateBoneObsState(!teleportSinceLastGetState, decisionPeriod);
         //ClearGizmos();
 
@@ -738,6 +741,10 @@ public class MLAgentsDirector : Agent
         copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame - kinCMVelInKinRefFrame);
         copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
         copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
+        if (debug)
+        {
+            Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
+        }
 
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
         for (int i = 0; i < 36; i++)

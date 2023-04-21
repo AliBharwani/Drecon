@@ -17,6 +17,7 @@ public class ConfigWriter : MonoBehaviour
     public bool noStrafing = false;
     public bool actionsAreEulerRotations = true;
     public bool actionsAre6DRotations = false;
+    public bool adjust6DRots = false;
     public bool normalizeLimitedDOFOutputs = true;
     public bool normalizeRewardComponents = false;
     public bool networkControlsAllJoints = false;

@@ -356,15 +356,15 @@ MonoBehaviour:
     VectorObservationSize: 128
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 10
+      m_NumContinuousActions: 40
       BranchSizes: 
-    VectorActionSize: 0a000000
+    VectorActionSize: 28000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: d8c484281c845464d9997ef2dde05a5c, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 10893f0c953095440af3cb1669cfad27, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -450,6 +450,7 @@ MonoBehaviour:
   noStrafing: 0
   actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
+  adjust6DRots: 0
   normalizeLimitedDOFOutputs: 1
   normalizeRewardComponents: 0
   networkControlsAllJoints: 1
@@ -1272,16 +1273,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 113
+    VectorObservationSize: 111
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 25
+      m_NumContinuousActions: 23
       BranchSizes: 
-    VectorActionSize: 19000000
+    VectorActionSize: 17000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 1856e2a67263e0941a634f63abfa2fda, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: e9c1d7319c939384b8c8c59de2d50098, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -1739,17 +1740,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/NoStrafing
+  writeToFilePath: ../results/NoStrafingAxisAngle
   filename: unityconfig.json
-  loadFromFilePath: ../results/CoMVelFixed+Laptop1
+  loadFromFilePath: ../results/NoStrafingV2
   prob_to_change_inputs: 0.001
   solverIterations: 256
   noStrafing: 1
-  actionsAreEulerRotations: 1
+  actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
+  adjust6DRots: 0
   normalizeLimitedDOFOutputs: 0
   normalizeRewardComponents: 0
-  networkControlsAllJoints: 1
+  networkControlsAllJoints: 0
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 1
@@ -2059,12 +2061,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 134
+    VectorObservationSize: 132
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 46
+      m_NumContinuousActions: 44
       BranchSizes: 
-    VectorActionSize: 2e000000
+    VectorActionSize: 2c000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -2093,17 +2095,17 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   groundCollider: {fileID: 870766689}
-  simulated_char_type2_prefab: {fileID: 0}
-  kinematic_char_type2_prefab: {fileID: 0}
+  simulated_char_type2_prefab: {fileID: 1698237335039107927, guid: bb31332a00655ce46af95914ccbe7651, type: 3}
+  kinematic_char_type2_prefab: {fileID: 536787371494200998, guid: 0122f7b7f5b26b843bd88f8c210cdd39, type: 3}
   simulated_handmade_char_prefab: {fileID: 8472335581407420909, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
-  kinematic_handmade_char_prefab: {fileID: 8076812278296859351, guid: ce2d80a0955c13d439b4c3cf4a368b3d, type: 3}
+  kinematic_handmade_char_prefab: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 1
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
-  drawGizmos: 0
+  drawGizmos: 1
 --- !u!4 &2033970013
 Transform:
   m_ObjectHideFlags: 0
@@ -2149,7 +2151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 2
+  numAgents: 1
   modelDirector: {fileID: 767361687}
   model6DDirector: {fileID: 2033970009}
   modelAllJointsDirector: {fileID: 710360376}
