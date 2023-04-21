@@ -22,6 +22,7 @@ public class PhysicsManager : MonoBehaviour
             debugBody.GetJointVelocities(jointVelocities);
             Utils.debugArray(jointVelocities.ToArray(), $"{Time.frameCount} jointForces before physics simulate ");
         }
+        //Debug.Log($"Executing physics");
         Physics.Simulate(Time.fixedDeltaTime);
         if (debug)
         {

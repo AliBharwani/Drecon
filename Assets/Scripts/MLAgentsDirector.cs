@@ -400,8 +400,6 @@ public class MLAgentsDirector : Agent
         if (!_config.projectileTraining)
             projectile.SetActive(false);
 
-        UpdateKinCMData(false);
-        UpdateSimCMData(false);
         numActions = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>().BrainParameters.ActionSpec.NumContinuousActions;
         //if (_config.networkControlsAllJoints)
         //    numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + extendedLimitedDOFBones.Length; // 40 or 76
@@ -414,6 +412,7 @@ public class MLAgentsDirector : Agent
         {
             initialRotInverses = new Matrix4x4[_config.networkControlsAllJoints ? extendedfullDOFBones.Length : fullDOFBones.Length];
         }
+
         resetData();
     }
     private void resetData()
@@ -426,6 +425,8 @@ public class MLAgentsDirector : Agent
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
         prevActionOutput = new float[numActions];
+        UpdateKinCMData(false);
+        UpdateSimCMData(false);
     }
     Matrix4x4[] initialRotInverses;
     public bool debug;
@@ -464,7 +465,10 @@ public class MLAgentsDirector : Agent
         SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .02f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
         teleportSinceLastGetState = true;
+        Physics.Simulate(Time.fixedDeltaTime);
         resetData();
+        kinChar.cmVel = Vector3.zero;
+        simChar.cmVel = Vector3.zero;
         RequestDecision();
         //Debug.Log($"Teleoport happens on {curFixedUpdate}");
     }
@@ -478,6 +482,9 @@ public class MLAgentsDirector : Agent
             return;
         }
         curFixedUpdate++;
+        //bool endedEpisodeAtEndOfLastFrame = lastEpisodeEndingFrame == (curFixedUpdate - 1);
+        //if (endedEpisodeAtEndOfLastFrame)
+        //    Debug.Log($"endedEpisodeAtEndOfLastFrame, curFixedUpdate: {curFixedUpdate}");
         //Debug.Log($"{Time.frameCount} : ML Agent updated");
 
         // Make sure to teleport sim character if kin character teleported
@@ -502,7 +509,7 @@ public class MLAgentsDirector : Agent
         //Debug.Log($"curFixedUpdate: {curFixedUpdate} updateVelocity: {updateVelocity}");
         UpdateKinCMData(updateVelocity);
         //Debug.Log($"{Time.frameCount}: FixedUpdate kin cm: {kinChar.cm} kin cm vel: {kinChar.cmVel} sim cm: {simChar.cm} sim cm vel: {simChar.cmVel} ");
-        //UpdateBoneObsState(updateVelocity);
+        UpdateBoneObsState(updateVelocity, Time.fixedDeltaTime);
         // UpdateBoneSurfacePts(updateVelocity);
         //bool episodeEnded = calcAndSetRewards();
         //if (episodeEnded)
@@ -720,16 +727,16 @@ public class MLAgentsDirector : Agent
     float[] getState()
     {
         //bool updateVel = curFixedUpdate - lastSimCharTeleportFixedUpdate < _config.EVALUATE_EVERY_K_STEPS;
-        float decisionPeriod = Time.fixedDeltaTime * _config.EVALUATE_EVERY_K_STEPS;
-        kinCMVelLastGetState = teleportSinceLastGetState ? kinCMVelLastGetState : ((kinChar.cm - kinCMLastGetState) / decisionPeriod);
-        simCMVelLastGetState = teleportSinceLastGetState ? simCMVelLastGetState : ((simChar.cm - simCMLastGetState) / decisionPeriod);
-        UpdateBoneObsState(!teleportSinceLastGetState, decisionPeriod);
+        //float decisionPeriod = Time.fixedDeltaTime * _config.EVALUATE_EVERY_K_STEPS;
+        //kinCMVelLastGetState = teleportSinceLastGetState ? kinCMVelLastGetState : ((kinChar.cm - kinCMLastGetState) / decisionPeriod);
+        //simCMVelLastGetState = teleportSinceLastGetState ? simCMVelLastGetState : ((simChar.cm - simCMLastGetState) / decisionPeriod);
+        //UpdateBoneObsState(!teleportSinceLastGetState, decisionPeriod);
         //ClearGizmos();
 
         Vector3 cmDistance = kinChar.cm - simChar.cm; 
         //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel} kinCMVelLastGetState: {kinCMVelLastGetState} simCMVelLastGetState: {simCMVelLastGetState}");
-        Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinCMVelLastGetState);        
-        Vector3 simCMVelInKinRefFrame = resolveVelInKinematicRefFrame(simCMVelLastGetState);
+        Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinChar.cm);        
+        Vector3 simCMVelInKinRefFrame = resolveVelInKinematicRefFrame(simChar.cm);
         Vector3 desiredVel = resolveVelInKinematicRefFrame(MMScript.desired_velocity);
         Vector3 velDiffSimMinusDesired = simCMVelInKinRefFrame - desiredVel;
 
@@ -743,7 +750,8 @@ public class MLAgentsDirector : Agent
         copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
         if (debug)
         {
-            Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
+            //Debug.Log($"kinChar.cm: {kinChar.cm }  simChar.cm: {simChar.cm}");
+            Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} simCMVelInKinRefFrame: {simCMVelInKinRefFrame} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
         }
 
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
@@ -758,9 +766,9 @@ public class MLAgentsDirector : Agent
         if (state_idx != numObservations)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything, 6D: {_config.actionsAre6DRotations}");
 
-        kinCMLastGetState = kinChar.cm;
-        simCMLastGetState = simChar.cm;
-        teleportSinceLastGetState = false;
+        //kinCMLastGetState = kinChar.cm;
+        //simCMLastGetState = simChar.cm;
+        //teleportSinceLastGetState = false;
         return state;
 
     }
