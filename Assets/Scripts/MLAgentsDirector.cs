@@ -465,11 +465,11 @@ public class MLAgentsDirector : Agent
         SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .02f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
         teleportSinceLastGetState = true;
-        Physics.Simulate(Time.fixedDeltaTime);
+        Physics.Simulate(.00001f);
         resetData();
         kinChar.cmVel = Vector3.zero;
         simChar.cmVel = Vector3.zero;
-        RequestDecision();
+        //RequestDecision();
         //Debug.Log($"Teleoport happens on {curFixedUpdate}");
     }
 
@@ -651,8 +651,13 @@ public class MLAgentsDirector : Agent
             Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
             lastEpisodeEndingFrame = curFixedUpdate;
             EndEpisode();
+            if (debug)
+                EditorApplication.isPaused = true;
             return true;
         }
+        if (debug && fallFactor < 0.03)
+            EditorApplication.isPaused = true;
+
         UpdateSimCMData(updateVelocity);
         //Debug.Log($"{Time.frameCount}: Rewards kin cm: {kinChar.cm} kin cm vel: {kinChar.cmVel} sim cm: {simChar.cm} sim cm vel: {simChar.cmVel} ");
         UpdateBoneSurfacePts(updateVelocity);
@@ -733,10 +738,11 @@ public class MLAgentsDirector : Agent
         //UpdateBoneObsState(!teleportSinceLastGetState, decisionPeriod);
         //ClearGizmos();
 
-        Vector3 cmDistance = kinChar.cm - simChar.cm; 
+        Vector3 cmDistance = kinChar.cm - simChar.cm;
+        bool endedEpisode = lastEpisodeEndingFrame >= (curFixedUpdate - 1);
         //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel} kinCMVelLastGetState: {kinCMVelLastGetState} simCMVelLastGetState: {simCMVelLastGetState}");
-        Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinChar.cm);        
-        Vector3 simCMVelInKinRefFrame = resolveVelInKinematicRefFrame(simChar.cm);
+        Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinChar.cmVel);        
+        Vector3 simCMVelInKinRefFrame = resolveVelInKinematicRefFrame(simChar.cmVel);
         Vector3 desiredVel = resolveVelInKinematicRefFrame(MMScript.desired_velocity);
         Vector3 velDiffSimMinusDesired = simCMVelInKinRefFrame - desiredVel;
 
