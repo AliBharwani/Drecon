@@ -25,7 +25,7 @@ behaviors:
             normalize: true
     keep_checkpoints: 10
     max_steps: 300000000
-    checkpoint_interval: 100000 
+    checkpoint_interval: 200000 
     time_horizon: 32
-    summary_freq: 100000
+    summary_freq: 50000
     threaded: true

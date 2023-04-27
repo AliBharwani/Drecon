@@ -161,7 +161,7 @@ public class SimCharController : MonoBehaviour
         // Before teleport: simCharPos + simCharPosOffset = kinCharPos ; simCharPosOffset = kinCharPos - simCharPos
         // After teleport: newSimCharPos + simCharPosOffset = newKinCharPos ; newSimCharPos = newKinCharPos - simCharPosOffset
         Vector3 newSimCharPos = newKinCharPos - simCharPosOffset;
-        simChar.root.gameObject.SetActive(false);
+        //simChar.root.gameObject.SetActive(false);
         simChar.root.TeleportRoot(newSimCharPos, simChar.root.transform.rotation);
         //Utils.debugVector3Array(kin_char.MMScript.curr_bone_angular_velocities, "kin_char.MMScript.curr_bone_angular_velocities", "f6");
         for (int i = 1; i < 23; i++)
@@ -205,7 +205,7 @@ public class SimCharController : MonoBehaviour
             }
 
         }
-        simChar.root.gameObject.SetActive(true);
+        //simChar.root.gameObject.SetActive(true);
     }
     public static void teleportSimChar(CharInfo sim_char, CharInfo kin_char,  float verticalOffset = .15f, bool setVelocities = false)
         {

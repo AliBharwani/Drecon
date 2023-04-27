@@ -651,12 +651,12 @@ public class MLAgentsDirector : Agent
             Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
             lastEpisodeEndingFrame = curFixedUpdate;
             EndEpisode();
-            if (debug)
-                EditorApplication.isPaused = true;
+            //if (debug)
+            //    EditorApplication.isPaused = true;
             return true;
         }
-        if (debug && fallFactor < 0.03)
-            EditorApplication.isPaused = true;
+        //if (debug && fallFactor < 0.03)
+        //    EditorApplication.isPaused = true;
 
         UpdateSimCMData(updateVelocity);
         //Debug.Log($"{Time.frameCount}: Rewards kin cm: {kinChar.cm} kin cm vel: {kinChar.cmVel} sim cm: {simChar.cm} sim cm vel: {simChar.cmVel} ");
@@ -739,7 +739,7 @@ public class MLAgentsDirector : Agent
         //ClearGizmos();
 
         Vector3 cmDistance = kinChar.cm - simChar.cm;
-        bool endedEpisode = lastEpisodeEndingFrame >= (curFixedUpdate - 1);
+        //bool endedEpisode = lastEpisodeEndingFrame >= (curFixedUpdate - 1);
         //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel} kinCMVelLastGetState: {kinCMVelLastGetState} simCMVelLastGetState: {simCMVelLastGetState}");
         Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinChar.cmVel);        
         Vector3 simCMVelInKinRefFrame = resolveVelInKinematicRefFrame(simChar.cmVel);
@@ -764,7 +764,6 @@ public class MLAgentsDirector : Agent
         for (int i = 0; i < 36; i++)
             state[state_idx++] = kinChar.boneState[i];
         for (int i = 0; i < 36; i++)
-            // In order to keep it between [-1, 1] 
             state[state_idx++] = simChar.boneState[i] - kinChar.boneState[i];
         for (int i = 0; i < numActions; i++)
             state[state_idx++] = prevActionOutput[i];
@@ -775,6 +774,8 @@ public class MLAgentsDirector : Agent
         //kinCMLastGetState = kinChar.cm;
         //simCMLastGetState = simChar.cm;
         //teleportSinceLastGetState = false;
+        //if (debug)
+        //    Utils.debugArray(state, $"{curFixedUpdate} state: ");
         return state;
 
     }

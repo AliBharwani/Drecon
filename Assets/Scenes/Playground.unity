@@ -1241,7 +1241,7 @@ MonoBehaviour:
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
-  debug: 1
+  debug: 0
   updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 0
@@ -1282,7 +1282,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 6eb3c79b7f55def4a8ed315e5b012325, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: e9c1d7319c939384b8c8c59de2d50098, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 0
   m_BehaviorName: Drecon
@@ -1740,9 +1740,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/NoStrafingAxisAngleV3
+  writeToFilePath: ../results/NoStrafingAxisAngle
   filename: unityconfig.json
-  loadFromFilePath: ../results/NoStrafingAxisAngle
+  loadFromFilePath: ../results/NoStrafingV2
   prob_to_change_inputs: 0.001
   solverIterations: 256
   noStrafing: 1
@@ -2070,9 +2070,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 48cd2ca3150806e45a937698b55748e2, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: c35233edcee21fb42b757f637aea22b3, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
