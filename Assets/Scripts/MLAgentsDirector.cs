@@ -108,6 +108,7 @@ public class MLAgentsDirector : Agent
     Normalizer velRewardNormalizer = new Normalizer();
     Normalizer localPoseRewardNormalizer = new Normalizer();
     Normalizer cmVelRewardNormalizer = new Normalizer();
+    private Unity.MLAgents.Policies.BehaviorParameters behaviorParameters;
 
     public override void CollectObservations(VectorSensor sensor)
     {
@@ -161,6 +162,21 @@ public class MLAgentsDirector : Agent
             Quaternion final = curRotations[boneIdx];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             ab.SetDriveRotation(final);
+        }
+        if (_config.setDriveTargetVelocities) { 
+            Quaternion[] curBoneRots = MMScript.bone_rotations;
+            for (int i = 1; i < 23; i++)
+            {
+                ArticulationBody ab = simChar.boneToArtBody[i];
+                Quaternion deltaRotation = curBoneRots[i] * Quaternion.Inverse(prevKinRots[i]);
+                float angle = 2 * Mathf.Acos(Mathf.Clamp(deltaRotation.w, -1, 1));
+                Vector3 axis = new Vector3(deltaRotation.x, deltaRotation.y, deltaRotation.z).normalized;
+                float angularVelocity = angle / Time.fixedDeltaTime; // Angular velocity in radians per second
+                //Debug.Log($"{(mm_v2.Bones)i} has deltaRotation.w: {deltaRotation.w} angle:{angle} angularVelocity: {angularVelocity}");
+                Vector3 targetAngularVelocity = angularVelocity * axis;
+                ab.SetDriveTargetVelocity(targetAngularVelocity);
+            }
+            prevKinRots = curBoneRots;
         }
     }
     bool isFirstAction = true;
@@ -400,7 +416,10 @@ public class MLAgentsDirector : Agent
         if (!_config.projectileTraining)
             projectile.SetActive(false);
 
-        numActions = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>().BrainParameters.ActionSpec.NumContinuousActions;
+        behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
+        numActions = behaviorParameters.BrainParameters.ActionSpec.NumContinuousActions;
+        //if (behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly)
+        //    Debug.Log($"{behaviorParameters.BrainParameters.Norm}");
         //if (_config.networkControlsAllJoints)
         //    numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + extendedLimitedDOFBones.Length; // 40 or 76
         //else 
@@ -415,6 +434,8 @@ public class MLAgentsDirector : Agent
         curFixedUpdate = _config.EVALUATE_EVERY_K_STEPS - 1;
         resetData();
     }
+
+    Quaternion[] prevKinRots = Utils.identity_quat_arr(23);
     private void resetData()
     {
         for (int i = 0; i < nbodies; i++)
@@ -425,6 +446,10 @@ public class MLAgentsDirector : Agent
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
         prevActionOutput = new float[numActions];
+        kinChar.boneState = new float[36];
+        simChar.boneState = new float[36];
+        if (_config.setDriveTargetVelocities)
+            prevKinRots = MMScript.bone_rotations;
         UpdateKinCMData(false);
         UpdateSimCMData(false);
     }
@@ -501,7 +526,7 @@ public class MLAgentsDirector : Agent
             //simChar.root.TeleportRoot(newRootPosition, kinChar.trans.rotation);
             SimCharController.teleportSimCharRoot(simChar, MMScript.origin, preTeleportSimCharPosOffset);
             //Debug.Log($"{Time.frameCount}: Teleporting sim char root");
-                    teleportSinceLastGetState = true;
+            teleportSinceLastGetState = true;
 
             updateVelocity = false;
         }
@@ -617,12 +642,14 @@ public class MLAgentsDirector : Agent
                 Vector3 boneVel = (boneWorldPos - prevBonePos) / dt;
                 boneVel = resolveVelInKinematicRefFrame(boneVel);
                 copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
-                copyVecIntoArray(ref copyInto, ref copyIdx, updateVelocity ? boneVel : Vector3.zero);
-                //if (updateVelocity)
-                //    copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
-                //else
-                //    copyIdx += 3;
+                //copyVecIntoArray(ref copyInto, ref copyIdx, updateVelocity ? boneVel : Vector3.zero);
+                if (updateVelocity)
+                    copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
+                else
+                    copyIdx += 3;
                 curInfo.boneWorldPos[j] = boneWorldPos;
+                //if (debug)
+                //    Debug.Log($"{(isKinChar ? "Kin: " : "Sim: ")} {bone} world pos: {boneWorldPos} | local pos: {boneLocalPos} : vel: {(updateVelocity ? boneVel : Vector3.zero)}");
             }
         }
     }
@@ -652,19 +679,21 @@ public class MLAgentsDirector : Agent
             finalReward = _config.EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
             SetReward(_config.EPISODE_END_REWARD);
+            //Debug.Log("=================================================");
             Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
+            //Debug.Log("=================================================");
             lastEpisodeEndingFrame = curFixedUpdate;
             EndEpisode();
 #if UNITY_EDITOR
-            if (debug)
-                EditorApplication.isPaused = true;
+            //if (debug)
+            //    EditorApplication.isPaused = true;
 #endif
 
             return true;
         }
 #if UNITY_EDITOR
-        if (debug && fallFactor < 0.02)
-            EditorApplication.isPaused = true;
+        //if (debug && fallFactor < 0.02)
+        //    EditorApplication.isPaused = true;
 #endif
         UpdateSimCMData(updateVelocity);
         //Debug.Log($"{Time.frameCount}: Rewards kin cm: {kinChar.cm} kin cm vel: {kinChar.cmVel} sim cm: {simChar.cm} sim cm vel: {simChar.cmVel} ");
@@ -727,12 +756,15 @@ public class MLAgentsDirector : Agent
    and acceleration so that global velocity features are measurable in
    the state.
     Idx to value mapping: 
-    0-2   : kinematic cm vel
-    3-5   : sim cm vel
-    6-8   : difference between sim cm vel and kin cm vel
-    9-10  : desired velocity
-    11-12 : the diff between sim cm horizontal vel and desired vel
-
+    0-2   : cm distance
+    3-5   : kinematic cm vel
+    6-8   : sim cm vel
+    9-11   : difference between sim cm vel and kin cm vel
+    12-13  : desired velocity
+    14-15 : the diff between sim cm horizontal vel and desired vel
+    16-51 : kin char state
+    52-87 : sim state - kin state
+    88-110 : numActions (
     */
     Vector3 kinCMVelLastGetState, simCMVelLastGetState;
     Vector3 kinCMLastGetState, simCMLastGetState;
@@ -763,14 +795,12 @@ public class MLAgentsDirector : Agent
         copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
         copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
         if (debug)
-        {
-            //Debug.Log($"kinChar.cm: {kinChar.cm }  simChar.cm: {simChar.cm}");
-            Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} simCMVelInKinRefFrame: {simCMVelInKinRefFrame} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
-        }
+            Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} kinCMVelInKinRefFrame: {kinCMVelInKinRefFrame} simCMVelInKinRefFrame: {simCMVelInKinRefFrame} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
+        
 
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
         for (int i = 0; i < 36; i++)
-            state[state_idx++] = kinChar.boneState[i];
+            state[state_idx++] = simChar.boneState[i];
         for (int i = 0; i < 36; i++)
             state[state_idx++] = simChar.boneState[i] - kinChar.boneState[i];
         for (int i = 0; i < numActions; i++)

@@ -364,7 +364,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 10893f0c953095440af3cb1669cfad27, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -447,6 +447,7 @@ MonoBehaviour:
   loadFromFilePath: ../results/AllJointsResetKin
   prob_to_change_inputs: 0.001
   solverIterations: 255
+  setDriveTargetVelocities: 0
   noStrafing: 0
   actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
@@ -1282,9 +1283,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: e9c1d7319c939384b8c8c59de2d50098, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 03307c720ad7f6b4aa19ea9889a8cc95, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1745,6 +1746,7 @@ MonoBehaviour:
   loadFromFilePath: ../results/NoStrafingV2
   prob_to_change_inputs: 0.001
   solverIterations: 256
+  setDriveTargetVelocities: 1
   noStrafing: 1
   actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
@@ -2072,7 +2074,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: c35233edcee21fb42b757f637aea22b3, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2151,7 +2153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 2
+  numAgents: 1
   modelDirector: {fileID: 767361687}
   model6DDirector: {fileID: 2033970009}
   modelAllJointsDirector: {fileID: 710360376}
@@ -2275,31 +2277,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3639812460091103858, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_ParentAnchorPosition.x
-      value: -0.4536227
+      value: -0.17299995
       objectReference: {fileID: 0}
     - target: {fileID: 3639812460091103858, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_ParentAnchorPosition.y
-      value: 0.17037903
+      value: -0.00000025331974
       objectReference: {fileID: 0}
     - target: {fileID: 3639812460091103858, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_ParentAnchorPosition.z
-      value: 0.002432232
+      value: 0.0000002370216
       objectReference: {fileID: 0}
     - target: {fileID: 3639812460091103858, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_ParentAnchorRotation.w
-      value: 0.63122815
+      value: 0.9825246
       objectReference: {fileID: 0}
     - target: {fileID: 3639812460091103858, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_ParentAnchorRotation.x
-      value: 0.055549804
+      value: 0.000004934147
       objectReference: {fileID: 0}
     - target: {fileID: 3639812460091103858, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_ParentAnchorRotation.y
-      value: -0.023094222
+      value: 0.000026693742
       objectReference: {fileID: 0}
     - target: {fileID: 3639812460091103858, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_ParentAnchorRotation.z
-      value: -0.7732608
+      value: -0.18613444
       objectReference: {fileID: 0}
     - target: {fileID: 3746801772725272385, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: m_Enabled
@@ -2519,6 +2521,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8149458909502737913, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: set_art_bodies
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8149458909502737913, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
+      propertyPath: setDriveTargetVels
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8149458909502737913, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}

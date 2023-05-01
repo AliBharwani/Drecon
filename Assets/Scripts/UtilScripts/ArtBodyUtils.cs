@@ -153,6 +153,29 @@ public static class ArtBodyUtils
         body.zDrive = zDrive;
     }
 
+    public static void SetDriveTargetVelocity(this ArticulationBody body, Vector3 targetAngularVel)
+    {
+        /* Angular velocity appears in scaled angle axis representation 
+         * 
+         */
+        //Vector3 target_vel = body.ToTargetRotationInReducedSpace(targetLocalVel, true);
+
+        //body.angularVelocity = target_vel;
+        //return;
+        // assign to the drive targets...
+        ArticulationDrive xDrive = body.xDrive;
+        xDrive.targetVelocity = targetAngularVel.x;
+        body.xDrive = xDrive;
+
+        ArticulationDrive yDrive = body.yDrive;
+        yDrive.targetVelocity = targetAngularVel.y;
+        body.yDrive = yDrive;
+
+        ArticulationDrive zDrive = body.zDrive;
+        zDrive.targetVelocity = targetAngularVel.z;
+        body.zDrive = zDrive;
+    }
+
     public static void SetDriveRotation(this ArticulationBody body, Quaternion targetLocalRotation, bool debug = false)
     {
         Vector3 target = body.ToTargetRotationInReducedSpace(targetLocalRotation, true);

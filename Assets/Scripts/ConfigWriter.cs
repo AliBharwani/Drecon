@@ -14,6 +14,7 @@ public class ConfigWriter : MonoBehaviour
     // HYPER PARAMS
     public float prob_to_change_inputs = .001f;
     public int solverIterations = 32;
+    public bool setDriveTargetVelocities;
     public bool noStrafing = false;
     public bool actionsAreEulerRotations = true;
     public bool actionsAre6DRotations = false;
@@ -21,6 +22,7 @@ public class ConfigWriter : MonoBehaviour
     public bool normalizeLimitedDOFOutputs = true;
     public bool normalizeRewardComponents = false;
     public bool networkControlsAllJoints = false;
+
 
     public bool useGeodesicForAngleDiff = false;
     public float poseRewardMultiplier = 1f / 10f;

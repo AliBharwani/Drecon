@@ -118,7 +118,7 @@ public class SimCharController : MonoBehaviour
         frameIdx++;
         playFrameIdx();
     }
-
+    public bool setDriveTargetVels = false;
     private void playFrameIdx()
     {
         Vector3[] curr_bone_positions = db.bone_positions[frameIdx];
@@ -145,7 +145,17 @@ public class SimCharController : MonoBehaviour
             if (ab == null)
                 continue;
             ab.SetDriveRotation(local_rot);
-            ab.SetDriveTargetVelocity(local_angular_vel);
+            if (setDriveTargetVels) {
+                Quaternion prevRot = db.bone_rotations[frameIdx - 1][i];
+                Quaternion curRot = curr_bone_rotations[i];
+                Quaternion deltaRotation = curRot * Quaternion.Inverse(prevRot);
+                float angle = 2 * Mathf.Acos(deltaRotation.w);
+                Vector3 axis = new Vector3(deltaRotation.x, deltaRotation.y, deltaRotation.z).normalized;
+
+                float angularVelocity = angle / Time.fixedDeltaTime; // Angular velocity in radians per second
+                Vector3 targetAngularVelocity = angularVelocity * axis;
+                ab.SetDriveTargetVelocity(targetAngularVelocity);
+            }
 
         }
 
