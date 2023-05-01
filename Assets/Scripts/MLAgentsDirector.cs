@@ -55,7 +55,7 @@ public class MLAgentsDirector : Agent
     private SimCharController SimCharController;
     private int nbodies; 
     private int curFixedUpdate = -1;
-    private int lastSimCharTeleportFixedUpdate = 0;
+    private int lastSimCharTeleportFixedUpdate = -1;
     private bool isInitialized;
 
     float[] prevActionOutput;
@@ -412,7 +412,7 @@ public class MLAgentsDirector : Agent
         {
             initialRotInverses = new Matrix4x4[_config.networkControlsAllJoints ? extendedfullDOFBones.Length : fullDOFBones.Length];
         }
-
+        curFixedUpdate = _config.EVALUATE_EVERY_K_STEPS - 1;
         resetData();
     }
     private void resetData()
@@ -492,7 +492,7 @@ public class MLAgentsDirector : Agent
         //if (simCharTeleported)
         //    Debug.Log($"BOOM : {simCharTeleported}");
         // only update velocity if we did not teleport last frame
-        updateVelocity = lastSimCharTeleportFixedUpdate + 1 != curFixedUpdate;
+        updateVelocity = lastSimCharTeleportFixedUpdate + 1 < curFixedUpdate;
         //Debug.Log($"lastKinRootPos: {lastKinRootPos} simChar.root.transform.position: {simChar.root.transform.position} ");
         if (MMScript.teleportedThisFixedUpdate)
         {
@@ -515,6 +515,8 @@ public class MLAgentsDirector : Agent
         //if (episodeEnded)
         //    return;
         // request Decision
+        //if (!updateVelocity)
+        //    return;
         ClearGizmos();
         AddGizmoSphere(kinChar.cm, Color.blue);
         AddGizmoSphere(simChar.cm, Color.red);
@@ -615,10 +617,11 @@ public class MLAgentsDirector : Agent
                 Vector3 boneVel = (boneWorldPos - prevBonePos) / dt;
                 boneVel = resolveVelInKinematicRefFrame(boneVel);
                 copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
-                if (updateVelocity)
-                    copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
-                else
-                    copyIdx += 3;
+                copyVecIntoArray(ref copyInto, ref copyIdx, updateVelocity ? boneVel : Vector3.zero);
+                //if (updateVelocity)
+                //    copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
+                //else
+                //    copyIdx += 3;
                 curInfo.boneWorldPos[j] = boneWorldPos;
             }
         }
@@ -640,10 +643,11 @@ public class MLAgentsDirector : Agent
     // returns TRUE if episode ended
     public bool calcAndSetRewards()
     {
+
         bool heads1mApart;
         double posReward, velReward, localPoseReward, cmVelReward, fallFactor;
         calcFallFactor(out fallFactor, out heads1mApart);
-        if (heads1mApart)
+        if (heads1mApart && curFixedUpdate > lastSimCharTeleportFixedUpdate + 1)
         {
             finalReward = _config.EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
@@ -651,13 +655,17 @@ public class MLAgentsDirector : Agent
             Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
             lastEpisodeEndingFrame = curFixedUpdate;
             EndEpisode();
-            //if (debug)
-            //    EditorApplication.isPaused = true;
+#if UNITY_EDITOR
+            if (debug)
+                EditorApplication.isPaused = true;
+#endif
+
             return true;
         }
-        //if (debug && fallFactor < 0.03)
-        //    EditorApplication.isPaused = true;
-
+#if UNITY_EDITOR
+        if (debug && fallFactor < 0.02)
+            EditorApplication.isPaused = true;
+#endif
         UpdateSimCMData(updateVelocity);
         //Debug.Log($"{Time.frameCount}: Rewards kin cm: {kinChar.cm} kin cm vel: {kinChar.cmVel} sim cm: {simChar.cm} sim cm vel: {simChar.cmVel} ");
         UpdateBoneSurfacePts(updateVelocity);
