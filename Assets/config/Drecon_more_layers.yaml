@@ -27,5 +27,5 @@ behaviors:
     max_steps: 300000000
     checkpoint_interval: 200000 
     time_horizon: 32
-    summary_freq: 50000
+    summary_freq: 100000
     threaded: true

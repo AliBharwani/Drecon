@@ -164,19 +164,19 @@ public class MLAgentsDirector : Agent
             ab.SetDriveRotation(final);
         }
         if (_config.setDriveTargetVelocities) { 
-            Quaternion[] curBoneRots = MMScript.bone_rotations;
+            //Quaternion[] curBoneRots = MMScript.bone_rotations;
             for (int i = 1; i < 23; i++)
             {
                 ArticulationBody ab = simChar.boneToArtBody[i];
-                Quaternion deltaRotation = curBoneRots[i] * Quaternion.Inverse(prevKinRots[i]);
-                float angle = 2 * Mathf.Acos(Mathf.Clamp(deltaRotation.w, -1, 1));
-                Vector3 axis = new Vector3(deltaRotation.x, deltaRotation.y, deltaRotation.z).normalized;
-                float angularVelocity = angle / Time.fixedDeltaTime; // Angular velocity in radians per second
+                //Quaternion deltaRotation = curBoneRots[i] * Quaternion.Inverse(prevKinRots[i]);
+                //float angle = 2 * Mathf.Acos(Mathf.Clamp(deltaRotation.w, -1, 1));
+                //Vector3 axis = new Vector3(deltaRotation.x, deltaRotation.y, deltaRotation.z).normalized;
+                //float angularVelocity = angle / Time.fixedDeltaTime; // Angular velocity in radians per second
                 //Debug.Log($"{(mm_v2.Bones)i} has deltaRotation.w: {deltaRotation.w} angle:{angle} angularVelocity: {angularVelocity}");
-                Vector3 targetAngularVelocity = angularVelocity * axis;
+                Vector3 targetAngularVelocity = MMScript.bone_angular_velocities[i]; //angularVelocity * axis;
                 ab.SetDriveTargetVelocity(targetAngularVelocity);
             }
-            prevKinRots = curBoneRots;
+            //prevKinRots = curBoneRots;
         }
     }
     bool isFirstAction = true;
@@ -448,8 +448,8 @@ public class MLAgentsDirector : Agent
         prevActionOutput = new float[numActions];
         kinChar.boneState = new float[36];
         simChar.boneState = new float[36];
-        if (_config.setDriveTargetVelocities)
-            prevKinRots = MMScript.bone_rotations;
+        //if (_config.setDriveTargetVelocities)
+        //    prevKinRots = MMScript.bone_rotations;
         UpdateKinCMData(false);
         UpdateSimCMData(false);
     }

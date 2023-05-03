@@ -73,9 +73,8 @@ public class mm_v2 : MonoBehaviour
 
     Vector3[] bone_positions;
     Vector3[] bone_velocities;
-    [HideInInspector]
-    public Quaternion[] bone_rotations;
-    Vector3[] bone_angular_velocities;
+    internal Quaternion[] bone_rotations;
+    internal Vector3[] bone_angular_velocities;
 
     Vector3[] bone_offset_positions;
     Vector3[] bone_offset_velocities;

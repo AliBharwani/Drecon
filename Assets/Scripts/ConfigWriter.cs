@@ -19,7 +19,7 @@ public class ConfigWriter : MonoBehaviour
     public bool actionsAreEulerRotations = true;
     public bool actionsAre6DRotations = false;
     public bool adjust6DRots = false;
-    public bool normalizeLimitedDOFOutputs = true;
+    //public bool normalizeLimitedDOFOutputs = true;
     public bool normalizeRewardComponents = false;
     public bool networkControlsAllJoints = false;
 
@@ -28,7 +28,7 @@ public class ConfigWriter : MonoBehaviour
     public float poseRewardMultiplier = 1f / 10f;
     public bool resetKinCharOnEpisodeEnd = false;
     public bool selfCollision;
-    public bool useUnnormalizedEulerOffsets = false;
+    //public bool useUnnormalizedEulerOffsets = false;
     public int EVALUATE_EVERY_K_STEPS = 2;
     public int N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = 4;
     public float EPISODE_END_REWARD = -.5f;

@@ -452,14 +452,12 @@ MonoBehaviour:
   actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
   adjust6DRots: 0
-  normalizeLimitedDOFOutputs: 1
   normalizeRewardComponents: 0
   networkControlsAllJoints: 1
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 0
-  useUnnormalizedEulerOffsets: 0
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
@@ -1283,7 +1281,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 03307c720ad7f6b4aa19ea9889a8cc95, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 91e64133c6159d641a81f9cc424a2de5, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -1741,24 +1739,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/NoStrafingAxisAngle
+  writeToFilePath: ../results/EulerLimitedOffset
   filename: unityconfig.json
-  loadFromFilePath: ../results/NoStrafingV2
+  loadFromFilePath: ../results/NoStrafingStateFixed
   prob_to_change_inputs: 0.001
   solverIterations: 256
   setDriveTargetVelocities: 1
   noStrafing: 1
-  actionsAreEulerRotations: 0
+  actionsAreEulerRotations: 1
   actionsAre6DRotations: 0
   adjust6DRots: 0
-  normalizeLimitedDOFOutputs: 0
   normalizeRewardComponents: 0
   networkControlsAllJoints: 0
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 1
-  useUnnormalizedEulerOffsets: 1
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
@@ -1885,7 +1881,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1394463714
 Transform:
   m_ObjectHideFlags: 0
@@ -2140,7 +2136,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2090630088
 MonoBehaviour:
   m_ObjectHideFlags: 0
