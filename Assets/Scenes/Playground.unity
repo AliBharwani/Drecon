@@ -1240,7 +1240,7 @@ MonoBehaviour:
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
-  debug: 0
+  debug: 1
   updateVelOnTeleport: 1
   gizmoSphereRad: 0.01
   drawGizmos: 0
@@ -1281,7 +1281,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 91e64133c6159d641a81f9cc424a2de5, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 4230b42b31431a240bbb56dc89028a05, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -1739,14 +1739,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/EulerLimitedOffset
+  writeToFilePath: ../results/NoStrafingStateFixed
   filename: unityconfig.json
-  loadFromFilePath: ../results/NoStrafingStateFixed
+  loadFromFilePath: ../results/NoStrafingAxisAngle
   prob_to_change_inputs: 0.001
   solverIterations: 256
   setDriveTargetVelocities: 1
   noStrafing: 1
-  actionsAreEulerRotations: 1
+  actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
   adjust6DRots: 0
   normalizeRewardComponents: 0
@@ -1881,7 +1881,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1394463714
 Transform:
   m_ObjectHideFlags: 0
@@ -2136,7 +2136,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2090630088
 MonoBehaviour:
   m_ObjectHideFlags: 0

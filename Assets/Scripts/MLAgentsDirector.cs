@@ -21,12 +21,14 @@ public struct CharInfo
     public Vector3 cmVel;
     public Vector3[] boneWorldPos;
     public Vector3[][] boneSurfacePts;
+    public Vector3[][] boneSurfacePtsWorldSpace;
     public Vector3[][] boneSurfaceVels;
     public ArticulationBody[] boneToArtBody;
     public float[] boneState;
     public CharInfo(int nbodies, int numStateBones) : this()
     {
         boneSurfacePts = new Vector3[nbodies][];
+        boneSurfacePtsWorldSpace = new Vector3[nbodies][];
         boneSurfaceVels = new Vector3[nbodies][];
         boneWorldPos = new Vector3[numStateBones];
         boneToCollider = new GameObject[nbodies];
@@ -219,7 +221,7 @@ public class MLAgentsDirector : Agent
                 debugStr.Append($"{bone}: {curActions[actionIdx]} | {finalActions[actionIdx]} ");
                 actionIdx += 1;
             }
-            Debug.Log(debugStr.ToString());
+            //Debug.Log(debugStr.ToString());
         }
         applyActions(finalActions);
     }
@@ -441,8 +443,10 @@ public class MLAgentsDirector : Agent
         for (int i = 0; i < nbodies; i++)
         {
             kinChar.boneSurfacePts[i] = new Vector3[6];
-            kinChar.boneSurfaceVels[i] = new Vector3[6];
+            kinChar.boneSurfacePtsWorldSpace[i] = new Vector3[6];
+            kinChar.boneSurfaceVels[i] = new Vector3[6]; 
             simChar.boneSurfacePts[i] = new Vector3[6];
+            simChar.boneSurfacePtsWorldSpace[i] = new Vector3[6];
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
         prevActionOutput = new float[numActions];
@@ -602,24 +606,35 @@ public class MLAgentsDirector : Agent
 
             Vector3[] newKinBoneSurfacePts = new Vector3[6];
             Vector3[] newSimBoneSurfacePts = new Vector3[6];
+            Vector3[] newKinBoneSurfacePtsWorld = new Vector3[6];
+            Vector3[] newSimBoneSurfacePtsWorld = new Vector3[6];
 
             getSixPointsOnCollider(kinChar.boneToCollider[i], ref newKinBoneSurfacePts, (mm_v2.Bones) i);
             getSixPointsOnCollider(simChar.boneToCollider[i], ref newSimBoneSurfacePts, (mm_v2.Bones) i);
 
-            Vector3[] prevKinSurfacePts = kinChar.boneSurfacePts[i];
-            Vector3[] prevSimSurfacePts = simChar.boneSurfacePts[i];
+            //Vector3[] prevKinSurfacePts = kinChar.boneSurfacePts[i];
+            //Vector3[] prevSimSurfacePts = simChar.boneSurfacePts[i];
+            Vector3[] prevKinSurfacePts = kinChar.boneSurfacePtsWorldSpace[i];
+            Vector3[] prevSimSurfacePts = simChar.boneSurfacePtsWorldSpace[i];
 
             for (int j = 0; j < 6; j++)
             {
+                newKinBoneSurfacePtsWorld[j] = newKinBoneSurfacePts[j];
+                newSimBoneSurfacePtsWorld[j] = newSimBoneSurfacePts[j];
+
                 newKinBoneSurfacePts[j] = resolvePosInKinematicRefFrame(newKinBoneSurfacePts[j]);
                 newSimBoneSurfacePts[j] = resolvePosInSimRefFrame(newSimBoneSurfacePts[j]);
 
                 if (updateVelocity) {
-                    kinChar.boneSurfaceVels[i][j] = (newKinBoneSurfacePts[j] - prevKinSurfacePts[j]) / Time.fixedDeltaTime;
-                    simChar.boneSurfaceVels[i][j] = (newSimBoneSurfacePts[j] - prevSimSurfacePts[j]) / Time.fixedDeltaTime;
+                    kinChar.boneSurfaceVels[i][j] = (newKinBoneSurfacePtsWorld[j] - prevKinSurfacePts[j]) / Time.fixedDeltaTime;
+                    simChar.boneSurfaceVels[i][j] = (newSimBoneSurfacePtsWorld[j] - prevSimSurfacePts[j]) / Time.fixedDeltaTime;
                     //Debug.Log($"simChar.boneSurfaceVels[i][j] : {simChar.boneSurfaceVels[i][j]}");
                 }
             }
+
+            kinChar.boneSurfacePtsWorldSpace[i] = newKinBoneSurfacePtsWorld;
+            simChar.boneSurfacePtsWorldSpace[i] = newSimBoneSurfacePtsWorld;
+
             kinChar.boneSurfacePts[i] = newKinBoneSurfacePts;
             simChar.boneSurfacePts[i] = newSimBoneSurfacePts;
         }
@@ -710,12 +725,9 @@ public class MLAgentsDirector : Agent
         {
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
         }
-        //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
-        //Debug.Log($"final_reward: {finalReward}");
+        Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         //updateMeanReward(final_reward);
         AddReward(finalReward);
-
-        //SetReward(finalReward);
         return false;
     }
 
@@ -794,8 +806,8 @@ public class MLAgentsDirector : Agent
         copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame - kinCMVelInKinRefFrame);
         copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
         copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
-        if (debug)
-            Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} kinCMVelInKinRefFrame: {kinCMVelInKinRefFrame} simCMVelInKinRefFrame: {simCMVelInKinRefFrame} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
+        //if (debug)
+        //    Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} kinCMVelInKinRefFrame: {kinCMVelInKinRefFrame} simCMVelInKinRefFrame: {simCMVelInKinRefFrame} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
         
 
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
@@ -904,6 +916,8 @@ public class MLAgentsDirector : Agent
         }
         posReward = Math.Exp((-10f / (nbodies * 6)) *  posDiffsSum );
         velReward = Math.Exp((-1f / (nbodies * 6)) *  velDiffsSum );
+        if (debug)
+            Debug.Log($"velDiffsSum: {velDiffsSum} velReward: {velReward}");
         if (_config.normalizeRewardComponents)
         {
             posReward = posRewardNormalizer.getNormalized((float)posReward);
