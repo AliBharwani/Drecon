@@ -91,8 +91,6 @@ public class MLAgentsDirector : Agent
     public static mm_v2.Bones[] alwaysOpenloopBones = new mm_v2.Bones[]
     { Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand, Bone_LeftToe, Bone_RightToe};
 
-    Vector3[] bone_pos_mins, bone_pos_maxes, bone_vel_mins, bone_vel_maxes;
-    long timeAtStart;
     // 0.2 m side length cube
     // Mass between 0.01 kg and 8 kg
     // The cube is launched at 5 m/s, towards a uniformly sampled location on the vertical axis,
@@ -103,7 +101,9 @@ public class MLAgentsDirector : Agent
     internal Collider projectileCollider;
     internal Rigidbody projectileRB;
     private float lastProjectileLaunchtime = 0f;
-
+    public  bool debug = false;
+    public bool updateVelOnTeleport = true;
+    public bool resetKinToSimOnFail = false;
     // Reward Normalizers 
     //Normalizer posRewardNormalizer, velRewardNormalizer, localPoseRewardNormalizer, cmVelRewardNormalizer, fallFactorNormalizer;
     Normalizer posRewardNormalizer = new Normalizer();
@@ -252,7 +252,7 @@ public class MLAgentsDirector : Agent
             //angle = (angle * 120) - 180;
             //Vector3 normalizedOutput = output.normalized;
             Quaternion offset = Quaternion.AngleAxis(angle, output);
-            Quaternion final = curRotations[boneIdx] * offset;
+            Quaternion final = offset * curRotations[boneIdx] ;
             ab.SetDriveRotation(final);
         }
 
@@ -309,9 +309,13 @@ public class MLAgentsDirector : Agent
             Vector3 outputV1 = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
             Vector3 outputV2 = new Vector3(finalActions[actionIdx + 3], finalActions[actionIdx + 4], finalActions[actionIdx + 5]);
             actionIdx += 6;
-            Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i], _config.adjust6DRots);
-            Quaternion newTargetRot = curRotations[boneIdx] * networkAdjustment;
-            ab.SetDriveRotation(newTargetRot.normalized);
+            //Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i], _config.adjust6DRots);
+            Matrix4x4 networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
+            Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
+            Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
+            Quaternion newTargetRot =  Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
+            ab.SetDriveRotation(newTargetRot);
+            //ab.SetDriveRotation(newTargetRot.normalized);
         }
     }
 
@@ -386,6 +390,7 @@ public class MLAgentsDirector : Agent
         simChar.trans = simulatedCharObj.transform;
         simChar.boneToTransform = SimCharController.boneToTransform;
         simChar.root = SimCharController.boneToArtBody[(int)Bone_Entity];
+
         foreach (var body in simulatedCharObj.GetComponentsInChildren<ArticulationBody>())
         {
             body.solverIterations = _config.solverIterations;
@@ -420,6 +425,7 @@ public class MLAgentsDirector : Agent
 
         behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         numActions = behaviorParameters.BrainParameters.ActionSpec.NumContinuousActions;
+        resetKinToSimOnFail &= behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
         //if (behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly)
         //    Debug.Log($"{behaviorParameters.BrainParameters.Norm}");
         //if (_config.networkControlsAllJoints)
@@ -432,6 +438,14 @@ public class MLAgentsDirector : Agent
         if (_config.actionsAre6DRotations)
         {
             initialRotInverses = new Matrix4x4[_config.networkControlsAllJoints ? extendedfullDOFBones.Length : fullDOFBones.Length];
+        }
+        if (resetKinToSimOnFail)
+        {
+            foreach(var col in simChar.trans.GetComponentsInChildren<ArticulationBody>())
+            {
+                var cr = col.gameObject.AddComponent<CollisionReporter>();
+                cr.director = this;
+            }
         }
         curFixedUpdate = _config.EVALUATE_EVERY_K_STEPS - 1;
         resetData();
@@ -458,10 +472,10 @@ public class MLAgentsDirector : Agent
         UpdateSimCMData(false);
     }
     Matrix4x4[] initialRotInverses;
-    public bool debug;
+
+
     public void Awake()
     {
-        timeAtStart = DateTimeOffset.Now.ToUnixTimeSeconds();
         //Debug.Log("MLAgents Director Awake called");
         //Unity.MLAgents.Policies.BehaviorParameters behavior_params = gameObject.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         if (motionDB == null)
@@ -479,7 +493,6 @@ public class MLAgentsDirector : Agent
         customInit();
         //SimCharController.set_art_body_rot_limits();
     }
-    public bool updateVelOnTeleport = true;
     public override void OnEpisodeBegin()
     {
         //Debug.Log("OnEpisodeBegin() called");
@@ -682,6 +695,7 @@ public class MLAgentsDirector : Agent
     private float meanReward = 0f;
     internal float finalReward = 0f;
     internal int lastEpisodeEndingFrame = 0;
+    private bool shouldEndThisFrame = false;
     // returns TRUE if episode ended
     public bool calcAndSetRewards()
     {
@@ -689,7 +703,14 @@ public class MLAgentsDirector : Agent
         bool heads1mApart;
         double posReward, velReward, localPoseReward, cmVelReward, fallFactor;
         calcFallFactor(out fallFactor, out heads1mApart);
-        if (heads1mApart && curFixedUpdate > lastSimCharTeleportFixedUpdate + 1)
+        if (heads1mApart && resetKinToSimOnFail && !shouldEndThisFrame)
+        {
+            MMScript.ResetAndTeleport(simChar.trans.position, simChar.trans.rotation);
+            MMScript.FixedUpdate();
+            UpdateKinCMData(false);
+            UpdateBoneObsState(false, Time.fixedDeltaTime);
+        }
+        else if ((heads1mApart && curFixedUpdate > lastSimCharTeleportFixedUpdate + 1) || shouldEndThisFrame)
         {
             finalReward = _config.EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
@@ -698,6 +719,7 @@ public class MLAgentsDirector : Agent
             Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
             //Debug.Log("=================================================");
             lastEpisodeEndingFrame = curFixedUpdate;
+            shouldEndThisFrame = false;
             EndEpisode();
 #if UNITY_EDITOR
             //if (debug)
@@ -725,7 +747,7 @@ public class MLAgentsDirector : Agent
         {
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
         }
-        Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
+        //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         //updateMeanReward(final_reward);
         AddReward(finalReward);
         return false;
@@ -928,7 +950,7 @@ public class MLAgentsDirector : Agent
     void calcLocalPoseReward(out double poseReward)
     {
         double totalLoss = 0;
-        for (int i = 1; i < 23; i++)
+        for (int i = 0; i < 23; i++)
         {
             Transform kinBone = kinChar.boneToTransform[i];
             Transform simBone = simChar.boneToTransform[i];
@@ -996,6 +1018,28 @@ public class MLAgentsDirector : Agent
         fallFactor = Math.Clamp(1.3 - 1.4 * headDistance, 0d, 1d);
     }
 
+    public void processCollision(Collision collision)
+    {
+        //Debug.Log($"collision");
+        if (!resetKinToSimOnFail)
+            return;
+        foreach (ContactPoint contact in collision.contacts)
+        {
+            string colliderName = contact.thisCollider.gameObject.name;
+            if (!colliderName.ToLower().Contains("toe") && !colliderName.ToLower().Contains("foot") && contact.otherCollider.gameObject.name == "Ground")
+            {
+                shouldEndThisFrame = true;
+                //EndEpisode();
+                //Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame) / 60f} sec)");
+                //lastEpisodeEndingFrame = curFixedUpdate;
+            }
+            //Debug.Log($"{colliderName} collided with {contact.otherCollider.gameObject.name}");
+        }
+    }
+
+
+
+    // ================================ UTIL ====================================
     // Get 6 points on capsule object
     // first we start off at the center, and the 6 points are given by
     // center plus-minus radius on y dimension

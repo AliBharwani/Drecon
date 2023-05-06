@@ -113,6 +113,7 @@ public class SimCharController : MonoBehaviour
 
     void FixedUpdate()
     {
+
         if (!is_active)
             return;
         frameIdx++;

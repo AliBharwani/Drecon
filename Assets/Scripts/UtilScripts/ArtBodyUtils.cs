@@ -71,7 +71,7 @@ public static class ArtBodyUtils
         mat[2, 1] = e2.z;
         //mlagents - learn Assets\config\Drecon_more_layers.yaml--env = "Builds\Drecon"--run - id = AxisAngleAngleRenormalized--time - scale 1--capture - frame - rate = 0--no - graphics--num - env = 12
         //mlagents - learn Assets\config\Drecon_6d.yaml--run - id = 6DTest--time - scale 1--capture - frame - rate = 0--force
-                  mat[0, 2] = e3.x;
+        mat[0, 2] = e3.x;
         mat[1, 2] = e3.y;
         mat[2, 2] = e3.z;
         if (adjustmentMat != null && useAdjustmentMat)
@@ -129,6 +129,34 @@ public static class ArtBodyUtils
         }
         Quaternion q = new Quaternion(qx, qy, qz, qw);
         return q.normalized;
+    }
+    public static Matrix4x4 From6DRepresentation(Vector3 v1, Vector3 v2)
+    {
+        // Apply Gram-Schmidt process treating v1 - v2 as columns of new rotation matrix
+        Vector3 e1 = v1.normalized;
+        Vector3 u2 = v2 - (Vector3.Dot(e1, v2) * e1);
+        Vector3 e2 = u2.normalized;
+        Vector3 e3 = Vector3.Cross(e1, e2);
+        //float qw = Mathf.Sqrt(1f + m00 + m11 + m22) / 2f;
+        //float qx = (m21 - m12) / (4f * qw);
+        //float qy = (m02 - m20) / (4f * qw);
+        //float qz = (m10 - m01) / (4f * qw);
+
+        //float qw, qx, qy, qz;
+        Matrix4x4 mat = Matrix4x4.identity;
+        mat[0, 0] = e1.x;
+        mat[1, 0] = e1.y;
+        mat[2, 0] = e1.z;
+
+        mat[0, 1] = e2.x;
+        mat[1, 1] = e2.y;
+        mat[2, 1] = e2.z;
+        //mlagents - learn Assets\config\Drecon_more_layers.yaml--env = "Builds\Drecon"--run - id = AxisAngleAngleRenormalized--time - scale 1--capture - frame - rate = 0--no - graphics--num - env = 12
+        //mlagents - learn Assets\config\Drecon_6d.yaml--run - id = 6DTest--time - scale 1--capture - frame - rate = 0--force
+        mat[0, 2] = e3.x;
+        mat[1, 2] = e3.y;
+        mat[2, 2] = e3.z;
+        return mat;
     }
     public static void SetDriveTargetVelocity(this ArticulationBody body, Quaternion targetLocalVel, bool debug = false)
     {

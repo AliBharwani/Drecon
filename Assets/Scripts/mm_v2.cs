@@ -198,11 +198,11 @@ public class mm_v2 : MonoBehaviour
             feature_weight_trajectory_positions,
             feature_weight_trajectory_directions);
         numBones = motionDB.nbones();
-        init();
+        init(origin, Quaternion.identity);
         is_initalized = true;
     }
 
-    void init()
+    void init(Vector3 pos, Quaternion rot)
     {
         //Debug.Log($"Init called, frame idx is currently {frameIdx}");
         curr_bone_positions = motionDB.bone_positions[frameIdx];
@@ -251,8 +251,11 @@ public class mm_v2 : MonoBehaviour
         trajectory_rotations = identityQuatArray(4);
         trajectory_angular_velocities = new Vector3[4];
         random_lstick_input =  Random.insideUnitCircle;
-        simulation_position = origin;
-        simulation_rotation = Quaternion.identity;
+
+        //bone_positions[0] = pos;
+        //bone_rotations[0] = rot;
+        simulation_position = pos;
+        simulation_rotation = rot;
         inertialize_pose_reset(bone_positions[0], bone_rotations[0]);
         inertialize_pose_update(
             motionDB.bone_positions[frameIdx],
@@ -283,9 +286,27 @@ public class mm_v2 : MonoBehaviour
         simulation_angular_velocity = Vector3.zero;
         desired_velocity = Vector3.zero;
         desired_rotation = Quaternion.identity;
-        init();
+        init(origin, Quaternion.identity);
     }
-
+    public void ResetAndTeleport(Vector3 newPosition, Quaternion newRootRotation)
+    {
+        //Debug.Log("Reset called");
+        frameIdx = 0;
+        frameCounter = 1;
+        //transform.position = newPosition;
+        //transform.rotation = newRootRotation;
+        simulation_velocity = Vector3.zero;
+        simulation_acceleration = Vector3.zero;
+        simulation_rotation = Quaternion.identity;
+        simulation_angular_velocity = Vector3.zero;
+        //desired_velocity = Vector3.zero;
+        //desired_rotation = Quaternion.identity;
+        init(newPosition, newRootRotation);
+        //bone_positions[0] = newPosition;
+        //simulation_position = newPosition;
+        //bone_rotations[0] = newRootRotation;
+        //simulation_rotation = newRootRotation;
+    }
     internal void reset_contact_state()
     {
         for (int i = 0; i < contact_bones.Length; i++)
