@@ -450,6 +450,7 @@ MonoBehaviour:
   solverIterations: 255
   setDriveTargetVelocities: 0
   noStrafing: 0
+  setRotsDirectly: 0
   actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
   adjust6DRots: 0
@@ -1242,7 +1243,7 @@ MonoBehaviour:
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
-  debug: 0
+  debug: 1
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
@@ -1284,9 +1285,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 4230b42b31431a240bbb56dc89028a05, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 0eee607aff590e74bb1a71f933c5e5a2, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1742,15 +1743,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/NoStrafingStateFixed6DV2
+  writeToFilePath: ../results/AxisAngleRotFixed
   filename: unityconfig.json
-  loadFromFilePath: ../results/NoStrafingStateFixed
+  loadFromFilePath: ../results/AxisAngleRotFixed
   prob_to_change_inputs: 0.001
   solverIterations: 256
   setDriveTargetVelocities: 1
   noStrafing: 1
+  setRotsDirectly: 0
   actionsAreEulerRotations: 0
-  actionsAre6DRotations: 1
+  actionsAre6DRotations: 0
   adjust6DRots: 0
   normalizeRewardComponents: 0
   networkControlsAllJoints: 0
@@ -1762,7 +1764,7 @@ MonoBehaviour:
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
-  ACTION_STIFFNESS_HYPERPARAM: 0.4
+  ACTION_STIFFNESS_HYPERPARAM: 0.2
   simulationVelocityHalflife: 0.4
   simulation_rotation_halflife: 0.4
   walkOnly: 1
@@ -2071,9 +2073,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: c35233edcee21fb42b757f637aea22b3, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 959ce924e937d164f94c888917501812, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2153,7 +2155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 2
+  numAgents: 1
   modelDirector: {fileID: 767361687}
   model6DDirector: {fileID: 2033970009}
   modelAllJointsDirector: {fileID: 710360376}

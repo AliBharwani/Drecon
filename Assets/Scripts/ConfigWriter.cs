@@ -16,6 +16,7 @@ public class ConfigWriter : MonoBehaviour
     public int solverIterations = 32;
     public bool setDriveTargetVelocities;
     public bool noStrafing = false;
+    public bool setRotsDirectly = false;
     public bool actionsAreEulerRotations = true;
     public bool actionsAre6DRotations = false;
     public bool adjust6DRots = false;

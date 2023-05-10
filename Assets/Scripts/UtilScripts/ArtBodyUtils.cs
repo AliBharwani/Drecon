@@ -47,6 +47,20 @@ public static class ArtBodyUtils
         rotMatrix[2, 2] = e3.z;
         return rotMatrix;
     }
+    public static Quaternion RotateObjectWithOrthonormalVector(Vector3 v1, Vector3 v2)
+    {
+        // Gram-Schmidt orthonormalization
+        Vector3 e1 = v1.normalized;
+        Vector3 u2 = v2 - (Vector3.Dot(e1, v2) * e1);
+        Vector3 e2 = u2.normalized;
+        Vector3 e3 = Vector3.Cross(e1, e2);
+
+        // Create quaternion from orthonormalized vectors
+        Quaternion rotation = new Quaternion();
+        rotation.SetFromToRotation(Vector3.right, e1);
+        rotation *= Quaternion.FromToRotation(Vector3.up, e3);
+        return rotation;
+    }
 
     public static Quaternion From6DRepresentation(Vector3 v1, Vector3 v2, ref Matrix4x4 adjustmentMat, bool useAdjustmentMat)
     {

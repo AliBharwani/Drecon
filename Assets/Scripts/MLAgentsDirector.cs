@@ -143,17 +143,19 @@ public class MLAgentsDirector : Agent
             actionIdx++;
             Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
             var zDrive = ab.zDrive;
-            if (_config.fullRangeEulerOutputs)
+            if (_config.setRotsDirectly)
             {
-                var outputZ = output * 180f;
-                zDrive.target = targetRotationInJointSpace.z + outputZ;
+                var scale = (zDrive.upperLimit - zDrive.lowerLimit) / 2f;
+                var midpoint = zDrive.lowerLimit + scale;
+                var target = (output * scale) + midpoint;
+                zDrive.target = target;
                 ab.zDrive = zDrive;
             }
             else
             {
                 var scale = zDrive.upperLimit - zDrive.lowerLimit;
                 float angle = output * scale;
-                zDrive.target = targetRotationInJointSpace.z + angle;
+                zDrive.target =  targetRotationInJointSpace.z + angle;
                 ab.zDrive = zDrive;
             }
         }
@@ -211,8 +213,8 @@ public class MLAgentsDirector : Agent
             {
                 mm_v2.Bones bone = fullDOFBonesToUse[i];
                 Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
-                debugStr.Append($"{bone.ToString().Substring(5)}: {output} ");
-                actionIdx += 3;
+                debugStr.Append($"{bone.ToString().Substring(5)}: {output} " + (_config.actionsAre6DRotations ? $"{ new Vector3(curActions[actionIdx + 3], curActions[actionIdx + 4], curActions[actionIdx + 5])}" : ""));
+                actionIdx += _config.actionsAre6DRotations ? 6 : 3;
             }
             mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
             for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
@@ -252,7 +254,7 @@ public class MLAgentsDirector : Agent
             //angle = (angle * 120) - 180;
             //Vector3 normalizedOutput = output.normalized;
             Quaternion offset = Quaternion.AngleAxis(angle, output);
-            Quaternion final = offset * curRotations[boneIdx] ;
+            Quaternion final = _config.setRotsDirectly  ? offset : offset * curRotations[boneIdx] ;
             ab.SetDriveRotation(final);
         }
 
@@ -267,36 +269,39 @@ public class MLAgentsDirector : Agent
             Vector3 output = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
             actionIdx += 3;
             Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
-            float scale;
+            float scale, midpoint;
 
             var xdrive = ab.xDrive;
             scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
-            float outputX = output.x * scale*2;
+            midpoint = xdrive.lowerLimit + scale;
+            float outputX = _config.setRotsDirectly ? (output.x * scale) + midpoint : output.x * scale*2;
             if (_config.fullRangeEulerOutputs)
             {
                 outputX = output.x * 180f;
             }
-            xdrive.target = targetRotationInJointSpace.x + outputX;
+            xdrive.target = _config.setRotsDirectly ? outputX :  targetRotationInJointSpace.x + outputX;
             ab.xDrive = xdrive;
 
             var ydrive = ab.yDrive;
             scale = (ydrive.upperLimit - ydrive.lowerLimit) / 2f;
-            float outputY = output.y * scale * 2;
+            midpoint = ydrive.lowerLimit + scale;
+            float outputY = _config.setRotsDirectly ? (output.y * scale) + midpoint : output.y * scale * 2;
             if (_config.fullRangeEulerOutputs)
             {
                 outputY = output.y * 180f;
             }
-            ydrive.target = targetRotationInJointSpace.y + outputY;
+            ydrive.target = _config.setRotsDirectly ? outputY : targetRotationInJointSpace.y + outputY;
             ab.yDrive = ydrive;
 
             var zdrive = ab.zDrive;
             scale = (zdrive.upperLimit - zdrive.lowerLimit) / 2f;
-            float outputZ = output.z * scale * 2;
+            midpoint = zdrive.lowerLimit + scale;
+            float outputZ = _config.setRotsDirectly ? (output.z * scale) + midpoint : output.z * scale * 2;
             if (_config.fullRangeEulerOutputs)
             {
                 outputZ = output.z * 180f;
             }
-            zdrive.target = targetRotationInJointSpace.z + outputZ;
+            zdrive.target = _config.setRotsDirectly ? outputZ :  targetRotationInJointSpace.z + outputZ;
             ab.zDrive = zdrive;    
         }
     }
@@ -310,10 +315,12 @@ public class MLAgentsDirector : Agent
             Vector3 outputV2 = new Vector3(finalActions[actionIdx + 3], finalActions[actionIdx + 4], finalActions[actionIdx + 5]);
             actionIdx += 6;
             //Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i], _config.adjust6DRots);
-            Matrix4x4 networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
-            Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
-            Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
-            Quaternion newTargetRot =  Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
+            //Matrix4x4 networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
+            //Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
+            //Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
+            //Quaternion newTargetRot =  Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
+            Quaternion offset = ArtBodyUtils.RotateObjectWithOrthonormalVector(outputV1, outputV2);
+            Quaternion newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
             ab.SetDriveRotation(newTargetRot);
             //ab.SetDriveRotation(newTargetRot.normalized);
         }
@@ -470,6 +477,7 @@ public class MLAgentsDirector : Agent
         //    prevKinRots = MMScript.bone_rotations;
         UpdateKinCMData(false);
         UpdateSimCMData(false);
+        UpdateBoneObsState(false, Time.fixedDeltaTime, true);
     }
     Matrix4x4[] initialRotInverses;
 
@@ -544,7 +552,7 @@ public class MLAgentsDirector : Agent
             SimCharController.teleportSimCharRoot(simChar, MMScript.origin, preTeleportSimCharPosOffset);
             //Debug.Log($"{Time.frameCount}: Teleporting sim char root");
             teleportSinceLastGetState = true;
-
+            lastSimCharTeleportFixedUpdate = curFixedUpdate;
             updateVelocity = false;
         }
         // Update CMs 
@@ -653,11 +661,13 @@ public class MLAgentsDirector : Agent
         }
     }
 
-    private void UpdateBoneObsState(bool updateVelocity, float dt)
+    private void UpdateBoneObsState(bool updateVelocity, float dt, bool zeroVelocity = false)
     {
         foreach (bool isKinChar in new bool[]{true, false}) {
             CharInfo curInfo = isKinChar ? kinChar : simChar;
             float[] copyInto = curInfo.boneState;
+            //if (debug && !isKinChar)
+            //    Utils.debugArray(copyInto, "copyInto: ");
             int copyIdx = 0;
             for (int j = 0; j < stateBones.Length; j++)
             {
@@ -668,13 +678,16 @@ public class MLAgentsDirector : Agent
                 //Vector3 bone_relative_pos = Utils.quat_inv_mul_vec3(relative_rot, bone_local_pos);
                 Vector3 prevBonePos = curInfo.boneWorldPos[j];
                 Vector3 boneVel = (boneWorldPos - prevBonePos) / dt;
-                boneVel = resolveVelInKinematicRefFrame(boneVel);
+                boneVel = zeroVelocity ? Vector3.zero : resolveVelInKinematicRefFrame(boneVel);
                 copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
+
                 //copyVecIntoArray(ref copyInto, ref copyIdx, updateVelocity ? boneVel : Vector3.zero);
-                if (updateVelocity)
+                if (updateVelocity || zeroVelocity)
                     copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
                 else
                     copyIdx += 3;
+                //if (debug && j == 0 && !isKinChar)
+                //    Debug.Log($"LeftToe vel: updateVelocity:{updateVelocity} velocity in array: {(updateVelocity ? boneVel : new Vector3(copyInto[copyIdx - 3], copyInto[copyIdx - 2], copyInto[copyIdx - 1]))}");
                 curInfo.boneWorldPos[j] = boneWorldPos;
                 //if (debug)
                 //    Debug.Log($"{(isKinChar ? "Kin: " : "Sim: ")} {bone} world pos: {boneWorldPos} | local pos: {boneLocalPos} : vel: {(updateVelocity ? boneVel : Vector3.zero)}");
@@ -796,7 +809,7 @@ public class MLAgentsDirector : Agent
     9-11   : difference between sim cm vel and kin cm vel
     12-13  : desired velocity
     14-15 : the diff between sim cm horizontal vel and desired vel
-    16-51 : kin char state
+    16-51 : sim char state
     52-87 : sim state - kin state
     88-110 : numActions (
     */
@@ -805,12 +818,6 @@ public class MLAgentsDirector : Agent
     bool teleportSinceLastGetState = true;
     float[] getState()
     {
-        //bool updateVel = curFixedUpdate - lastSimCharTeleportFixedUpdate < _config.EVALUATE_EVERY_K_STEPS;
-        //float decisionPeriod = Time.fixedDeltaTime * _config.EVALUATE_EVERY_K_STEPS;
-        //kinCMVelLastGetState = teleportSinceLastGetState ? kinCMVelLastGetState : ((kinChar.cm - kinCMLastGetState) / decisionPeriod);
-        //simCMVelLastGetState = teleportSinceLastGetState ? simCMVelLastGetState : ((simChar.cm - simCMLastGetState) / decisionPeriod);
-        //UpdateBoneObsState(!teleportSinceLastGetState, decisionPeriod);
-        //ClearGizmos();
 
         Vector3 cmDistance = kinChar.cm - simChar.cm;
         //bool endedEpisode = lastEpisodeEndingFrame >= (curFixedUpdate - 1);
@@ -843,9 +850,6 @@ public class MLAgentsDirector : Agent
         if (state_idx != numObservations)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything, 6D: {_config.actionsAre6DRotations}");
 
-        //kinCMLastGetState = kinChar.cm;
-        //simCMLastGetState = simChar.cm;
-        //teleportSinceLastGetState = false;
         //if (debug)
         //    Utils.debugArray(state, $"{curFixedUpdate} state: ");
         return state;
@@ -938,8 +942,8 @@ public class MLAgentsDirector : Agent
         }
         posReward = Math.Exp((-10f / (nbodies * 6)) *  posDiffsSum );
         velReward = Math.Exp((-1f / (nbodies * 6)) *  velDiffsSum );
-        if (debug)
-            Debug.Log($"velDiffsSum: {velDiffsSum} velReward: {velReward}");
+        //if (debug)
+        //    Debug.Log($"velDiffsSum: {velDiffsSum} velReward: {velReward}");
         if (_config.normalizeRewardComponents)
         {
             posReward = posRewardNormalizer.getNormalized((float)posReward);
