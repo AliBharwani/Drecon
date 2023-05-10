@@ -546,6 +546,7 @@ public class MLAgentsDirector : Agent
         //Debug.Log($"lastKinRootPos: {lastKinRootPos} simChar.root.transform.position: {simChar.root.transform.position} ");
         if (MMScript.teleportedThisFixedUpdate)
         {
+            EditorApplication.isPaused = true;
             Vector3 preTeleportSimCharPosOffset = lastKinRootPos - simChar.root.transform.position;
             //Debug.Log($"preTeleportSimCharPosOffset: {preTeleportSimCharPosOffset} lastKinRootPos: {lastKinRootPos} simChar.root.transform.position: {simChar.root.transform.position} ");
             //simChar.root.TeleportRoot(newRootPosition, kinChar.trans.rotation);
@@ -622,6 +623,25 @@ public class MLAgentsDirector : Agent
 
     private void UpdateBoneSurfacePts(bool updateVelocity)
     {
+        foreach (bool isKinChar in new bool[] { true, false })
+            for (int i = 1; i < 23; i++)
+            {
+                var charInfo = isKinChar ? kinChar : simChar;
+                Vector3[] newSurfacePts = new Vector3[6];
+                Vector3[] newWorldSurfacePts = new Vector3[6];
+                getSixPointsOnCollider(charInfo.boneToCollider[i], ref newWorldSurfacePts, (mm_v2.Bones)i);
+                Vector3[] prevWorldSurfacePts = charInfo.boneSurfacePtsWorldSpace[i];
+
+                for (int j = 0; j < 6; j++)
+                {
+                    newSurfacePts[j] = isKinChar ? resolvePosInKinematicRefFrame(newWorldSurfacePts[j]) :  resolvePosInSimRefFrame(newWorldSurfacePts[j]);
+                    if (updateVelocity)
+                        charInfo.boneSurfaceVels[i][j] = (newWorldSurfacePts[j] - prevWorldSurfacePts[j]) / Time.fixedDeltaTime;
+                }
+                charInfo.boneSurfacePtsWorldSpace[i] = newWorldSurfacePts;
+                charInfo.boneSurfacePts[i] = newSurfacePts;
+            }
+        /*
         for (int i = 1; i < 23; i++)
         {
 
@@ -658,7 +678,7 @@ public class MLAgentsDirector : Agent
 
             kinChar.boneSurfacePts[i] = newKinBoneSurfacePts;
             simChar.boneSurfacePts[i] = newSimBoneSurfacePts;
-        }
+        }*/
     }
 
     private void UpdateBoneObsState(bool updateVelocity, float dt, bool zeroVelocity = false)
@@ -712,7 +732,6 @@ public class MLAgentsDirector : Agent
     // returns TRUE if episode ended
     public bool calcAndSetRewards()
     {
-
         bool heads1mApart;
         double posReward, velReward, localPoseReward, cmVelReward, fallFactor;
         calcFallFactor(out fallFactor, out heads1mApart);
@@ -752,15 +771,11 @@ public class MLAgentsDirector : Agent
         calcPosAndVelReward(out posReward, out velReward);
         calcLocalPoseReward(out localPoseReward);
         calcCMVelReward(out cmVelReward);
-        if (curFixedUpdate - _config.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT < lastSimCharTeleportFixedUpdate)
-        {
+        if (curFixedUpdate - _config.N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT < lastEpisodeEndingFrame)
             finalReward = 0f;
-        }
         else
-        {
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
-        }
-        //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
+        Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         //updateMeanReward(final_reward);
         AddReward(finalReward);
         return false;

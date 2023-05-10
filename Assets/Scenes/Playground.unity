@@ -1743,7 +1743,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/AxisAngleRotFixed
+  writeToFilePath: ../results/BoneObsStateFixed-AA
   filename: unityconfig.json
   loadFromFilePath: ../results/AxisAngleRotFixed
   prob_to_change_inputs: 0.001
