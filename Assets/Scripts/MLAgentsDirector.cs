@@ -167,21 +167,10 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             ab.SetDriveRotation(final);
         }
-        if (_config.setDriveTargetVelocities) { 
-            //Quaternion[] curBoneRots = MMScript.bone_rotations;
+        if (_config.setDriveTargetVelocities)
             for (int i = 1; i < 23; i++)
-            {
-                ArticulationBody ab = simChar.boneToArtBody[i];
-                //Quaternion deltaRotation = curBoneRots[i] * Quaternion.Inverse(prevKinRots[i]);
-                //float angle = 2 * Mathf.Acos(Mathf.Clamp(deltaRotation.w, -1, 1));
-                //Vector3 axis = new Vector3(deltaRotation.x, deltaRotation.y, deltaRotation.z).normalized;
-                //float angularVelocity = angle / Time.fixedDeltaTime; // Angular velocity in radians per second
-                //Debug.Log($"{(mm_v2.Bones)i} has deltaRotation.w: {deltaRotation.w} angle:{angle} angularVelocity: {angularVelocity}");
-                Vector3 targetAngularVelocity = MMScript.bone_angular_velocities[i]; //angularVelocity * axis;
-                ab.SetDriveTargetVelocity(targetAngularVelocity);
-            }
-            //prevKinRots = curBoneRots;
-        }
+                simChar.boneToArtBody[i].SetDriveTargetVelocity(MMScript.bone_angular_velocities[i]);
+            
     }
     bool isFirstAction = true;
     // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
@@ -223,7 +212,7 @@ public class MLAgentsDirector : Agent
                 debugStr.Append($"{bone}: {curActions[actionIdx]} | {finalActions[actionIdx]} ");
                 actionIdx += 1;
             }
-            //Debug.Log(debugStr.ToString());
+            Debug.Log(debugStr.ToString());
         }
         applyActions(finalActions);
     }
@@ -478,6 +467,7 @@ public class MLAgentsDirector : Agent
         UpdateKinCMData(false);
         UpdateSimCMData(false);
         UpdateBoneObsState(false, Time.fixedDeltaTime, true);
+        UpdateBoneSurfacePts(false);
     }
     Matrix4x4[] initialRotInverses;
 
@@ -514,7 +504,6 @@ public class MLAgentsDirector : Agent
         projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + 2 * Vector3.right;
         SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .02f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
-        teleportSinceLastGetState = true;
         Physics.Simulate(.00001f);
         resetData();
         kinChar.cmVel = Vector3.zero;
@@ -542,20 +531,18 @@ public class MLAgentsDirector : Agent
         //if (simCharTeleported)
         //    Debug.Log($"BOOM : {simCharTeleported}");
         // only update velocity if we did not teleport last frame
-        updateVelocity = lastSimCharTeleportFixedUpdate + 1 < curFixedUpdate;
         //Debug.Log($"lastKinRootPos: {lastKinRootPos} simChar.root.transform.position: {simChar.root.transform.position} ");
         if (MMScript.teleportedThisFixedUpdate)
         {
-            EditorApplication.isPaused = true;
             Vector3 preTeleportSimCharPosOffset = lastKinRootPos - simChar.root.transform.position;
             //Debug.Log($"preTeleportSimCharPosOffset: {preTeleportSimCharPosOffset} lastKinRootPos: {lastKinRootPos} simChar.root.transform.position: {simChar.root.transform.position} ");
             //simChar.root.TeleportRoot(newRootPosition, kinChar.trans.rotation);
             SimCharController.teleportSimCharRoot(simChar, MMScript.origin, preTeleportSimCharPosOffset);
             //Debug.Log($"{Time.frameCount}: Teleporting sim char root");
-            teleportSinceLastGetState = true;
             lastSimCharTeleportFixedUpdate = curFixedUpdate;
-            updateVelocity = false;
+            //updateVelocity = false;
         }
+        updateVelocity = lastSimCharTeleportFixedUpdate + 1 < curFixedUpdate;
         // Update CMs 
         //Debug.Log($"curFixedUpdate: {curFixedUpdate} updateVelocity: {updateVelocity}");
         UpdateKinCMData(updateVelocity);
@@ -573,9 +560,9 @@ public class MLAgentsDirector : Agent
         AddGizmoSphere(simChar.cm, Color.red);
         if (curFixedUpdate % _config.EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
-        else {
+        else 
             applyActions(prevActionOutput);
-        }
+        
         //updateMeanReward();
         if (_config.projectileTraining)
             FireProjectile();
@@ -641,44 +628,6 @@ public class MLAgentsDirector : Agent
                 charInfo.boneSurfacePtsWorldSpace[i] = newWorldSurfacePts;
                 charInfo.boneSurfacePts[i] = newSurfacePts;
             }
-        /*
-        for (int i = 1; i < 23; i++)
-        {
-
-            Vector3[] newKinBoneSurfacePts = new Vector3[6];
-            Vector3[] newSimBoneSurfacePts = new Vector3[6];
-            Vector3[] newKinBoneSurfacePtsWorld = new Vector3[6];
-            Vector3[] newSimBoneSurfacePtsWorld = new Vector3[6];
-
-            getSixPointsOnCollider(kinChar.boneToCollider[i], ref newKinBoneSurfacePts, (mm_v2.Bones) i);
-            getSixPointsOnCollider(simChar.boneToCollider[i], ref newSimBoneSurfacePts, (mm_v2.Bones) i);
-
-            //Vector3[] prevKinSurfacePts = kinChar.boneSurfacePts[i];
-            //Vector3[] prevSimSurfacePts = simChar.boneSurfacePts[i];
-            Vector3[] prevKinSurfacePts = kinChar.boneSurfacePtsWorldSpace[i];
-            Vector3[] prevSimSurfacePts = simChar.boneSurfacePtsWorldSpace[i];
-
-            for (int j = 0; j < 6; j++)
-            {
-                newKinBoneSurfacePtsWorld[j] = newKinBoneSurfacePts[j];
-                newSimBoneSurfacePtsWorld[j] = newSimBoneSurfacePts[j];
-
-                newKinBoneSurfacePts[j] = resolvePosInKinematicRefFrame(newKinBoneSurfacePts[j]);
-                newSimBoneSurfacePts[j] = resolvePosInSimRefFrame(newSimBoneSurfacePts[j]);
-
-                if (updateVelocity) {
-                    kinChar.boneSurfaceVels[i][j] = (newKinBoneSurfacePtsWorld[j] - prevKinSurfacePts[j]) / Time.fixedDeltaTime;
-                    simChar.boneSurfaceVels[i][j] = (newSimBoneSurfacePtsWorld[j] - prevSimSurfacePts[j]) / Time.fixedDeltaTime;
-                    //Debug.Log($"simChar.boneSurfaceVels[i][j] : {simChar.boneSurfaceVels[i][j]}");
-                }
-            }
-
-            kinChar.boneSurfacePtsWorldSpace[i] = newKinBoneSurfacePtsWorld;
-            simChar.boneSurfacePtsWorldSpace[i] = newSimBoneSurfacePtsWorld;
-
-            kinChar.boneSurfacePts[i] = newKinBoneSurfacePts;
-            simChar.boneSurfacePts[i] = newSimBoneSurfacePts;
-        }*/
     }
 
     private void UpdateBoneObsState(bool updateVelocity, float dt, bool zeroVelocity = false)
@@ -755,7 +704,7 @@ public class MLAgentsDirector : Agent
             EndEpisode();
 #if UNITY_EDITOR
             //if (debug)
-            //    EditorApplication.isPaused = true;
+                //EditorApplication.isPaused = true;
 #endif
 
             return true;
@@ -775,7 +724,7 @@ public class MLAgentsDirector : Agent
             finalReward = 0f;
         else
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
-        Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
+        //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         //updateMeanReward(final_reward);
         AddReward(finalReward);
         return false;
@@ -827,10 +776,7 @@ public class MLAgentsDirector : Agent
     16-51 : sim char state
     52-87 : sim state - kin state
     88-110 : numActions (
-    */
-    Vector3 kinCMVelLastGetState, simCMVelLastGetState;
-    Vector3 kinCMLastGetState, simCMLastGetState;
-    bool teleportSinceLastGetState = true;
+    */ 
     float[] getState()
     {
 
