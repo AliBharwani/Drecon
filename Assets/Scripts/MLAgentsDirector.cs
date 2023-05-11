@@ -58,7 +58,6 @@ public class MLAgentsDirector : Agent
     private int nbodies; 
     private int curFixedUpdate = -1;
     private int lastSimCharTeleportFixedUpdate = -1;
-    private bool isInitialized;
 
     float[] prevActionOutput;
     int numActions;
@@ -177,12 +176,7 @@ public class MLAgentsDirector : Agent
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        //Debug.Log($"{Time.frameCount} : Applying Python Action on ML Agent");
-
         float[] curActions = actionBuffers.ContinuousActions.Array;
-
-        // TODO: Exp. with different methods of low pass filtering; instead of filtering the floats
-        // one by one maybe I should slerp the resultant quaternions instead? 
         if (_config.actionsAre6DRotations && isFirstAction)
         {
             setFirstActionsAsIdentityRots(curActions);
@@ -430,7 +424,6 @@ public class MLAgentsDirector : Agent
         //    numActions = (fullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length; // 25 or 44
         //Debug.Log($"numActions: {numActions}");
         numObservations = 88 + numActions; // 111 or 132 or 128 or 164
-        isInitialized = true;
         if (_config.actionsAre6DRotations)
         {
             initialRotInverses = new Matrix4x4[_config.networkControlsAllJoints ? extendedfullDOFBones.Length : fullDOFBones.Length];
@@ -485,8 +478,8 @@ public class MLAgentsDirector : Agent
         debug = debug && !Academy.Instance.IsCommunicatorOn;
         if (Academy.Instance.IsCommunicatorOn)
         {
-            int numFixedUpdatesPerSecond = Mathf.CeilToInt(1f / Time.fixedDeltaTime);
-            MaxStep = numFixedUpdatesPerSecond * _config.MAX_EPISODE_LENGTH_SECONDS;
+            int numStepsPerSecond = (int) (Mathf.Ceil(1f / Time.fixedDeltaTime) / _config.EVALUATE_EVERY_K_STEPS);
+            MaxStep = numStepsPerSecond  * _config.MAX_EPISODE_LENGTH_SECONDS;
         }
         customInit();
         //SimCharController.set_art_body_rot_limits();
@@ -515,46 +508,17 @@ public class MLAgentsDirector : Agent
     bool updateVelocity;
     private void FixedUpdate()
     {
-        if (!isInitialized)
-        {
-            customInit();
-            return;
-        }
         curFixedUpdate++;
-        //bool endedEpisodeAtEndOfLastFrame = lastEpisodeEndingFrame == (curFixedUpdate - 1);
-        //if (endedEpisodeAtEndOfLastFrame)
-        //    Debug.Log($"endedEpisodeAtEndOfLastFrame, curFixedUpdate: {curFixedUpdate}");
-        //Debug.Log($"{Time.frameCount} : ML Agent updated");
-
-        // Make sure to teleport sim character if kin character teleported
-        //Debug.Log($"simCharTeleported: {simCharTeleported}");
-        //if (simCharTeleported)
-        //    Debug.Log($"BOOM : {simCharTeleported}");
-        // only update velocity if we did not teleport last frame
-        //Debug.Log($"lastKinRootPos: {lastKinRootPos} simChar.root.transform.position: {simChar.root.transform.position} ");
         if (MMScript.teleportedThisFixedUpdate)
         {
             Vector3 preTeleportSimCharPosOffset = lastKinRootPos - simChar.root.transform.position;
-            //Debug.Log($"preTeleportSimCharPosOffset: {preTeleportSimCharPosOffset} lastKinRootPos: {lastKinRootPos} simChar.root.transform.position: {simChar.root.transform.position} ");
-            //simChar.root.TeleportRoot(newRootPosition, kinChar.trans.rotation);
             SimCharController.teleportSimCharRoot(simChar, MMScript.origin, preTeleportSimCharPosOffset);
-            //Debug.Log($"{Time.frameCount}: Teleporting sim char root");
             lastSimCharTeleportFixedUpdate = curFixedUpdate;
-            //updateVelocity = false;
         }
         updateVelocity = lastSimCharTeleportFixedUpdate + 1 < curFixedUpdate;
-        // Update CMs 
-        //Debug.Log($"curFixedUpdate: {curFixedUpdate} updateVelocity: {updateVelocity}");
         UpdateKinCMData(updateVelocity);
-        //Debug.Log($"{Time.frameCount}: FixedUpdate kin cm: {kinChar.cm} kin cm vel: {kinChar.cmVel} sim cm: {simChar.cm} sim cm vel: {simChar.cmVel} ");
         UpdateBoneObsState(updateVelocity, Time.fixedDeltaTime);
-        // UpdateBoneSurfacePts(updateVelocity);
-        //bool episodeEnded = calcAndSetRewards();
-        //if (episodeEnded)
-        //    return;
-        // request Decision
-        //if (!updateVelocity)
-        //    return;
+ 
         ClearGizmos();
         AddGizmoSphere(kinChar.cm, Color.blue);
         AddGizmoSphere(simChar.cm, Color.red);
@@ -563,7 +527,6 @@ public class MLAgentsDirector : Agent
         else 
             applyActions(prevActionOutput);
         
-        //updateMeanReward();
         if (_config.projectileTraining)
             FireProjectile();
         lastKinRootPos = kinChar.trans.position;
@@ -635,8 +598,6 @@ public class MLAgentsDirector : Agent
         foreach (bool isKinChar in new bool[]{true, false}) {
             CharInfo curInfo = isKinChar ? kinChar : simChar;
             float[] copyInto = curInfo.boneState;
-            //if (debug && !isKinChar)
-            //    Utils.debugArray(copyInto, "copyInto: ");
             int copyIdx = 0;
             for (int j = 0; j < stateBones.Length; j++)
             {
