@@ -172,7 +172,7 @@ public class mm_v2 : MonoBehaviour
     internal bool debug_move_every_second = true;
     float time_since_last_move = 0f;
     float minimum_fixed_update_timer = 0f;
-
+    public bool synchronization_enabled = false;
     void Awake()
     {
         Application.targetFrameRate = 60;
@@ -514,7 +514,18 @@ public class mm_v2 : MonoBehaviour
             simulation_rotation_halflife,
             Time.fixedDeltaTime);
         //inertialize_root_adjust(ref bone_offset_positions[0], ref bone_positions[0], ref bone_rotations[0], simulation_position, simulation_rotation);
+        if (synchronization_enabled)
+        {
+            simulation_position = bone_positions[0];
+            simulation_rotation = bone_rotations[0];
 
+            inertialize_root_adjust(
+                ref bone_offset_positions[0],
+                ref bone_positions[0],
+                ref bone_rotations[0],
+                bone_positions[0],
+                bone_rotations[0]);
+        }
 
 
         Vector3[] adjusted_bone_positions = bone_positions;

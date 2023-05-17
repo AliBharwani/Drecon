@@ -194,7 +194,6 @@ public static class ArtBodyUtils
         zDrive.targetVelocity = target_vel.z;
         body.zDrive = zDrive;
     }
-
     public static void SetDriveTargetVelocity(this ArticulationBody body, Vector3 targetAngularVel)
     {
         /* Angular velocity appears in scaled angle axis representation 
@@ -218,13 +217,35 @@ public static class ArtBodyUtils
         body.zDrive = zDrive;
     }
 
+    public static void SetDriveTargetVelocity(this ArticulationBody body, Vector3 targetAngularVel, Quaternion localRotation)
+    {
+        /* Angular velocity appears in scaled angle axis representation 
+         * 
+         */
+        //Vector3 target_vel = body.ToTargetRotationInReducedSpace(targetLocalVel, true);
+        Quaternion targetAngularVelocityQ = Quaternion.AngleAxis(targetAngularVel.magnitude, targetAngularVel.normalized);
+        Vector3 degsPerSecond = (targetAngularVelocityQ * localRotation).ToEulerAnglesInRange180() - localRotation.ToEulerAnglesInRange180();
+        degsPerSecond *= 60;
+        //body.angularVelocity = target_vel;
+        //return;
+        // assign to the drive targets...
+        ArticulationDrive xDrive = body.xDrive;
+        xDrive.targetVelocity = degsPerSecond.x;
+        body.xDrive = xDrive;
+
+        ArticulationDrive yDrive = body.yDrive;
+        yDrive.targetVelocity = degsPerSecond.y;
+        body.yDrive = yDrive;
+
+        ArticulationDrive zDrive = body.zDrive;
+        zDrive.targetVelocity = degsPerSecond.z;
+        body.zDrive = zDrive;
+    }
     public static void SetDriveRotation(this ArticulationBody body, Quaternion targetLocalRotation, bool debug = false)
     {
         Vector3 target = body.ToTargetRotationInReducedSpace(targetLocalRotation, true);
         //if (debug)
-        //Debug.Log($"{body.transform.name} Target rot: {target.ToString("f6")}");
-
-
+        //Debug.Log($"{body.transform.name} Target rot: {target.ToString("f6
         // assign to the drive targets...
         ArticulationDrive xDrive = body.xDrive;
         xDrive.target = target.x;
@@ -412,18 +433,35 @@ public static class ArtBodyUtils
     {
         if (body.isRoot)
             return Vector3.zero;
+        // = Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation)  gives us the rotation that goes from the inverse of the targetLocalRot to the anchor rot
+        // * body.parentAnchorRotation puts this rotation in the parent's joitn space
         Quaternion q = Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation;
+        //q = Quaternion.Inverse(targetLocalRotation);
         q.Normalize();
         Vector3 TargetRotationInJointSpace = -q.eulerAngles;
         //Vector3 TargetRotationInJointSpace = -(Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation).normalized.eulerAngles;
-        //TargetRotationInJointSpace = targetLocalRotation.eulerAngles;
+        //TargetRotationInJointSpace = Quaternion.Inverse(targetLocalRotation).eulerAngles;
         TargetRotationInJointSpace = new Vector3(
             Mathf.DeltaAngle(0, TargetRotationInJointSpace.x),
             Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
             Mathf.DeltaAngle(0, TargetRotationInJointSpace.z));
         return inDegrees ? TargetRotationInJointSpace : TargetRotationInJointSpace * Mathf.Deg2Rad;
     }
+    public static Vector3 ToEulerAnglesInRange180(this Vector3 vec)
+    {
+        return new Vector3()
+        {
+            x = WrapAngle(vec.x),
+            y = WrapAngle(vec.y),
+            z = WrapAngle(vec.z)
+        };
 
+        float WrapAngle(float angle)
+        {
+            angle %= 360;
+            return angle > 180 ? angle - 360 : angle;
+        }
+    }
     public static Vector3 ToEulerAnglesInRange180(this Quaternion q)
     {
         return new Vector3()

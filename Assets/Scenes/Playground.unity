@@ -451,6 +451,7 @@ MonoBehaviour:
   setDriveTargetVelocities: 0
   noStrafing: 0
   setRotsDirectly: 0
+  outputIsBase: 0
   actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
   adjust6DRots: 0
@@ -1150,7 +1151,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 10893f0c953095440af3cb1669cfad27, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1200,6 +1201,71 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &761501877
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_Name
+      value: kinematic char bigger feet
+      objectReference: {fileID: 0}
+    - target: {fileID: 1810728709180460642, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: gen_inputs
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1810728709180460642, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: synchronization_enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_RootOrder
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.9534136
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 3.5393589
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
 --- !u!1 &767361687
 GameObject:
   m_ObjectHideFlags: 0
@@ -1243,7 +1309,7 @@ MonoBehaviour:
   reportMeanRewardEveryNSteps: 10000
   use_debug_mats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
-  debug: 0
+  debug: 1
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
@@ -1285,7 +1351,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 37176bad4a1141f4d91eedb13f41fae3, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 2c13cf9ee394864468affdb1589a355b, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -1743,14 +1809,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/BoneObsStateFixed-Euler
+  writeToFilePath: ../results/SetVelocitiesFixedEuler
   filename: unityconfig.json
-  loadFromFilePath: ../results/BoneObsStateFixed-AA
+  loadFromFilePath: ../results/BoneObsStateFixed-Euler
   prob_to_change_inputs: 0.001
   solverIterations: 256
   setDriveTargetVelocities: 1
   noStrafing: 1
   setRotsDirectly: 0
+  outputIsBase: 1
   actionsAreEulerRotations: 1
   actionsAre6DRotations: 0
   adjust6DRots: 0
@@ -1765,11 +1832,11 @@ MonoBehaviour:
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  simulationVelocityHalflife: 0.4
-  simulation_rotation_halflife: 0.4
+  simulationVelocityHalflife: 0.6
+  simulation_rotation_halflife: 0.6
   walkOnly: 1
-  projectileTraining: 0
-  LAUNCH_FREQUENCY: 3
+  projectileTraining: 1
+  LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
   boneToNames:
@@ -2073,9 +2140,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 959ce924e937d164f94c888917501812, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: d0fa6daec33463f4ea10f00fe70291ff, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2142,7 +2209,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2090630088
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -168,7 +168,7 @@ public class MLAgentsDirector : Agent
         }
         if (_config.setDriveTargetVelocities)
             for (int i = 1; i < 23; i++)
-                simChar.boneToArtBody[i].SetDriveTargetVelocity(MMScript.bone_angular_velocities[i]);
+                simChar.boneToArtBody[i].SetDriveTargetVelocity(MMScript.bone_angular_velocities[i], curRotations[i]);
             
     }
     bool isFirstAction = true;
@@ -196,7 +196,7 @@ public class MLAgentsDirector : Agent
             {
                 mm_v2.Bones bone = fullDOFBonesToUse[i];
                 Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
-                debugStr.Append($"{bone.ToString().Substring(5)}: {output} " + (_config.actionsAre6DRotations ? $"{ new Vector3(curActions[actionIdx + 3], curActions[actionIdx + 4], curActions[actionIdx + 5])}" : ""));
+                debugStr.Append($"{bone.ToString().Substring(5)}: {output} " + (_config.actionsAre6DRotations ? $"{ new Vector3(curActions[actionIdx + 3], curActions[actionIdx + 4], curActions[actionIdx + 5])} " : ""));
                 actionIdx += _config.actionsAre6DRotations ? 6 : 3;
             }
             mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
@@ -237,7 +237,7 @@ public class MLAgentsDirector : Agent
             //angle = (angle * 120) - 180;
             //Vector3 normalizedOutput = output.normalized;
             Quaternion offset = Quaternion.AngleAxis(angle, output);
-            Quaternion final = _config.setRotsDirectly  ? offset : offset * curRotations[boneIdx] ;
+            Quaternion final = _config.setRotsDirectly  ? offset : _config.outputIsBase ? curRotations[boneIdx]  * offset : offset * curRotations[boneIdx] ;
             ab.SetDriveRotation(final);
         }
 
@@ -298,12 +298,12 @@ public class MLAgentsDirector : Agent
             Vector3 outputV2 = new Vector3(finalActions[actionIdx + 3], finalActions[actionIdx + 4], finalActions[actionIdx + 5]);
             actionIdx += 6;
             //Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i], _config.adjust6DRots);
-            //Matrix4x4 networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
-            //Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
-            //Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
-            //Quaternion newTargetRot =  Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
-            Quaternion offset = ArtBodyUtils.RotateObjectWithOrthonormalVector(outputV1, outputV2);
-            Quaternion newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
+            Matrix4x4 networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
+            Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
+            Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
+            Quaternion newTargetRot =  Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
+            //Quaternion offset = ArtBodyUtils.RotateObjectWithOrthonormalVector(outputV1, outputV2);
+            //Quaternion newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
             ab.SetDriveRotation(newTargetRot);
             //ab.SetDriveRotation(newTargetRot.normalized);
         }
@@ -478,8 +478,10 @@ public class MLAgentsDirector : Agent
         debug = debug && !Academy.Instance.IsCommunicatorOn;
         if (Academy.Instance.IsCommunicatorOn)
         {
-            int numStepsPerSecond = (int) (Mathf.Ceil(1f / Time.fixedDeltaTime) / _config.EVALUATE_EVERY_K_STEPS);
-            MaxStep = numStepsPerSecond  * _config.MAX_EPISODE_LENGTH_SECONDS;
+            //int numFixedUpdatesPerSecond = Mathf.CeilToInt(1f / Time.fixedDeltaTime);
+            //MaxStep = numFixedUpdatesPerSecond * _config.MAX_EPISODE_LENGTH_SECONDS;
+            int numStepsPerSecond = (int)(Mathf.Ceil(1f / Time.fixedDeltaTime) / _config.EVALUATE_EVERY_K_STEPS);
+            MaxStep = numStepsPerSecond * _config.MAX_EPISODE_LENGTH_SECONDS;
         }
         customInit();
         //SimCharController.set_art_body_rot_limits();
@@ -741,7 +743,7 @@ public class MLAgentsDirector : Agent
     float[] getState()
     {
 
-        Vector3 cmDistance = kinChar.cm - simChar.cm;
+        Vector3 cmDistance = resolvePosInKinematicRefFrame(simChar.cm) ;
         //bool endedEpisode = lastEpisodeEndingFrame >= (curFixedUpdate - 1);
         //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel} kinCMVelLastGetState: {kinCMVelLastGetState} simCMVelLastGetState: {simCMVelLastGetState}");
         Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinChar.cmVel);        

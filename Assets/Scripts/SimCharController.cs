@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -153,15 +154,40 @@ public class SimCharController : MonoBehaviour
                 float angle = 2 * Mathf.Acos(deltaRotation.w);
                 Vector3 axis = new Vector3(deltaRotation.x, deltaRotation.y, deltaRotation.z).normalized;
 
-                float angularVelocity = angle / Time.fixedDeltaTime; // Angular velocity in radians per second
-                Vector3 targetAngularVelocity = angularVelocity * axis;
-                ab.SetDriveTargetVelocity(targetAngularVelocity);
+                float angularVelocity = angle / Time.fixedDeltaTime; 
+                Vector3 targetAngularVelocityCalculated = angularVelocity * axis;
+                Vector3 targetAngularVelocity = curr_bone_angular_vel[i]; // Mathf.Rad2Deg
+                Quaternion targetAngularVelocityQ = Quaternion.AngleAxis(targetAngularVelocity.magnitude , targetAngularVelocity.normalized);
+                //targetAngularVelocityQ = Quaternion.Inverse(ab.anchorRotation) * (targetAngularVelocityQ) * ab.parentAnchorRotation;
+                Vector3 tq = -(Quaternion.Inverse(ab.anchorRotation) * Quaternion.Inverse(targetAngularVelocityQ) * ab.parentAnchorRotation).normalized.eulerAngles;// ab.ToTargetRotationInReducedSpace(targetAngularVelocityQ, true);
+                //tq = Quaternion.AngleAxis(targetAngularVelocityCalculated.magnitude, targetAngularVelocityCalculated).eulerAngles;
+                //Vector3 degPerSec = new Vector3(targetAngularVelocityQ.eulerAngles.x)
+                //Vector3 angularVelocity = 2f  * targetAngularVelocityQ.eulerAngles;
+
+                // Convert angular velocity to Euler angles in radians per second
+                //Vector3 euler = angularVelocity  ;
+
+                Vector3 degsPerSecond = targetAngularVelocityQ.ToEulerAnglesInRange180();// * 60f; 
+                degsPerSecond = (targetAngularVelocityQ * curRot).ToEulerAnglesInRange180() - curRot.ToEulerAnglesInRange180();
+                degsPerSecond *= 60;
+                if (bone == Bone_LeftLeg) {
+                    Vector3 prevEuler = db.bone_rotations[frameIdx - 1][i].eulerAngles.ToEulerAnglesInRange180();
+                    Vector3 curEuler = curr_bone_rotations[i].eulerAngles.ToEulerAnglesInRange180();
+                    Vector3 randomVelCalc = (curEuler - prevEuler) * 60f;
+                    Debug.Log($"Last frame rot: {prevEuler} cur rot: {curEuler} vel at 60fps: {randomVelCalc}  degsPerSecond:{degsPerSecond} targetAngularVelocityQ.eulerAngles: {targetAngularVelocityQ.eulerAngles} tq: {tq}");
+                }
+                Vector3 prevEuler2 = db.bone_rotations[frameIdx - 1][i].eulerAngles.ToEulerAnglesInRange180();
+                Vector3 curEuler2 = curr_bone_rotations[i].eulerAngles.ToEulerAnglesInRange180();
+                Vector3 randomVelCalc2 = (curEuler2 - prevEuler2) * 60f;
+                // Apply time step to c
+                //ab.SetDriveTargetVelocity(degsPerSecond);
+                ab.SetDriveTargetVelocity(targetAngularVelocity, curRot);
+                //ab.SetDriveTargetVelocity(Quaternion.AngleAxis(targetAngularVelocity.magnitude * Mathf.Rad2Deg, targetAngularVelocity).ToEulerAnglesInRange180());
             }
 
         }
 
     }
-
     public static database db;
     public static void teleportSimCharRoot(CharInfo simChar, Vector3 newKinCharPos, Vector3 simCharPosOffset)
     {

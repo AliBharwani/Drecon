@@ -1617,11 +1617,11 @@ MonoBehaviour:
   - {fileID: 5854466903530170736}
   - {fileID: 5490273468372067306}
   motionDB: {fileID: 0}
-  bone_rotations: []
   desired_velocity: {x: 0, y: 0, z: 0}
   ik_enabled: 1
   teleportedThisFixedUpdate: 0
   is_initalized: 0
+  synchronization_enabled: 1
   debug_always_max_speed: 0
   drawGizmos: 1
 --- !u!114 &6572924355493366906
