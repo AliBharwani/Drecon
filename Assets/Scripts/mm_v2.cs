@@ -519,12 +519,12 @@ public class mm_v2 : MonoBehaviour
             simulation_position = bone_positions[0];
             simulation_rotation = bone_rotations[0];
 
-            inertialize_root_adjust(
-                ref bone_offset_positions[0],
-                ref bone_positions[0],
-                ref bone_rotations[0],
-                bone_positions[0],
-                bone_rotations[0]);
+            //inertialize_root_adjust(
+            //    ref bone_offset_positions[0],
+            //    ref bone_positions[0],
+            //    ref bone_rotations[0],
+            //    bone_positions[0],
+            //    bone_rotations[0]);
         }
 
 
@@ -1307,13 +1307,8 @@ public class mm_v2 : MonoBehaviour
 
 
     // Compute forward kinematics for all joints
-    private void forward_kinematics_full(
-        //in Vector3[] local_bone_positions,
-        //in Quaternion[] local_bone_rotations,
-        //in int[] bone_parents
-        )
+    private void forward_kinematics_full()
     {
-
         //Vector3[] bone_pos = useBlending ? bone_positions : local_bone_positions;
         //Quaternion[] bone_rot = useBlending ? bone_rotations : local_bone_rotations;
         for (int i = 0; i < bone_parents.Length; i++)
@@ -1338,25 +1333,83 @@ public class mm_v2 : MonoBehaviour
 
     private void apply_global_pos_and_rot()
     {
-        //Debug.Log(numBones); // 23
         for (int i = 0; i < numBones; i++)
         {
             Transform t = boneToTransform[i];
-            //if (i == 1)
-            //{
-                //Quaternion rot = local_bone_rotations[i];
-                //Debug.Log($"Frame {frameIdx}: {rot.w}, {rot.x} , {rot.y} , {rot.z}");
-                //t.localPosition = local_bone_positions[i];
-                //t.position = global_bone_positions[i];
-            //}
-            //t.localRotation = local_bone_rotations[i];
-            //t.localRotation = Utils.to_unity_rot(local_bone_rotations[i]);
             t.position = global_bone_positions[i];
             t.rotation = global_bone_rotations[i];
         }
-        //boneToTransform[0].rotation *= Quaternion.AngleAxis( 180f, Vector3.forward);
     }
+    // --- Inference Time options
 
+    public  void clamp_pos_and_rot(Vector3 target_pos, Quaternion target_rot)
+    {
+        Vector3 adjusted_position = bone_positions[0];
+        Quaternion adjusted_rotation = bone_rotations[0];
+
+        adjusted_position = clamp_character_position(
+            adjusted_position,
+            target_pos,
+           _config.clampingMaxDistance);
+
+        //adjusted_rotation = clamp_character_rotation(
+        //    adjusted_rotation,
+        //    target_rot,
+        //    _config.clampingMaxAngle);
+
+        inertialize_root_adjust(
+            ref bone_offset_positions[0],
+            ref bone_positions[0],
+            ref bone_rotations[0],
+            adjusted_position,
+            adjusted_rotation);
+    }
+    Vector3 clamp_character_position(
+     Vector3 character_position,
+     Vector3 simulation_position,
+     float max_distance)
+    {
+        // If the character deviates too far from the simulation 
+        // position we need to clamp it to within the max distance
+        if ((character_position - simulation_position).magnitude > max_distance)
+        {
+            return max_distance*
+                (character_position - simulation_position).normalized + 
+                simulation_position;
+        }
+        else
+        {
+            return character_position;
+        }
+    }
+    Quaternion clamp_character_rotation(
+        Quaternion character_rotation,
+        Quaternion simulation_rotation,
+        float max_angle)
+    {
+        // If the angle between the character rotation and simulation 
+        // rotation exceeds the threshold we need to clamp it back
+        if (Quaternion.Angle(character_rotation, simulation_rotation) > max_angle)
+        {
+            // First, find the rotational difference between the two
+            Quaternion diff = Utils.quat_abs(Utils.quat_mul_inv(
+                character_rotation, simulation_rotation));
+
+            // We can then decompose it into angle and axis
+            float diff_angle; Vector3 diff_axis;
+            diff.ToAngleAxis(out diff_angle, out diff_axis);
+
+            // We then clamp the angle to within our bounds
+            diff_angle = Mathf.Clamp(diff_angle, -max_angle, max_angle);
+        
+            // And apply back the clamped rotation
+            return Utils.quat_from_angle_axis(diff_angle, diff_axis) * simulation_rotation;
+        }
+           else
+        {
+            return character_rotation;
+        }
+    }
     public static Quaternion[] identityQuatArray(int size)
     {
         Quaternion[] ret = new Quaternion[size];

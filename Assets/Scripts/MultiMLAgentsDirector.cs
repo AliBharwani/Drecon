@@ -64,7 +64,7 @@ public class MultiMLAgentsDirector : MonoBehaviour
         //Debug.Log($"{Time.frameCount} : MultiMLAgentsDirector updating");
 
         foreach (var director in directors)
-            director.calcAndSetRewards();
+            director.LateFixedUpdate();
         curStep++;
         if (curStep % reportMeanRewardEveryNSteps == 0)
         {

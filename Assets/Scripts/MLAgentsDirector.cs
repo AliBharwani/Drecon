@@ -429,13 +429,9 @@ public class MLAgentsDirector : Agent
             initialRotInverses = new Matrix4x4[_config.networkControlsAllJoints ? extendedfullDOFBones.Length : fullDOFBones.Length];
         }
         if (resetKinToSimOnFail)
-        {
             foreach(var col in simChar.trans.GetComponentsInChildren<ArticulationBody>())
-            {
-                var cr = col.gameObject.AddComponent<CollisionReporter>();
-                cr.director = this;
-            }
-        }
+                col.gameObject.AddComponent<CollisionReporter>().director = this;
+        
         curFixedUpdate = _config.EVALUATE_EVERY_K_STEPS - 1;
         resetData();
     }
@@ -539,7 +535,7 @@ public class MLAgentsDirector : Agent
         if (Time.time - lastProjectileLaunchtime < _config.LAUNCH_FREQUENCY)
             return;
         lastProjectileLaunchtime = Time.time;
-        projectileRB.mass = UnityEngine.Random.Range(.01f, 8f);
+        projectileRB.mass = UnityEngine.Random.Range(_config.PROJECTILE_MIN_WEIGHT, _config.PROJECTILE_MAX_WEIGHT);
         // To get XZ position, consider characters position on plane, pick random spot on unit cirlce,
         // and go RADIUS units towards that spot 
         // Y position is uniformly sampled from −0.5 m to 0.5 m, centered on the character’s CM
@@ -595,9 +591,11 @@ public class MLAgentsDirector : Agent
             }
     }
 
-    private void UpdateBoneObsState(bool updateVelocity, float dt, bool zeroVelocity = false)
+    private void UpdateBoneObsState(bool updateVelocity, float dt, bool zeroVelocity = false, bool updateKinOnly = false)
     {
         foreach (bool isKinChar in new bool[]{true, false}) {
+            if (updateKinOnly && !isKinChar)
+                continue;
             CharInfo curInfo = isKinChar ? kinChar : simChar;
             float[] copyInto = curInfo.boneState;
             int copyIdx = 0;
@@ -641,6 +639,23 @@ public class MLAgentsDirector : Agent
     internal float finalReward = 0f;
     internal int lastEpisodeEndingFrame = 0;
     private bool shouldEndThisFrame = false;
+    public void LateFixedUpdate()
+    {
+        calcAndSetRewards();
+        //UpdateSimCMData(updateVelocity);
+        //UpdateBoneSurfacePts(updateVelocity);
+
+        bool inInferenceMode = behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
+        if (!inInferenceMode)
+            return;
+        if (_config.clampKinCharToSim) {
+            Quaternion horizontalHeadingRotation = Quaternion.Euler(0f, simChar.trans.rotation.eulerAngles.y, 0f);
+            MMScript.clamp_pos_and_rot(new Vector3(simChar.cm.x, 0f, simChar.cm.z), horizontalHeadingRotation);
+        }
+        UpdateKinCMData(false);
+        UpdateBoneObsState(false, Time.fixedDeltaTime, false, true);
+        return;
+    }
     // returns TRUE if episode ended
     public bool calcAndSetRewards()
     {
@@ -669,7 +684,6 @@ public class MLAgentsDirector : Agent
             //if (debug)
                 //EditorApplication.isPaused = true;
 #endif
-
             return true;
         }
 #if UNITY_EDITOR
@@ -743,7 +757,7 @@ public class MLAgentsDirector : Agent
     float[] getState()
     {
 
-        Vector3 cmDistance = resolvePosInKinematicRefFrame(simChar.cm) ;
+        Vector3 cmDistance = resolvePosInKinematicRefFrame(simChar.cm);
         //bool endedEpisode = lastEpisodeEndingFrame >= (curFixedUpdate - 1);
         //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel} kinCMVelLastGetState: {kinCMVelLastGetState} simCMVelLastGetState: {simCMVelLastGetState}");
         Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinChar.cmVel);        
@@ -774,8 +788,8 @@ public class MLAgentsDirector : Agent
         if (state_idx != numObservations)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything, 6D: {_config.actionsAre6DRotations}");
 
-        //if (debug)
-        //    Utils.debugArray(state, $"{curFixedUpdate} state: ");
+        if (debug)
+            Utils.debugArray(state, $"{curFixedUpdate} state: ");
         return state;
 
     }

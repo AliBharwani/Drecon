@@ -7,12 +7,17 @@ using System.IO;
 
 public class ConfigWriter : MonoBehaviour
 {
+    [Header("CONFIG SETTINGS")]
     public string writeToFilePath = "";
     public string filename = "";
     public string loadFromFilePath = "";
 
-    // HYPER PARAMS
-    public float prob_to_change_inputs = .001f;
+    [Header("INFERENCE SETTINGS")]
+    public bool clampKinCharToSim;
+    public float clampingMaxDistance = .5f;
+    public float clampingMaxAngle = 20f;
+
+    [Header("PHYSICAL CHARACTER SETTINGS")]
     public int solverIterations = 32;
     public bool setDriveTargetVelocities;
     public bool noStrafing = false;
@@ -24,31 +29,42 @@ public class ConfigWriter : MonoBehaviour
     //public bool normalizeLimitedDOFOutputs = true;
     public bool normalizeRewardComponents = false;
     public bool networkControlsAllJoints = false;
-
-
+    public bool fullRangeEulerOutputs;
     public bool useGeodesicForAngleDiff = false;
     public float poseRewardMultiplier = 1f / 10f;
     public bool resetKinCharOnEpisodeEnd = false;
     public bool selfCollision;
     //public bool useUnnormalizedEulerOffsets = false;
+    [Header("TRAINING HYPERPARAM SETTINGS")]
     public int EVALUATE_EVERY_K_STEPS = 2;
     public int N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = 4;
     public float EPISODE_END_REWARD = -.5f;
     public int MAX_EPISODE_LENGTH_SECONDS = 20;
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
+    [Header("KINEMATIC CHARACTER SETTINGS")]
+    public float prob_to_change_inputs = .001f;
     public float simulationVelocityHalflife = .27f;
     public float simulation_rotation_halflife = .27f;
     public bool walkOnly = false;
+    public float searchTime = .2f;
     // PROJECTILE HYPER PARAMS
+    [Header("PROJECTILE SETTINGS")]
     public bool projectileTraining = true;
     public float LAUNCH_FREQUENCY = 1f;
     public  float LAUNCH_RADIUS = .66f;
     public  float LAUNCH_SPEED = 5f;
+    public float PROJECTILE_MAX_WEIGHT = 10f;
+    public float PROJECTILE_MIN_WEIGHT = 1f;
+    [Header("ARTICULATION BODY SETTINGS")]
     // Art body params
     public string[] boneToNames = new string[23];
     public  float[] boneToStiffness = new float[23];
     public bool useCapsuleFeet;
-    public float searchTime = .2f;
+    public List<MusclePower> MusclePowers;
+    public float forceLimit;
+    public float damping;
+    public float pGainMultiplier = 1f;
+    public bool rewardsInGUI;
 
     [System.Serializable]
     public class MusclePower
@@ -57,9 +73,6 @@ public class ConfigWriter : MonoBehaviour
         public Vector3 PowerVector;
     }
 
-    public List<MusclePower> MusclePowers;
-    public float forceLimit;
-    public  float damping;
 
     private static ConfigWriter _instance;
     public static ConfigWriter Instance { get { return _instance; } }
@@ -76,9 +89,7 @@ public class ConfigWriter : MonoBehaviour
         }
     }
 
-    public float pGainMultiplier = 1f;
-    public bool rewardsInGUI;
-    public bool fullRangeEulerOutputs;
+
 
     [ContextMenu("Multiply all stiffness values by pGainMultiplier")]
     public void multiplyAllStiffnessValues()

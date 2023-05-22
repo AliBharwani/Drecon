@@ -446,7 +446,9 @@ MonoBehaviour:
   writeToFilePath: ../results/AllJointsResetKin
   filename: unityconfig.json
   loadFromFilePath: ../results/AllJointsResetKin
-  prob_to_change_inputs: 0.001
+  clampKinCharToSim: 0
+  clampingMaxDistance: 0.5
+  clampingMaxAngle: 20
   solverIterations: 255
   setDriveTargetVelocities: 0
   noStrafing: 0
@@ -457,6 +459,7 @@ MonoBehaviour:
   adjust6DRots: 0
   normalizeRewardComponents: 0
   networkControlsAllJoints: 1
+  fullRangeEulerOutputs: 0
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 1
@@ -466,13 +469,17 @@ MonoBehaviour:
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  prob_to_change_inputs: 0.001
   simulationVelocityHalflife: 0.5
   simulation_rotation_halflife: 0.27
   walkOnly: 1
+  searchTime: 0.2
   projectileTraining: 1
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
+  PROJECTILE_MAX_WEIGHT: 10
+  PROJECTILE_MIN_WEIGHT: 1
   boneToNames:
   - Bone_Entity
   - Bone_Hips
@@ -522,7 +529,6 @@ MonoBehaviour:
   - 2000
   - 1000
   useCapsuleFeet: 0
-  searchTime: 0.2
   MusclePowers:
   - Bone: 1
     PowerVector: {x: 2000, y: 2000, z: 2000}
@@ -554,7 +560,6 @@ MonoBehaviour:
   damping: 100
   pGainMultiplier: 0.5
   rewardsInGUI: 0
-  fullRangeEulerOutputs: 0
 --- !u!4 &381966280
 Transform:
   m_ObjectHideFlags: 0
@@ -1212,6 +1217,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: kinematic char bigger feet
       objectReference: {fileID: 0}
+    - target: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1810728709180460642, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
       propertyPath: gen_inputs
       value: 0
@@ -1812,7 +1821,9 @@ MonoBehaviour:
   writeToFilePath: ../results/SetVelocitiesFixedEuler
   filename: unityconfig.json
   loadFromFilePath: ../results/BoneObsStateFixed-Euler
-  prob_to_change_inputs: 0.001
+  clampKinCharToSim: 1
+  clampingMaxDistance: 0.5
+  clampingMaxAngle: 20
   solverIterations: 256
   setDriveTargetVelocities: 1
   noStrafing: 1
@@ -1823,6 +1834,7 @@ MonoBehaviour:
   adjust6DRots: 0
   normalizeRewardComponents: 0
   networkControlsAllJoints: 0
+  fullRangeEulerOutputs: 0
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 1
@@ -1832,13 +1844,17 @@ MonoBehaviour:
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
+  prob_to_change_inputs: 0.001
   simulationVelocityHalflife: 0.6
   simulation_rotation_halflife: 0.6
   walkOnly: 1
-  projectileTraining: 1
+  searchTime: 0.2
+  projectileTraining: 0
   LAUNCH_FREQUENCY: 1
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
+  PROJECTILE_MAX_WEIGHT: 10
+  PROJECTILE_MIN_WEIGHT: 1
   boneToNames:
   - Bone_Entity
   - Bone_Hips
@@ -1888,7 +1904,6 @@ MonoBehaviour:
   - 2000
   - 1000
   useCapsuleFeet: 0
-  searchTime: 0.2
   MusclePowers:
   - Bone: 1
     PowerVector: {x: 1600, y: 1600, z: 1600}
@@ -1922,7 +1937,6 @@ MonoBehaviour:
   damping: 100
   pGainMultiplier: 0.8
   rewardsInGUI: 0
-  fullRangeEulerOutputs: 0
 --- !u!4 &1357924715
 Transform:
   m_ObjectHideFlags: 0
@@ -2209,7 +2223,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2090630088
 MonoBehaviour:
   m_ObjectHideFlags: 0
