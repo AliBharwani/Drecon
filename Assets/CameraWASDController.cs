@@ -15,9 +15,11 @@ public class CameraWASDController : MonoBehaviour
     KeyControl upKey, downKey, rightKey, leftKey;
     public float xSens = 400f;
     public float ySens = 100f;
+    public float screenSensitivity = 300f;
     float xRot, yRot;
 
-    Vector2 screenRot, targetScreenRot, screenRotVel;
+    Vector2 screenVel, screenAcc;
+
     public float screenRotHalflife= .1f;
     void Start()
     {
@@ -45,32 +47,11 @@ public class CameraWASDController : MonoBehaviour
 
         transform.position += positionDelta;
 
-        targetScreenRot += Mouse.current.delta.ReadValue() * Time.deltaTime;
-        SpringUtils.spring_character_update(screenRot, screenRotVel, targetScreenRot, screenRotHalflife, Time.deltaTime , out screenRot, out screenRotVel);
-
-        Vector2 mouseDelta = screenRotVel;
-        //mouseDelta.x *= xSens;
-        //mouseDelta.y *= ySens;
-        //mouseDelta.Normalize();
+        SpringUtils.spring_character_update(screenVel, screenAcc, Mouse.current.delta.ReadValue() * screenSensitivity * Time.deltaTime, screenRotHalflife, Time.deltaTime , out screenVel, out screenAcc);
+        Vector2 mouseDelta = screenVel;
         yRot += mouseDelta.x;
         xRot -= mouseDelta.y;
         xRot = Mathf.Clamp(xRot, -90f, 90f);
         transform.rotation = Quaternion.Euler(xRot, yRot, 0f);
-
-        //if (!Mouse.current.rightButton.isPressed)
-        //    return;
-
-        //Vector2 mouseDelta = Mouse.current.delta.ReadValue() * Time.deltaTime;
-        //mouseDelta.x *= xSens;
-        //mouseDelta.y *= ySens;
-        ////mouseDelta.Normalize();
-        ////mouseDelta *= mouseSensitivity * Time.fixedDeltaTime;
-        ////transform.Rotate(new Vector3(0f, mouseDelta.x, 0f));
-        //yRot += mouseDelta.x;
-        //xRot -= mouseDelta.y;
-        //xRot = Mathf.Clamp(xRot, -90f, 90f);
-        //transform.rotation = Quaternion.Euler(xRot, yRot, 0f);
-
-
     }
 }
