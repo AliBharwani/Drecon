@@ -43,6 +43,8 @@ public class ConfigWriter : MonoBehaviour
     public float ACTION_STIFFNESS_HYPERPARAM = .2f;
     [Header("KINEMATIC CHARACTER SETTINGS")]
     public float prob_to_change_inputs = .001f;
+    public bool useCustomInputGenerator = false;
+    public float inputGeneratorHalflife = .5f;
     public float simulationVelocityHalflife = .27f;
     public float simulation_rotation_halflife = .27f;
     public bool walkOnly = false;

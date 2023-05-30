@@ -173,6 +173,7 @@ public class mm_v2 : MonoBehaviour
     float time_since_last_move = 0f;
     float minimum_fixed_update_timer = 0f;
     public bool synchronization_enabled = false;
+    private InputGeneratorModule input_generator;
     void Awake()
     {
         Application.targetFrameRate = 60;
@@ -199,6 +200,8 @@ public class mm_v2 : MonoBehaviour
             feature_weight_trajectory_directions);
         numBones = motionDB.nbones();
         init(origin, Quaternion.identity);
+        input_generator = gameObject.AddComponent<InputGeneratorModule>();
+        input_generator.inputChangeHalflife = _config.inputGeneratorHalflife;
         is_initalized = true;
     }
 
@@ -360,18 +363,11 @@ public class mm_v2 : MonoBehaviour
         apply_global_pos_and_rot();
     }
 
-    bool should_gen_inputs()
+    bool should_change_generated_inputs()
     {
         if (!gen_inputs)
             return false;
         return Random.value <= _config.prob_to_change_inputs;
-        //time_since_last_check += Time.fixedDeltaTime;
-        //if (time_since_last_check > 1f / 60f)
-        //{
-        //    time_since_last_check = 0f;
-        //    return Random.value <= prob_to_change_inputs;
-        //}
-        //return false;
     }
     public bool debug_always_max_speed = false;
 
@@ -379,7 +375,7 @@ public class mm_v2 : MonoBehaviour
     {
         //Debug.Log("======================");
         //Debug.Log($"{Time.frameCount} : Kinematic character updated");
-        if (debug_move_every_second )// && Time.realtimeSinceStartup > 2f)
+        if (debug_move_every_second )
         {
             time_since_last_move += Time.fixedDeltaTime;
             if (time_since_last_move > minimum_fixed_update_timer)
@@ -390,19 +386,26 @@ public class mm_v2 : MonoBehaviour
         teleportedThisFixedUpdate = false;
         // Update if we are reading from user input (ie not generating random rotations) or we are
         // generating random inputs and every frame the user changes desires with P(.001)
-        if (should_gen_inputs()) {
+        if (should_change_generated_inputs())
+        {
             //Debug.Log("Genning new inputs!");
-            random_lstick_input = debug_always_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
+            if (_config.useCustomInputGenerator)
+                input_generator.changeDirection();
+            random_lstick_input = _config.useCustomInputGenerator ? input_generator.currentPosition : debug_always_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
             // Random chance of making desired rotation face direction of velocity  
             is_strafing = !_config.noStrafing && Random.value <= .5f;
             is_runbutton_pressed = !walk_only && Random.value <= .5f;
-            Vector2 rotation_vec = is_strafing ?  Random.insideUnitCircle : random_lstick_input;
-            desired_rotation =  Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y) ;
-        } else if (!gen_inputs && gamepad != null)
+            Vector2 rotation_vec = is_strafing ? Random.insideUnitCircle : random_lstick_input;
+            desired_rotation = Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y);
+        }
+        else if (!gen_inputs && gamepad != null)
         {
             is_strafing = gamepad.leftTrigger.isPressed;
             is_runbutton_pressed = gamepad.aButton.isPressed;
         }
+        else if (gen_inputs && _config.useCustomInputGenerator)
+            random_lstick_input = input_generator.currentPosition;
+
         desired_gait_update(Time.fixedDeltaTime);
         simulation_fwrd_speed = Mathf.Lerp(simulation_walk_fwrd_speed, simulation_run_fwrd_speed, desired_gait);
         simulation_side_speed = Mathf.Lerp(simulation_walk_side_speed, simulation_run_side_speed, desired_gait);

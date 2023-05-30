@@ -21,24 +21,22 @@ public static class SpringUtils
 
 
     public static void simple_spring_damper_exact(
-    ref float x,
-    ref float v,
-    in float x_goal,
-    in float halflife,
-    in float dt)
+        ref float x,
+        ref float v,
+        in float x_goal,
+        in float halflife,
+        in float dt)
     {
-    float y = halflife_to_damping(halflife) / 2.0f;
-    float j0 = x - x_goal;
-    float j1 = v + j0 * y;
-    float eydt = fast_negexp(y * dt);
+        float y = halflife_to_damping(halflife) / 2.0f;
+        float j0 = x - x_goal;
+        float j1 = v + j0 * y;
+        float eydt = fast_negexp(y * dt);
 
-    x = eydt* (j0 + j1* dt) + x_goal;
-    v = eydt* (v - j1* y*dt);
+        x = eydt* (j0 + j1* dt) + x_goal;
+        v = eydt* (v - j1* y*dt);
     }
 
-
-
-public static void spring_character_update(
+    public static void spring_character_update(
     //Vector2 x,
     Vector2 v,
     Vector2 a,
