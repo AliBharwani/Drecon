@@ -392,7 +392,8 @@ MonoBehaviour:
   simulated_handmade_char_prefab: {fileID: 8472335581407420909, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
   kinematic_handmade_char_prefab: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
   reportMeanRewardEveryNSteps: 10000
-  use_debug_mats: 0
+  kinUseDebugMats: 0
+  simUseDebugMats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
@@ -1186,7 +1187,8 @@ MonoBehaviour:
   simulated_handmade_char_prefab: {fileID: 8472335581407420909, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
   kinematic_handmade_char_prefab: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
   reportMeanRewardEveryNSteps: 10000
-  use_debug_mats: 1
+  kinUseDebugMats: 0
+  simUseDebugMats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
@@ -1318,7 +1320,8 @@ MonoBehaviour:
   simulated_handmade_char_prefab: {fileID: 8472335581407420909, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
   kinematic_handmade_char_prefab: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
   reportMeanRewardEveryNSteps: 10000
-  use_debug_mats: 0
+  kinUseDebugMats: 1
+  simUseDebugMats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
@@ -1362,7 +1365,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 0de76ef088b28234f91c7e6e9a755796, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: ebeea912d1661a147a8dd9d18a665b4d, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -1612,7 +1615,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409498, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_RootOrder
@@ -1727,6 +1730,7 @@ GameObject:
   - component: {fileID: 1276295763}
   - component: {fileID: 1276295762}
   - component: {fileID: 1276295761}
+  - component: {fileID: 1276295765}
   m_Layer: 0
   m_Name: CameraController
   m_TagString: Untagged
@@ -1822,11 +1826,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b10ea6c9344169244921b228f517bec9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horizontalVelPerSecond: 2
-  verticalVelPerSec: 2
+  horizontalVelPerSecond: 6
+  verticalVelPerSec: 6
   xSens: 400
   ySens: 400
-  screenRotHalflife: 0.1
+  screenSensitivity: 20
+  screenRotHalflife: 0.08
 --- !u!4 &1276295764
 Transform:
   m_ObjectHideFlags: 0
@@ -1842,6 +1847,28 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1276295765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1276295760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 302f2e1c6d45b4e48b06d3acc3ab4d8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  mass: 7
+  gravity: 1
+  force: 100
+  forceType: 1
+  continousFire: 0
+  continousFireSleepTime: 1
+  offset: 0.5
+  spawnWithTorque: 0
+  torqueForce: 1
 --- !u!1 &1313389652
 GameObject:
   m_ObjectHideFlags: 0
@@ -1947,17 +1974,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/AAOutputIsBase
+  writeToFilePath: ../results/AARunningEnabled+CustomInputs
   filename: unityconfig.json
   loadFromFilePath: ../results/BoneObsStateFixed-Euler
-  clampKinCharToSim: 0
+  clampKinCharToSim: 1
   clampingMaxDistance: 0.5
   clampingMaxAngle: 20
   solverIterations: 256
   setDriveTargetVelocities: 1
   noStrafing: 1
   setRotsDirectly: 0
-  outputIsBase: 1
+  outputIsBase: 0
   actionsAreEulerRotations: 0
   actionsAre6DRotations: 0
   adjust6DRots: 0
@@ -1973,12 +2000,12 @@ MonoBehaviour:
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
   ACTION_STIFFNESS_HYPERPARAM: 0.2
-  prob_to_change_inputs: 0.005
+  prob_to_change_inputs: 0.001
   useCustomInputGenerator: 1
   inputGeneratorHalflife: 0.5
   simulationVelocityHalflife: 0.8
   simulation_rotation_halflife: 0.6
-  walkOnly: 0
+  walkOnly: 1
   searchTime: 0.2
   projectileTraining: 0
   LAUNCH_FREQUENCY: 3
@@ -2315,7 +2342,8 @@ MonoBehaviour:
   simulated_handmade_char_prefab: {fileID: 8472335581407420909, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
   kinematic_handmade_char_prefab: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
   reportMeanRewardEveryNSteps: 10000
-  use_debug_mats: 1
+  kinUseDebugMats: 0
+  simUseDebugMats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1

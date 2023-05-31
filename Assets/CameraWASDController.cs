@@ -6,8 +6,6 @@ using UnityEngine.InputSystem.Controls;
 
 public class CameraWASDController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    bool isStrafing = true;
     //public float velocityPerSecond = 2f;
     public float horizontalVelPerSecond = 2f;
     public float verticalVelPerSec = 2f;

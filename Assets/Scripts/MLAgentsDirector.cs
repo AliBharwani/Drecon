@@ -63,7 +63,9 @@ public class MLAgentsDirector : Agent
     int numActions;
     int numObservations;
     database motionDB;
-    public bool use_debug_mats = false;
+    public bool kinUseDebugMats = false;
+    public bool simUseDebugMats = false;
+
     // Used for normalization
     private Vector3 lastKinRootPos = Vector3.zero;
 
@@ -345,7 +347,7 @@ public class MLAgentsDirector : Agent
     private Vector3 rightfootColliderCenter;
     void customInit()
     {
-        if (use_debug_mats)
+        if (kinUseDebugMats || simUseDebugMats)
         {
             Material RedMatTransparent, WhiteMatTransparent;
 #if UNITY_EDITOR
@@ -355,8 +357,10 @@ public class MLAgentsDirector : Agent
             RedMatTransparent = Resources.Load<Material>("RedMatTransparent");
             WhiteMatTransparent = Resources.Load<Material>("WhiteMatTransparent");
 #endif
-            kinematicCharObj.GetComponent<ArtBodyTester>().set_all_material(WhiteMatTransparent);
-            simulatedCharObj.GetComponent<ArtBodyTester>().set_all_material(RedMatTransparent);
+            if (kinUseDebugMats)
+                kinematicCharObj.GetComponent<ArtBodyTester>().set_all_material(WhiteMatTransparent);
+            if (simUseDebugMats)
+                simulatedCharObj.GetComponent<ArtBodyTester>().set_all_material(RedMatTransparent);
         }
 
         MMScript = kinematicCharObj.GetComponent<mm_v2>();
