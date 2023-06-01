@@ -21,7 +21,7 @@ public class CameraWASDController : MonoBehaviour
     public float screenRotHalflife= .1f;
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
         kb = Keyboard.current;
         upKey = kb.wKey;
         downKey = kb.sKey;
@@ -44,7 +44,13 @@ public class CameraWASDController : MonoBehaviour
         positionDelta.y = yDelta * verticalVelPerSec * Time.deltaTime;
 
         transform.position += positionDelta;
+        if (kb.capsLockKey.isPressed)
+            transform.position = new Vector3(0f, 1f, 1f);
+        if (kb.backquoteKey.wasPressedThisFrame)
+            Cursor.lockState = CursorLockMode.None;
 
+        if (Cursor.lockState == CursorLockMode.None)
+            return;
         SpringUtils.spring_character_update(screenVel, screenAcc, Mouse.current.delta.ReadValue() * screenSensitivity * Time.deltaTime, screenRotHalflife, Time.deltaTime , out screenVel, out screenAcc);
         Vector2 mouseDelta = screenVel;
         yRot += mouseDelta.x;

@@ -8,7 +8,7 @@ public class mm_v2 : MonoBehaviour
 {
     public bool gen_inputs = true;
     public bool walk_only = false;
-    public float MAX_WANDERING_RADIUS = 10f;
+    //public float MAX_WANDERING_RADIUS = 10f;
     private ConfigWriter _config;
 
     public enum Bones
@@ -1122,7 +1122,7 @@ public class mm_v2 : MonoBehaviour
 
     private bool is_out_of_bounds(Vector3 pos)
     {
-        return Vector3.Distance(origin, pos) > MAX_WANDERING_RADIUS;
+        return Vector3.Distance(origin, pos) > _config.MAX_WANDERING_RADIUS;
     }
 
     private Vector3 get_world_space_position()

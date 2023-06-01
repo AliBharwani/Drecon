@@ -17,6 +17,7 @@ public class ProjectileCannon : MonoBehaviour
     public float torqueForce = 1f;
     float lastFireTime = -1f;
 
+    public float projectileScale = .15f;
     Mouse mouse;
     GameObject projectileInstance;
     Rigidbody projectileRb;
@@ -27,7 +28,12 @@ public class ProjectileCannon : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (mouse.leftButton.wasPressedThisFrame || (continousFire && (Time.time - lastFireTime > continousFireSleepTime))) { 
+        projectileScale *= Keyboard.current.eKey.isPressed ? 1.05f : 1f;
+        projectileScale *= Keyboard.current.qKey.isPressed ?  1f / 1.05f : 1f;
+
+        if (mouse.leftButton.wasPressedThisFrame || (continousFire && (Time.time - lastFireTime > continousFireSleepTime))) {
+            if (mouse.leftButton.wasPressedThisFrame)
+                Cursor.lockState = CursorLockMode.Locked;
             fireProjectile();
             lastFireTime = Time.time;
         }
@@ -47,6 +53,7 @@ public class ProjectileCannon : MonoBehaviour
 
         Vector3 forward = transform.forward;
         projectileInstance.transform.position = transform.position + forward * offset;
+        projectileInstance.transform.localScale = Vector3.one * projectileScale;
         projectileRb.AddForce(forward * force, forceType);
         if (spawnWithTorque)
             projectileRb.AddTorque(new Vector3(Random.value, Random.value, Random.value).normalized * torqueForce, forceType);

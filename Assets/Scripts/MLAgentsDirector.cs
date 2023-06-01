@@ -55,7 +55,7 @@ public class MLAgentsDirector : Agent
     public int reportMeanRewardEveryNSteps = 10000;
     private mm_v2 MMScript;
     private SimCharController SimCharController;
-    private int nbodies; 
+    private int nbodies;
     private int curFixedUpdate = -1;
     private int lastSimCharTeleportFixedUpdate = -1;
 
@@ -70,7 +70,7 @@ public class MLAgentsDirector : Agent
     private Vector3 lastKinRootPos = Vector3.zero;
 
     [HideInInspector]
-    public static mm_v2.Bones[] stateBones = new mm_v2.Bones[] 
+    public static mm_v2.Bones[] stateBones = new mm_v2.Bones[]
     {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
     [HideInInspector]
     public static mm_v2.Bones[] fullDOFBones = new mm_v2.Bones[]
@@ -102,7 +102,7 @@ public class MLAgentsDirector : Agent
     internal Collider projectileCollider;
     internal Rigidbody projectileRB;
     private float lastProjectileLaunchtime = 0f;
-    public  bool debug = false;
+    public bool debug = false;
     public bool updateVelOnTeleport = true;
     public bool resetKinToSimOnFail = false;
     // Reward Normalizers 
@@ -121,15 +121,20 @@ public class MLAgentsDirector : Agent
     {
 
         Quaternion[] curRotations = MMScript.bone_rotations;
-
         mm_v2.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
         int actionIdx = 0;
-        if (_config.actionsAre6DRotations)
-            applyActionsWith6DRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
-        else if (_config.actionsAreEulerRotations)
-            applyActionsAsEulerRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
-        else
-            applyActionsAsAxisAngleRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+        switch (_config.actionRotType)
+        {
+            case ActionRotationType.AxisAngle:
+                applyActionsAsAxisAngleRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                break;
+            case ActionRotationType.Euler:
+                applyActionsAsEulerRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                break;
+            case ActionRotationType.SixD:
+                applyActionsWith6DRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                break;
+        }
 
         mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
 
@@ -156,7 +161,7 @@ public class MLAgentsDirector : Agent
             {
                 var scale = zDrive.upperLimit - zDrive.lowerLimit;
                 float angle = output * scale;
-                zDrive.target =  targetRotationInJointSpace.z + angle;
+                zDrive.target = targetRotationInJointSpace.z + angle;
                 ab.zDrive = zDrive;
             }
         }
@@ -171,22 +176,17 @@ public class MLAgentsDirector : Agent
         if (_config.setDriveTargetVelocities)
             for (int i = 1; i < 23; i++)
                 simChar.boneToArtBody[i].SetDriveTargetVelocity(MMScript.bone_angular_velocities[i], curRotations[i]);
-            
+
     }
-    bool isFirstAction = true;
     // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
     // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
+        bool actionsAre6D = _config.actionRotType == ActionRotationType.SixD;
         float[] curActions = actionBuffers.ContinuousActions.Array;
-        if (_config.actionsAre6DRotations && isFirstAction)
-        {
-            setFirstActionsAsIdentityRots(curActions);
-            isFirstAction = false;
-        }
         float[] finalActions = new float[numActions];
         for (int i = 0; i < numActions; i++)
-           finalActions[i] = _config.ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - _config.ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
+            finalActions[i] = _config.ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - _config.ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
         prevActionOutput = finalActions;
         if (debug)
         {
@@ -198,8 +198,8 @@ public class MLAgentsDirector : Agent
             {
                 mm_v2.Bones bone = fullDOFBonesToUse[i];
                 Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
-                debugStr.Append($"{bone.ToString().Substring(5)}: {output} " + (_config.actionsAre6DRotations ? $"{ new Vector3(curActions[actionIdx + 3], curActions[actionIdx + 4], curActions[actionIdx + 5])} " : ""));
-                actionIdx += _config.actionsAre6DRotations ? 6 : 3;
+                debugStr.Append($"{bone.ToString().Substring(5)}: {output} " + (actionsAre6D ? $"{ new Vector3(curActions[actionIdx + 3], curActions[actionIdx + 4], curActions[actionIdx + 5])} " : ""));
+                actionIdx += actionsAre6D ? 6 : 3;
             }
             mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
             for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
@@ -211,18 +211,6 @@ public class MLAgentsDirector : Agent
             Debug.Log(debugStr.ToString());
         }
         applyActions(finalActions);
-    }
-    private void setFirstActionsAsIdentityRots(float[] actions)
-    {
-        mm_v2.Bones[] extendedBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
-        int actionIdx = 0;
-        for(int i = 0; i < extendedBonesToUse.Length; i++)
-        {
-            Vector3 v1 = new Vector3(actions[actionIdx++], actions[actionIdx++], actions[actionIdx++]);
-            Vector3 v2 = new Vector3(actions[actionIdx++], actions[actionIdx++], actions[actionIdx++]);
-            initialRotInverses[i] = ArtBodyUtils.MatrixFrom6DRepresentation(v1, v2).transpose;
-            //Debug.Log($"Initial geodesics for {i}: {ArtBodyUtils.geodesicBetweenTwoRotationMatrices(Matrix4x4.identity, initialRotInverses[i].transpose)}");
-        }
     }
 
     private void applyActionsAsAxisAngleRotations(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
@@ -239,7 +227,7 @@ public class MLAgentsDirector : Agent
             //angle = (angle * 120) - 180;
             //Vector3 normalizedOutput = output.normalized;
             Quaternion offset = Quaternion.AngleAxis(angle, output);
-            Quaternion final = _config.setRotsDirectly  ? offset : _config.outputIsBase ? curRotations[boneIdx]  * offset : offset * curRotations[boneIdx] ;
+            Quaternion final = _config.setRotsDirectly ? offset : _config.outputIsBase ? curRotations[boneIdx] * offset : offset * curRotations[boneIdx];
             ab.SetDriveRotation(final);
         }
 
@@ -259,12 +247,12 @@ public class MLAgentsDirector : Agent
             var xdrive = ab.xDrive;
             scale = (xdrive.upperLimit - xdrive.lowerLimit) / 2f;
             midpoint = xdrive.lowerLimit + scale;
-            float outputX = _config.setRotsDirectly ? (output.x * scale) + midpoint : output.x * scale*2;
+            float outputX = _config.setRotsDirectly ? (output.x * scale) + midpoint : output.x * scale * 2;
             if (_config.fullRangeEulerOutputs)
             {
                 outputX = output.x * 180f;
             }
-            xdrive.target = _config.setRotsDirectly ? outputX :  targetRotationInJointSpace.x + outputX;
+            xdrive.target = _config.setRotsDirectly ? outputX : targetRotationInJointSpace.x + outputX;
             ab.xDrive = xdrive;
 
             var ydrive = ab.yDrive;
@@ -286,10 +274,11 @@ public class MLAgentsDirector : Agent
             {
                 outputZ = output.z * 180f;
             }
-            zdrive.target = _config.setRotsDirectly ? outputZ :  targetRotationInJointSpace.z + outputZ;
-            ab.zDrive = zdrive;    
+            zdrive.target = _config.setRotsDirectly ? outputZ : targetRotationInJointSpace.z + outputZ;
+            ab.zDrive = zdrive;
         }
     }
+
     private void applyActionsWith6DRotations(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
         for (int i = 0; i < fullDOFBonesToUse.Length; i++)
@@ -299,13 +288,23 @@ public class MLAgentsDirector : Agent
             Vector3 outputV1 = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
             Vector3 outputV2 = new Vector3(finalActions[actionIdx + 3], finalActions[actionIdx + 4], finalActions[actionIdx + 5]);
             actionIdx += 6;
+            Quaternion newTargetRot;
             //Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i], _config.adjust6DRots);
-            Matrix4x4 networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
-            Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
-            Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
-            Quaternion newTargetRot =  Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
-            //Quaternion offset = ArtBodyUtils.RotateObjectWithOrthonormalVector(outputV1, outputV2);
-            //Quaternion newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
+            if (_config.sixDRotMethod == SixDRotationMethod.RotateObjectWithOrthonormalVector)
+            {
+                Matrix4x4 networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
+                Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
+                Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
+                newTargetRot = Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
+            }
+            else if (_config.sixDRotMethod == SixDRotationMethod.RotateObjectWithOrthonormalVector)
+            {
+                Quaternion offset = ArtBodyUtils.RotateObjectWithOrthonormalVector(outputV1, outputV2);
+                newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
+            }
+            else
+                newTargetRot = Quaternion.identity;
+
             ab.SetDriveRotation(newTargetRot);
             //ab.SetDriveRotation(newTargetRot.normalized);
         }
@@ -420,18 +419,7 @@ public class MLAgentsDirector : Agent
         behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         numActions = behaviorParameters.BrainParameters.ActionSpec.NumContinuousActions;
         resetKinToSimOnFail &= behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
-        //if (behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly)
-        //    Debug.Log($"{behaviorParameters.BrainParameters.Norm}");
-        //if (_config.networkControlsAllJoints)
-        //    numActions = (extendedfullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + extendedLimitedDOFBones.Length; // 40 or 76
-        //else 
-        //    numActions = (fullDOFBones.Length * (_config.actionsAre6DRotations ? 6 : 3)) + limitedDOFBones.Length; // 25 or 44
-        //Debug.Log($"numActions: {numActions}");
         numObservations = 88 + numActions; // 111 or 132 or 128 or 164
-        if (_config.actionsAre6DRotations)
-        {
-            initialRotInverses = new Matrix4x4[_config.networkControlsAllJoints ? extendedfullDOFBones.Length : fullDOFBones.Length];
-        }
         if (resetKinToSimOnFail)
             foreach(var col in simChar.trans.GetComponentsInChildren<ArticulationBody>())
                 col.gameObject.AddComponent<CollisionReporter>().director = this;
@@ -462,8 +450,6 @@ public class MLAgentsDirector : Agent
         UpdateBoneObsState(false, Time.fixedDeltaTime, true);
         UpdateBoneSurfacePts(false);
     }
-    Matrix4x4[] initialRotInverses;
-
 
     public void Awake()
     {
@@ -639,7 +625,7 @@ public class MLAgentsDirector : Agent
     }
 
 
-    private float meanReward = 0f;
+    //private float meanReward = 0f;
     internal float finalReward = 0f;
     internal int lastEpisodeEndingFrame = 0;
     private bool shouldEndThisFrame = false;
@@ -679,7 +665,7 @@ public class MLAgentsDirector : Agent
             //updateMeanReward(-.5f);
             SetReward(_config.EPISODE_END_REWARD);
             //Debug.Log("=================================================");
-            Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
+            Debug.Log($"{Time.frameCount}: Calling end episode on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
             //Debug.Log("=================================================");
             lastEpisodeEndingFrame = curFixedUpdate;
             shouldEndThisFrame = false;
@@ -790,7 +776,7 @@ public class MLAgentsDirector : Agent
             state[state_idx++] = prevActionOutput[i];
    
         if (state_idx != numObservations)
-            throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything, 6D: {_config.actionsAre6DRotations}");
+            throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything");
 
         if (debug)
             Utils.debugArray(state, $"{curFixedUpdate} state: ");

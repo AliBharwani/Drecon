@@ -51,10 +51,11 @@ public class MultiMLAgentsDirector : MonoBehaviour
     {
         GameObject obj;
         //obj = _config.networkControlsAllJoints ? Instantiate(modelAllJointsDirector) : _config.actionsAre6DRotations ? Instantiate(model6DDirector) : Instantiate(modelDirector);
+        bool actionsAre6D = _config.actionRotType == ActionRotationType.SixD;
         if (_config.networkControlsAllJoints)
-            obj = _config.actionsAre6DRotations ? Instantiate(modelAllJointsDirector) : Instantiate(modelAllJoints3DDirector);
+            obj = actionsAre6D ? Instantiate(modelAllJointsDirector) : Instantiate(modelAllJoints3DDirector);
         else
-            obj = _config.actionsAre6DRotations ? Instantiate(model6DDirector) : Instantiate(modelDirector);
+            obj = actionsAre6D ? Instantiate(model6DDirector) : Instantiate(modelDirector);
         MLAgentsDirector director = obj.GetComponent<MLAgentsDirector>();
         obj.SetActive(true);
         return director;

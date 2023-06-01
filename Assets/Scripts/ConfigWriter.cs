@@ -1,10 +1,19 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using System.IO;
+public enum SixDRotationMethod
+{
+    TRSTimesMatrix,
+    RotateObjectWithOrthonormalVector,
+}
 
+// The type of rotation the action outputs are formatted as
+public enum ActionRotationType
+{
+    Euler,
+    AxisAngle,
+    SixD,
+}
 public class ConfigWriter : MonoBehaviour
 {
     [Header("CONFIG SETTINGS")]
@@ -23,9 +32,10 @@ public class ConfigWriter : MonoBehaviour
     public bool noStrafing = false;
     public bool setRotsDirectly = false;
     public bool outputIsBase = false;
-    public bool actionsAreEulerRotations = true;
-    public bool actionsAre6DRotations = false;
-    public bool adjust6DRots = false;
+    //public bool actionsAreEulerRotations = true;
+    //public bool actionsAre6DRotations = false;
+    public ActionRotationType actionRotType;
+    public SixDRotationMethod sixDRotMethod;
     //public bool normalizeLimitedDOFOutputs = true;
     public bool normalizeRewardComponents = false;
     public bool networkControlsAllJoints = false;
@@ -49,6 +59,7 @@ public class ConfigWriter : MonoBehaviour
     public float simulation_rotation_halflife = .27f;
     public bool walkOnly = false;
     public float searchTime = .2f;
+    public float MAX_WANDERING_RADIUS = 50f;
     // PROJECTILE HYPER PARAMS
     [Header("PROJECTILE SETTINGS")]
     public bool projectileTraining = true;
@@ -133,6 +144,15 @@ public class ConfigWriter : MonoBehaviour
     public void loadConfig()
     {
         string filepath = Application.dataPath + @"/" + loadFromFilePath + @"/" + filename;
+        string json = File.ReadAllText(filepath);
+        JsonUtility.FromJsonOverwrite(json, this);
+    }
+
+
+    [ContextMenu("Reset current config")]
+    public void resetConfig()
+    {
+        string filepath = Application.dataPath + @"/" + writeToFilePath + @"/" + filename;
         string json = File.ReadAllText(filepath);
         JsonUtility.FromJsonOverwrite(json, this);
     }
