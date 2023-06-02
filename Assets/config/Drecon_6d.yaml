@@ -6,7 +6,7 @@ behaviors:
       buffer_size: 40960
       learning_rate: 0.0003
       beta: 0.005
-      epsilon: 0.2
+      epsilon: 0.25
       lambd: 0.95
       num_epoch: 3
       learning_rate_schedule: constant

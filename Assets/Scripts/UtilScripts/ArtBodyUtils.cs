@@ -62,7 +62,7 @@ public static class ArtBodyUtils
         return rotation;
     }
 
-    public static Quaternion From6DRepresentation(Vector3 v1, Vector3 v2, ref Matrix4x4 adjustmentMat, bool useAdjustmentMat)
+    public static Quaternion QuatFrom6DRepresentation(Vector3 v1, Vector3 v2)
     {
         // Apply Gram-Schmidt process treating v1 - v2 as columns of new rotation matrix
         Vector3 e1 = v1.normalized;
@@ -88,11 +88,6 @@ public static class ArtBodyUtils
         mat[0, 2] = e3.x;
         mat[1, 2] = e3.y;
         mat[2, 2] = e3.z;
-        if (adjustmentMat != null && useAdjustmentMat)
-        {
-            //Debug.Log($"Geodesic between identity and unadjusted: {geodesicBetweenTwoRotationMatrices(Matrix4x4.identity, mat, true)} adjusted: {geodesicBetweenTwoRotationMatrices(Matrix4x4.identity, mat * adjustmentMat, true)} v1: {v1} v2: {v2} e1: {e1} e2: {e2} e3: {e3} ");
-            mat = mat * adjustmentMat;
-        }
 
         float m00 = mat[0, 0];
         float m10 = mat[1, 0];
@@ -144,7 +139,7 @@ public static class ArtBodyUtils
         Quaternion q = new Quaternion(qx, qy, qz, qw);
         return q.normalized;
     }
-    public static Matrix4x4 From6DRepresentation(Vector3 v1, Vector3 v2)
+    public static Matrix4x4 MatFrom6DRepresentation(Vector3 v1, Vector3 v2)
     {
         // Apply Gram-Schmidt process treating v1 - v2 as columns of new rotation matrix
         Vector3 e1 = v1.normalized;

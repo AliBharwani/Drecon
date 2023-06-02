@@ -46,7 +46,7 @@ public class CameraWASDController : MonoBehaviour
         transform.position += positionDelta;
         if (kb.capsLockKey.isPressed)
             transform.position = new Vector3(0f, 1f, 1f);
-        if (kb.backquoteKey.wasPressedThisFrame)
+        if (kb.backquoteKey.wasPressedThisFrame || kb.escapeKey.wasPressedThisFrame)
             Cursor.lockState = CursorLockMode.None;
 
         if (Cursor.lockState == CursorLockMode.None)

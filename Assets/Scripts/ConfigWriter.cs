@@ -5,6 +5,7 @@ public enum SixDRotationMethod
 {
     TRSTimesMatrix,
     RotateObjectWithOrthonormalVector,
+    MatrixToQuat,
 }
 
 // The type of rotation the action outputs are formatted as
@@ -13,6 +14,7 @@ public enum ActionRotationType
     Euler,
     AxisAngle,
     SixD,
+    Exp,
 }
 public class ConfigWriter : MonoBehaviour
 {
@@ -25,6 +27,7 @@ public class ConfigWriter : MonoBehaviour
     public bool clampKinCharToSim;
     public float clampingMaxDistance = .5f;
     public float clampingMaxAngle = 20f;
+    public bool useSkinnedMesh = false;
 
     [Header("PHYSICAL CHARACTER SETTINGS")]
     public int solverIterations = 32;
@@ -35,6 +38,7 @@ public class ConfigWriter : MonoBehaviour
     //public bool actionsAreEulerRotations = true;
     //public bool actionsAre6DRotations = false;
     public ActionRotationType actionRotType;
+    public float alphaForExpMap = 120f;
     public SixDRotationMethod sixDRotMethod;
     //public bool normalizeLimitedDOFOutputs = true;
     public bool normalizeRewardComponents = false;
@@ -135,7 +139,16 @@ public class ConfigWriter : MonoBehaviour
     [ContextMenu("Write out config file to current config name ")]
     public void writeCurrentConfig()
     {
-        string filepath = Application.dataPath + @"/" +  writeToFilePath + @"/" +  filename;
+        string folderpath = Application.dataPath + @"/" + writeToFilePath;
+        Debug.Log($"folderpath: {folderpath}");
+        string filepath = folderpath + @"/" + filename;
+        // Check if the folder exists
+        if (!Directory.Exists(folderpath))
+        {
+            // Create the folder
+            Directory.CreateDirectory(folderpath);
+            Debug.Log("Folder created.");
+        }
         string json = JsonUtility.ToJson(this);
         File.WriteAllText(filepath, json);
     }

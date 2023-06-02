@@ -133,6 +133,9 @@ public class MLAgentsDirector : Agent
                 break;
             case ActionRotationType.SixD:
                 applyActionsWith6DRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                break; 
+            case ActionRotationType.Exp:
+                applyActionsAsExp(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
                 break;
         }
 
@@ -212,6 +215,21 @@ public class MLAgentsDirector : Agent
         }
         applyActions(finalActions);
     }
+    private void applyActionsAsExp(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
+    {
+
+        for (int i = 0; i < fullDOFBonesToUse.Length; i++)
+        {
+            int boneIdx = (int)fullDOFBonesToUse[i];
+            ArticulationBody ab = simChar.boneToArtBody[boneIdx];
+            Vector3 output = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
+            actionIdx += 3;
+            Quaternion offset = Utils.quat_exp(output * _config.alphaForExpMap / 2f);
+            Quaternion final = _config.setRotsDirectly ? offset : _config.outputIsBase ? curRotations[boneIdx] * offset : offset * curRotations[boneIdx];
+            ab.SetDriveRotation(final);
+        }
+
+    }
 
     private void applyActionsAsAxisAngleRotations(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
@@ -290,9 +308,9 @@ public class MLAgentsDirector : Agent
             actionIdx += 6;
             Quaternion newTargetRot;
             //Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i], _config.adjust6DRots);
-            if (_config.sixDRotMethod == SixDRotationMethod.RotateObjectWithOrthonormalVector)
+            if (_config.sixDRotMethod == SixDRotationMethod.TRSTimesMatrix)
             {
-                Matrix4x4 networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2);
+                Matrix4x4 networkAdjustment = ArtBodyUtils.MatFrom6DRepresentation(outputV1, outputV2);
                 Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
                 Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
                 newTargetRot = Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
@@ -300,6 +318,11 @@ public class MLAgentsDirector : Agent
             else if (_config.sixDRotMethod == SixDRotationMethod.RotateObjectWithOrthonormalVector)
             {
                 Quaternion offset = ArtBodyUtils.RotateObjectWithOrthonormalVector(outputV1, outputV2);
+                newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
+            }
+            else if (_config.sixDRotMethod == SixDRotationMethod.MatrixToQuat)
+            {
+                Quaternion offset = ArtBodyUtils.QuatFrom6DRepresentation(outputV1, outputV2);
                 newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
             }
             else
@@ -358,8 +381,19 @@ public class MLAgentsDirector : Agent
 #endif
             if (kinUseDebugMats)
                 kinematicCharObj.GetComponent<ArtBodyTester>().set_all_material(WhiteMatTransparent);
-            if (simUseDebugMats)
+            if (simUseDebugMats && !_config.useSkinnedMesh)
                 simulatedCharObj.GetComponent<ArtBodyTester>().set_all_material(RedMatTransparent);
+        }
+        if (_config.useSkinnedMesh)
+        {
+            foreach (var rend in simulatedCharObj.GetComponentsInChildren<Renderer>())
+                rend.enabled = false; //   (false);
+            var skin = simulatedCharObj.GetComponentInChildren<SkinnedMeshRenderer>(true);
+            if (skin != null)
+            {
+                skin.gameObject.SetActive(true);
+                skin.enabled = true;
+            }
         }
 
         MMScript = kinematicCharObj.GetComponent<mm_v2>();
