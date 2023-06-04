@@ -21,6 +21,7 @@ public class InputGeneratorModule : MonoBehaviour
 
     public void changeDirection()
     {
-        targetPosition = Random.value < .01f ? new Vector2() : Random.insideUnitCircle;
+        targetPosition = Random.value < .01f ?  Vector2.zero : Random.insideUnitCircle;
+        //Debug.Log($"New target: {targetPosition}");
     }
 }

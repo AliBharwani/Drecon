@@ -563,6 +563,7 @@ MonoBehaviour:
     PowerVector: {x: 2000, y: 2000, z: 2000}
   forceLimit: 3.402823e+38
   damping: 100
+  dampingScalesWithStiffness: 0
   pGainMultiplier: 0.5
   rewardsInGUI: 0
 --- !u!4 &381966280
@@ -1484,9 +1485,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 9c8640535d5d024419b5731370d7711f, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: ebeea912d1661a147a8dd9d18a665b4d, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2099,10 +2100,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/ExpMap
+  writeToFilePath: ../results/AARunningEnabled+CustomInputs
   filename: unityconfig.json
-  loadFromFilePath: ../results/EulerLongerHorizon
-  clampKinCharToSim: 0
+  loadFromFilePath: ../results/BoneObsStateFixed-Euler
+  clampKinCharToSim: 1
   clampingMaxDistance: 0.5
   clampingMaxAngle: 20
   useSkinnedMesh: 0
@@ -2111,7 +2112,7 @@ MonoBehaviour:
   noStrafing: 1
   setRotsDirectly: 0
   outputIsBase: 0
-  actionRotType: 3
+  actionRotType: 1
   alphaForExpMap: 120
   sixDRotMethod: 0
   normalizeRewardComponents: 0
@@ -2133,7 +2134,7 @@ MonoBehaviour:
   simulation_rotation_halflife: 0.6
   walkOnly: 0
   searchTime: 0.2
-  MAX_WANDERING_RADIUS: 50
+  MAX_WANDERING_RADIUS: 10
   projectileTraining: 0
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
@@ -2220,6 +2221,7 @@ MonoBehaviour:
     PowerVector: {x: 1600, y: 1600, z: 1600}
   forceLimit: 200
   damping: 100
+  dampingScalesWithStiffness: 0
   pGainMultiplier: 0.8
   rewardsInGUI: 0
 --- !u!4 &1357924715
@@ -2569,7 +2571,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 2
+  numAgents: 1
   modelDirector: {fileID: 767361687}
   model6DDirector: {fileID: 2033970009}
   modelAllJointsDirector: {fileID: 710360376}

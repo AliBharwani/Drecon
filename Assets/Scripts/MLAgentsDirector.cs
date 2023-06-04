@@ -452,12 +452,14 @@ public class MLAgentsDirector : Agent
 
         behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         numActions = behaviorParameters.BrainParameters.ActionSpec.NumContinuousActions;
-        resetKinToSimOnFail &= behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
+        _config.clampKinCharToSim &= behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
         numObservations = 88 + numActions; // 111 or 132 or 128 or 164
-        if (resetKinToSimOnFail)
-            foreach(var col in simChar.trans.GetComponentsInChildren<ArticulationBody>())
+        if (_config.clampKinCharToSim) 
+            foreach(var col in simChar.trans.GetComponentsInChildren<ArticulationBody>()) { 
                 col.gameObject.AddComponent<CollisionReporter>().director = this;
-        
+                col.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            }
+
         curFixedUpdate = _config.EVALUATE_EVERY_K_STEPS - 1;
         resetData();
     }
@@ -686,14 +688,15 @@ public class MLAgentsDirector : Agent
         bool heads1mApart;
         double posReward, velReward, localPoseReward, cmVelReward, fallFactor;
         calcFallFactor(out fallFactor, out heads1mApart);
-        if (heads1mApart && resetKinToSimOnFail && !shouldEndThisFrame)
-        {
-            MMScript.ResetAndTeleport(simChar.trans.position, simChar.trans.rotation);
-            MMScript.FixedUpdate();
-            UpdateKinCMData(false);
-            UpdateBoneObsState(false, Time.fixedDeltaTime);
-        }
-        else if ((heads1mApart && curFixedUpdate > lastSimCharTeleportFixedUpdate + 1) || shouldEndThisFrame)
+        //if (heads1mApart && resetKinToSimOnFail && !shouldEndThisFrame)
+        //{
+        //    MMScript.ResetAndTeleport(simChar.trans.position, simChar.trans.rotation);
+        //    MMScript.FixedUpdate();
+        //    UpdateKinCMData(false);
+        //    UpdateBoneObsState(false, Time.fixedDeltaTime);
+        //}
+        //else
+        if ((heads1mApart && curFixedUpdate > lastSimCharTeleportFixedUpdate + 1 && !_config.clampKinCharToSim) || (_config.clampKinCharToSim && shouldEndThisFrame))
         {
             finalReward = _config.EPISODE_END_REWARD;
             //updateMeanReward(-.5f);
@@ -986,14 +989,14 @@ public class MLAgentsDirector : Agent
 
     public void processCollision(Collision collision)
     {
-        //Debug.Log($"collision");
-        if (!resetKinToSimOnFail)
+        if (!_config.clampKinCharToSim)
             return;
         foreach (ContactPoint contact in collision.contacts)
         {
             string colliderName = contact.thisCollider.gameObject.name;
-            if (!colliderName.ToLower().Contains("toe") && !colliderName.ToLower().Contains("foot") && contact.otherCollider.gameObject.name == "Ground")
+            if (!colliderName.ToLower().Contains("toe") && !colliderName.ToLower().Contains("foot") && !colliderName.ToLower().Contains("leg_") && contact.otherCollider.gameObject.name == "Ground")
             {
+                Debug.Log($"Collider name: {colliderName} other collider name: {contact.otherCollider.gameObject.name}");
                 shouldEndThisFrame = true;
                 //EndEpisode();
                 //Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame) / 60f} sec)");

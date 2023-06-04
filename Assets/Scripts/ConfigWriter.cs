@@ -80,6 +80,7 @@ public class ConfigWriter : MonoBehaviour
     public List<MusclePower> MusclePowers;
     public float forceLimit;
     public float damping;
+    public bool dampingScalesWithStiffness;
     public float pGainMultiplier = 1f;
     public bool rewardsInGUI;
 

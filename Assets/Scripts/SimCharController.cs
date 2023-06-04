@@ -47,11 +47,19 @@ public class SimCharController : MonoBehaviour
         for(int i = 1; i < 23; i++)
         {
             //Debug.Log($"Setting {(mm_v2.Bones)i} to {_config.boneToStiffness[i
-            if (_config.MusclePowers.Any(x => x.Bone == (mm_v2.Bones)i))
-                boneToArtBody[i].SetAllDriveStiffness(_config.MusclePowers.First(x => x.Bone == (mm_v2.Bones)i).PowerVector);
+            bool musclePowerExists = _config.MusclePowers.Any(x => x.Bone == (mm_v2.Bones)i);
+            Vector3 musclePower = musclePowerExists ? _config.MusclePowers.First(x => x.Bone == (mm_v2.Bones)i).PowerVector : Vector3.zero;
+            if (musclePowerExists)
+                boneToArtBody[i].SetAllDriveStiffness(musclePower);
             else
                 boneToArtBody[i].SetAllDriveStiffness(_config.boneToStiffness[i]);
-            boneToArtBody[i].SetAllDriveDamping(_config.damping);
+
+            Vector3 damping;
+            if (_config.dampingScalesWithStiffness)
+                damping = musclePowerExists ? musclePower * .1f : Vector3.one * _config.boneToStiffness[i] * .1f;
+            else
+                damping = Vector3.one * _config.damping;
+            boneToArtBody[i].SetAllDriveDamping(damping);
             boneToArtBody[i].SetAllForceLimit(_config.forceLimit);
         }
     }

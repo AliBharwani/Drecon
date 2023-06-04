@@ -1524,7 +1524,7 @@ ArticulationBody:
   m_JointFriction: 0.05
   m_Immovable: 0
   m_UseGravity: 1
-  m_CollisionDetectionMode: 0
+  m_CollisionDetectionMode: 1
 --- !u!4 &406941983236226562 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -218672999929158978, guid: dcb5ccfbc78fb0342a553af36bf4dcec, type: 3}
@@ -2199,7 +2199,7 @@ ArticulationBody:
   m_JointFriction: 0.05
   m_Immovable: 0
   m_UseGravity: 1
-  m_CollisionDetectionMode: 0
+  m_CollisionDetectionMode: 1
 --- !u!4 &2956835559288671378 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5790058765815975982, guid: dcb5ccfbc78fb0342a553af36bf4dcec, type: 3}
@@ -2261,7 +2261,7 @@ ArticulationBody:
   m_JointFriction: 0.05
   m_Immovable: 0
   m_UseGravity: 1
-  m_CollisionDetectionMode: 0
+  m_CollisionDetectionMode: 1
 --- !u!4 &2994578797903622783 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -3396769582767526205, guid: dcb5ccfbc78fb0342a553af36bf4dcec, type: 3}
@@ -3065,7 +3065,7 @@ ArticulationBody:
   m_JointFriction: 0.05
   m_Immovable: 0
   m_UseGravity: 1
-  m_CollisionDetectionMode: 0
+  m_CollisionDetectionMode: 1
 --- !u!1 &6926952455079006047 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1834050325955023843, guid: dcb5ccfbc78fb0342a553af36bf4dcec, type: 3}
