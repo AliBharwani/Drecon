@@ -106,4 +106,9 @@ public static class MathUtils
         return Quaternion.AngleAxis(Mathf.Atan2(x, y) * Mathf.Rad2Deg, Vector3.up);
     }
 
+    // 2D Rotations represented by a single angle are continous in the form [cos(theta), sin(theta)] 
+    public static Vector2 getContinuousRepOf2DAngle(float thetaRads)
+    {
+        return new Vector2(Mathf.Cos(thetaRads), Mathf.Sin(thetaRads));
+    }
 }

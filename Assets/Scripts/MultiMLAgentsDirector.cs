@@ -56,8 +56,8 @@ public class MultiMLAgentsDirector : MonoBehaviour
         if (_config.networkControlsAllJoints)
             obj = actionsAre6D ? Instantiate(modelAllJointsDirector) : Instantiate(modelAllJoints3DDirector);
         else
-            obj = actionsAre6D ? Instantiate(model6DDirector) :  Instantiate(modelDirector);
-        //obj = actionsAre6D ? Instantiate(model6DDirector) : _config.addOrientationDataToObsState ? Instantiate(modelDirectorWithOrientationData) : Instantiate(modelDirector);
+            //obj = actionsAre6D ? Instantiate(model6DDirector) :  Instantiate(modelDirector);
+            obj = actionsAre6D ? Instantiate(model6DDirector) : _config.addOrientationDataToObsState ? Instantiate(modelDirectorWithOrientationData) : Instantiate(modelDirector);
         MLAgentsDirector director = obj.GetComponent<MLAgentsDirector>();
         obj.SetActive(true);
         return director;

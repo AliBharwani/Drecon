@@ -1550,7 +1550,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 111
+    VectorObservationSize: 115
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 23
@@ -1559,9 +1559,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: d43cb0932cc316146beef6a391825e1d, type: 3}
+  m_Model: {fileID: 0}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1969,7 +1969,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1276295761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2207,9 +2207,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/AARunningEnabled+CustomInputs
+  writeToFilePath: ../results/EulerWOrientation
   filename: unityconfig.json
-  loadFromFilePath: ../results/BoneObsStateFixed-Euler
+  loadFromFilePath: ../results/EulerRunningEnabled
   clampKinCharToSim: 0
   clampingMaxDistance: 0.5
   clampingMaxAngle: 20
@@ -2219,7 +2219,7 @@ MonoBehaviour:
   noStrafing: 1
   setRotsDirectly: 0
   outputIsBase: 0
-  actionRotType: 1
+  actionRotType: 0
   alphaForExpMap: 120
   sixDRotMethod: 0
   normalizeRewardComponents: 0
@@ -2239,7 +2239,7 @@ MonoBehaviour:
   useCustomInputGenerator: 1
   inputGeneratorHalflife: 0.5
   simulationVelocityHalflife: 0.8
-  simulation_rotation_halflife: 0.6
+  simulation_rotation_halflife: 0.8
   walkOnly: 0
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 50
@@ -2679,9 +2679,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 1
+  numAgents: 2
   modelDirector: {fileID: 767361687}
-  modelDirectorWithOrientationData: {fileID: 0}
+  modelDirectorWithOrientationData: {fileID: 818134323}
   model6DDirector: {fileID: 2033970009}
   modelAllJointsDirector: {fileID: 710360376}
   modelAllJoints3DDirector: {fileID: 214671234}

@@ -453,7 +453,8 @@ public class MLAgentsDirector : Agent
         behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         numActions = behaviorParameters.BrainParameters.ActionSpec.NumContinuousActions;
         _config.clampKinCharToSim &= behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
-        numObservations = 88 + numActions; // 111 or 132 or 128 or 164
+        Debug.Log($"behaviorParameters.BrainParameters.VectorObservationSize: {behaviorParameters.BrainParameters.VectorObservationSize}");
+        numObservations = behaviorParameters.BrainParameters.VectorObservationSize; // 111 or 132 or 128 or 164
         if (_config.clampKinCharToSim) 
             foreach(var col in simChar.trans.GetComponentsInChildren<ArticulationBody>()) { 
                 col.gameObject.AddComponent<CollisionReporter>().director = this;
@@ -792,30 +793,17 @@ public class MLAgentsDirector : Agent
         Utils.copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame - kinCMVelInKinRefFrame);
         Utils.copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
         Utils.copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
-        //if (debug)
-        //    Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} kinCMVelInKinRefFrame: {kinCMVelInKinRefFrame} simCMVelInKinRefFrame: {simCMVelInKinRefFrame} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
-        /*
-         if (_config.addOrientationDataToObsState) {
-            add - sim rotation
-                    kin rotation
-                    desired rotation
-                    sim rotation relative to kin rotation
-                  sim rotation relative to desired rotation
-                  
-        
-            add => Quaternion.Inverse(simRotation) * kinRotation
-            add =
-        }
-         */
+
         if (_config.addOrientationDataToObsState)
         {
-            float yawDiffKinAndSim = (Quaternion.Inverse(kinChar.trans.rotation) * simulatedCharObj.transform.rotation).GetYAngle(true);
-            float yawDiffDesiredAndSim = (Quaternion.Inverse(MMScript.desired_rotation) * simulatedCharObj.transform.rotation).GetYAngle(true);
-
+            float yawDiffKinAndSim = (Quaternion.Inverse(kinChar.trans.rotation) * simulatedCharObj.transform.rotation).GetYAngle();
+            float yawDiffDesiredAndSim = (Quaternion.Inverse(MMScript.desired_rotation) * simulatedCharObj.transform.rotation).GetYAngle();
+            Utils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffKinAndSim));
+            Utils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffDesiredAndSim));
             //Debug.Log($"simYRot: {simYRot} desiredRotAngle:{desiredRotAngle} ");
         }
 
-            // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
+        // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
         for (int i = 0; i < 36; i++)
             state[state_idx++] = simChar.boneState[i];
         for (int i = 0; i < 36; i++)
