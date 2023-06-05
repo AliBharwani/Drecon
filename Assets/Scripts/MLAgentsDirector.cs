@@ -802,7 +802,19 @@ public class MLAgentsDirector : Agent
         copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
         //if (debug)
         //    Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} kinCMVelInKinRefFrame: {kinCMVelInKinRefFrame} simCMVelInKinRefFrame: {simCMVelInKinRefFrame} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
+        /*
+         if (_config.addOrientationDataToObsState) {
+            add - sim rotation
+                    kin rotation
+                    desired rotation
+                    sim rotation relative to kin rotation
+                  sim rotation relative to desired rotation
+                  
         
+            add => Quaternion.Inverse(simRotation) * kinRotation
+            add =
+        }
+         */
 
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
         for (int i = 0; i < 36; i++)

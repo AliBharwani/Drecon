@@ -1485,7 +1485,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: ebeea912d1661a147a8dd9d18a665b4d, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: d43cb0932cc316146beef6a391825e1d, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -1862,7 +1862,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1276295761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2100,10 +2100,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/AARunningEnabled+CustomInputs
+  writeToFilePath: ../results/ExpMapFullActionStiffnessOutputIsBase
   filename: unityconfig.json
-  loadFromFilePath: ../results/BoneObsStateFixed-Euler
-  clampKinCharToSim: 1
+  loadFromFilePath: ../results/EulerLongerHorizon
+  clampKinCharToSim: 0
   clampingMaxDistance: 0.5
   clampingMaxAngle: 20
   useSkinnedMesh: 0
@@ -2111,8 +2111,8 @@ MonoBehaviour:
   setDriveTargetVelocities: 1
   noStrafing: 1
   setRotsDirectly: 0
-  outputIsBase: 0
-  actionRotType: 1
+  outputIsBase: 1
+  actionRotType: 3
   alphaForExpMap: 120
   sixDRotMethod: 0
   normalizeRewardComponents: 0
@@ -2126,7 +2126,7 @@ MonoBehaviour:
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 2
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
-  ACTION_STIFFNESS_HYPERPARAM: 0.2
+  ACTION_STIFFNESS_HYPERPARAM: 1
   prob_to_change_inputs: 0.005
   useCustomInputGenerator: 1
   inputGeneratorHalflife: 0.5
@@ -2134,7 +2134,7 @@ MonoBehaviour:
   simulation_rotation_halflife: 0.6
   walkOnly: 0
   searchTime: 0.2
-  MAX_WANDERING_RADIUS: 10
+  MAX_WANDERING_RADIUS: 50
   projectileTraining: 0
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5

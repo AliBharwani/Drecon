@@ -166,23 +166,20 @@ public class SimCharController : MonoBehaviour
                 Vector3 targetAngularVelocityCalculated = angularVelocity * axis;
                 Vector3 targetAngularVelocity = curr_bone_angular_vel[i]; // Mathf.Rad2Deg
                 Quaternion targetAngularVelocityQ = Quaternion.AngleAxis(targetAngularVelocity.magnitude , targetAngularVelocity.normalized);
-                //targetAngularVelocityQ = Quaternion.Inverse(ab.anchorRotation) * (targetAngularVelocityQ) * ab.parentAnchorRotation;
-                Vector3 tq = -(Quaternion.Inverse(ab.anchorRotation) * Quaternion.Inverse(targetAngularVelocityQ) * ab.parentAnchorRotation).normalized.eulerAngles;// ab.ToTargetRotationInReducedSpace(targetAngularVelocityQ, true);
-                //tq = Quaternion.AngleAxis(targetAngularVelocityCalculated.magnitude, targetAngularVelocityCalculated).eulerAngles;
-                //Vector3 degPerSec = new Vector3(targetAngularVelocityQ.eulerAngles.x)
-                //Vector3 angularVelocity = 2f  * targetAngularVelocityQ.eulerAngles;
-
-                // Convert angular velocity to Euler angles in radians per second
-                //Vector3 euler = angularVelocity  ;
+                Quaternion targetAngVelRads = Quaternion.AngleAxis(targetAngularVelocity.magnitude * Mathf.Rad2Deg, targetAngularVelocity.normalized);
+                Quaternion targetAngVelLocalSpace = Quaternion.Inverse(ab.anchorRotation) * Quaternion.Inverse(targetAngVelRads) * ab.parentAnchorRotation;
 
                 Vector3 degsPerSecond = targetAngularVelocityQ.ToEulerAnglesInRange180();// * 60f; 
                 degsPerSecond = (targetAngularVelocityQ * curRot).ToEulerAnglesInRange180() - curRot.ToEulerAnglesInRange180();
                 degsPerSecond *= 60;
-                if (bone == Bone_LeftLeg) {
+                if (bone == Bone_LeftUpLeg) {
                     Vector3 prevEuler = db.bone_rotations[frameIdx - 1][i].eulerAngles.ToEulerAnglesInRange180();
                     Vector3 curEuler = curr_bone_rotations[i].eulerAngles.ToEulerAnglesInRange180();
                     Vector3 randomVelCalc = (curEuler - prevEuler) * 60f;
-                    Debug.Log($"Last frame rot: {prevEuler} cur rot: {curEuler} vel at 60fps: {randomVelCalc}  degsPerSecond:{degsPerSecond} targetAngularVelocityQ.eulerAngles: {targetAngularVelocityQ.eulerAngles} tq: {tq}");
+                    Vector3 testVec = Utils.quat_from_scaled_angle_axis(targetAngularVelocity).eulerAngles;
+                    //Debug.Log($"Last frame rot: {prevEuler} cur rot: {curEuler} vel at 60fps: {randomVelCalc}" +
+                    //          $" targetAngVelRads.eulerAngles: {targetAngVelRads.eulerAngles}" +
+                    //          $" targetAngVelLocalSpace {targetAngVelLocalSpace.eulerAngles}");
                 }
                 Vector3 prevEuler2 = db.bone_rotations[frameIdx - 1][i].eulerAngles.ToEulerAnglesInRange180();
                 Vector3 curEuler2 = curr_bone_rotations[i].eulerAngles.ToEulerAnglesInRange180();
@@ -196,6 +193,7 @@ public class SimCharController : MonoBehaviour
         }
 
     }
+
     public static database db;
     public static void teleportSimCharRoot(CharInfo simChar, Vector3 newKinCharPos, Vector3 simCharPosOffset)
     {

@@ -217,12 +217,13 @@ public static class ArtBodyUtils
         /* Angular velocity appears in scaled angle axis representation 
          * 
          */
-        //Vector3 target_vel = body.ToTargetRotationInReducedSpace(targetLocalVel, true);
-        Quaternion targetAngularVelocityQ = Quaternion.AngleAxis(targetAngularVel.magnitude, targetAngularVel.normalized);
+        Quaternion targetAngularVelocityQ = Quaternion.AngleAxis(targetAngularVel.magnitude * Mathf.Rad2Deg * Time.fixedDeltaTime  , targetAngularVel.normalized);
+
         Vector3 degsPerSecond = (targetAngularVelocityQ * localRotation).ToEulerAnglesInRange180() - localRotation.ToEulerAnglesInRange180();
-        degsPerSecond *= 60;
-        //body.angularVelocity = target_vel;
-        //return;
+        degsPerSecond /= Time.fixedDeltaTime;
+        //if (body.name == "Model:LeftUpLeg")
+        //    Debug.Log($"DegsPerSecond: {degsPerSecond}");
+
         // assign to the drive targets...
         ArticulationDrive xDrive = body.xDrive;
         xDrive.targetVelocity = degsPerSecond.x;
@@ -446,6 +447,9 @@ public static class ArtBodyUtils
             return Vector3.zero;
         // = Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation)  gives us the rotation that goes from the inverse of the targetLocalRot to the anchor rot
         // * body.parentAnchorRotation puts this rotation in the parent's joitn space
+        // Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation --> applies the inverse of the targetLocalRotation to the parentAnchorRotation. Basically saying:
+        // "What is the rotation that will take us from parentAnchorRotation to targetLocalRotation? 
+
         Quaternion q = Quaternion.Inverse(body.anchorRotation) * Quaternion.Inverse(targetLocalRotation) * body.parentAnchorRotation;
         //q = Quaternion.Inverse(targetLocalRotation);
         q.Normalize();
