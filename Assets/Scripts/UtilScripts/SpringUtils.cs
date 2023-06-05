@@ -114,12 +114,12 @@ public static class SpringUtils
     {
         float y = halflife_to_damping(halflife) / 2.0f;
 
-        Vector3 j0 = Utils.quat_to_scaled_angle_axis(Utils.quat_abs(x * Utils.quat_inv(x_goal)));
+        Vector3 j0 = MathUtils.quat_to_scaled_angle_axis(MathUtils.quat_abs(x * MathUtils.quat_inv(x_goal)));
         Vector3 j1 = v + j0 * y;
 
         float eydt = fast_negexp(y * dt);
 
-        x = Utils.quat_from_scaled_angle_axis(eydt * (j0 + j1 * dt)) * x_goal;
+        x = MathUtils.quat_from_scaled_angle_axis(eydt * (j0 + j1 * dt)) * x_goal;
         v = eydt * (v - (j1 * y * dt));
     }
     public static void decay_spring_damper_implicit(
@@ -144,12 +144,12 @@ public static class SpringUtils
     {
         float y = halflife_to_damping(halflife) / 2.0f;
 
-        Vector3 j0 = Utils.quat_to_scaled_angle_axis(x);
+        Vector3 j0 = MathUtils.quat_to_scaled_angle_axis(x);
         Vector3 j1 = v + j0 * y;
 
         float eydt = fast_negexp(y * dt);
 
-        x = Utils.quat_from_scaled_angle_axis(eydt * (j0 + j1 * dt));
+        x = MathUtils.quat_from_scaled_angle_axis(eydt * (j0 + j1 * dt));
         v = eydt * (v - (j1 * y * dt));
     }
 
@@ -174,7 +174,7 @@ public static class SpringUtils
         in Quaternion dst_x,
         in Vector3 dst_v)
     {
-        off_x = Utils.quat_abs( (off_x * src_x) * Utils.quat_inv(dst_x));
+        off_x = MathUtils.quat_abs( (off_x * src_x) * MathUtils.quat_inv(dst_x));
         off_v = (off_v + src_v) - dst_v;
     }
 

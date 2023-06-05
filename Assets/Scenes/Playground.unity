@@ -413,7 +413,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &381966278
 GameObject:
@@ -464,6 +464,7 @@ MonoBehaviour:
   fullRangeEulerOutputs: 0
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
+  addOrientationDataToObsState: 0
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 0
   EVALUATE_EVERY_K_STEPS: 2
@@ -613,7 +614,7 @@ Transform:
   - {fileID: 1234743671}
   - {fileID: 1313389654}
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &529752456
 PrefabInstance:
@@ -1328,7 +1329,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &761501877
 PrefabInstance:
@@ -1443,7 +1444,7 @@ MonoBehaviour:
   kinUseDebugMats: 1
   simUseDebugMats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
-  debug: 0
+  debug: 1
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
@@ -1485,7 +1486,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: d43cb0932cc316146beef6a391825e1d, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: ebeea912d1661a147a8dd9d18a665b4d, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -1505,6 +1506,112 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 885ff57caa2445342b3bd4a3c63fbcac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &818134323
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 818134327}
+  - component: {fileID: 818134326}
+  - component: {fileID: 818134325}
+  - component: {fileID: 818134324}
+  m_Layer: 0
+  m_Name: ML_Director_WithOrientationData
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &818134324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 818134323}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 885ff57caa2445342b3bd4a3c63fbcac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &818134325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 818134323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d1c4e0b1822b495aa52bc52839ecb30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_BrainParameters:
+    VectorObservationSize: 111
+    NumStackedVectorObservations: 1
+    m_ActionSpec:
+      m_NumContinuousActions: 23
+      BranchSizes: 
+    VectorActionSize: 17000000
+    VectorActionDescriptions: []
+    VectorActionSpaceType: 1
+    hasUpgradedBrainParametersWithActionSpec: 1
+  m_Model: {fileID: 5022602860645237092, guid: d43cb0932cc316146beef6a391825e1d, type: 3}
+  m_InferenceDevice: 1
+  m_BehaviorType: 2
+  m_BehaviorName: Drecon
+  TeamId: 0
+  m_UseChildSensors: 1
+  m_UseChildActuators: 1
+  m_ObservableAttributeHandling: 0
+--- !u!114 &818134326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 818134323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38613307e25bf4af8afeae13fd7627f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
+  groundCollider: {fileID: 870766689}
+  simulated_char_type2_prefab: {fileID: 1698237335039107927, guid: bb31332a00655ce46af95914ccbe7651, type: 3}
+  kinematic_char_type2_prefab: {fileID: 536787371494200998, guid: 0122f7b7f5b26b843bd88f8c210cdd39, type: 3}
+  simulated_handmade_char_prefab: {fileID: 8472335581407420909, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
+  kinematic_handmade_char_prefab: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+  reportMeanRewardEveryNSteps: 10000
+  kinUseDebugMats: 1
+  simUseDebugMats: 0
+  projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
+  debug: 1
+  updateVelOnTeleport: 1
+  resetKinToSimOnFail: 0
+  gizmoSphereRad: 0.01
+  drawGizmos: 0
+--- !u!4 &818134327
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 818134323}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &852811573
 GameObject:
   m_ObjectHideFlags: 0
@@ -1970,7 +2077,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1276295765
 MonoBehaviour:
@@ -2100,9 +2207,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/ExpMapFullActionStiffnessOutputIsBase
+  writeToFilePath: ../results/AARunningEnabled+CustomInputs
   filename: unityconfig.json
-  loadFromFilePath: ../results/EulerLongerHorizon
+  loadFromFilePath: ../results/BoneObsStateFixed-Euler
   clampKinCharToSim: 0
   clampingMaxDistance: 0.5
   clampingMaxAngle: 20
@@ -2111,8 +2218,8 @@ MonoBehaviour:
   setDriveTargetVelocities: 1
   noStrafing: 1
   setRotsDirectly: 0
-  outputIsBase: 1
-  actionRotType: 3
+  outputIsBase: 0
+  actionRotType: 1
   alphaForExpMap: 120
   sixDRotMethod: 0
   normalizeRewardComponents: 0
@@ -2120,13 +2227,14 @@ MonoBehaviour:
   fullRangeEulerOutputs: 0
   useGeodesicForAngleDiff: 1
   poseRewardMultiplier: 0.1
+  addOrientationDataToObsState: 1
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 1
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 2
   EPISODE_END_REWARD: -0.5
   MAX_EPISODE_LENGTH_SECONDS: 20
-  ACTION_STIFFNESS_HYPERPARAM: 1
+  ACTION_STIFFNESS_HYPERPARAM: 0.2
   prob_to_change_inputs: 0.005
   useCustomInputGenerator: 1
   inputGeneratorHalflife: 0.5
@@ -2237,7 +2345,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1394463713
 GameObject:
@@ -2254,7 +2362,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1394463714
 Transform:
   m_ObjectHideFlags: 0
@@ -2423,7 +2531,7 @@ Transform:
   - {fileID: 1877289342}
   - {fileID: 1734769402}
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1734769402 stripped
 Transform:
@@ -2539,7 +2647,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2090630087
 GameObject:
@@ -2573,6 +2681,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   numAgents: 1
   modelDirector: {fileID: 767361687}
+  modelDirectorWithOrientationData: {fileID: 0}
   model6DDirector: {fileID: 2033970009}
   modelAllJointsDirector: {fileID: 710360376}
   modelAllJoints3DDirector: {fileID: 214671234}
@@ -2943,7 +3052,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8149458909502737913, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: setDriveTargetVels
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8149458909502737913, guid: acb5ab24e6ac0934e89ffd87d0982efd, type: 3}
       propertyPath: apply_all_local_rots

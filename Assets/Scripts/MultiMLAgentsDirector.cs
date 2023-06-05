@@ -7,9 +7,10 @@ public class MultiMLAgentsDirector : MonoBehaviour
 {
     public int numAgents = 5;
     public GameObject modelDirector;
+    public GameObject modelDirectorWithOrientationData;
     public GameObject model6DDirector;
     public GameObject modelAllJointsDirector;
-    public GameObject modelAllJoints3DDirector;
+    public GameObject modelAllJoints3DDirector; 
 
     private MLAgentsDirector[] directors;
     public int reportMeanRewardEveryNSteps = 10000;
@@ -55,7 +56,8 @@ public class MultiMLAgentsDirector : MonoBehaviour
         if (_config.networkControlsAllJoints)
             obj = actionsAre6D ? Instantiate(modelAllJointsDirector) : Instantiate(modelAllJoints3DDirector);
         else
-            obj = actionsAre6D ? Instantiate(model6DDirector) : Instantiate(modelDirector);
+            obj = actionsAre6D ? Instantiate(model6DDirector) :  Instantiate(modelDirector);
+        //obj = actionsAre6D ? Instantiate(model6DDirector) : _config.addOrientationDataToObsState ? Instantiate(modelDirectorWithOrientationData) : Instantiate(modelDirector);
         MLAgentsDirector director = obj.GetComponent<MLAgentsDirector>();
         obj.SetActive(true);
         return director;

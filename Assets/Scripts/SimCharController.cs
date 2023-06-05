@@ -142,7 +142,7 @@ public class SimCharController : MonoBehaviour
                 continue;
             Transform t = boneToTransform[i];
             Quaternion local_rot = curr_bone_rotations[i];
-            Quaternion local_angular_vel = Utils.quat_from_scaled_angle_axis(curr_bone_angular_vel[i]);
+            Quaternion local_angular_vel = MathUtils.quat_from_scaled_angle_axis(curr_bone_angular_vel[i]);
             bool print_debug = bone == debug_bone;
 
             if (isKinematic)
@@ -176,7 +176,7 @@ public class SimCharController : MonoBehaviour
                     Vector3 prevEuler = db.bone_rotations[frameIdx - 1][i].eulerAngles.ToEulerAnglesInRange180();
                     Vector3 curEuler = curr_bone_rotations[i].eulerAngles.ToEulerAnglesInRange180();
                     Vector3 randomVelCalc = (curEuler - prevEuler) * 60f;
-                    Vector3 testVec = Utils.quat_from_scaled_angle_axis(targetAngularVelocity).eulerAngles;
+                    Vector3 testVec = MathUtils.quat_from_scaled_angle_axis(targetAngularVelocity).eulerAngles;
                     //Debug.Log($"Last frame rot: {prevEuler} cur rot: {curEuler} vel at 60fps: {randomVelCalc}" +
                     //          $" targetAngVelRads.eulerAngles: {targetAngVelRads.eulerAngles}" +
                     //          $" targetAngVelLocalSpace {targetAngVelLocalSpace.eulerAngles}");
@@ -537,7 +537,7 @@ public class SimCharController : MonoBehaviour
             //apply_global_pos_and_rot(global_pos, global_rots, boneToTransform);
             Vector3 cm = MLAgentsDirector.getCM(boneToTransform, global_pos);
             Vector3 cm_vel =  (cm - last_cm) / frame_time;
-            cm_vel = Utils.quat_inv_mul_vec3(global_rots[0], cm_vel);
+            cm_vel = MathUtils.quat_inv_mul_vec3(global_rots[0], cm_vel);
             if (update_velocity)
                 updated_mins_and_maxes(cm_vel, ref cm_vel_min, ref cm_vel_max);
 
@@ -547,9 +547,9 @@ public class SimCharController : MonoBehaviour
                 // Get state bone pose
                 Vector3 bone_pos = global_pos[(int)MLAgentsDirector.stateBones[j]];
                 // Resolve in reference frame (multiply by inverse of root rotation and subtract root position)
-                Vector3 local_bone_pos = Utils.quat_inv_mul_vec3(global_rots[0], bone_pos - cm);
+                Vector3 local_bone_pos = MathUtils.quat_inv_mul_vec3(global_rots[0], bone_pos - cm);
                 Vector3 bone_vel = (bone_pos - state_bone_pos[j]) / frame_time;
-                bone_vel = Utils.quat_inv_mul_vec3(global_rots[0], bone_vel);
+                bone_vel = MathUtils.quat_inv_mul_vec3(global_rots[0], bone_vel);
                 // Compare min maxes
                 updated_mins_and_maxes(local_bone_pos, ref  bone_pos_mins[j], ref bone_pos_maxes[j]);
                 if (update_velocity)
@@ -597,7 +597,7 @@ public class SimCharController : MonoBehaviour
             {
                 Vector3 parent_position = global_bone_positions[bone_parents[i]];
                 Quaternion parent_rotation = global_bone_rotations[bone_parents[i]];
-                global_bone_positions[i] = Utils.quat_mul_vec3(parent_rotation, db.bone_positions[frame][i]) + parent_position;
+                global_bone_positions[i] = MathUtils.quat_mul_vec3(parent_rotation, db.bone_positions[frame][i]) + parent_position;
                 global_bone_rotations[i] = parent_rotation * db.bone_rotations[frame][i];
             }
         }

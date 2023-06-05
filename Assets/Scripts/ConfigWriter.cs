@@ -46,6 +46,7 @@ public class ConfigWriter : MonoBehaviour
     public bool fullRangeEulerOutputs;
     public bool useGeodesicForAngleDiff = false;
     public float poseRewardMultiplier = 1f / 10f;
+    public bool addOrientationDataToObsState = false;
     public bool resetKinCharOnEpisodeEnd = false;
     public bool selfCollision;
     //public bool useUnnormalizedEulerOffsets = false;
@@ -93,6 +94,7 @@ public class ConfigWriter : MonoBehaviour
 
 
     private static ConfigWriter _instance;
+
     public static ConfigWriter Instance { get { return _instance; } }
     private void Awake()
     {

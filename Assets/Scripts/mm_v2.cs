@@ -126,7 +126,7 @@ public class mm_v2 : MonoBehaviour
     Vector3 desired_velocity_change_prev;
     float desired_velocity_change_threshold = 50.0f;
 
-    Quaternion desired_rotation = Quaternion.identity;
+    public Quaternion desired_rotation = Quaternion.identity;
     Vector3 desired_rotation_change_curr = Vector3.zero;
     Vector3 desired_rotation_change_prev = Vector3.zero;
     float desired_rotation_change_threshold = 50.0f;
@@ -396,7 +396,7 @@ public class mm_v2 : MonoBehaviour
             is_strafing = !_config.noStrafing && Random.value <= .5f;
             is_runbutton_pressed = !walk_only && Random.value <= .5f;
             Vector2 rotation_vec = is_strafing ? Random.insideUnitCircle : random_lstick_input;
-            desired_rotation = Utils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y);
+            desired_rotation = MathUtils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y);
         }
         else if (!gen_inputs && gamepad != null)
         {
@@ -425,7 +425,7 @@ public class mm_v2 : MonoBehaviour
         desired_velocity = desired_velocity_curr;
 
         desired_rotation_change_prev = desired_rotation_change_curr;
-        desired_rotation_change_curr = Utils.quat_to_scaled_angle_axis(Utils.quat_abs(Utils.quat_mul_inv(desired_rotation_curr, desired_rotation))) / Time.fixedDeltaTime;
+        desired_rotation_change_curr = MathUtils.quat_to_scaled_angle_axis(MathUtils.quat_abs(MathUtils.quat_mul_inv(desired_rotation_curr, desired_rotation))) / Time.fixedDeltaTime;
         desired_rotation = desired_rotation_curr;
 
         bool force_search = false;
@@ -598,7 +598,7 @@ public class mm_v2 : MonoBehaviour
                     global_bone_positions[knee_bone],
                     global_bone_positions[heel_bone],
                     contact_position_clamp + (global_bone_positions[heel_bone] - global_bone_positions[toe_bone]),
-                    Utils.quat_mul_vec3(global_bone_rotations[knee_bone], new Vector3(0.0f, 1.0f, 0.0f)),
+                    MathUtils.quat_mul_vec3(global_bone_rotations[knee_bone], new Vector3(0.0f, 1.0f, 0.0f)),
                     global_bone_rotations[hip_bone],
                     global_bone_rotations[knee_bone],
                     global_bone_rotations[root_bone],
@@ -642,7 +642,7 @@ public class mm_v2 : MonoBehaviour
 
                 // Rotate toe bone so that the end of the toe 
                 // does not intersect with the ground
-                Vector3 toe_end_curr = Utils.quat_mul_vec3(
+                Vector3 toe_end_curr = MathUtils.quat_mul_vec3(
                     global_bone_rotations[toe_bone], new Vector3(ik_toe_length, 0.0f, 0.0f)) +
                     global_bone_positions[toe_bone];
 
@@ -679,14 +679,14 @@ public class mm_v2 : MonoBehaviour
         transition_dst_position = position_difference + transition_dst_position;
 
         // Find the point at which we want to now transition from in the src data
-        transition_src_position = transition_src_position + Utils.quat_mul_vec3(transition_src_rotation,
-             Utils.quat_inv_mul_vec3(transition_dst_rotation, position - offset_position - transition_dst_position));
+        transition_src_position = transition_src_position + MathUtils.quat_mul_vec3(transition_src_rotation,
+             MathUtils.quat_inv_mul_vec3(transition_dst_rotation, position - offset_position - transition_dst_position));
         transition_dst_position = position;
         offset_position = new Vector3();
 
         // Find the rotation difference. We need to normalize here or some error can accumulate 
         // over time during adjustment.
-        Quaternion rotation_difference = Quaternion.Normalize(Utils.quat_mul_inv(input_rotation, rotation));
+        Quaternion rotation_difference = Quaternion.Normalize(MathUtils.quat_mul_inv(input_rotation, rotation));
 
         // Apply the rotation difference to the current rotation and transition location
         rotation = rotation_difference * rotation;
@@ -752,9 +752,9 @@ public class mm_v2 : MonoBehaviour
         Vector3 root_position = bone_positions[0];
         Quaternion root_rotation = bone_rotations[0];
 
-        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
-        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation,  trajectory_positions[2] - root_position);
-        Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, trajectory_positions[3] - root_position);
+        Vector3 traj0 = MathUtils.quat_inv_mul_vec3(root_rotation, trajectory_positions[1] - root_position);
+        Vector3 traj1 = MathUtils.quat_inv_mul_vec3(root_rotation,  trajectory_positions[2] - root_position);
+        Vector3 traj2 = MathUtils.quat_inv_mul_vec3(root_rotation, trajectory_positions[3] - root_position);
 
         query[offset + 0] = traj0.x;
         query[offset + 1] = traj0.z;
@@ -770,9 +770,9 @@ public class mm_v2 : MonoBehaviour
     {
         Quaternion root_rotation = bone_rotations[0];
 
-        Vector3 traj0 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[1], Vector3.forward));
-        Vector3 traj1 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[2], Vector3.forward));
-        Vector3 traj2 = Utils.quat_inv_mul_vec3(root_rotation, Utils.quat_mul_vec3(trajectory_rotations[3], Vector3.forward));
+        Vector3 traj0 = MathUtils.quat_inv_mul_vec3(root_rotation, MathUtils.quat_mul_vec3(trajectory_rotations[1], Vector3.forward));
+        Vector3 traj1 = MathUtils.quat_inv_mul_vec3(root_rotation, MathUtils.quat_mul_vec3(trajectory_rotations[2], Vector3.forward));
+        Vector3 traj2 = MathUtils.quat_inv_mul_vec3(root_rotation, MathUtils.quat_mul_vec3(trajectory_rotations[3], Vector3.forward));
 
         query[offset + 0] = traj0.x;
         query[offset + 1] = traj0.z;
@@ -805,7 +805,7 @@ public class mm_v2 : MonoBehaviour
         Vector2 lstick = gen_inputs ? random_lstick_input : gamepad.leftStick.ReadValue();
 
         // Find stick position local to current facing direction
-        Vector3 local_stick_dir = Utils.quat_inv_mul_vec3(sim_rotation, new Vector3(lstick.x, 0, lstick.y));
+        Vector3 local_stick_dir = MathUtils.quat_inv_mul_vec3(sim_rotation, new Vector3(lstick.x, 0, lstick.y));
 
         local_stick_dir.x *= simulation_side_speed;
         local_stick_dir.z *= local_stick_dir.z > 0.0 ? simulation_fwrd_speed : simulation_back_speed;
@@ -815,7 +815,7 @@ public class mm_v2 : MonoBehaviour
         //        new Vector3(side_speed, 0.0f, back_speed) ;
         //Vector3 local_desired_vel = local_stick_dir.Scale(scale_vec);
         //Vector3 local_desired_vel = (MoveSpeed * local_stick_dir.magnitude) * local_stick_dir.normalized;
-        return Utils.quat_mul_vec3(sim_rotation, local_stick_dir);
+        return MathUtils.quat_mul_vec3(sim_rotation, local_stick_dir);
     }
 
     void desired_gait_update(
@@ -1000,8 +1000,8 @@ public class mm_v2 : MonoBehaviour
 
         if (1f - Vector3.Dot(curr_dir, targ_dir) > eps)
         {
-            bone_rotation = Utils.quat_inv_mul(global_parent_rotation,
-                Utils.quat_between(curr_dir, targ_dir) * global_rotation );
+            bone_rotation = MathUtils.quat_inv_mul(global_parent_rotation,
+                MathUtils.quat_between(curr_dir, targ_dir) * global_rotation );
         }
     }
     // Basic two-joint IK in the style of https://theorangeduck.com/page/simple-two-joint
@@ -1049,18 +1049,18 @@ public class mm_v2 : MonoBehaviour
         float ac_ab_1 = Mathf.Acos(Mathf.Clamp((lab * lab + lat * lat - lcb * lcb) / (2.0f * lab * lat), -1.0f, 1.0f));
         float ba_bc_1 = Mathf.Acos(Mathf.Clamp((lab * lab + lcb * lcb - lat * lat) / (2.0f * lab * lcb), -1.0f, 1.0f));
 
-        Quaternion r0 = Utils.quat_from_angle_axis(ac_ab_1 - ac_ab_0, axis_rot);
-        Quaternion r1 = Utils.quat_from_angle_axis(ba_bc_1 - ba_bc_0, axis_rot);
+        Quaternion r0 = MathUtils.quat_from_angle_axis(ac_ab_1 - ac_ab_0, axis_rot);
+        Quaternion r1 = MathUtils.quat_from_angle_axis(ba_bc_1 - ba_bc_0, axis_rot);
 
         Vector3 c_a =  (bone_end - bone_root).normalized;
         Vector3 t_a =  (target_clamp - bone_root).normalized;
 
-        Quaternion r2 = Utils.quat_from_angle_axis(
+        Quaternion r2 = MathUtils.quat_from_angle_axis(
             Mathf.Acos(Mathf.Clamp(Vector3.Dot(c_a, t_a), -1.0f, 1.0f)),
            Vector3.Cross(c_a, t_a).normalized);
 
-        bone_root_lr = Utils.quat_inv_mul(bone_par_gr,  r2 * (r0 * bone_root_gr));
-        bone_mid_lr = Utils.quat_inv_mul(bone_root_gr,  r1 * bone_mid_gr);
+        bone_root_lr = MathUtils.quat_inv_mul(bone_par_gr,  r2 * (r0 * bone_root_gr));
+        bone_mid_lr = MathUtils.quat_inv_mul(bone_root_gr,  r1 * bone_mid_gr);
     }
     private void simulation_rotations_update(ref Quaternion rotation, ref Vector3 angular_velocity, in Quaternion desired_rot, float halflife, float dt)
     {
@@ -1107,7 +1107,7 @@ public class mm_v2 : MonoBehaviour
         {
             Vector3 desired_dir = velocity.normalized;
             //Debug.Log(Mathf.Atan2(desired_dir.x, desired_dir.z));
-            return Utils.quat_from_stick_dir(desired_dir.x, desired_dir.z);// Quaternion.AngleAxis(Mathf.Atan2(desired_dir.x, desired_dir.z) * Mathf.Rad2Deg, Vector3.up);
+            return MathUtils.quat_from_stick_dir(desired_dir.x, desired_dir.z);// Quaternion.AngleAxis(Mathf.Atan2(desired_dir.x, desired_dir.z) * Mathf.Rad2Deg, Vector3.up);
         }
         else
         {
@@ -1127,8 +1127,8 @@ public class mm_v2 : MonoBehaviour
 
     private Vector3 get_world_space_position()
     {
-        return Utils.quat_mul_vec3(transition_dst_rotation,
-            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_positions[0] - transition_src_position))
+        return MathUtils.quat_mul_vec3(transition_dst_rotation,
+            MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_positions[0] - transition_src_position))
                 + transition_dst_position; 
     }
     private void inertialize_pose_update(
@@ -1146,28 +1146,28 @@ public class mm_v2 : MonoBehaviour
 
         // For world posoition, first we subtract the transition src position. This tells us how far the
         // 
-        Vector3 world_space_position = Utils.quat_mul_vec3(transition_dst_rotation,
-            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position))
+        Vector3 world_space_position = MathUtils.quat_mul_vec3(transition_dst_rotation,
+            MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position))
                 + transition_dst_position;
 
-        //Vector3 debugTerm = Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position);
+        //Vector3 debugTerm = MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position);
         //Debug.Log($"bone_input_positions[0] - transition_src_position: {bone_input_positions[0] - transition_src_position} \n" +
         //    $"quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position): {debugTerm} \n" +
         //    $"world_space_position: {world_space_position}");
 
-        Vector3 world_space_velocity = Utils.quat_mul_vec3(transition_dst_rotation,
-            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_velocities[0]));
+        Vector3 world_space_velocity = MathUtils.quat_mul_vec3(transition_dst_rotation,
+            MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_input_velocities[0]));
         //Debug.Log($"world_space_velocity: {world_space_velocity}");
 
         // Normalize here because quat inv mul can sometimes produce 
         // unstable returns when the two rotations are very close.
         Quaternion world_space_rotation = transition_dst_rotation *
-             Utils.quat_inv_mul(transition_src_rotation, bone_input_rotations[0]);
+             MathUtils.quat_inv_mul(transition_src_rotation, bone_input_rotations[0]);
         world_space_rotation.Normalize();
         //Debug.Log($"world_space_rotation: {world_space_rotation}");
 
-        Vector3 world_space_angular_velocity = Utils.quat_mul_vec3(transition_dst_rotation,
-            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_input_angular_velocities[0]));
+        Vector3 world_space_angular_velocity = MathUtils.quat_mul_vec3(transition_dst_rotation,
+            MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_input_angular_velocities[0]));
         //Debug.Log($"world_space_angular_velocity: {world_space_angular_velocity}");
 
         SpringUtils.inertialize_update(
@@ -1261,11 +1261,11 @@ public class mm_v2 : MonoBehaviour
 
         // We then find the velocities so we can transition the 
         // root inertiaizers
-        Vector3 world_space_dst_velocity = Utils.quat_mul_vec3(transition_dst_rotation,
-            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_dst_velocities[0]));
+        Vector3 world_space_dst_velocity = MathUtils.quat_mul_vec3(transition_dst_rotation,
+            MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_dst_velocities[0]));
 
-        Vector3 world_space_dst_angular_velocity = Utils.quat_mul_vec3(transition_dst_rotation,
-            Utils.quat_inv_mul_vec3(transition_src_rotation, bone_dst_angular_velocities[0]));
+        Vector3 world_space_dst_angular_velocity = MathUtils.quat_mul_vec3(transition_dst_rotation,
+            MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_dst_angular_velocities[0]));
 
 
         SpringUtils.inertialize_transition(
@@ -1328,7 +1328,7 @@ public class mm_v2 : MonoBehaviour
             {
                 Vector3 parent_position = global_bone_positions[bone_parents[i]];
                 Quaternion parent_rotation = global_bone_rotations[bone_parents[i]];
-                global_bone_positions[i] = Utils.quat_mul_vec3(parent_rotation, bone_positions[i]) + parent_position;
+                global_bone_positions[i] = MathUtils.quat_mul_vec3(parent_rotation, bone_positions[i]) + parent_position;
                 global_bone_rotations[i] = parent_rotation * bone_rotations[i];
             }
         }
@@ -1395,7 +1395,7 @@ public class mm_v2 : MonoBehaviour
         if (Quaternion.Angle(character_rotation, simulation_rotation) > max_angle)
         {
             // First, find the rotational difference between the two
-            Quaternion diff = Utils.quat_abs(Utils.quat_mul_inv(
+            Quaternion diff = MathUtils.quat_abs(MathUtils.quat_mul_inv(
                 character_rotation, simulation_rotation));
 
             // We can then decompose it into angle and axis
@@ -1406,7 +1406,7 @@ public class mm_v2 : MonoBehaviour
             diff_angle = Mathf.Clamp(diff_angle, -max_angle, max_angle);
         
             // And apply back the clamped rotation
-            return Utils.quat_from_angle_axis(diff_angle, diff_axis) * simulation_rotation;
+            return MathUtils.quat_from_angle_axis(diff_angle, diff_axis) * simulation_rotation;
         }
            else
         {

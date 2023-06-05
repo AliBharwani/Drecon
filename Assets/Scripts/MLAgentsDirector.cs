@@ -224,7 +224,7 @@ public class MLAgentsDirector : Agent
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             Vector3 output = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]);
             actionIdx += 3;
-            Quaternion offset = Utils.quat_exp(output * _config.alphaForExpMap / 2f);
+            Quaternion offset = MathUtils.quat_exp(output * _config.alphaForExpMap / 2f);
             Quaternion final = _config.setRotsDirectly ? offset : _config.outputIsBase ? curRotations[boneIdx] * offset : offset * curRotations[boneIdx];
             ab.SetDriveRotation(final);
         }
@@ -603,7 +603,7 @@ public class MLAgentsDirector : Agent
                 var charInfo = isKinChar ? kinChar : simChar;
                 Vector3[] newSurfacePts = new Vector3[6];
                 Vector3[] newWorldSurfacePts = new Vector3[6];
-                getSixPointsOnCollider(charInfo.boneToCollider[i], ref newWorldSurfacePts, (mm_v2.Bones)i);
+                Utils.getSixPointsOnCollider(charInfo.boneToCollider[i], ref newWorldSurfacePts, (mm_v2.Bones)i);
                 Vector3[] prevWorldSurfacePts = charInfo.boneSurfacePtsWorldSpace[i];
 
                 for (int j = 0; j < 6; j++)
@@ -635,11 +635,11 @@ public class MLAgentsDirector : Agent
                 Vector3 prevBonePos = curInfo.boneWorldPos[j];
                 Vector3 boneVel = (boneWorldPos - prevBonePos) / dt;
                 boneVel = zeroVelocity ? Vector3.zero : resolveVelInKinematicRefFrame(boneVel);
-                copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
+                Utils.copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
 
                 //copyVecIntoArray(ref copyInto, ref copyIdx, updateVelocity ? boneVel : Vector3.zero);
                 if (updateVelocity || zeroVelocity)
-                    copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
+                    Utils.copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
                 else
                     copyIdx += 3;
                 //if (debug && j == 0 && !isKinChar)
@@ -688,14 +688,6 @@ public class MLAgentsDirector : Agent
         bool heads1mApart;
         double posReward, velReward, localPoseReward, cmVelReward, fallFactor;
         calcFallFactor(out fallFactor, out heads1mApart);
-        //if (heads1mApart && resetKinToSimOnFail && !shouldEndThisFrame)
-        //{
-        //    MMScript.ResetAndTeleport(simChar.trans.position, simChar.trans.rotation);
-        //    MMScript.FixedUpdate();
-        //    UpdateKinCMData(false);
-        //    UpdateBoneObsState(false, Time.fixedDeltaTime);
-        //}
-        //else
         if ((heads1mApart && curFixedUpdate > lastSimCharTeleportFixedUpdate + 1 && !_config.clampKinCharToSim) || (_config.clampKinCharToSim && shouldEndThisFrame))
         {
             finalReward = _config.EPISODE_END_REWARD;
@@ -794,12 +786,12 @@ public class MLAgentsDirector : Agent
 
         float[] state = new float[numObservations];
         int state_idx = 0;
-        copyVecIntoArray(ref state, ref state_idx, cmDistance);
-        copyVecIntoArray(ref state, ref state_idx, kinCMVelInKinRefFrame);
-        copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame);
-        copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame - kinCMVelInKinRefFrame);
-        copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
-        copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
+        Utils.copyVecIntoArray(ref state, ref state_idx, cmDistance);
+        Utils.copyVecIntoArray(ref state, ref state_idx, kinCMVelInKinRefFrame);
+        Utils.copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame);
+        Utils.copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame - kinCMVelInKinRefFrame);
+        Utils.copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
+        Utils.copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
         //if (debug)
         //    Debug.Log($"Desired Velocity: {new Vector2(desiredVel.x, desiredVel.z)} kinCMVelInKinRefFrame: {kinCMVelInKinRefFrame} simCMVelInKinRefFrame: {simCMVelInKinRefFrame} velDiffSimMinusDesired: {new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z)}");
         /*
@@ -815,8 +807,15 @@ public class MLAgentsDirector : Agent
             add =
         }
          */
+        if (_config.addOrientationDataToObsState)
+        {
+            float yawDiffKinAndSim = (Quaternion.Inverse(kinChar.trans.rotation) * simulatedCharObj.transform.rotation).GetYAngle(true);
+            float yawDiffDesiredAndSim = (Quaternion.Inverse(MMScript.desired_rotation) * simulatedCharObj.transform.rotation).GetYAngle(true);
 
-        // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
+            //Debug.Log($"simYRot: {simYRot} desiredRotAngle:{desiredRotAngle} ");
+        }
+
+            // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
         for (int i = 0; i < 36; i++)
             state[state_idx++] = simChar.boneState[i];
         for (int i = 0; i < 36; i++)
@@ -827,8 +826,8 @@ public class MLAgentsDirector : Agent
         if (state_idx != numObservations)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything");
 
-        if (debug)
-            Utils.debugArray(state, $"{curFixedUpdate} state: ");
+        //if (debug)
+        //    Utils.debugArray(state, $"{curFixedUpdate} state: ");
         return state;
 
     }
@@ -846,7 +845,7 @@ public class MLAgentsDirector : Agent
             Transform t = bone_to_transform[i];
             var ab = t.GetComponent<ArticulationBody>();
             float mass = t.GetComponent<ArticulationBody>().mass;
-            Vector3 child_center = global_bone_positions == null ? getChildColliderCenter(t.gameObject) : global_bone_positions[i];
+            Vector3 child_center = global_bone_positions == null ? Utils.getChildColliderCenter(t.gameObject) : global_bone_positions[i];
             CoM += mass * child_center;
             total_mass += ab.mass;
 
@@ -860,48 +859,17 @@ public class MLAgentsDirector : Agent
     Vector3 resolveVelInKinematicRefFrame(Vector3 vel)
     {
         // using same logic as in desired_velocity_update
-        return Utils.quat_inv_mul_vec3(kinChar.trans.rotation, vel);
+        return MathUtils.quat_inv_mul_vec3(kinChar.trans.rotation, vel);
     }
     Vector3 resolvePosInKinematicRefFrame(Vector3 pos)
     {
         // using same logic as in desired_velocity_update
-        return Utils.quat_inv_mul_vec3(kinChar.trans.rotation, pos - kinChar.cm);
+        return MathUtils.quat_inv_mul_vec3(kinChar.trans.rotation, pos - kinChar.cm);
     }
     Vector3 resolvePosInSimRefFrame(Vector3 pos)
     {
         // using same logic as in desired_velocity_update
-        return Utils.quat_inv_mul_vec3(kinChar.trans.rotation, pos - simChar.cm);
-    }
-
-    void copyVecIntoArray(ref float[] state, ref int start_idx, Vector3 v)
-    {
-        state[start_idx] = v.x;
-        state[start_idx + 1] = v.y;
-        state[start_idx + 2] = v.z;
-        start_idx += 3;
-    }
-    void copyVecIntoArray(ref float[] state, ref int start_idx, Vector2 v)
-    {
-        state[start_idx] = v.x;
-        state[start_idx + 1] = v.y;
-        start_idx += 2;
-    }
-
-    public static Vector3 getChildColliderCenter(GameObject child)
-    {
-        foreach (Transform grandchild in child.transform)
-        {
-            if (grandchild.GetComponent<CapsuleCollider>() != null) { 
-                Vector3 center = grandchild.GetComponent<CapsuleCollider>().center;
-                return grandchild.TransformPoint(center);
-            }
-            if (grandchild.GetComponent<BoxCollider>() != null) {
-                Vector3 center = grandchild.GetComponent<BoxCollider>().center;
-                return grandchild.TransformPoint(center);
-            }
-
-        }
-        return Vector3.zero;
+        return MathUtils.quat_inv_mul_vec3(kinChar.trans.rotation, pos - simChar.cm);
     }
 
     void calcPosAndVelReward(out double posReward, out double velReward)
@@ -1018,46 +986,6 @@ public class MLAgentsDirector : Agent
         }
     }
 
-
-
-    // ================================ UTIL ====================================
-    // Get 6 points on capsule object
-    // first we start off at the center, and the 6 points are given by
-    // center plus-minus radius on y dimension
-    // center plus-minus radius on z dimension
-    // and since capsule is oriented on x dimension, the tippy tops are,
-    // as we previously calculated,
-    // center plus minus height/2 on x dimension 
-    public static void getSixPointsOnCapsule(GameObject obj, ref Vector3[] outputs)
-    {
-        CapsuleCollider cap = obj.GetComponent<CapsuleCollider>();
-        if (cap == null)
-            throw new Exception($"Object you're trying to get six points of capsule on does not have capsule: {obj.name}");
-        if (outputs.Length != 6)
-            throw new Exception($"outputs should have length 6, actual length: {outputs.Length}");
-
-        Vector3 center = cap.center;
-        float rad = cap.radius;
-        float half_height = cap.height / 2;
-        for (int i = 0; i < 3; i++)
-        {
-            Vector3 axis = Vector3.zero;
-            if (i == 0)
-                axis = Vector3.right;
-            else if (i == 1)
-                axis = Vector3.up;
-            else if (i == 2)
-                axis = Vector3.forward;
-
-            // Cap direction corresponds to which dimension it has its height along and is important 
-            // Use half height with Vector3.right because capsules are aligned on X axis
-            float variable = i == cap.direction ? half_height : rad;
-            outputs[i * 2] = obj.transform.TransformPoint(center + variable * axis);
-            outputs[i * 2 + 1] = obj.transform.TransformPoint(center - variable * axis);
-        }
-
-    }
-
     private float getBottomMostPointOnFoot(Transform foot, Vector3 center)
     {
         float x = feetBozSize.x / 2;
@@ -1088,52 +1016,6 @@ public class MLAgentsDirector : Agent
         //Debug.Log($"minToeY: {minToeY} minPointOnFoot: {minPointOnFoot} maxGroundPenetration: {maxGroundPenetration}");
         return maxGroundPenetration;
     }
-    public void getSixPointsOnCollider(GameObject obj, ref Vector3[] outputs, mm_v2.Bones bone)
-    {
-        if (bone == Bone_LeftFoot || bone == Bone_RightFoot)
-            getSixPointsOnBox(obj, ref outputs);
-        else
-            getSixPointsOnCapsule(obj, ref outputs);
-
-    }
-
-    public static void getSixPointsOnBox(GameObject obj, ref Vector3[] outputs)
-    {
-        BoxCollider box = obj.GetComponent<BoxCollider>();
-        if (box == null)
-            throw new Exception($"Object you're trying to get six points of box on does not have box: {obj.name}");
-        if (outputs.Length != 6)
-            throw new Exception($"outputs should have length 6, actual length: {outputs.Length}");
-
-        Vector3 center = box.center;
-        Vector3 size = box.size;
-
-        for (int i = 0; i < 3; i++)
-        {
-            Vector3 axis = Vector3.zero;
-            float move_amount = 0f;
-            if (i == 0)
-            {
-                move_amount = size.x;
-                axis = Vector3.right;
-            }
-            else if (i == 1)
-            {
-                move_amount = size.y;
-                axis = Vector3.up;
-            }
-            else if (i == 2)
-            {
-                move_amount = size.z;
-                axis = Vector3.forward;
-            }
-            // Cap direction corresponds to which dimension it has its height along and is important 
-            // Use half height with Vector3.right because capsules are aligned on X axis
-            outputs[i * 2] = obj.transform.TransformPoint(center + move_amount/2 * axis);
-            outputs[i * 2 + 1] = obj.transform.TransformPoint(center - move_amount/2 * axis);
-        }
-
-    }
 
     // Testing and internal stuff
     [ContextMenu("Create gizmos for capsule position points")]
@@ -1146,7 +1028,7 @@ public class MLAgentsDirector : Agent
             mm_v2.Bones bone = (mm_v2.Bones)i;
             GameObject kin_collider_obj = kinChar.boneToCollider[i];
             Vector3[] gizmos = new Vector3[6];
-            getSixPointsOnCollider(kin_collider_obj, ref gizmos, bone);            
+            Utils.getSixPointsOnCollider(kin_collider_obj, ref gizmos, bone);            
             foreach (Vector3 v in gizmos)
                 AddGizmoSphere(v, Color.blue);
         }
@@ -1200,16 +1082,6 @@ public class MLAgentsDirector : Agent
                 Gizmos.DrawLine(a, b);
             }
         }
-    }
-
-    [ContextMenu("Testing")]
-    private void testFunc()
-    {
-        Quaternion q1 = Quaternion.AngleAxis(180f, Vector3.right);
-        Quaternion q2 = Quaternion.AngleAxis(0f, Vector3.right);
-        Debug.Log($"{Quaternion.Dot(q1, q2)}");
-        Debug.Log($"{Quaternion.Dot(q1, q2)}");
-
     }
 
     private void OnGUI()

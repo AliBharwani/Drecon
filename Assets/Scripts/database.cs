@@ -30,7 +30,7 @@ public class database : MonoBehaviour
     KDTree tree;
     private Quaternion inv_sim_rot(int frame)
     {
-        return Utils.quat_inv(bone_rotations[frame][0]);
+        return MathUtils.quat_inv(bone_rotations[frame][0]);
     }
 
     public int motionMatch(float[] query)
@@ -182,9 +182,9 @@ public class database : MonoBehaviour
             int t1 = database_trajectory_index_clamp(i, frame_increments * 2);
             int t2 = database_trajectory_index_clamp(i, frame_increments * 3);
 
-            Vector3 trajectory_pos0 = Utils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t0][0] - bone_positions[i][0]);
-            Vector3 trajectory_pos1 = Utils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t1][0] - bone_positions[i][0]);
-            Vector3 trajectory_pos2 = Utils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t2][0] - bone_positions[i][0]);
+            Vector3 trajectory_pos0 = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t0][0] - bone_positions[i][0]);
+            Vector3 trajectory_pos1 = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t1][0] - bone_positions[i][0]);
+            Vector3 trajectory_pos2 = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t2][0] - bone_positions[i][0]);
 
             features[i][offset + 0] = trajectory_pos0.x;
             features[i][offset + 1] = trajectory_pos0.z;
@@ -206,9 +206,9 @@ public class database : MonoBehaviour
             int t1 = database_trajectory_index_clamp(i, frame_increments * 2);
             int t2 = database_trajectory_index_clamp(i, frame_increments * 3);
 
-            Vector3 trajectory_pos0 = Utils.quat_mul_vec3(inv_sim_rot(i), Utils.quat_mul_vec3(bone_rotations[t0][0], Vector3.forward));
-            Vector3 trajectory_pos1 = Utils.quat_mul_vec3(inv_sim_rot(i), Utils.quat_mul_vec3(bone_rotations[t1][0], Vector3.forward));
-            Vector3 trajectory_pos2 = Utils.quat_mul_vec3(inv_sim_rot(i), Utils.quat_mul_vec3(bone_rotations[t2][0], Vector3.forward));
+            Vector3 trajectory_pos0 = MathUtils.quat_mul_vec3(inv_sim_rot(i), MathUtils.quat_mul_vec3(bone_rotations[t0][0], Vector3.forward));
+            Vector3 trajectory_pos1 = MathUtils.quat_mul_vec3(inv_sim_rot(i), MathUtils.quat_mul_vec3(bone_rotations[t1][0], Vector3.forward));
+            Vector3 trajectory_pos2 = MathUtils.quat_mul_vec3(inv_sim_rot(i), MathUtils.quat_mul_vec3(bone_rotations[t2][0], Vector3.forward));
 
             features[i][offset + 0] = trajectory_pos0.x;
             features[i][offset + 1] = trajectory_pos0.z;
@@ -241,7 +241,7 @@ public class database : MonoBehaviour
                 bone_angular_velocities[i],
                 bone);
 
-            bone_velocity = Utils.quat_mul_vec3(inv_sim_rot(i), bone_velocity);
+            bone_velocity = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_velocity);
 
             features[i][offset + 0] = bone_velocity.x;
             features[i][offset + 1] = bone_velocity.y;
@@ -270,7 +270,7 @@ public class database : MonoBehaviour
                 bone);
 
             // multiply by inverse of simulation bone 
-            bone_position = Utils.quat_mul_vec3(inv_sim_rot(i), bone_position - bone_positions[i][0]);
+            bone_position = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_position - bone_positions[i][0]);
 
             features[i][offset + 0] = bone_position.x;
             features[i][offset + 1] = bone_position.y;
@@ -311,13 +311,13 @@ public class database : MonoBehaviour
             bone_angular_velocities,
             bone_parents[bone]);
 
-            bone_position = Utils.quat_mul_vec3(parent_rotation, bone_positions[bone]) + parent_position;
+            bone_position = MathUtils.quat_mul_vec3(parent_rotation, bone_positions[bone]) + parent_position;
             bone_velocity = 
                 parent_velocity +
-                Utils.quat_mul_vec3(parent_rotation, bone_velocities[bone]) + 
-                Vector3.Cross(parent_angular_velocity, Utils.quat_mul_vec3(parent_rotation, bone_positions[bone]));
+                MathUtils.quat_mul_vec3(parent_rotation, bone_velocities[bone]) + 
+                Vector3.Cross(parent_angular_velocity, MathUtils.quat_mul_vec3(parent_rotation, bone_positions[bone]));
             bone_rotation = parent_rotation * bone_rotations[bone];
-            bone_angular_velocity = Utils.quat_mul_vec3(parent_rotation, bone_angular_velocities[bone] + parent_angular_velocity);
+            bone_angular_velocity = MathUtils.quat_mul_vec3(parent_rotation, bone_angular_velocities[bone] + parent_angular_velocity);
         }
         else
         {
@@ -342,7 +342,7 @@ public class database : MonoBehaviour
                 bone_rotations,
                 bone_parents[bone]);
 
-            bone_position = Utils.quat_mul_vec3(parent_rotation, bone_positions[bone]) + parent_position;
+            bone_position = MathUtils.quat_mul_vec3(parent_rotation, bone_positions[bone]) + parent_position;
             bone_rotation = parent_rotation * bone_rotations[bone];
         }
         else
@@ -376,7 +376,7 @@ public class database : MonoBehaviour
 
         Vector3 parent_position = global_bone_positions[bone_parents[bone]];
         Quaternion parent_rotation = global_bone_rotations[bone_parents[bone]];
-        global_bone_positions[bone] = Utils.quat_mul_vec3(parent_rotation, local_bone_positions[bone]) + parent_position;
+        global_bone_positions[bone] = MathUtils.quat_mul_vec3(parent_rotation, local_bone_positions[bone]) + parent_position;
         global_bone_rotations[bone] = parent_rotation * local_bone_rotations[bone];
         global_bone_computed[bone] = true;
     }
