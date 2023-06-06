@@ -83,8 +83,6 @@ public class ConfigWriter : MonoBehaviour
     public float pGainMultiplier = 1f;
     public bool rewardsInGUI;
     [Header("UNTOUCHED / LEGACY")]
-    public bool normalizeRewardComponents = false;
-    public float poseRewardMultiplier = 1f / 10f;
     public bool resetKinCharOnEpisodeEnd = false;
     public bool selfCollision;
 

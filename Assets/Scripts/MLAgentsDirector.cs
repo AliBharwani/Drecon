@@ -105,12 +105,6 @@ public class MLAgentsDirector : Agent
     public bool debug = false;
     public bool updateVelOnTeleport = true;
     public bool resetKinToSimOnFail = false;
-    // Reward Normalizers 
-    //Normalizer posRewardNormalizer, velRewardNormalizer, localPoseRewardNormalizer, cmVelRewardNormalizer, fallFactorNormalizer;
-    Normalizer posRewardNormalizer = new Normalizer();
-    Normalizer velRewardNormalizer = new Normalizer();
-    Normalizer localPoseRewardNormalizer = new Normalizer();
-    Normalizer cmVelRewardNormalizer = new Normalizer();
     private Unity.MLAgents.Policies.BehaviorParameters behaviorParameters;
 
     public override void CollectObservations(VectorSensor sensor)
@@ -599,7 +593,10 @@ public class MLAgentsDirector : Agent
                 {
                     newSurfacePts[j] = isKinChar ? resolvePosInKinematicRefFrame(newWorldSurfacePts[j]) :  resolvePosInSimRefFrame(newWorldSurfacePts[j]);
                     if (updateVelocity)
-                        charInfo.boneSurfaceVels[i][j] = (newWorldSurfacePts[j] - prevWorldSurfacePts[j]) / Time.fixedDeltaTime;
+                    {
+                        Vector3 surfaceVel = (newWorldSurfacePts[j] - prevWorldSurfacePts[j]) / Time.fixedDeltaTime;
+                        charInfo.boneSurfaceVels[i][j] = resolveVelInKinematicRefFrame(surfaceVel);
+                    }
                 }
                 charInfo.boneSurfacePtsWorldSpace[i] = newWorldSurfacePts;
                 charInfo.boneSurfacePts[i] = newSurfacePts;
@@ -696,7 +693,7 @@ public class MLAgentsDirector : Agent
             finalReward = 0f;
         else
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
-        Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
+        //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         //updateMeanReward(final_reward);
         AddReward(finalReward);
         return false;
@@ -843,6 +840,8 @@ public class MLAgentsDirector : Agent
         double velDiffsSum = 0f;
         for (int i = 1; i < 23; i++)
         {
+            if (_config.outputIsBase && ((mm_v2.Bones)i == Bone_LeftFoot || (mm_v2.Bones)i == Bone_RightFoot))
+                continue;
             for (int j = 0; j < 6; j++)
             {
                 posDiffsSum += (kinChar.boneSurfacePts[i][j] - simChar.boneSurfacePts[i][j]).magnitude;
@@ -851,13 +850,6 @@ public class MLAgentsDirector : Agent
         }
         posReward = Math.Exp((-10f / (nbodies)) *  posDiffsSum );
         velReward = Math.Exp((-1f / (nbodies)) *  velDiffsSum );
-        //if (debug)
-        //    Debug.Log($"velDiffsSum: {velDiffsSum} velReward: {velReward}");
-        if (_config.normalizeRewardComponents)
-        {
-            posReward = posRewardNormalizer.getNormalized((float)posReward);
-            velReward = velRewardNormalizer.getNormalized((float)velReward);
-        }
     }
 
     void calcLocalPoseReward(out double poseReward)
@@ -879,18 +871,14 @@ public class MLAgentsDirector : Agent
             // We want the magnitude of the diff so we take abs value
             angle = Math.Abs(GeoUtils.wrap_radians((float)angle));
             totalLoss += (float)angle;
-            Debug.Log($"Bone: {(mm_v2.Bones)i} Quaternion loss: {angle} totalLoss: {totalLoss}");
+            //Debug.Log($"Bone: {(mm_v2.Bones)i} Quaternion loss: {angle} totalLoss: {totalLoss}");
         }
-        poseReward = Math.Exp((-10f/nbodies) * _config.poseRewardMultiplier * totalLoss);
-        if (_config.normalizeRewardComponents)
-            poseReward = localPoseRewardNormalizer.getNormalized((float)poseReward);
+        poseReward = Math.Exp((-10f/nbodies) * totalLoss);
     }
 
     void calcCMVelReward(out double cmVelReward)
     {
-        cmVelReward = Math.Exp(-1d * (kinChar.cmVel - simChar.cmVel).magnitude);
-        if (_config.normalizeRewardComponents)
-            cmVelReward = cmVelRewardNormalizer.getNormalized((float)cmVelReward);
+        cmVelReward = Math.Exp(-1d * (resolveVelInKinematicRefFrame(kinChar.cmVel) - resolveVelInKinematicRefFrame(simChar.cmVel)).magnitude);
     }
 
     void calcFallFactor(out double fallFactor, out bool heads1mApart)
