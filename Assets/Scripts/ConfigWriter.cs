@@ -28,9 +28,13 @@ public class ConfigWriter : MonoBehaviour
     public float clampingMaxDistance = .5f;
     public float clampingMaxAngle = 20f;
     public bool useSkinnedMesh = false;
+    public float friction = 1f;
+    public PhysicMaterial groundMaterial;
+    private float prevFrictionVal = 1f;
 
     [Header("PHYSICAL CHARACTER SETTINGS")]
     public int solverIterations = 32;
+    public bool addOrientationDataToObsState = false;
     public bool setDriveTargetVelocities;
     public bool noStrafing = false;
     public bool setRotsDirectly = false;
@@ -41,14 +45,8 @@ public class ConfigWriter : MonoBehaviour
     public float alphaForExpMap = 120f;
     public SixDRotationMethod sixDRotMethod;
     //public bool normalizeLimitedDOFOutputs = true;
-    public bool normalizeRewardComponents = false;
     public bool networkControlsAllJoints = false;
     public bool fullRangeEulerOutputs;
-    public bool useGeodesicForAngleDiff = false;
-    public float poseRewardMultiplier = 1f / 10f;
-    public bool addOrientationDataToObsState = false;
-    public bool resetKinCharOnEpisodeEnd = false;
-    public bool selfCollision;
     //public bool useUnnormalizedEulerOffsets = false;
     [Header("TRAINING HYPERPARAM SETTINGS")]
     public int EVALUATE_EVERY_K_STEPS = 2;
@@ -84,6 +82,11 @@ public class ConfigWriter : MonoBehaviour
     public bool dampingScalesWithStiffness;
     public float pGainMultiplier = 1f;
     public bool rewardsInGUI;
+    [Header("UNTOUCHED / LEGACY")]
+    public bool normalizeRewardComponents = false;
+    public float poseRewardMultiplier = 1f / 10f;
+    public bool resetKinCharOnEpisodeEnd = false;
+    public bool selfCollision;
 
     [System.Serializable]
     public class MusclePower
@@ -109,6 +112,14 @@ public class ConfigWriter : MonoBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (Mathf.Approximately(friction, prevFrictionVal) || groundMaterial == null)
+            return;
+        groundMaterial.dynamicFriction = friction;
+        groundMaterial.staticFriction = friction;
+        prevFrictionVal = friction;
+    }
 
 
     [ContextMenu("Multiply all stiffness values by pGainMultiplier")]

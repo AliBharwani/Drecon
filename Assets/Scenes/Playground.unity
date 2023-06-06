@@ -451,7 +451,10 @@ MonoBehaviour:
   clampingMaxDistance: 0.5
   clampingMaxAngle: 20
   useSkinnedMesh: 0
+  friction: 1
+  groundMaterial: {fileID: 0}
   solverIterations: 255
+  addOrientationDataToObsState: 0
   setDriveTargetVelocities: 0
   noStrafing: 0
   setRotsDirectly: 0
@@ -459,14 +462,8 @@ MonoBehaviour:
   actionRotType: 0
   alphaForExpMap: 120
   sixDRotMethod: 0
-  normalizeRewardComponents: 0
   networkControlsAllJoints: 1
   fullRangeEulerOutputs: 0
-  useGeodesicForAngleDiff: 1
-  poseRewardMultiplier: 0.1
-  addOrientationDataToObsState: 0
-  resetKinCharOnEpisodeEnd: 1
-  selfCollision: 0
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
@@ -567,6 +564,11 @@ MonoBehaviour:
   dampingScalesWithStiffness: 0
   pGainMultiplier: 0.5
   rewardsInGUI: 0
+  normalizeRewardComponents: 0
+  useGeodesicForAngleDiff: 1
+  poseRewardMultiplier: 0.1
+  resetKinCharOnEpisodeEnd: 1
+  selfCollision: 0
 --- !u!4 &381966280
 Transform:
   m_ObjectHideFlags: 0
@@ -1559,9 +1561,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: d7f32631a38d4b744b4ca04252f352a5, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1592,7 +1594,7 @@ MonoBehaviour:
   kinUseDebugMats: 1
   simUseDebugMats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
-  debug: 1
+  debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
@@ -2214,7 +2216,10 @@ MonoBehaviour:
   clampingMaxDistance: 0.5
   clampingMaxAngle: 20
   useSkinnedMesh: 0
+  friction: 1
+  groundMaterial: {fileID: 13400000, guid: 5a0abe6df57e58d45b9179b57d5d8cb2, type: 2}
   solverIterations: 256
+  addOrientationDataToObsState: 1
   setDriveTargetVelocities: 1
   noStrafing: 1
   setRotsDirectly: 0
@@ -2222,14 +2227,8 @@ MonoBehaviour:
   actionRotType: 0
   alphaForExpMap: 120
   sixDRotMethod: 0
-  normalizeRewardComponents: 0
   networkControlsAllJoints: 0
   fullRangeEulerOutputs: 0
-  useGeodesicForAngleDiff: 1
-  poseRewardMultiplier: 0.1
-  addOrientationDataToObsState: 1
-  resetKinCharOnEpisodeEnd: 1
-  selfCollision: 1
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 2
   EPISODE_END_REWARD: -0.5
@@ -2239,7 +2238,7 @@ MonoBehaviour:
   useCustomInputGenerator: 1
   inputGeneratorHalflife: 0.5
   simulationVelocityHalflife: 0.8
-  simulation_rotation_halflife: 0.8
+  simulation_rotation_halflife: 0.6
   walkOnly: 0
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 50
@@ -2332,6 +2331,11 @@ MonoBehaviour:
   dampingScalesWithStiffness: 0
   pGainMultiplier: 0.8
   rewardsInGUI: 0
+  normalizeRewardComponents: 0
+  useGeodesicForAngleDiff: 1
+  poseRewardMultiplier: 0.1
+  resetKinCharOnEpisodeEnd: 1
+  selfCollision: 1
 --- !u!4 &1357924715
 Transform:
   m_ObjectHideFlags: 0
@@ -2679,7 +2683,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 2
+  numAgents: 1
   modelDirector: {fileID: 767361687}
   modelDirectorWithOrientationData: {fileID: 818134323}
   model6DDirector: {fileID: 2033970009}

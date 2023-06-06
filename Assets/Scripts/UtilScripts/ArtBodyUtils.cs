@@ -495,6 +495,7 @@ public static class ArtBodyUtils
 
     public static float GetYAngle(this Quaternion q, bool inDegrees = false)
     {
+        // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
         return Mathf.Atan2(2 * q.y * q.w - 2 * q.x * q.z, 1 - 2 * Mathf.Pow(q.y,2) - 2 * Mathf.Pow(q.z,2)) * (inDegrees ? Mathf.Rad2Deg : 1);
     }
     public static void resetJointPosition(this ArticulationBody body, Vector3 newJointPositions, bool resetEverything = true)

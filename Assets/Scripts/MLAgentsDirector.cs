@@ -348,8 +348,6 @@ public class MLAgentsDirector : Agent
         for (int i = 0; i < limitedDOFBones.Length; i++)
         {
             mm_v2.Bones bone =  limitedDOFBones[i];
-            // Angle is in range (-1, 1) => map to (-180, 180)
-            //float angle = final_actions[i] * 180;
             ArticulationBody ab = simChar.boneToArtBody[(int)bone];
             Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[(int) bone], true);
             ArticulationDrive drive = ab.zDrive;
@@ -407,8 +405,6 @@ public class MLAgentsDirector : Agent
         kinChar.boneToTransform = MMScript.boneToTransform;
         kinChar.charObj = kinematicCharObj;
         kinChar.MMScript = MMScript;
-        //nbodies = kinChar.boneToTransform.Length;
-        //kinChar.boneSurfacePts = new Vector3[nbodies][];
 
         SimCharController = simulatedCharObj.GetComponent<SimCharController>();
         SimCharController.is_active = false;
@@ -452,7 +448,10 @@ public class MLAgentsDirector : Agent
 
         behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         numActions = behaviorParameters.BrainParameters.ActionSpec.NumContinuousActions;
-        _config.clampKinCharToSim &= behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
+        bool isInference = behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
+        _config.clampKinCharToSim &= isInference;
+        if (isInference)
+            _config.friction = 1f;
         Debug.Log($"behaviorParameters.BrainParameters.VectorObservationSize: {behaviorParameters.BrainParameters.VectorObservationSize}");
         numObservations = behaviorParameters.BrainParameters.VectorObservationSize; // 111 or 132 or 128 or 164
         if (_config.clampKinCharToSim) 
@@ -490,8 +489,6 @@ public class MLAgentsDirector : Agent
 
     public void Awake()
     {
-        //Debug.Log("MLAgents Director Awake called");
-        //Unity.MLAgents.Policies.BehaviorParameters behavior_params = gameObject.GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         if (motionDB == null)
             motionDB = database.Instance;
         _config = ConfigWriter.Instance;
@@ -501,24 +498,19 @@ public class MLAgentsDirector : Agent
         debug = debug && !Academy.Instance.IsCommunicatorOn;
         if (Academy.Instance.IsCommunicatorOn)
         {
-            //int numFixedUpdatesPerSecond = Mathf.CeilToInt(1f / Time.fixedDeltaTime);
-            //MaxStep = numFixedUpdatesPerSecond * _config.MAX_EPISODE_LENGTH_SECONDS;
             int numStepsPerSecond = (int)(Mathf.Ceil(1f / Time.fixedDeltaTime) / _config.EVALUATE_EVERY_K_STEPS);
             MaxStep = numStepsPerSecond * _config.MAX_EPISODE_LENGTH_SECONDS;
         }
         customInit();
-        //SimCharController.set_art_body_rot_limits();
     }
     public override void OnEpisodeBegin()
     {
-        //Debug.Log("OnEpisodeBegin() called");
         if (_config.resetKinCharOnEpisodeEnd)
         {
             MMScript.Reset();
             MMScript.FixedUpdate();
         }
         float verticalOffset = getVerticalOffset();
-        //Debug.Log($"Vertical offset: {verticalOffset}");
         projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + 2 * Vector3.right;
         SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .02f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
@@ -526,8 +518,6 @@ public class MLAgentsDirector : Agent
         resetData();
         kinChar.cmVel = Vector3.zero;
         simChar.cmVel = Vector3.zero;
-        //RequestDecision();
-        //Debug.Log($"Teleoport happens on {curFixedUpdate}");
     }
 
     bool updateVelocity;
@@ -582,7 +572,6 @@ public class MLAgentsDirector : Agent
 
     private void UpdateKinCMData(bool updateVelocity)
     {
-        //Debug.Log($"Updating CM data, update vel: {updateVelocity}");
         Vector3 newKinCM = getCM(kinChar.boneToTransform);
         kinChar.cmVel = updateVelocity ? (newKinCM - kinChar.cm) / Time.fixedDeltaTime : kinChar.cmVel;
         kinChar.cm = newKinCM;
@@ -590,7 +579,6 @@ public class MLAgentsDirector : Agent
     }
     private void UpdateSimCMData(bool updateVelocity)
     {
-        //Debug.Log($"Updating CM data, update vel: {updateVelocity}");
         Vector3 newSimCM = getCM(simChar.boneToTransform);
         simChar.cmVel = updateVelocity ? (newSimCM - simChar.cm) / Time.fixedDeltaTime : simChar.cmVel;
         simChar.cm = newSimCM;
@@ -629,25 +617,18 @@ public class MLAgentsDirector : Agent
             for (int j = 0; j < stateBones.Length; j++)
             {
                 mm_v2.Bones bone = stateBones[j];
-                // Compute position of bone
                 Vector3 boneWorldPos = curInfo.boneToTransform[(int)bone].position;
                 Vector3 boneLocalPos = isKinChar ? resolvePosInKinematicRefFrame(boneWorldPos) : resolvePosInSimRefFrame(boneWorldPos);
-                //Vector3 bone_relative_pos = Utils.quat_inv_mul_vec3(relative_rot, bone_local_pos);
                 Vector3 prevBonePos = curInfo.boneWorldPos[j];
                 Vector3 boneVel = (boneWorldPos - prevBonePos) / dt;
                 boneVel = zeroVelocity ? Vector3.zero : resolveVelInKinematicRefFrame(boneVel);
                 Utils.copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
 
-                //copyVecIntoArray(ref copyInto, ref copyIdx, updateVelocity ? boneVel : Vector3.zero);
                 if (updateVelocity || zeroVelocity)
                     Utils.copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
                 else
                     copyIdx += 3;
-                //if (debug && j == 0 && !isKinChar)
-                //    Debug.Log($"LeftToe vel: updateVelocity:{updateVelocity} velocity in array: {(updateVelocity ? boneVel : new Vector3(copyInto[copyIdx - 3], copyInto[copyIdx - 2], copyInto[copyIdx - 1]))}");
                 curInfo.boneWorldPos[j] = boneWorldPos;
-                //if (debug)
-                //    Debug.Log($"{(isKinChar ? "Kin: " : "Sim: ")} {bone} world pos: {boneWorldPos} | local pos: {boneLocalPos} : vel: {(updateVelocity ? boneVel : Vector3.zero)}");
             }
         }
     }
@@ -662,15 +643,12 @@ public class MLAgentsDirector : Agent
     }
 
 
-    //private float meanReward = 0f;
     internal float finalReward = 0f;
     internal int lastEpisodeEndingFrame = 0;
     private bool shouldEndThisFrame = false;
     public void LateFixedUpdate()
     {
         calcAndSetRewards();
-        //UpdateSimCMData(updateVelocity);
-        //UpdateBoneSurfacePts(updateVelocity);
 
         bool inInferenceMode = behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
         if (!inInferenceMode)
@@ -692,11 +670,8 @@ public class MLAgentsDirector : Agent
         if ((heads1mApart && curFixedUpdate > lastSimCharTeleportFixedUpdate + 1 && !_config.clampKinCharToSim) || (_config.clampKinCharToSim && shouldEndThisFrame))
         {
             finalReward = _config.EPISODE_END_REWARD;
-            //updateMeanReward(-.5f);
             SetReward(_config.EPISODE_END_REWARD);
-            //Debug.Log("=================================================");
             Debug.Log($"{Time.frameCount}: Calling end episode on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
-            //Debug.Log("=================================================");
             lastEpisodeEndingFrame = curFixedUpdate;
             shouldEndThisFrame = false;
             EndEpisode();
@@ -721,7 +696,7 @@ public class MLAgentsDirector : Agent
             finalReward = 0f;
         else
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
-        //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
+        Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         //updateMeanReward(final_reward);
         AddReward(finalReward);
         return false;
@@ -800,7 +775,8 @@ public class MLAgentsDirector : Agent
             float yawDiffDesiredAndSim = (Quaternion.Inverse(MMScript.desired_rotation) * simulatedCharObj.transform.rotation).GetYAngle();
             Utils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffKinAndSim));
             Utils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffDesiredAndSim));
-            //Debug.Log($"simYRot: {simYRot} desiredRotAngle:{desiredRotAngle} ");
+            if (debug)
+                Debug.Log($"yawDiffKinAndSim: {yawDiffKinAndSim} yawDiffDesiredAndSim: {yawDiffDesiredAndSim} ");
         }
 
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
@@ -873,8 +849,8 @@ public class MLAgentsDirector : Agent
                 velDiffsSum += (kinChar.boneSurfaceVels[i][j] - simChar.boneSurfaceVels[i][j]).magnitude;
             }
         }
-        posReward = Math.Exp((-10f / (nbodies * 6)) *  posDiffsSum );
-        velReward = Math.Exp((-1f / (nbodies * 6)) *  velDiffsSum );
+        posReward = Math.Exp((-10f / (nbodies)) *  posDiffsSum );
+        velReward = Math.Exp((-1f / (nbodies)) *  velDiffsSum );
         //if (debug)
         //    Debug.Log($"velDiffsSum: {velDiffsSum} velReward: {velReward}");
         if (_config.normalizeRewardComponents)
@@ -889,54 +865,25 @@ public class MLAgentsDirector : Agent
         double totalLoss = 0;
         for (int i = 0; i < 23; i++)
         {
+            if (_config.outputIsBase && ((mm_v2.Bones)i == Bone_LeftFoot || (mm_v2.Bones)i == Bone_RightFoot))
+                continue;
             Transform kinBone = kinChar.boneToTransform[i];
             Transform simBone = simChar.boneToTransform[i];
-            float loss;
-            // After some testing, the results from either of these should be identical
-
-            if (_config.useGeodesicForAngleDiff)
-            {
-                Matrix4x4 kinRotation = Matrix4x4.Rotate(kinBone.localRotation);
-                Matrix4x4 simRotation = Matrix4x4.Rotate(simBone.localRotation);
-                //Matrix4x4 lossMat = (simRotation * kinRotation.transpose);
-                //float trace = lossMat[0, 0] + lossMat[1, 1] + lossMat[2, 2];
-                // Need clamping because Acos will throw NAN for values outside [-1, 1]
-                //float traceClamped = Mathf.Clamp((trace - 1) / 2, -1f, 1f);
-                //loss = Mathf.Acos(traceClamped);
-                loss = ArtBodyUtils.geodesicBetweenTwoRotationMatrices(kinRotation, simRotation);
-            //geodesicTotalRewardSum += loss;
-            } else { 
-
-                // From Stack Overflow:
-                //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
-                // diff * q1 = q2  --->  diff = q2 * inverse(q1)
-                Quaternion diff = simBone.localRotation * Quaternion.Inverse(kinBone.localRotation);
-                //Vector3 axis;
-                // https://stackoverflow.com/questions/21513637/dot-product-of-two-quaternion-rotations
-                // angle = 2*atan2(q.vec.length(), q.w)
-                //double sqrd_dot =  Math.Pow(Quaternion.Dot(kin_bone.localRotation, sim_bone.localRotation), 2);
-                //double angle = Math.Acos(2 * sqrd_dot - 1);
-                //diff.ToAngleAxis(out angle, out axis);
-
-                Vector3 diff_vec = new Vector3(diff.x, diff.y, diff.z);
-                double angle = 2 * Math.Atan2(diff_vec.magnitude, diff.w);
-                // We want the magnitude of the diff so we take abs value
-                angle = Math.Abs(GeoUtils.wrap_radians((float)angle));
-                //double unity_angle = Quaternion.Angle(sim_bone.localRotation, kin_bone.localRotation);
-                loss = (float) angle;
-            }
-            totalLoss += loss;
-            //Debug.Log($"Bone: {(mm_v2.Bones)i} Quaternion loss: {loss}, geoDesicloss {geodesicLoss}");
+            // From Stack Overflow:
+            //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
+            // diff * q1 = q2  --->  diff = q2 * inverse(q1)
+            Quaternion diff = simBone.localRotation * Quaternion.Inverse(kinBone.localRotation);
+            // https://stackoverflow.com/questions/21513637/dot-product-of-two-quaternion-rotations
+            Vector3 diff_vec = new Vector3(diff.x, diff.y, diff.z);
+            double angle = 2 * Math.Atan2(diff_vec.magnitude, diff.w);
+            // We want the magnitude of the diff so we take abs value
+            angle = Math.Abs(GeoUtils.wrap_radians((float)angle));
+            totalLoss += (float)angle;
+            Debug.Log($"Bone: {(mm_v2.Bones)i} Quaternion loss: {angle} totalLoss: {totalLoss}");
         }
         poseReward = Math.Exp((-10f/nbodies) * _config.poseRewardMultiplier * totalLoss);
         if (_config.normalizeRewardComponents)
-        {
             poseReward = localPoseRewardNormalizer.getNormalized((float)poseReward);
-        }
-        //double geodesicTotalReward = Math.Exp(-1f * poseRewardMultiplier * geodesicTotalRewardSum);
-        //Debug.Log($"pose_reward_sum: {pose_reward_sum} Quaternion reward: {pose_reward} " +
-        //    $"  geodesicTotalRewardSum: {geodesicTotalRewardSum} geodesicTotalReward: {geodesicTotalReward}");
-
     }
 
     void calcCMVelReward(out double cmVelReward)
@@ -966,9 +913,6 @@ public class MLAgentsDirector : Agent
             {
                 Debug.Log($"Collider name: {colliderName} other collider name: {contact.otherCollider.gameObject.name}");
                 shouldEndThisFrame = true;
-                //EndEpisode();
-                //Debug.Log($"{Time.frameCount}: Calling end epsidoe on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame) / 60f} sec)");
-                //lastEpisodeEndingFrame = curFixedUpdate;
             }
             //Debug.Log($"{colliderName} collided with {contact.otherCollider.gameObject.name}");
         }
@@ -983,11 +927,6 @@ public class MLAgentsDirector : Agent
         Vector3 topRight = foot.TransformPoint(center + new Vector3(x, -y, -z));
         Vector3 bottomLeft = foot.TransformPoint(center + new Vector3(-x, -y, z));
         Vector3 bottomRight = foot.TransformPoint(center + new Vector3(-x, -y, -z));
-        //AddGizmoSphere(topLeft, Color.red);
-        //AddGizmoSphere(topRight, Color.red);
-        //AddGizmoSphere(bottomLeft, Color.red);
-        //AddGizmoSphere(bottomRight, Color.red);
-
         return Mathf.Min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
     }
 
