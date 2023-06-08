@@ -564,9 +564,6 @@ MonoBehaviour:
   dampingScalesWithStiffness: 0
   pGainMultiplier: 0.5
   rewardsInGUI: 0
-  normalizeRewardComponents: 0
-  useGeodesicForAngleDiff: 1
-  poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 0
 --- !u!4 &381966280
@@ -1446,7 +1443,7 @@ MonoBehaviour:
   kinUseDebugMats: 1
   simUseDebugMats: 0
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
-  debug: 1
+  debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
@@ -1490,7 +1487,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: ebeea912d1661a147a8dd9d18a665b4d, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1561,7 +1558,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: d7f32631a38d4b744b4ca04252f352a5, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 88894bc2dbabc37419ce71987e8458bf, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -2209,9 +2206,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/EulerWOrientation
+  writeToFilePath: ../results/AA-ControlHips
   filename: unityconfig.json
-  loadFromFilePath: ../results/EulerRunningEnabled
+  loadFromFilePath: ../results/AADreconRewardsLongHorizon
   clampKinCharToSim: 0
   clampingMaxDistance: 0.5
   clampingMaxAngle: 20
@@ -2223,8 +2220,8 @@ MonoBehaviour:
   setDriveTargetVelocities: 1
   noStrafing: 1
   setRotsDirectly: 0
-  outputIsBase: 0
-  actionRotType: 0
+  outputIsBase: 1
+  actionRotType: 1
   alphaForExpMap: 120
   sixDRotMethod: 0
   networkControlsAllJoints: 0
@@ -2241,7 +2238,7 @@ MonoBehaviour:
   simulation_rotation_halflife: 0.6
   walkOnly: 0
   searchTime: 0.2
-  MAX_WANDERING_RADIUS: 50
+  MAX_WANDERING_RADIUS: 100
   projectileTraining: 0
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
@@ -2299,41 +2296,38 @@ MonoBehaviour:
   useCapsuleFeet: 0
   MusclePowers:
   - Bone: 1
-    PowerVector: {x: 1600, y: 1600, z: 1600}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 10
-    PowerVector: {x: 1600, y: 1600, z: 1600}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 11
-    PowerVector: {x: 1600, y: 1600, z: 1600}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 12
-    PowerVector: {x: 1600, y: 1600, z: 1600}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 6
-    PowerVector: {x: 1600, y: 1600, z: 4800}
+    PowerVector: {x: 2000, y: 2000, z: 6000}
   - Bone: 2
-    PowerVector: {x: 1600, y: 1600, z: 4800}
+    PowerVector: {x: 2000, y: 2000, z: 6000}
   - Bone: 7
-    PowerVector: {x: 3200, y: 3200, z: 3200}
+    PowerVector: {x: 4000, y: 4000, z: 4000}
   - Bone: 3
-    PowerVector: {x: 3200, y: 3200, z: 3200}
+    PowerVector: {x: 4000, y: 4000, z: 4000}
   - Bone: 8
-    PowerVector: {x: 800, y: 800, z: 1600}
+    PowerVector: {x: 1000, y: 1000, z: 2000}
   - Bone: 4
-    PowerVector: {x: 800, y: 800, z: 1600}
+    PowerVector: {x: 1000, y: 1000, z: 2000}
   - Bone: 20
-    PowerVector: {x: 800, y: 800, z: 800}
+    PowerVector: {x: 1000, y: 1000, z: 1000}
   - Bone: 16
-    PowerVector: {x: 800, y: 800, z: 800}
+    PowerVector: {x: 1000, y: 1000, z: 1000}
   - Bone: 21
-    PowerVector: {x: 1600, y: 1600, z: 1600}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   - Bone: 17
-    PowerVector: {x: 1600, y: 1600, z: 1600}
+    PowerVector: {x: 2000, y: 2000, z: 2000}
   forceLimit: 200
-  damping: 100
+  damping: 125
   dampingScalesWithStiffness: 0
-  pGainMultiplier: 0.8
+  pGainMultiplier: 1.25
   rewardsInGUI: 0
-  normalizeRewardComponents: 0
-  useGeodesicForAngleDiff: 1
-  poseRewardMultiplier: 0.1
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 1
 --- !u!4 &1357924715

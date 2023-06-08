@@ -74,7 +74,7 @@ public class MLAgentsDirector : Agent
     {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
     [HideInInspector]
     public static mm_v2.Bones[] fullDOFBones = new mm_v2.Bones[]
-    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Spine};
+    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips};
 
     [HideInInspector]
     public static mm_v2.Bones[] extendedfullDOFBones = new mm_v2.Bones[]
@@ -446,7 +446,6 @@ public class MLAgentsDirector : Agent
         _config.clampKinCharToSim &= isInference;
         if (isInference)
             _config.friction = 1f;
-        Debug.Log($"behaviorParameters.BrainParameters.VectorObservationSize: {behaviorParameters.BrainParameters.VectorObservationSize}");
         numObservations = behaviorParameters.BrainParameters.VectorObservationSize; // 111 or 132 or 128 or 164
         if (_config.clampKinCharToSim) 
             foreach(var col in simChar.trans.GetComponentsInChildren<ArticulationBody>()) { 
@@ -772,8 +771,6 @@ public class MLAgentsDirector : Agent
             float yawDiffDesiredAndSim = (Quaternion.Inverse(MMScript.desired_rotation) * simulatedCharObj.transform.rotation).GetYAngle();
             Utils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffKinAndSim));
             Utils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffDesiredAndSim));
-            if (debug)
-                Debug.Log($"yawDiffKinAndSim: {yawDiffKinAndSim} yawDiffDesiredAndSim: {yawDiffDesiredAndSim} ");
         }
 
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
@@ -840,8 +837,8 @@ public class MLAgentsDirector : Agent
         double velDiffsSum = 0f;
         for (int i = 1; i < 23; i++)
         {
-            if (_config.outputIsBase && ((mm_v2.Bones)i == Bone_LeftFoot || (mm_v2.Bones)i == Bone_RightFoot))
-                continue;
+            //if (_config.outputIsBase && ((mm_v2.Bones)i == Bone_LeftFoot || (mm_v2.Bones)i == Bone_RightFoot))
+            //    continue;
             for (int j = 0; j < 6; j++)
             {
                 posDiffsSum += (kinChar.boneSurfacePts[i][j] - simChar.boneSurfacePts[i][j]).magnitude;
@@ -857,8 +854,8 @@ public class MLAgentsDirector : Agent
         double totalLoss = 0;
         for (int i = 0; i < 23; i++)
         {
-            if (_config.outputIsBase && ((mm_v2.Bones)i == Bone_LeftFoot || (mm_v2.Bones)i == Bone_RightFoot))
-                continue;
+            //if (_config.outputIsBase && ((mm_v2.Bones)i == Bone_LeftFoot || (mm_v2.Bones)i == Bone_RightFoot))
+            //    continue;
             Transform kinBone = kinChar.boneToTransform[i];
             Transform simBone = simChar.boneToTransform[i];
             // From Stack Overflow:

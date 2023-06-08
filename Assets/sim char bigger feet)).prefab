@@ -687,6 +687,18 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: -1975647178175493962, guid: dcb5ccfbc78fb0342a553af36bf4dcec, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.027
+      objectReference: {fileID: 0}
+    - target: {fileID: -1975647178175493962, guid: dcb5ccfbc78fb0342a553af36bf4dcec, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.053
+      objectReference: {fileID: 0}
+    - target: {fileID: -1975647178175493962, guid: dcb5ccfbc78fb0342a553af36bf4dcec, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.001
+      objectReference: {fileID: 0}
     - target: {fileID: -1969186238773691819, guid: dcb5ccfbc78fb0342a553af36bf4dcec, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -1917,8 +1929,8 @@ CapsuleCollider:
   m_Material: {fileID: 13400000, guid: 5a0abe6df57e58d45b9179b57d5d8cb2, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.09
-  m_Height: 0.33173773
+  m_Radius: 0.1
+  m_Height: 0.38
   m_Direction: 0
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &1918777798375555090 stripped
@@ -3902,8 +3914,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b59abed81e9274532b266b3685b85168, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  height: 0.3317377
-  radius: 0.09
+  height: 0.38
+  radius: 0.1
   segments: 24
 --- !u!1 &8602222559197243078 stripped
 GameObject:
