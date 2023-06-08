@@ -50,6 +50,16 @@ public class ArtBodyTester : MonoBehaviour
             }
         }
     }
+    [ContextMenu("Print Art bodies masses")]
+    public void print_all_art_body_masses()
+    {
+        foreach (Transform t in getAllChildren())
+        {
+            ArticulationBody ab = t.gameObject.GetComponent<ArticulationBody>();
+            if (ab != null)
+                Debug.Log($"{t.gameObject.name} has mass {ab.mass}");
+        }
+    }
     [ContextMenu("Disable all articulation bodies")]
     public void disable_all_art_bodies()
     {
