@@ -84,19 +84,22 @@ public class SimCharController : MonoBehaviour
     {
         if (!_config.selfCollision)
             return;
-        Physics.IgnoreCollision(boneToCollider[(int)Bone_LeftUpLeg], boneToCollider[(int)Bone_RightUpLeg]);
         Physics.IgnoreCollision(boneToCollider[(int)Bone_LeftArm], boneToCollider[(int)Bone_Spine2]);
         Physics.IgnoreCollision(boneToCollider[(int)Bone_RightArm], boneToCollider[(int)Bone_Spine2]);
 
         int[] torsoColliders = new int[] { (int)Bone_Neck, (int)Bone_LeftShoulder, (int)Bone_RightShoulder, (int) Bone_Spine2,
                                             (int) Bone_Spine1, (int) Bone_Spine, (int) Bone_Hips, (int) Bone_Head};
-        int[] feetColliders = new int[] { (int)Bone_LeftLeg, (int)Bone_RightLeg, (int)Bone_LeftFoot, (int)Bone_LeftToe, (int)Bone_RightFoot, (int)Bone_RightToe };
+
+        int[] feetColliders = new int[] { (int)Bone_LeftUpLeg, (int)Bone_RightUpLeg, (int)Bone_LeftLeg, (int)Bone_RightLeg, (int)Bone_LeftFoot, (int)Bone_LeftToe, (int)Bone_RightFoot, (int)Bone_RightToe };
+
         for (int i = 0; i < torsoColliders.Length; i++)
             for (int j = i + 1; j < torsoColliders.Length; j++)
                 Physics.IgnoreCollision(boneToCollider[torsoColliders[i]], boneToCollider[torsoColliders[j]]);
+
         for (int i = 0; i < feetColliders.Length; i++)
             for (int j = i + 1; j < feetColliders.Length; j++)
                 Physics.IgnoreCollision(boneToCollider[feetColliders[i]], boneToCollider[feetColliders[j]]);
+
         for (int i = 2; i < db.nbones(); i++) // start at 2 because hip has no parent collider
         {
             int parent = db.bone_parents[i];

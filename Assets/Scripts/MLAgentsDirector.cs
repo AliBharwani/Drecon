@@ -76,6 +76,9 @@ public class MLAgentsDirector : Agent
     public static mm_v2.Bones[] fullDOFBones = new mm_v2.Bones[]
     {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips};
 
+    //public static mm_v2.Bones[] fullDOFBones = new mm_v2.Bones[]
+    //{  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Spine};
+
     [HideInInspector]
     public static mm_v2.Bones[] extendedfullDOFBones = new mm_v2.Bones[]
     {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips, Bone_Spine,  Bone_Spine1, Bone_Spine2, Bone_LeftShoulder, Bone_RightShoulder};
@@ -444,7 +447,7 @@ public class MLAgentsDirector : Agent
         numActions = behaviorParameters.BrainParameters.ActionSpec.NumContinuousActions;
         bool isInference = behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
         _config.clampKinCharToSim &= isInference;
-        if (isInference)
+        if (!isInference)
             _config.friction = 1f;
         numObservations = behaviorParameters.BrainParameters.VectorObservationSize; // 111 or 132 or 128 or 164
         if (_config.clampKinCharToSim) 
@@ -527,9 +530,9 @@ public class MLAgentsDirector : Agent
         UpdateKinCMData(updateVelocity);
         UpdateBoneObsState(updateVelocity, Time.fixedDeltaTime);
  
-        ClearGizmos();
-        AddGizmoSphere(kinChar.cm, Color.blue);
-        AddGizmoSphere(simChar.cm, Color.red);
+        //ClearGizmos();
+        //AddGizmoSphere(kinChar.cm, Color.blue);
+        //AddGizmoSphere(simChar.cm, Color.red);
         if (curFixedUpdate % _config.EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
         else 
@@ -594,7 +597,7 @@ public class MLAgentsDirector : Agent
                     if (updateVelocity)
                     {
                         Vector3 surfaceVel = (newWorldSurfacePts[j] - prevWorldSurfacePts[j]) / Time.fixedDeltaTime;
-                        charInfo.boneSurfaceVels[i][j] = resolveVelInKinematicRefFrame(surfaceVel);
+                        charInfo.boneSurfaceVels[i][j] = isKinChar ? resolveVelInKinematicRefFrame(surfaceVel) : resolveVelInSimRefFrame(surfaceVel);
                     }
                 }
                 charInfo.boneSurfacePtsWorldSpace[i] = newWorldSurfacePts;
@@ -617,7 +620,7 @@ public class MLAgentsDirector : Agent
                 Vector3 boneLocalPos = isKinChar ? resolvePosInKinematicRefFrame(boneWorldPos) : resolvePosInSimRefFrame(boneWorldPos);
                 Vector3 prevBonePos = curInfo.boneWorldPos[j];
                 Vector3 boneVel = (boneWorldPos - prevBonePos) / dt;
-                boneVel = zeroVelocity ? Vector3.zero : resolveVelInKinematicRefFrame(boneVel);
+                boneVel = zeroVelocity ? Vector3.zero : isKinChar ? resolveVelInKinematicRefFrame(boneVel) : resolveVelInSimRefFrame(boneVel);
                 Utils.copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
 
                 if (updateVelocity || zeroVelocity)
@@ -692,7 +695,6 @@ public class MLAgentsDirector : Agent
             finalReward = 0f;
         else
             finalReward = (float)(fallFactor * (posReward + velReward + localPoseReward + cmVelReward));
-        //Debug.Log($"finalReward: {finalReward} fall_factor: {fallFactor}, pos_reward: {posReward}, vel_reward: {velReward}, local_pose_reward: {localPoseReward}, cm_vel_reward: {cmVelReward}");
         //updateMeanReward(final_reward);
         AddReward(finalReward);
         return false;
@@ -752,7 +754,7 @@ public class MLAgentsDirector : Agent
         //bool endedEpisode = lastEpisodeEndingFrame >= (curFixedUpdate - 1);
         //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel} kinCMVelLastGetState: {kinCMVelLastGetState} simCMVelLastGetState: {simCMVelLastGetState}");
         Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinChar.cmVel);        
-        Vector3 simCMVelInKinRefFrame = resolveVelInKinematicRefFrame(simChar.cmVel);
+        Vector3 simCMVelInKinRefFrame = resolveVelInSimRefFrame(simChar.cmVel);
         Vector3 desiredVel = resolveVelInKinematicRefFrame(MMScript.desired_velocity);
         Vector3 velDiffSimMinusDesired = simCMVelInKinRefFrame - desiredVel;
 
@@ -791,24 +793,24 @@ public class MLAgentsDirector : Agent
     }
 
     // Gets CoM in world position
-    public static Vector3 getCM(Transform[] bone_to_transform, Vector3[] global_bone_positions = null)
+    public static Vector3 getCM(Transform[] boneToTransform, Vector3[] globalBonePositions = null)
     {
         // We start at 1 because 0 is the root bone with no colliders
         // to calculate CM, we get the masses and centers of each capsule and
         // sum them together and divide by the total mass
-        float total_mass = 0f;
+        float totalMass = 0f;
         Vector3 CoM = Vector3.zero;
-        for (int i = 1; i < bone_to_transform.Length; i++)
+        for (int i = 1; i < boneToTransform.Length; i++)
         {
-            Transform t = bone_to_transform[i];
+            Transform t = boneToTransform[i];
             var ab = t.GetComponent<ArticulationBody>();
             float mass = t.GetComponent<ArticulationBody>().mass;
-            Vector3 child_center = global_bone_positions == null ? Utils.getChildColliderCenter(t.gameObject) : global_bone_positions[i];
-            CoM += mass * child_center;
-            total_mass += ab.mass;
+            Vector3 childCenter = globalBonePositions == null ? Utils.getChildColliderCenter(t.gameObject) : globalBonePositions[i];
+            CoM += mass * childCenter;
+            totalMass += ab.mass;
 
         }
-        return CoM / total_mass;
+        return CoM / totalMass;
     }
 
     // Velocity is different in that we only need to make its rotation
@@ -819,6 +821,11 @@ public class MLAgentsDirector : Agent
         // using same logic as in desired_velocity_update
         return MathUtils.quat_inv_mul_vec3(kinChar.trans.rotation, vel);
     }
+    Vector3 resolveVelInSimRefFrame(Vector3 vel)
+    {
+        // using same logic as in desired_velocity_update
+        return MathUtils.quat_inv_mul_vec3(_config.resolveSimReferenceFrameWithSimRotation ? simChar.trans.rotation : kinChar.trans.rotation, vel);
+    }
     Vector3 resolvePosInKinematicRefFrame(Vector3 pos)
     {
         // using same logic as in desired_velocity_update
@@ -827,7 +834,7 @@ public class MLAgentsDirector : Agent
     Vector3 resolvePosInSimRefFrame(Vector3 pos)
     {
         // using same logic as in desired_velocity_update
-        return MathUtils.quat_inv_mul_vec3(kinChar.trans.rotation, pos - simChar.cm);
+        return MathUtils.quat_inv_mul_vec3(_config.resolveSimReferenceFrameWithSimRotation  ? simChar.trans.rotation : kinChar.trans.rotation, pos - simChar.cm);
     }
 
     void calcPosAndVelReward(out double posReward, out double velReward)
@@ -875,7 +882,7 @@ public class MLAgentsDirector : Agent
 
     void calcCMVelReward(out double cmVelReward)
     {
-        cmVelReward = Math.Exp(-1d * (resolveVelInKinematicRefFrame(kinChar.cmVel) - resolveVelInKinematicRefFrame(simChar.cmVel)).magnitude);
+        cmVelReward = Math.Exp(-1d * (resolveVelInKinematicRefFrame(kinChar.cmVel) - resolveVelInSimRefFrame(simChar.cmVel)).magnitude);
     }
 
     void calcFallFactor(out double fallFactor, out bool heads1mApart)
@@ -917,7 +924,7 @@ public class MLAgentsDirector : Agent
 
     private float getVerticalOffset()
     {
-        ClearGizmos();
+        // ClearGizmos();
         Transform leftFoot = kinChar.boneToCollider[(int)Bone_LeftFoot].transform;
         Transform rightFoot = kinChar.boneToCollider[(int)Bone_RightFoot].transform;
         float minPointOnFoot = Mathf.Min(getBottomMostPointOnFoot(leftFoot, leftfootColliderCenter), getBottomMostPointOnFoot(rightFoot, rightfootColliderCenter));
