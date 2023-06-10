@@ -197,7 +197,9 @@ public class mm_v2 : MonoBehaviour
             feature_weight_foot_velocity,
             feature_weight_hip_velocity,
             feature_weight_trajectory_positions,
-            feature_weight_trajectory_directions);
+            feature_weight_trajectory_directions,
+            frame_increments,
+            ignore_surrounding);
         numBones = motionDB.nbones();
         init(origin, Quaternion.identity);
         input_generator = gameObject.AddComponent<InputGeneratorModule>();
@@ -412,12 +414,9 @@ public class mm_v2 : MonoBehaviour
         simulation_back_speed = Mathf.Lerp( simulation_walk_back_speed, simulation_run_back_speed, desired_gait);
 
         Vector3 desired_velocity_curr = desired_velocity_update(simulation_rotation);
-        //Debug.Log($"Gamepad: {gamepad.leftStick.ReadValue()}");
-        //desired_rotation = !gen_inputs ? desired_rotation_update(desired_rotation, desired_velocity) : desired_rotation;
         Quaternion desired_rotation_curr = desired_rotation_update(desired_rotation, desired_velocity);
         Vector3 world_space_position = bone_positions[0];
         bool end_of_anim = motionDB.database_trajectory_index_clamp(frameIdx, 1) == frameIdx;
-
 
         // Check if we should force a search because input changed quickly
         desired_velocity_change_prev = desired_velocity_change_curr;
@@ -466,8 +465,7 @@ public class mm_v2 : MonoBehaviour
         }
         else
             frameIdx++;
-        //motionDB.setDataToFrame(ref local_bone_positions, ref local_bone_rotations, frameIdx);
-        //frameIdx++;
+
         playFrameIdx();
         search_timer -= Time.fixedDeltaTime;
         frameCounter++;
@@ -482,13 +480,10 @@ public class mm_v2 : MonoBehaviour
         Gizmos.color = Color.blue;
         for (int i = 0; i < 4; i++)
             Gizmos.DrawSphere(trajectory_positions[i], .1f);
-        //Gizmos.color = Color.cyan;
-        //Gizmos.DrawSphere(MLAgentsDirector.get_cm(boneToTransform), .1f);
     }
 
     private void playFrameIdx()
     {
-        //Debug.Log($"Playing frame {frameIdx}");
         curr_bone_positions = motionDB.bone_positions[frameIdx];
         curr_bone_velocities = motionDB.bone_velocities[frameIdx];
         curr_bone_rotations = motionDB.bone_rotations[frameIdx];
@@ -516,18 +511,11 @@ public class mm_v2 : MonoBehaviour
             desired_rotation,
             simulation_rotation_halflife,
             Time.fixedDeltaTime);
-        //inertialize_root_adjust(ref bone_offset_positions[0], ref bone_positions[0], ref bone_rotations[0], simulation_position, simulation_rotation);
+
         if (synchronization_enabled)
         {
             simulation_position = bone_positions[0];
             simulation_rotation = bone_rotations[0];
-
-            //inertialize_root_adjust(
-            //    ref bone_offset_positions[0],
-            //    ref bone_positions[0],
-            //    ref bone_rotations[0],
-            //    bone_positions[0],
-            //    bone_rotations[0]);
         }
 
 
@@ -791,7 +779,7 @@ public class mm_v2 : MonoBehaviour
             query[i] = (query[i] - motionDB.features_offset[i]) / motionDB.features_scale[i];
         }
     }
-    float simulation_run_fwrd_speed = 4.0f;
+    float simulation_run_fwrd_speed = 4.5f;
     float simulation_run_side_speed = 3.0f;
     float simulation_run_back_speed = 2.5f;
 
@@ -809,12 +797,6 @@ public class mm_v2 : MonoBehaviour
 
         local_stick_dir.x *= simulation_side_speed;
         local_stick_dir.z *= local_stick_dir.z > 0.0 ? simulation_fwrd_speed : simulation_back_speed;
-
-        //Vector3 local_desired_vel = local_stick_dir.z > 0.0 ?
-        //        new Vector3(side_speed, 0.0f, fwrd_speed):
-        //        new Vector3(side_speed, 0.0f, back_speed) ;
-        //Vector3 local_desired_vel = local_stick_dir.Scale(scale_vec);
-        //Vector3 local_desired_vel = (MoveSpeed * local_stick_dir.magnitude) * local_stick_dir.normalized;
         return MathUtils.quat_mul_vec3(sim_rotation, local_stick_dir);
     }
 

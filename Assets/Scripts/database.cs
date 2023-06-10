@@ -84,12 +84,11 @@ public class database : MonoBehaviour
         init_database(filename);
     }
 
-    public void init_database(string filename, int _num_neigh = 1, int _frame_increments = 10, int _ignore_surrounding = 20)
+    public void init_database(string filename, int _num_neigh = 1)
     {
         Debug.Log($"Creating motion database");
 
-        frame_increments = _frame_increments;
-        ignore_surrounding = _ignore_surrounding;
+
         num_neigh = _num_neigh;
         load_db(filename);
         ConfigWriter _config = ConfigWriter.Instance;
@@ -115,9 +114,12 @@ public class database : MonoBehaviour
         in float feature_weight_foot_velocity,
         in float feature_weight_hip_velocity,
         in float feature_weight_trajectory_positions,
-        in float feature_weight_trajectory_directions)
+        in float feature_weight_trajectory_directions,
+        int _frame_increments,
+        int _ignore_surrounding)
     {
-
+        frame_increments = _frame_increments;
+        ignore_surrounding = _ignore_surrounding;
         int nfeatures =
             3 + // Left Foot Position
             3 + // Right Foot Position 
@@ -387,35 +389,24 @@ public class database : MonoBehaviour
         // First compute what is essentially the mean 
         // value for each feature dimension
         for (int j = 0; j < size; j++)
-        {
             features_offset[offset + j] = 0.0f;    
-        }
 
         for (int i = 0; i < numframes; i++)
-        {
             for (int j = 0; j < size; j++)
-            {
                 features_offset[offset + j] += features[i][ offset + j] / numframes;
-            }
-        }
 
         // Now compute the variance of each feature dimension
         float[] vars = new float[size];
         for (int i = 0; i < numframes; i++)
-        {
             for (int j = 0; j < size; j++)
-            {
                 vars[j] += Mathf.Pow(features[i][offset + j] - features_offset[offset + j], 2) / numframes;
-            }
-        }
+
 
         // We compute the overall std of the feature as the average
         // std across all dimensions
         float std = 0.0f;
         for (int j = 0; j < size; j++)
-        {
             std += Mathf.Sqrt(vars[j]) / size;
-        }
 
         // Features with no variation can have zero std which is
         // almost always a bug.
@@ -423,18 +414,12 @@ public class database : MonoBehaviour
 
         // The scale of a feature is just the std divided by the weight
         for (int j = 0; j < size; j++)
-        {
             features_scale[offset + j] = std / weight;
-        }
 
         // Using the offset and scale we can then normalize the features
         for (int i = 0; i < numframes; i++)
-        {
             for (int j = 0; j < size; j++)
-            {
                 features[i][ offset + j ] = (features[i][offset + j] - features_offset[offset + j]) / features_scale[offset + j];
-            }
-        }
     }
     public void setDataToFrame(ref Vector3[] local_bone_positions, ref Quaternion[] local_bone_rotations, int frameIdx)
     {
