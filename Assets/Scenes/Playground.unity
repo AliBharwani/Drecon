@@ -516,7 +516,6 @@ MonoBehaviour:
   - 1000
   - 2000
   - 1000
-  useCapsuleFeet: 0
   MusclePowers:
   - Bone: 1
     PowerVector: {x: 2000, y: 2000, z: 2000}
@@ -549,6 +548,7 @@ MonoBehaviour:
   dampingScalesWithStiffness: 0
   pGainMultiplier: 0.5
   rewardsInGUI: 0
+  useCapsuleFeet: 0
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 0
 --- !u!4 &381966280
@@ -1561,7 +1561,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 5b51e8b2205607f4a98ad3e4b19ba400, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2533,7 +2533,7 @@ MonoBehaviour:
   simulation_rotation_halflife: 0.5
   walkOnly: 0
   searchTime: 0.2
-  MAX_WANDERING_RADIUS: 5
+  MAX_WANDERING_RADIUS: 100
   projectileTraining: 0
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
@@ -2588,7 +2588,6 @@ MonoBehaviour:
   - 1000
   - 2000
   - 1000
-  useCapsuleFeet: 0
   MusclePowers:
   - Bone: 1
     PowerVector: {x: 1600, y: 1600, z: 1600}
@@ -2623,6 +2622,7 @@ MonoBehaviour:
   dampingScalesWithStiffness: 0
   pGainMultiplier: 0.8
   rewardsInGUI: 0
+  useCapsuleFeet: 0
   resetKinCharOnEpisodeEnd: 1
   selfCollision: 0
 --- !u!4 &1357924715
@@ -3088,7 +3088,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 1
+  numAgents: 2
   modelAgent: {fileID: 767361687}
   modelAgentWithOrientationData: {fileID: 818134323}
   model6DAgent: {fileID: 2033970009}

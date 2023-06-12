@@ -302,7 +302,7 @@ public class SimCharController : MonoBehaviour
             else
                 db = new MocapDB();
 #else
-            db = new database();
+            db = new MocapDB();
 #endif
         }
         return db;

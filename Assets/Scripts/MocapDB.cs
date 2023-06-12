@@ -72,11 +72,7 @@ public class MocapDB : MonoBehaviour
     }
     private string getDatabaseFilename()
     {
-# if UNITY_EDITOR
         return Application.dataPath + (use60fps ? @"/outputs/database60fps.bin" : @"/outputs/database.bin");
-#else
-        return Application.dataPath + (use60fps ? @"/outputs/database60fps.bin" : @"/outputs/database.bin");
-#endif
     }
     public MocapDB(string filename = null )
     {

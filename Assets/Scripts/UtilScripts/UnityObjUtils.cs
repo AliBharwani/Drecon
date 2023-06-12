@@ -7,14 +7,8 @@ public static class UnityObjUtils
     public static void setAllChildrenRenderersMaterial(Transform obj, Material mat)
     {
         foreach (var renderer in obj.GetComponentsInChildren<Renderer>())
-        {
             if (renderer.enabled)
-# if UNITY_EDITOR
                 renderer.sharedMaterial = mat;
-#else
-                renderer.sharedMaterial = mat;
-#endif
-        }
     }
     public static GameObject getChildCapsuleCollider(GameObject child)
     {
