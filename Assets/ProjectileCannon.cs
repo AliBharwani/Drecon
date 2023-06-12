@@ -25,7 +25,6 @@ public class ProjectileCannon : MonoBehaviour
     {
         mouse = Mouse.current;
     }
-    // Update is called once per frame
     void Update()
     {
         projectileScale *= Keyboard.current.eKey.isPressed ? 1.05f : 1f;

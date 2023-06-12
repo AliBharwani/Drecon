@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CollisionReporter : MonoBehaviour
 {
-    public MLAgentsDirector director;
+    public MLAgent director;
     private void OnCollisionEnter(Collision collision)
     {
         director.processCollision(collision);

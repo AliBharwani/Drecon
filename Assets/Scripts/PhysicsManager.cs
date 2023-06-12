@@ -10,7 +10,7 @@ public class PhysicsManager : MonoBehaviour
         Physics.autoSimulation = false;
     }
     public ArticulationBody debugBody;
-    public mm_v2 MMScript;
+    public MotionMatchingAnimator MMScript;
     // Update is called once per frame
     void FixedUpdate()
     {

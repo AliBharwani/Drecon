@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static mm_v2.Bones;
+using static MotionMatchingAnimator.Bones;
 
 public class TestDirector : MonoBehaviour
 {
@@ -14,7 +14,7 @@ public class TestDirector : MonoBehaviour
     public float physicsSimulateTime = 1f / 60f;
     public float timeToSimulate = 10f;
     public float physicsSpeed = .5f;
-    private mm_v2 MMScript;
+    private MotionMatchingAnimator MMScript;
     private SimCharController SimCharController;
     private int nbodies;
 
@@ -22,21 +22,21 @@ public class TestDirector : MonoBehaviour
     private Quaternion[] startingRotations;
 
     [HideInInspector]
-    public static mm_v2.Bones[] stateBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] stateBones = new MotionMatchingAnimator.Bones[]
     {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
     [HideInInspector]
-    public static mm_v2.Bones[] allFullDOFBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] allFullDOFBones = new MotionMatchingAnimator.Bones[]
     //{ Bone_LeftArm, Bone_RightArm, };
-    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips, Bone_Spine,  Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand, mm_v2.Bones.Bone_LeftShoulder, mm_v2.Bones.Bone_RightShoulder};
+    {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips, Bone_Spine,  Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand, MotionMatchingAnimator.Bones.Bone_LeftShoulder, MotionMatchingAnimator.Bones.Bone_RightShoulder};
     [HideInInspector]
-    public static mm_v2.Bones[] allLimitedDOFBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] allLimitedDOFBones = new MotionMatchingAnimator.Bones[]
     {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftToe, Bone_RightToe, Bone_LeftForeArm, Bone_RightForeArm};
 
     [HideInInspector]
-    public static mm_v2.Bones[] openloopBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] openloopBones = new MotionMatchingAnimator.Bones[]
       {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand};
 
-    public static mm_v2.Bones[] debugBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] debugBones = new MotionMatchingAnimator.Bones[]
       {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand};
 
     // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
@@ -75,7 +75,7 @@ public class TestDirector : MonoBehaviour
     
     void myInit()
     {
-        MMScript = kinematicChar.GetComponent<mm_v2>();
+        MMScript = kinematicChar.GetComponent<MotionMatchingAnimator>();
         if (!MMScript.is_initalized && !Application.isEditor)
             return;
         kinChar = new CharInfo();
@@ -146,7 +146,7 @@ public class TestDirector : MonoBehaviour
     {
         if (kinematicChar == null)
             kinematicChar = Instantiate(kinematicCharPrefab, Vector3.zero, Quaternion.identity);
-        MMScript = kinematicChar.GetComponent<mm_v2>();
+        MMScript = kinematicChar.GetComponent<MotionMatchingAnimator>();
         MMScript.set_random_pose();
 
     }

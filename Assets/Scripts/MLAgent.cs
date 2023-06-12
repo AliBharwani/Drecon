@@ -5,7 +5,7 @@ using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 using System.Collections.Generic;
 using UnityEngine;
-using static mm_v2.Bones;
+using static MotionMatchingAnimator.Bones;
 using UnityEditor;
 using System.Text;
 
@@ -13,7 +13,7 @@ public struct CharInfo
 {
     public Transform[]  boneToTransform;
     public GameObject[] boneToCollider;
-    public mm_v2 MMScript;
+    public MotionMatchingAnimator MMScript;
     public GameObject charObj;
     public Transform  trans;
     public ArticulationBody root;
@@ -38,9 +38,9 @@ public struct CharInfo
         boneState = new float[36];
     }
 }
-public class MLAgentsDirector : Agent
+public class MLAgent : Agent
 {
-    private ConfigWriter _config;
+    private ConfigManager _config;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
     internal GameObject simulatedCharObj;
@@ -53,7 +53,7 @@ public class MLAgentsDirector : Agent
     public GameObject simulated_handmade_char_prefab;
     public GameObject kinematic_handmade_char_prefab;
     public int reportMeanRewardEveryNSteps = 10000;
-    private mm_v2 MMScript;
+    private MotionMatchingAnimator MMScript;
     private SimCharController SimCharController;
     private int nbodies;
     private int curFixedUpdate = -1;
@@ -70,29 +70,29 @@ public class MLAgentsDirector : Agent
     private Vector3 lastKinRootPos = Vector3.zero;
 
     [HideInInspector]
-    public static mm_v2.Bones[] stateBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] stateBones = new MotionMatchingAnimator.Bones[]
     {  Bone_LeftToe, Bone_RightToe, Bone_Spine, Bone_Head, Bone_LeftForeArm, Bone_RightForeArm };
     [HideInInspector]
-    public static mm_v2.Bones[] fullDOFBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] fullDOFBones = new MotionMatchingAnimator.Bones[]
     {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips};
 
     //public static mm_v2.Bones[] fullDOFBones = new mm_v2.Bones[]
     //{  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Spine};
 
     [HideInInspector]
-    public static mm_v2.Bones[] extendedfullDOFBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] extendedfullDOFBones = new MotionMatchingAnimator.Bones[]
     {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips, Bone_Spine,  Bone_Spine1, Bone_Spine2, Bone_LeftShoulder, Bone_RightShoulder};
     [HideInInspector]
-    public static mm_v2.Bones[] limitedDOFBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] limitedDOFBones = new MotionMatchingAnimator.Bones[]
     {  Bone_LeftLeg, Bone_RightLeg };
     [HideInInspector]
-    public static mm_v2.Bones[] extendedLimitedDOFBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] extendedLimitedDOFBones = new MotionMatchingAnimator.Bones[]
     {  Bone_LeftLeg, Bone_RightLeg, Bone_LeftForeArm, Bone_RightForeArm};
     [HideInInspector]
-    public static mm_v2.Bones[] openloopBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] openloopBones = new MotionMatchingAnimator.Bones[]
       {  Bone_Hips, Bone_Spine1, Bone_Spine2, Bone_Neck, Bone_Head, Bone_LeftForeArm, Bone_LeftHand, Bone_RightForeArm, Bone_RightHand, Bone_LeftShoulder, Bone_RightShoulder};
 
-    public static mm_v2.Bones[] alwaysOpenloopBones = new mm_v2.Bones[]
+    public static MotionMatchingAnimator.Bones[] alwaysOpenloopBones = new MotionMatchingAnimator.Bones[]
     { Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand, Bone_LeftToe, Bone_RightToe};
 
     // 0.2 m side length cube
@@ -118,7 +118,7 @@ public class MLAgentsDirector : Agent
     {
 
         Quaternion[] curRotations = MMScript.bone_rotations;
-        mm_v2.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
+        MotionMatchingAnimator.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
         int actionIdx = 0;
         switch (_config.actionRotType)
         {
@@ -136,7 +136,7 @@ public class MLAgentsDirector : Agent
                 break;
         }
 
-        mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
+        MotionMatchingAnimator.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
 
         for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
         {
@@ -161,7 +161,7 @@ public class MLAgentsDirector : Agent
             zDrive.target = target;
             ab.zDrive = zDrive;
         }
-        mm_v2.Bones[] openloopBonesBonesToUse = _config.networkControlsAllJoints ? alwaysOpenloopBones : openloopBones;
+        MotionMatchingAnimator.Bones[] openloopBonesBonesToUse = _config.networkControlsAllJoints ? alwaysOpenloopBones : openloopBones;
         for (int i = 0; i < openloopBonesBonesToUse.Length; i++)
         {
             int boneIdx = (int)openloopBonesBonesToUse[i];
@@ -189,18 +189,18 @@ public class MLAgentsDirector : Agent
             //Utils.debugArray(curActions, "curActions: ");
             StringBuilder debugStr = new StringBuilder();
             int actionIdx = 0;
-            mm_v2.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
+            MotionMatchingAnimator.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
             for (int i = 0; i < fullDOFBonesToUse.Length; i++)
             {
-                mm_v2.Bones bone = fullDOFBonesToUse[i];
+                MotionMatchingAnimator.Bones bone = fullDOFBonesToUse[i];
                 Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
                 debugStr.Append($"{bone.ToString().Substring(5)}: {output} " + (actionsAre6D ? $"{ new Vector3(curActions[actionIdx + 3], curActions[actionIdx + 4], curActions[actionIdx + 5])} " : ""));
                 actionIdx += actionsAre6D ? 6 : 3;
             }
-            mm_v2.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
+            MotionMatchingAnimator.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
             for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
             {
-                mm_v2.Bones bone = limitedDOFBonesToUse[i];
+                MotionMatchingAnimator.Bones bone = limitedDOFBonesToUse[i];
                 debugStr.Append($"{bone}: {curActions[actionIdx]} | {finalActions[actionIdx]} ");
                 actionIdx += 1;
             }
@@ -208,7 +208,7 @@ public class MLAgentsDirector : Agent
         }
         applyActions(finalActions);
     }
-    private void applyActionsAsExp(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
+    private void applyActionsAsExp(float[] finalActions, Quaternion[] curRotations, MotionMatchingAnimator.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
 
         for (int i = 0; i < fullDOFBonesToUse.Length; i++)
@@ -224,7 +224,7 @@ public class MLAgentsDirector : Agent
 
     }
 
-    private void applyActionsAsAxisAngleRotations(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
+    private void applyActionsAsAxisAngleRotations(float[] finalActions, Quaternion[] curRotations, MotionMatchingAnimator.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
 
         for (int i = 0; i < fullDOFBonesToUse.Length; i++)
@@ -244,7 +244,7 @@ public class MLAgentsDirector : Agent
 
     }
 
-    private void applyActionsAsEulerRotations(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
+    private void applyActionsAsEulerRotations(float[] finalActions, Quaternion[] curRotations, MotionMatchingAnimator.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
         for (int i = 0; i < fullDOFBonesToUse.Length; i++)
         {
@@ -290,7 +290,7 @@ public class MLAgentsDirector : Agent
         }
     }
 
-    private void applyActionsWith6DRotations(float[] finalActions, Quaternion[] curRotations, mm_v2.Bones[] fullDOFBonesToUse, ref int actionIdx)
+    private void applyActionsWith6DRotations(float[] finalActions, Quaternion[] curRotations, MotionMatchingAnimator.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
         for (int i = 0; i < fullDOFBonesToUse.Length; i++)
         {
@@ -339,7 +339,7 @@ public class MLAgentsDirector : Agent
         }
         for (int i = 0; i < limitedDOFBones.Length; i++)
         {
-            mm_v2.Bones bone =  limitedDOFBones[i];
+            MotionMatchingAnimator.Bones bone =  limitedDOFBones[i];
             ArticulationBody ab = simChar.boneToArtBody[(int)bone];
             Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[(int) bone], true);
             ArticulationDrive drive = ab.zDrive;
@@ -386,7 +386,7 @@ public class MLAgentsDirector : Agent
             }
         }
 
-        MMScript = kinematicCharObj.GetComponent<mm_v2>();
+        MMScript = kinematicCharObj.GetComponent<MotionMatchingAnimator>();
 
         MMScript.search_time = _config.searchTime;
         if (!MMScript.is_initalized)
@@ -481,7 +481,7 @@ public class MLAgentsDirector : Agent
     {
         if (motionDB == null)
             motionDB = database.Instance;
-        _config = ConfigWriter.Instance;
+        _config = ConfigManager.Instance;
         nbodies = motionDB.nbones();
         kinematicCharObj = Instantiate(_config.useCapsuleFeet ? kinematic_char_type2_prefab : kinematic_handmade_char_prefab  , Vector3.zero, Quaternion.identity);
         simulatedCharObj = Instantiate(_config.useCapsuleFeet ? simulated_char_type2_prefab : simulated_handmade_char_prefab  , Vector3.zero, Quaternion.identity);
@@ -579,7 +579,7 @@ public class MLAgentsDirector : Agent
                 var charInfo = isKinChar ? kinChar : simChar;
                 Vector3[] newSurfacePts = new Vector3[6];
                 Vector3[] newWorldSurfacePts = new Vector3[6];
-                Utils.getSixPointsOnCollider(charInfo.boneToCollider[i], ref newWorldSurfacePts, (mm_v2.Bones)i);
+                Utils.getSixPointsOnCollider(charInfo.boneToCollider[i], ref newWorldSurfacePts, (MotionMatchingAnimator.Bones)i);
                 Vector3[] prevWorldSurfacePts = charInfo.boneSurfacePtsWorldSpace[i];
 
                 for (int j = 0; j < 6; j++)
@@ -606,7 +606,7 @@ public class MLAgentsDirector : Agent
             int copyIdx = 0;
             for (int j = 0; j < stateBones.Length; j++)
             {
-                mm_v2.Bones bone = stateBones[j];
+                MotionMatchingAnimator.Bones bone = stateBones[j];
                 Vector3 boneWorldPos = curInfo.boneToTransform[(int)bone].position;
                 Vector3 boneLocalPos = isKinChar ? resolvePosInKinematicRefFrame(boneWorldPos) : resolvePosInSimRefFrame(boneWorldPos);
                 Vector3 prevBonePos = curInfo.boneWorldPos[j];
@@ -935,7 +935,7 @@ public class MLAgentsDirector : Agent
         for (int i = 1; i < 23; i++)
         {
             // Get bone, transform, child capsule object
-            mm_v2.Bones bone = (mm_v2.Bones)i;
+            MotionMatchingAnimator.Bones bone = (MotionMatchingAnimator.Bones)i;
             GameObject kin_collider_obj = kinChar.boneToCollider[i];
             Vector3[] gizmos = new Vector3[6];
             Utils.getSixPointsOnCollider(kin_collider_obj, ref gizmos, bone);            

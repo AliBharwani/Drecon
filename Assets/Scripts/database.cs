@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 using System.IO;
 using System.Text;
-using static mm_v2.Bones;
+using static MotionMatchingAnimator.Bones;
 public class database : MonoBehaviour
 {
     public bool use60fps = true;
@@ -91,7 +91,7 @@ public class database : MonoBehaviour
 
         num_neigh = _num_neigh;
         load_db(filename);
-        ConfigWriter _config = ConfigWriter.Instance;
+        ConfigManager _config = ConfigManager.Instance;
         if (!_config.useCapsuleFeet)
             offset_foot_rots();
     }

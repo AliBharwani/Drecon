@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static mm_v2.Bones;
+using static MotionMatchingAnimator.Bones;
 public class CalculateBoneMasses : MonoBehaviour
 {
 
@@ -41,7 +41,7 @@ public class CalculateBoneMasses : MonoBehaviour
                         int num_collisions = 0;
                         for (int i = 1; i < n; i++)
                         {
-                            int collided = check_collision(point, (mm_v2.Bones)i) ? 1 : 0;
+                            int collided = check_collision(point, (MotionMatchingAnimator.Bones)i) ? 1 : 0;
                             num_collisions += collided;
                             bone_collided[i] = collided;
                         }
@@ -61,7 +61,7 @@ public class CalculateBoneMasses : MonoBehaviour
         {
             float[] weight_dist = bone_to_points[i];
             float total_collisions = weight_dist[0] + weight_dist[1] + weight_dist[2] + weight_dist[3] + weight_dist[4];
-            float full_weight = get_full_weight((mm_v2.Bones)i);
+            float full_weight = get_full_weight((MotionMatchingAnimator.Bones)i);
             float final_weight = total_collisions > 0 ? (weight_dist[0] / total_collisions) * full_weight +
                                   (weight_dist[1] / total_collisions) * .5f * full_weight +
                                   (weight_dist[2] / total_collisions) * .33f * full_weight +
@@ -69,7 +69,7 @@ public class CalculateBoneMasses : MonoBehaviour
                                   (weight_dist[4] / total_collisions) * .2f * full_weight
                                   : full_weight;
 
-            Debug.Log($"Bone {(mm_v2.Bones)i} total_collisions: {total_collisions}  full weight: {full_weight} | final_weight: {final_weight}");
+            Debug.Log($"Bone {(MotionMatchingAnimator.Bones)i} total_collisions: {total_collisions}  full weight: {full_weight} | final_weight: {final_weight}");
             final_unfiltered_mass += full_weight;
             final_mass += final_weight;
             ArticulationBody ab = bone_to_transform[i].GetComponent<ArticulationBody>();
@@ -82,7 +82,7 @@ public class CalculateBoneMasses : MonoBehaviour
     }
     public int AVG_HUMAN_DENSITY = 985; // kg / m^3
 
-    float get_full_weight(mm_v2.Bones bone)
+    float get_full_weight(MotionMatchingAnimator.Bones bone)
     {
         float volume;
         if (bone == Bone_LeftFoot || bone == Bone_RightFoot)
@@ -115,7 +115,7 @@ public class CalculateBoneMasses : MonoBehaviour
 
     }
 
-    private bool check_collision(Vector3 point, mm_v2.Bones bone)
+    private bool check_collision(Vector3 point, MotionMatchingAnimator.Bones bone)
     {
         if (bone == Bone_LeftFoot || bone == Bone_RightFoot)
         {

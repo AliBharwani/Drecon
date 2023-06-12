@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using static mm_v2.Bones;
+using static MotionMatchingAnimator.Bones;
 
 public static class Utils
 {
@@ -116,7 +116,7 @@ public static class Utils
 
     }
 
-    public static void getSixPointsOnCollider(GameObject obj, ref Vector3[] outputs, mm_v2.Bones bone)
+    public static void getSixPointsOnCollider(GameObject obj, ref Vector3[] outputs, MotionMatchingAnimator.Bones bone)
     {
         if (bone == Bone_LeftFoot || bone == Bone_RightFoot)
             getSixPointsOnBox(obj, ref outputs);

@@ -2,22 +2,22 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static mm_v2.Bones;
+using static MotionMatchingAnimator.Bones;
 public class SimCharController : MonoBehaviour
 {
     public bool apply_all_local_rots;
     public bool isKinematic;
     public int frameIdx = 500;
-    public mm_v2.Bones[] bones_to_apply;
-    public mm_v2.Bones debug_bone;
+    public MotionMatchingAnimator.Bones[] bones_to_apply;
+    public MotionMatchingAnimator.Bones debug_bone;
     public Transform[] boneToTransform = new Transform[23];
     public ArticulationBody[] boneToArtBody = new ArticulationBody[23];
     public bool is_active = false;
     internal Quaternion[] startingRotations = new Quaternion[23];
-    private ConfigWriter _config;
+    private ConfigManager _config;
     void Awake()
     {
-        _config = ConfigWriter.Instance;
+        _config = ConfigManager.Instance;
         db = database.Instance;
         //foreach (var t in GetComponentsInChildren<Transform>())
         //    t.gameObject.AddComponent<CollisionDebugger>();
@@ -47,8 +47,8 @@ public class SimCharController : MonoBehaviour
         for(int i = 1; i < 23; i++)
         {
             //Debug.Log($"Setting {(mm_v2.Bones)i} to {_config.boneToStiffness[i
-            bool musclePowerExists = _config.MusclePowers.Any(x => x.Bone == (mm_v2.Bones)i);
-            Vector3 musclePower = musclePowerExists ? _config.MusclePowers.First(x => x.Bone == (mm_v2.Bones)i).PowerVector : Vector3.zero;
+            bool musclePowerExists = _config.MusclePowers.Any(x => x.Bone == (MotionMatchingAnimator.Bones)i);
+            Vector3 musclePower = musclePowerExists ? _config.MusclePowers.First(x => x.Bone == (MotionMatchingAnimator.Bones)i).PowerVector : Vector3.zero;
             if (musclePowerExists)
                 boneToArtBody[i].SetAllDriveStiffness(musclePower);
             else
@@ -76,7 +76,7 @@ public class SimCharController : MonoBehaviour
             else
                 boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(trans.gameObject).GetComponent<Collider>();
             if (boneToCollider[i] == null)
-                Debug.Log($"Could not find collider for {(mm_v2.Bones)i }");
+                Debug.Log($"Could not find collider for {(MotionMatchingAnimator.Bones)i }");
         }
     }
 
@@ -117,7 +117,7 @@ public class SimCharController : MonoBehaviour
     {
         for (int i = 0; i < 23; i++)
         {
-            mm_v2.Bones bone = (mm_v2.Bones)i;
+            MotionMatchingAnimator.Bones bone = (MotionMatchingAnimator.Bones)i;
             ArticulationBody ab = boneToTransform[i].GetComponent<ArticulationBody>();
             boneToArtBody[i] = ab;
         }
@@ -140,7 +140,7 @@ public class SimCharController : MonoBehaviour
         //Utils.debugVector3Array(curr_bone_angular_vel, "curr_bone_angular_vel");
         for (int i = 1; i < 23; i++)
         {
-            mm_v2.Bones bone = (mm_v2.Bones)i;
+            MotionMatchingAnimator.Bones bone = (MotionMatchingAnimator.Bones)i;
             if (!apply_all_local_rots && !bones_to_apply.Contains(bone))
                 continue;
             Transform t = boneToTransform[i];
@@ -212,7 +212,7 @@ public class SimCharController : MonoBehaviour
         //Utils.debugVector3Array(kin_char.MMScript.curr_bone_angular_velocities, "kin_char.MMScript.curr_bone_angular_velocities", "f6");
         for (int i = 1; i < 23; i++)
         {
-            mm_v2.Bones bone = (mm_v2.Bones)i;
+            MotionMatchingAnimator.Bones bone = (MotionMatchingAnimator.Bones)i;
             ArticulationBody body = simChar.boneToArtBody[i];
             if (body.jointType != ArticulationJointType.SphericalJoint)
             {
@@ -289,7 +289,7 @@ public class SimCharController : MonoBehaviour
         //Utils.debugVector3Array(kin_char.MMScript.curr_bone_angular_velocities, "kin_char.MMScript.curr_bone_angular_velocities", "f6");
         for (int i = 1; i < 23; i++)
         {
-            mm_v2.Bones bone = (mm_v2.Bones)i;
+            MotionMatchingAnimator.Bones bone = (MotionMatchingAnimator.Bones)i;
             ArticulationBody body = sim_char.boneToArtBody[i];
             //if (setVelocities) { 
             //    body.velocity = kin_char.MMScript.curr_bone_velocities[0] + kin_char.MMScript.curr_bone_velocities[i] + (i > 1 ? kin_char.MMScript.curr_bone_velocities[1] : Vector3.zero);
@@ -309,7 +309,7 @@ public class SimCharController : MonoBehaviour
             //    Mathf.DeltaAngle(0, TargetRotationInJointSpace.y),
             //    Mathf.DeltaAngle(0, TargetRotationInJointSpace.z)) * Mathf.Deg2Rad;
             Vector3 TargetRotationInJointSpace = body.ToTargetRotationInReducedSpace(targetLocalRot, false);
-            bool isFootBone = bone == mm_v2.Bones.Bone_LeftFoot || bone == mm_v2.Bones.Bone_RightFoot;
+            bool isFootBone = bone == MotionMatchingAnimator.Bones.Bone_LeftFoot || bone == MotionMatchingAnimator.Bones.Bone_RightFoot;
             //Vector3 targetLocalAngularVel = kin_char.MMScript.curr_bone_angular_velocities[i];
             //Vector3 axis;
             //float angle;
@@ -454,10 +454,10 @@ public class SimCharController : MonoBehaviour
             drive.upperLimit = max_z;
             ab.zDrive = drive;
 #if UNITY_EDITOR
-            if (!UnityEditor.EditorApplication.isPlaying && TestDirector.allLimitedDOFBones.Contains((mm_v2.Bones)j))
+            if (!UnityEditor.EditorApplication.isPlaying && TestDirector.allLimitedDOFBones.Contains((MotionMatchingAnimator.Bones)j))
             { 
-                Debug.Log($"Bone {(mm_v2.Bones)j} Mins: x: {min_x} , y: {min_y} , z: {min_z}");
-                Debug.Log($"Bone {(mm_v2.Bones)j} Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
+                Debug.Log($"Bone {(MotionMatchingAnimator.Bones)j} Mins: x: {min_x} , y: {min_y} , z: {min_z}");
+                Debug.Log($"Bone {(MotionMatchingAnimator.Bones)j} Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
             }
 #endif
         }
@@ -487,7 +487,7 @@ public class SimCharController : MonoBehaviour
     [ContextMenu("Find mins and maxes for velocities and positions")]
         public void min_max_debugger()
     {
-        int num_state_bones = MLAgentsDirector.stateBones.Length;
+        int num_state_bones = MLAgent.stateBones.Length;
         Vector3 vel_min = Vector3.positiveInfinity;
         Vector3 vel_max = Vector3.negativeInfinity;
         Vector3[] bone_pos_mins = new Vector3[num_state_bones];
@@ -501,7 +501,7 @@ public class SimCharController : MonoBehaviour
         {
             //Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos min: {bone_pos_mins[j].ToString("f6")}");
             //Debug.Log($"{MLAgentsDirector.state_bones[j]} bone pos max: {bone_pos_maxes[j].ToString("f6")}");
-            Debug.Log($"{MLAgentsDirector.stateBones[j]} bone vel min: {bone_vel_mins[j].ToString("f6")} || bone vel max: {bone_vel_maxes[j].ToString("f6")}");
+            Debug.Log($"{MLAgent.stateBones[j]} bone vel min: {bone_vel_mins[j].ToString("f6")} || bone vel max: {bone_vel_maxes[j].ToString("f6")}");
             //Debug.Log($"{MLAgentsDirector.state_bones[j]} bone vel max: {bone_vel_maxes[j].ToString("f6")}");
 
         }
@@ -520,7 +520,7 @@ public class SimCharController : MonoBehaviour
         Vector3 last_cm = Vector3.zero;
         Vector3[] global_pos = new Vector3[23];
         Quaternion[] global_rots = new Quaternion[23];
-        int num_state_bones = MLAgentsDirector.stateBones.Length;
+        int num_state_bones = MLAgent.stateBones.Length;
         Vector3[] state_bone_pos = new Vector3[num_state_bones];
 
         cm_vel_min = Vector3.positiveInfinity;
@@ -538,7 +538,7 @@ public class SimCharController : MonoBehaviour
             forward_kinematics_full(db, i, ref global_pos, ref global_rots);
             bool update_velocity = !db.range_starts.Contains(i);
             //apply_global_pos_and_rot(global_pos, global_rots, boneToTransform);
-            Vector3 cm = MLAgentsDirector.getCM(boneToTransform, global_pos);
+            Vector3 cm = MLAgent.getCM(boneToTransform, global_pos);
             Vector3 cm_vel =  (cm - last_cm) / frame_time;
             cm_vel = MathUtils.quat_inv_mul_vec3(global_rots[0], cm_vel);
             if (update_velocity)
@@ -548,7 +548,7 @@ public class SimCharController : MonoBehaviour
             for (int j = 0; j < num_state_bones; j++)
             {
                 // Get state bone pose
-                Vector3 bone_pos = global_pos[(int)MLAgentsDirector.stateBones[j]];
+                Vector3 bone_pos = global_pos[(int)MLAgent.stateBones[j]];
                 // Resolve in reference frame (multiply by inverse of root rotation and subtract root position)
                 Vector3 local_bone_pos = MathUtils.quat_inv_mul_vec3(global_rots[0], bone_pos - cm);
                 Vector3 bone_vel = (bone_pos - state_bone_pos[j]) / frame_time;

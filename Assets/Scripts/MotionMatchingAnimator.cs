@@ -4,12 +4,11 @@ using UnityEngine.Assertions;
 using UnityEngine.InputSystem;
 
 
-public class mm_v2 : MonoBehaviour
+public class MotionMatchingAnimator : MonoBehaviour
 {
     public bool gen_inputs = true;
     public bool walk_only = false;
-    //public float MAX_WANDERING_RADIUS = 10f;
-    private ConfigWriter _config;
+    private ConfigManager _config;
 
     public enum Bones
     {
@@ -145,7 +144,7 @@ public class mm_v2 : MonoBehaviour
     float ik_toe_length = 0.15f;
     float ik_unlock_radius = 0.2f;
     float ik_blending_halflife = 0.1f;
-    static mm_v2.Bones[] contact_bones =  { Bones.Bone_LeftToe, Bones.Bone_RightToe};
+    static Bones[] contact_bones =  { Bones.Bone_LeftToe, Bones.Bone_RightToe};
     bool[] contact_states = new bool[contact_bones.Length];
     bool[] contact_locks = new bool[contact_bones.Length];
     Vector3[] contact_positions = new Vector3[contact_bones.Length];
@@ -173,7 +172,7 @@ public class mm_v2 : MonoBehaviour
     float time_since_last_move = 0f;
     float minimum_fixed_update_timer = 0f;
     public bool synchronization_enabled = false;
-    private InputGeneratorModule input_generator;
+    private InputGenerator input_generator;
     void Awake()
     {
         Application.targetFrameRate = 60;
@@ -187,7 +186,7 @@ public class mm_v2 : MonoBehaviour
         {
             motionDB = database.Instance;
         }
-        _config = ConfigWriter.Instance;
+        _config = ConfigManager.Instance;
         simulation_velocity_halflife = _config.simulationVelocityHalflife;
         simulation_rotation_halflife = _config.simulation_rotation_halflife;
 
@@ -202,7 +201,7 @@ public class mm_v2 : MonoBehaviour
             ignore_surrounding);
         numBones = motionDB.nbones();
         init(origin, Quaternion.identity);
-        input_generator = gameObject.AddComponent<InputGeneratorModule>();
+        input_generator = gameObject.AddComponent<InputGenerator>();
         input_generator.inputChangeHalflife = _config.inputGeneratorHalflife;
         is_initalized = true;
     }

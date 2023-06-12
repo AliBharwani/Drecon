@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class InputGeneratorModule : MonoBehaviour
+public class InputGenerator : MonoBehaviour
 {
     public Vector2 currentPosition;
     Vector2 targetPosition;
@@ -22,6 +20,5 @@ public class InputGeneratorModule : MonoBehaviour
     public void changeDirection()
     {
         targetPosition = Random.value < .01f ?  Vector2.zero : Random.insideUnitCircle;
-        //Debug.Log($"New target: {targetPosition}");
     }
 }

@@ -16,7 +16,7 @@ public enum ActionRotationType
     SixD,
     Exp,
 }
-public class ConfigWriter : MonoBehaviour
+public class ConfigManager : MonoBehaviour
 {
     [Header("CONFIG SETTINGS")]
     public string writeToFilePath = "";
@@ -90,14 +90,14 @@ public class ConfigWriter : MonoBehaviour
     [System.Serializable]
     public class MusclePower
     {
-        public mm_v2.Bones Bone;
+        public MotionMatchingAnimator.Bones Bone;
         public Vector3 PowerVector;
     }
 
 
-    private static ConfigWriter _instance;
+    private static ConfigManager _instance;
 
-    public static ConfigWriter Instance { get { return _instance; } }
+    public static ConfigManager Instance { get { return _instance; } }
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -147,7 +147,7 @@ public class ConfigWriter : MonoBehaviour
     public void initBoneToString()
     {
         for (int i = 0; i < 23; i++)
-            boneToNames[i]  = ((mm_v2.Bones)i).ToString();
+            boneToNames[i]  = ((MotionMatchingAnimator.Bones)i).ToString();
     }
     [ContextMenu("Write out config file to current config name ")]
     public void writeCurrentConfig()

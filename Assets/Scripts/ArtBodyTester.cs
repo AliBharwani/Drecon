@@ -283,16 +283,16 @@ public class ArtBodyTester : MonoBehaviour
         return all;
     }
 
-    public static ConfigWriter config;
-    public static ConfigWriter getConfig()
+    public static ConfigManager config;
+    public static ConfigManager getConfig()
     {
         if (config == null)
         {
 #if UNITY_EDITOR
             if (UnityEditor.EditorApplication.isPlaying)
-                config = ConfigWriter.Instance;
+                config = ConfigManager.Instance;
             else
-                config = new ConfigWriter();
+                config = new ConfigManager();
 #else
             config = new ConfigWriter();
 #endif
@@ -320,34 +320,3 @@ public class ArtBodyTester : MonoBehaviour
     }
 
 }
-
-/*
- 0 hip
-1 spine
-2 spine1
-3 spine2
-4 neck (contains all head verts basically)
-5 head
-6 right shoulder
-7 right arm
-8 right forearm
-9 right hand
-[10, 32] right fingers
-33 left shoulder
-34 left arm 
-35 left forearm
-36 left hand
-[37, 59] left fingers
-60 right up leg
-61 right leg 
-62 right foot
-63 right toe
-64 right toe end
-65 left up leg
-66 left leg 
-67 left foot
-68 left toe 
-69 left toe end
-
- 
- */
