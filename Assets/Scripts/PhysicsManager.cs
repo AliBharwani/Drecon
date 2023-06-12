@@ -20,7 +20,7 @@ public class PhysicsManager : MonoBehaviour
         {
             List<float> jointVelocities = new List<float>(debugBody.dofCount);
             debugBody.GetJointVelocities(jointVelocities);
-            Utils.debugArray(jointVelocities.ToArray(), $"{Time.frameCount} jointForces before physics simulate ");
+            ArrayUtils.debugArray(jointVelocities.ToArray(), $"{Time.frameCount} jointForces before physics simulate ");
         }
         //Debug.Log($"Executing physics");
         Physics.Simulate(Time.fixedDeltaTime);
@@ -28,7 +28,7 @@ public class PhysicsManager : MonoBehaviour
         {
             List<float> jointVelocities = new List<float>(debugBody.dofCount);
             debugBody.GetJointVelocities(jointVelocities);
-            Utils.debugArray(jointVelocities.ToArray(), $"{Time.frameCount} jointForces after physics simulate ");
+            ArrayUtils.debugArray(jointVelocities.ToArray(), $"{Time.frameCount} jointForces after physics simulate ");
         }
     }
 }

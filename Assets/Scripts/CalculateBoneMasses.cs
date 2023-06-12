@@ -107,9 +107,9 @@ public class CalculateBoneMasses : MonoBehaviour
         for (int i = 0; i < nbodies; i++)
         {
             if (i == (int)Bone_LeftFoot || i == (int)Bone_RightFoot)  
-                bone_to_collider[i] = ArtBodyTester.getChildBoxCollider(bone_to_transform[i].gameObject);
+                bone_to_collider[i] = UnityObjUtils.getChildBoxCollider(bone_to_transform[i].gameObject);
             else
-                bone_to_collider[i] = ArtBodyTester.getChildCapsuleCollider(bone_to_transform[i].gameObject);
+                bone_to_collider[i] = UnityObjUtils.getChildCapsuleCollider(bone_to_transform[i].gameObject);
             
         }
 

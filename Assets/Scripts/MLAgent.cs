@@ -186,7 +186,7 @@ public class MLAgent : Agent
         prevActionOutput = finalActions;
         if (debug)
         {
-            //Utils.debugArray(curActions, "curActions: ");
+            //ArrayUtils.debugArray(curActions, "curActions: ");
             StringBuilder debugStr = new StringBuilder();
             int actionIdx = 0;
             MotionMatchingAnimator.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
@@ -370,9 +370,9 @@ public class MLAgent : Agent
             WhiteMatTransparent = Resources.Load<Material>("WhiteMatTransparent");
 #endif
             if (kinUseDebugMats)
-                kinematicCharObj.GetComponent<ArtBodyTester>().set_all_material(WhiteMatTransparent);
+                UnityObjUtils.setAllChildrenRenderersMaterial(kinematicCharObj.transform, WhiteMatTransparent);
             if (simUseDebugMats && !_config.useSkinnedMesh)
-                simulatedCharObj.GetComponent<ArtBodyTester>().set_all_material(RedMatTransparent);
+                UnityObjUtils.setAllChildrenRenderersMaterial(simulatedCharObj.transform, RedMatTransparent);
         }
         if (_config.useSkinnedMesh)
         {
@@ -418,16 +418,16 @@ public class MLAgent : Agent
         {
             if (i == (int)Bone_LeftFoot || i == (int)Bone_RightFoot)
             {
-                kinChar.boneToCollider[i] = ArtBodyTester.getChildBoxCollider(kinChar.boneToTransform[i].gameObject);
-                simChar.boneToCollider[i] = ArtBodyTester.getChildBoxCollider(simChar.boneToTransform[i].gameObject);
+                kinChar.boneToCollider[i] = UnityObjUtils.getChildBoxCollider(kinChar.boneToTransform[i].gameObject);
+                simChar.boneToCollider[i] = UnityObjUtils.getChildBoxCollider(simChar.boneToTransform[i].gameObject);
                 feetBozSize = kinChar.boneToCollider[i].GetComponent<BoxCollider>().size;
                 if (i == (int)Bone_LeftFoot)
                     leftfootColliderCenter = simChar.boneToCollider[i].GetComponent<BoxCollider>().center;
                 else if (i == (int)Bone_RightFoot)
                     rightfootColliderCenter = simChar.boneToCollider[i].GetComponent<BoxCollider>().center;
             } else { 
-                kinChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(kinChar.boneToTransform[i].gameObject);
-                simChar.boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(simChar.boneToTransform[i].gameObject);
+                kinChar.boneToCollider[i] = UnityObjUtils.getChildCapsuleCollider(kinChar.boneToTransform[i].gameObject);
+                simChar.boneToCollider[i] = UnityObjUtils.getChildCapsuleCollider(simChar.boneToTransform[i].gameObject);
             }
         }
         groundColliderY = groundCollider.bounds.max.y;
@@ -579,7 +579,7 @@ public class MLAgent : Agent
                 var charInfo = isKinChar ? kinChar : simChar;
                 Vector3[] newSurfacePts = new Vector3[6];
                 Vector3[] newWorldSurfacePts = new Vector3[6];
-                Utils.getSixPointsOnCollider(charInfo.boneToCollider[i], ref newWorldSurfacePts, (MotionMatchingAnimator.Bones)i);
+                UnityObjUtils.getSixPointsOnCollider(charInfo.boneToCollider[i], ref newWorldSurfacePts, (MotionMatchingAnimator.Bones)i);
                 Vector3[] prevWorldSurfacePts = charInfo.boneSurfacePtsWorldSpace[i];
 
                 for (int j = 0; j < 6; j++)
@@ -612,10 +612,10 @@ public class MLAgent : Agent
                 Vector3 prevBonePos = curInfo.boneWorldPos[j];
                 Vector3 boneVel = (boneWorldPos - prevBonePos) / dt;
                 boneVel = zeroVelocity ? Vector3.zero : isKinChar ? resolveVelInKinematicRefFrame(boneVel) : resolveVelInSimRefFrame(boneVel);
-                Utils.copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
+                ArrayUtils.copyVecIntoArray(ref copyInto, ref copyIdx, boneLocalPos);
 
                 if (updateVelocity || zeroVelocity)
-                    Utils.copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
+                    ArrayUtils.copyVecIntoArray(ref copyInto, ref copyIdx, boneVel);
                 else
                     copyIdx += 3;
                 curInfo.boneWorldPos[j] = boneWorldPos;
@@ -751,19 +751,19 @@ public class MLAgent : Agent
 
         float[] state = new float[numObservations];
         int state_idx = 0;
-        Utils.copyVecIntoArray(ref state, ref state_idx, cmDistance);
-        Utils.copyVecIntoArray(ref state, ref state_idx, kinCMVelInKinRefFrame);
-        Utils.copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame);
-        Utils.copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame - kinCMVelInKinRefFrame);
-        Utils.copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
-        Utils.copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
+        ArrayUtils.copyVecIntoArray(ref state, ref state_idx, cmDistance);
+        ArrayUtils.copyVecIntoArray(ref state, ref state_idx, kinCMVelInKinRefFrame);
+        ArrayUtils.copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame);
+        ArrayUtils.copyVecIntoArray(ref state, ref state_idx, simCMVelInKinRefFrame - kinCMVelInKinRefFrame);
+        ArrayUtils.copyVecIntoArray(ref state, ref state_idx, new Vector2(desiredVel.x, desiredVel.z));
+        ArrayUtils.copyVecIntoArray(ref state, ref state_idx, new Vector2(velDiffSimMinusDesired.x, velDiffSimMinusDesired.z));
 
         if (_config.addOrientationDataToObsState)
         {
             float yawDiffKinAndSim = (Quaternion.Inverse(kinChar.trans.rotation) * simulatedCharObj.transform.rotation).GetYAngle();
             float yawDiffDesiredAndSim = (Quaternion.Inverse(MMScript.desired_rotation) * simulatedCharObj.transform.rotation).GetYAngle();
-            Utils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffKinAndSim));
-            Utils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffDesiredAndSim));
+            ArrayUtils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffKinAndSim));
+            ArrayUtils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffDesiredAndSim));
         }
 
         // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
@@ -778,7 +778,7 @@ public class MLAgent : Agent
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything");
 
         //if (debug)
-        //    Utils.debugArray(state, $"{curFixedUpdate} state: ");
+        //    ArrayUtils.debugArray(state, $"{curFixedUpdate} state: ");
         return state;
 
     }
@@ -796,7 +796,7 @@ public class MLAgent : Agent
             Transform t = boneToTransform[i];
             var ab = t.GetComponent<ArticulationBody>();
             float mass = t.GetComponent<ArticulationBody>().mass;
-            Vector3 childCenter = globalBonePositions == null ? Utils.getChildColliderCenter(t.gameObject) : globalBonePositions[i];
+            Vector3 childCenter = globalBonePositions == null ? UnityObjUtils.getChildColliderCenter(t.gameObject) : globalBonePositions[i];
             CoM += mass * childCenter;
             totalMass += ab.mass;
 
@@ -938,7 +938,7 @@ public class MLAgent : Agent
             MotionMatchingAnimator.Bones bone = (MotionMatchingAnimator.Bones)i;
             GameObject kin_collider_obj = kinChar.boneToCollider[i];
             Vector3[] gizmos = new Vector3[6];
-            Utils.getSixPointsOnCollider(kin_collider_obj, ref gizmos, bone);            
+            UnityObjUtils.getSixPointsOnCollider(kin_collider_obj, ref gizmos, bone);            
             foreach (Vector3 v in gizmos)
                 AddGizmoSphere(v, Color.blue);
         }

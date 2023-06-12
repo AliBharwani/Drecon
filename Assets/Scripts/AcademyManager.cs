@@ -25,7 +25,6 @@ public class AcademyManager : MonoBehaviour
      */
     void FixedUpdate()
     {
-        //Debug.Log($"{Time.frameCount} : AcademyManager updated");
         Academy.Instance.EnvironmentStep();
     }
 }

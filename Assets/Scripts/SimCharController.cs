@@ -72,9 +72,9 @@ public class SimCharController : MonoBehaviour
         {
             Transform trans = boneToTransform[i];
             if (i == (int) Bone_LeftFoot || i == (int) Bone_RightFoot)
-                boneToCollider[i] = ArtBodyTester.getChildBoxCollider(trans.gameObject).GetComponent<Collider>();
+                boneToCollider[i] = UnityObjUtils.getChildBoxCollider(trans.gameObject).GetComponent<Collider>();
             else
-                boneToCollider[i] = ArtBodyTester.getChildCapsuleCollider(trans.gameObject).GetComponent<Collider>();
+                boneToCollider[i] = UnityObjUtils.getChildCapsuleCollider(trans.gameObject).GetComponent<Collider>();
             if (boneToCollider[i] == null)
                 Debug.Log($"Could not find collider for {(MotionMatchingAnimator.Bones)i }");
         }
@@ -453,13 +453,6 @@ public class SimCharController : MonoBehaviour
             drive.lowerLimit = min_z;
             drive.upperLimit = max_z;
             ab.zDrive = drive;
-#if UNITY_EDITOR
-            if (!UnityEditor.EditorApplication.isPlaying && TestDirector.allLimitedDOFBones.Contains((MotionMatchingAnimator.Bones)j))
-            { 
-                Debug.Log($"Bone {(MotionMatchingAnimator.Bones)j} Mins: x: {min_x} , y: {min_y} , z: {min_z}");
-                Debug.Log($"Bone {(MotionMatchingAnimator.Bones)j} Maxess: x: {max_x} , y: {max_y} , z: {max_z}");
-            }
-#endif
         }
     }
 
