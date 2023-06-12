@@ -30,8 +30,10 @@ public class ProjectileCannon : MonoBehaviour
     {
         projectileScale *= Keyboard.current.eKey.isPressed ? 1.05f : 1f;
         projectileScale *= Keyboard.current.qKey.isPressed ?  1f / 1.05f : 1f;
-
-        if (mouse.leftButton.wasPressedThisFrame || (continousFire && (Time.time - lastFireTime > continousFireSleepTime))) {
+        if (Cursor.lockState == CursorLockMode.None && mouse.leftButton.wasPressedThisFrame)
+            Cursor.lockState = CursorLockMode.Locked;
+        else if (mouse.leftButton.wasPressedThisFrame || (continousFire && (Time.time - lastFireTime > continousFireSleepTime)))
+        {
             if (mouse.leftButton.wasPressedThisFrame)
                 Cursor.lockState = CursorLockMode.Locked;
             fireProjectile();

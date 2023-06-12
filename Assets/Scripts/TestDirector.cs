@@ -48,7 +48,7 @@ public class TestDirector : MonoBehaviour
         {
             int bone_idx = (int)allLimitedDOFBones[i];
             ArticulationBody ab = simChar.boneToArtBody[bone_idx];
-            Vector3 target = ab.ToTargetRotationInReducedSpace_OLD_DO_NOT_USE(cur_rotations[bone_idx]);
+            Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[bone_idx], true);
             ArticulationDrive drive = ab.zDrive;
             drive.target = target.z;
             ab.zDrive = drive;

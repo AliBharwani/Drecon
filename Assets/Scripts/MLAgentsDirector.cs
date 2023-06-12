@@ -140,30 +140,26 @@ public class MLAgentsDirector : Agent
 
         for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
         {
-            // Only inlcuded for compatibility with CoMVelFixed Run - skip toe input steps
-            //if (i == 2 && numActions == 42)
-            //    actionIdx += 2;
             int boneIdx = (int)limitedDOFBonesToUse[i];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
             float output = finalActions[actionIdx];
             actionIdx++;
-            Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
             var zDrive = ab.zDrive;
+            float target;
+            float range = zDrive.upperLimit - zDrive.lowerLimit;
             if (_config.setRotsDirectly)
             {
-                var scale = (zDrive.upperLimit - zDrive.lowerLimit) / 2f;
-                var midpoint = zDrive.lowerLimit + scale;
-                var target = (output * scale) + midpoint;
-                zDrive.target = target;
-                ab.zDrive = zDrive;
+                var midpoint = zDrive.lowerLimit + (range/2);
+                target = (output * (range/2)) + midpoint;
             }
             else
             {
-                var scale = zDrive.upperLimit - zDrive.lowerLimit;
-                float angle = output * scale;
-                zDrive.target = targetRotationInJointSpace.z + angle;
-                ab.zDrive = zDrive;
+                float angle = output * range;
+                Vector3 targetRotationInJointSpace = ab.ToTargetRotationInReducedSpace(curRotations[boneIdx], true);
+                target = targetRotationInJointSpace.z + angle;
             }
+            zDrive.target = target;
+            ab.zDrive = zDrive;
         }
         mm_v2.Bones[] openloopBonesBonesToUse = _config.networkControlsAllJoints ? alwaysOpenloopBones : openloopBones;
         for (int i = 0; i < openloopBonesBonesToUse.Length; i++)
@@ -307,7 +303,7 @@ public class MLAgentsDirector : Agent
             //Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i], _config.adjust6DRots);
             if (_config.sixDRotMethod == SixDRotationMethod.TRSTimesMatrix)
             {
-                Matrix4x4 networkAdjustment = ArtBodyUtils.MatFrom6DRepresentation(outputV1, outputV2);
+                Matrix4x4 networkAdjustment = ArtBodyUtils.MatrixFrom6DRepresentation(outputV1, outputV2);
                 Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
                 Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
                 newTargetRot = Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
@@ -326,7 +322,6 @@ public class MLAgentsDirector : Agent
                 newTargetRot = Quaternion.identity;
 
             ab.SetDriveRotation(newTargetRot);
-            //ab.SetDriveRotation(newTargetRot.normalized);
         }
     }
 
@@ -382,7 +377,7 @@ public class MLAgentsDirector : Agent
         if (_config.useSkinnedMesh)
         {
             foreach (var rend in simulatedCharObj.GetComponentsInChildren<Renderer>())
-                rend.enabled = false; //   (false);
+                rend.enabled = false;
             var skin = simulatedCharObj.GetComponentInChildren<SkinnedMeshRenderer>(true);
             if (skin != null)
             {
@@ -460,7 +455,6 @@ public class MLAgentsDirector : Agent
         resetData();
     }
 
-    Quaternion[] prevKinRots = Utils.identity_quat_arr(23);
     private void resetData()
     {
         for (int i = 0; i < nbodies; i++)
@@ -529,10 +523,7 @@ public class MLAgentsDirector : Agent
         updateVelocity = lastSimCharTeleportFixedUpdate + 1 < curFixedUpdate;
         UpdateKinCMData(updateVelocity);
         UpdateBoneObsState(updateVelocity, Time.fixedDeltaTime);
- 
-        //ClearGizmos();
-        //AddGizmoSphere(kinChar.cm, Color.blue);
-        //AddGizmoSphere(simChar.cm, Color.red);
+
         if (curFixedUpdate % _config.EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
         else 
