@@ -7,6 +7,7 @@ using UnityEngine;
 using static MotionMatchingAnimator.Bones;
 using UnityEditor;
 using System.Text;
+using Cinemachine;
 
 public struct CharInfo
 {
@@ -64,6 +65,7 @@ public class MLAgent : Agent
     MocapDB motionDB;
     public bool kinUseDebugMats = false;
     public bool simUseDebugMats = false;
+    public CinemachineVirtualCamera thirdPersonCam;
 
     private Vector3 lastKinRootPos = Vector3.zero;
 
@@ -426,6 +428,14 @@ public class MLAgent : Agent
         bool isInference = behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
         _config.clampKinCharToSim &= isInference;
         numObservations = behaviorParameters.BrainParameters.VectorObservationSize;
+        if (isInference)
+        {
+            GameObject camTarget = new GameObject("PlayerCamTarget");
+            PlayerCamTarget playerCamTarget = camTarget.AddComponent<PlayerCamTarget>();
+            playerCamTarget.init(simChar.trans);
+            thirdPersonCam.Follow = camTarget.transform;
+            MMScript.playerCamTarget = playerCamTarget;
+        }
         if (_config.clampKinCharToSim) 
             foreach(var ab in simChar.trans.GetComponentsInChildren<ArticulationBody>()) {
                 ab.gameObject.AddComponent<CollisionReporter>().agent = this;

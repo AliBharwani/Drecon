@@ -36,26 +36,38 @@ public static class SpringUtils
         v = eydt* (v - j1* y*dt);
     }
 
-    public static void spring_character_update(
-    //Vector2 x,
-    Vector2 v,
-    Vector2 a,
-    Vector2 v_goal,
-    float halflife,
-    float dt,
-    //out Vector2 x_out,
-    out Vector2 v_out,
-    out Vector2 a_out)
+    public static void simple_spring_damper_exact(
+        ref Vector3 x,
+        ref Vector3 v,
+        Vector3 x_goal,
+        float halflife,
+        float dt)
     {
         float y = halflife_to_damping(halflife) / 2.0f;
-        Vector2 j0 = v - v_goal;
-        Vector2 j1 = a + j0 * y;
+        Vector3 j0 = x - x_goal;
+        Vector3 j1 = v + j0 * y;
         float eydt = fast_negexp(y * dt);
 
-        //x_out = eydt * (((-j1) / (y * y)) + ((-j0 - j1 * dt) / y)) +
-        //    (j1 / (y * y)) + j0 / y + v_goal * dt + x;
-        v_out = eydt * (j0 + j1 * dt) + v_goal;
-        a_out = eydt * (a - j1 * y * dt);
+        x = eydt * (j0 + j1 * dt) + x_goal;
+        v = eydt * (v - j1 * y * dt);
+    }
+
+    public static void spring_character_update(
+        Vector2 x,
+        Vector2 v,
+        Vector2 x_goal,
+        float halflife,
+        float dt,
+        out Vector2 x_out,
+        out Vector2 v_out)
+    {
+        float y = halflife_to_damping(halflife) / 2.0f;
+        Vector2 j0 = x - x_goal;
+        Vector2 j1 = v + j0 * y;
+        float eydt = fast_negexp(y * dt);
+
+        x_out = eydt * (j0 + j1 * dt) + x_goal;
+        v_out = eydt * (v - j1 * y * dt);
     }
 
     public static void spring_character_update(
@@ -122,7 +134,7 @@ public static class SpringUtils
         x = MathUtils.quat_from_scaled_angle_axis(eydt * (j0 + j1 * dt)) * x_goal;
         v = eydt * (v - (j1 * y * dt));
     }
-    public static void decay_spring_damper_implicit(
+    public static void decay_spring_damper_exact(
         ref Vector3 x,
         ref Vector3 v,
         in float halflife,
@@ -136,7 +148,7 @@ public static class SpringUtils
         v = eydt* (v - j1* y*dt);
     }
 
-    public static void decay_spring_damper_implicit(
+    public static void decay_spring_damper_exact(
     ref Quaternion x,
     ref Vector3 v,
     in float halflife,
@@ -188,7 +200,7 @@ public static class SpringUtils
         in float halflife,
         in float dt)
     {
-        decay_spring_damper_implicit(ref off_x, ref off_v, halflife, dt);
+        decay_spring_damper_exact(ref off_x, ref off_v, halflife, dt);
         out_x = in_x + off_x;
         out_v = in_v + off_v;
     }
@@ -203,7 +215,7 @@ public static class SpringUtils
         in float halflife,
         in float dt)
     {
-        decay_spring_damper_implicit(ref off_x, ref off_v, halflife, dt);
+        decay_spring_damper_exact(ref off_x, ref off_v, halflife, dt);
         //off_x = Quaternion.identity;
         out_x = off_x * in_x;
         out_v = off_v + in_v;

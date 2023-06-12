@@ -168,6 +168,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     float minimum_fixed_update_timer = 0f;
     public bool synchronization_enabled = false;
     private InputGenerator input_generator;
+    internal PlayerCamTarget playerCamTarget;
     void Awake()
     {
         Application.targetFrameRate = 60;
@@ -719,10 +720,14 @@ public class MotionMatchingAnimator : MonoBehaviour
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)
     {
-        Vector2 lstick = gen_inputs ? random_lstick_input : gamepad.leftStick.ReadValue();
+        Vector2 lstick2 = gen_inputs ? random_lstick_input : gamepad.leftStick.ReadValue();
+        Vector3 lstick = new Vector3(lstick2.x, 0f, lstick2.y);
+        if (!gen_inputs && playerCamTarget != null) {
+            lstick = Quaternion.Euler(0f, playerCamTarget.yRot, 0f) * lstick;
+        }
 
         // Find stick position local to current facing direction
-        Vector3 local_stick_dir = MathUtils.quat_inv_mul_vec3(sim_rotation, new Vector3(lstick.x, 0, lstick.y));
+        Vector3 local_stick_dir = MathUtils.quat_inv_mul_vec3(sim_rotation, lstick);
 
         local_stick_dir.x *= simulation_side_speed;
         local_stick_dir.z *= local_stick_dir.z > 0.0 ? simulation_fwrd_speed : simulation_back_speed;

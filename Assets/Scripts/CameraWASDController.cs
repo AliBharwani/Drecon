@@ -32,7 +32,6 @@ public class CameraWASDController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         Vector3 positionDelta = transform.forward * (forwardKey.isPressed ? 1f: 0f);
         positionDelta += -transform.forward * (backwardKey.isPressed ? 1f : 0f);
         positionDelta += transform.right * (rightKey.isPressed ? 1f : 0f);
@@ -46,8 +45,6 @@ public class CameraWASDController : MonoBehaviour
         transform.position += positionDelta;
         if (kb.capsLockKey.isPressed)
             transform.position = new Vector3(0f, 1f, 1f);
-        if (kb.backquoteKey.wasPressedThisFrame || kb.escapeKey.wasPressedThisFrame)
-            Cursor.lockState = CursorLockMode.None;
 
         if (Cursor.lockState == CursorLockMode.None)
             return;

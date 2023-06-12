@@ -33,8 +33,6 @@ public class ProjectileCannon : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
         else if (mouse.leftButton.wasPressedThisFrame || (continousFire && (Time.time - lastFireTime > continousFireSleepTime)))
         {
-            if (mouse.leftButton.wasPressedThisFrame)
-                Cursor.lockState = CursorLockMode.Locked;
             fireProjectile();
             lastFireTime = Time.time;
         }
