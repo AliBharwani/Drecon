@@ -10,7 +10,7 @@ public class CameraWASDController : MonoBehaviour
     public float horizontalVelPerSecond = 2f;
     public float verticalVelPerSec = 2f;
     Keyboard kb;
-    KeyControl upKey, downKey, rightKey, leftKey;
+    KeyControl forwardKey, backwardKey, rightKey, leftKey;
     public float xSens = 400f;
     public float ySens = 100f;
     public float screenSensitivity = 300f;
@@ -23,8 +23,8 @@ public class CameraWASDController : MonoBehaviour
     {
         //Cursor.lockState = CursorLockMode.Locked;
         kb = Keyboard.current;
-        upKey = kb.wKey;
-        downKey = kb.sKey;
+        forwardKey = kb.wKey;
+        backwardKey = kb.sKey;
         leftKey = kb.aKey;
         rightKey = kb.dKey;
     }
@@ -33,8 +33,8 @@ public class CameraWASDController : MonoBehaviour
     void Update()
     {
 
-        Vector3 positionDelta = transform.forward * (upKey.isPressed ? 1f: 0f);
-        positionDelta += -transform.forward * (downKey.isPressed ? 1f : 0f);
+        Vector3 positionDelta = transform.forward * (forwardKey.isPressed ? 1f: 0f);
+        positionDelta += -transform.forward * (backwardKey.isPressed ? 1f : 0f);
         positionDelta += transform.right * (rightKey.isPressed ? 1f : 0f);
         positionDelta += -transform.right * (leftKey.isPressed ? 1f : 0f);
         positionDelta = positionDelta.normalized * (horizontalVelPerSecond * Time.deltaTime);

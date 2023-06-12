@@ -26,11 +26,7 @@ public class ConfigManager : MonoBehaviour
     [Header("INFERENCE SETTINGS")]
     public bool clampKinCharToSim;
     public float clampingMaxDistance = .5f;
-    public float clampingMaxAngle = 20f;
     public bool useSkinnedMesh = false;
-    public float friction = 1f;
-    public PhysicMaterial groundMaterial;
-    private float prevFrictionVal = 1f;
 
     [Header("PHYSICAL CHARACTER SETTINGS")]
     public int solverIterations = 32;
@@ -39,15 +35,11 @@ public class ConfigManager : MonoBehaviour
     public bool noStrafing = false;
     public bool setRotsDirectly = false;
     public bool outputIsBase = false;
-    //public bool actionsAreEulerRotations = true;
-    //public bool actionsAre6DRotations = false;
     public ActionRotationType actionRotType;
     public float alphaForExpMap = 120f;
     public SixDRotationMethod sixDRotMethod;
-    //public bool normalizeLimitedDOFOutputs = true;
     public bool networkControlsAllJoints = false;
     public bool fullRangeEulerOutputs;
-    //public bool useUnnormalizedEulerOffsets = false;
     public bool resolveSimReferenceFrameWithSimRotation = false;
     [Header("TRAINING HYPERPARAM SETTINGS")]
     public int EVALUATE_EVERY_K_STEPS = 2;
@@ -76,7 +68,6 @@ public class ConfigManager : MonoBehaviour
     // Art body params
     public string[] boneToNames = new string[23];
     public  float[] boneToStiffness = new float[23];
-    public bool useCapsuleFeet;
     public List<MusclePower> MusclePowers;
     public float forceLimit;
     public float damping;
@@ -84,6 +75,7 @@ public class ConfigManager : MonoBehaviour
     public float pGainMultiplier = 1f;
     public bool rewardsInGUI;
     [Header("UNTOUCHED / LEGACY")]
+    public bool useCapsuleFeet;
     public bool resetKinCharOnEpisodeEnd = false;
     public bool selfCollision;
 
@@ -93,7 +85,6 @@ public class ConfigManager : MonoBehaviour
         public MotionMatchingAnimator.Bones Bone;
         public Vector3 PowerVector;
     }
-
 
     private static ConfigManager _instance;
 
@@ -110,16 +101,6 @@ public class ConfigManager : MonoBehaviour
             _instance = this;
         }
     }
-
-    private void FixedUpdate()
-    {
-        if (Mathf.Approximately(friction, prevFrictionVal) || groundMaterial == null)
-            return;
-        groundMaterial.dynamicFriction = friction;
-        groundMaterial.staticFriction = friction;
-        prevFrictionVal = friction;
-    }
-
 
     [ContextMenu("Multiply all stiffness values by pGainMultiplier")]
     public void multiplyAllStiffnessValues()
@@ -149,6 +130,7 @@ public class ConfigManager : MonoBehaviour
         for (int i = 0; i < 23; i++)
             boneToNames[i]  = ((MotionMatchingAnimator.Bones)i).ToString();
     }
+
     [ContextMenu("Write out config file to current config name ")]
     public void writeCurrentConfig()
     {
@@ -173,7 +155,6 @@ public class ConfigManager : MonoBehaviour
         string json = File.ReadAllText(filepath);
         JsonUtility.FromJsonOverwrite(json, this);
     }
-
 
     [ContextMenu("Reset current config")]
     public void resetConfig()

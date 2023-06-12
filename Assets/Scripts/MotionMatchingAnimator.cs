@@ -1,8 +1,6 @@
-using System.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.InputSystem;
-
 
 public class MotionMatchingAnimator : MonoBehaviour
 {
@@ -56,7 +54,7 @@ public class MotionMatchingAnimator : MonoBehaviour
 
     public Transform[] boneToTransform = new Transform[23];
     [HideInInspector]
-    public database motionDB;
+    public MocapDB motionDB;
     int frameIdx = 0;
 
     Vector3[] curr_bone_positions;
@@ -81,9 +79,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     Vector3[] bone_offset_angular_velocities;
 
     Vector3[] global_bone_positions;
-    Vector3[] global_bone_velocities;
     Quaternion[] global_bone_rotations;
-    Vector3[] global_bone_angular_velocities;
 
     Vector3 transition_dst_position;
     Quaternion transition_dst_rotation;
@@ -98,14 +94,6 @@ public class MotionMatchingAnimator : MonoBehaviour
     Quaternion[] trajectory_rotations;
     Vector3[] trajectory_angular_velocities;
 
-    //bool contact_state = false;
-    //bool contact_lock = false;
-    //Vector3 contact_position;
-    //Vector3 contact_velocity;
-    //Vector3 contact_point;
-    //Vector3 contact_target;
-    //Vector3 contact_offset_position;
-    //Vector3 contact_offset_velocity;
     float desired_gait = 0.0f;
     float desired_gait_velocity = 0.0f;
     bool is_runbutton_pressed = false;
@@ -113,6 +101,14 @@ public class MotionMatchingAnimator : MonoBehaviour
     float simulation_fwrd_speed = 0f;
     float simulation_side_speed = 0f;
     float simulation_back_speed = 0f;
+
+    float simulation_run_fwrd_speed = 4.5f;
+    float simulation_run_side_speed = 3.0f;
+    float simulation_run_back_speed = 2.5f;
+
+    float simulation_walk_fwrd_speed = 1.75f;
+    float simulation_walk_side_speed = 1.5f;
+    float simulation_walk_back_speed = 1.25f;
 
     Vector3 simulation_position;
     Vector3 simulation_velocity;
@@ -162,7 +158,6 @@ public class MotionMatchingAnimator : MonoBehaviour
     Vector2 random_lstick_input;
     internal Vector3 origin;
     Quaternion origin_rot;
-    //float time_since_last_check = 0f;
     bool is_strafing;
     [HideInInspector]
     public bool teleportedThisFixedUpdate = false;
@@ -180,11 +175,10 @@ public class MotionMatchingAnimator : MonoBehaviour
         gamepad = Gamepad.current;
         origin = transform.position;
         origin_rot = transform.rotation;
-        //Debug.Log($"Origin is set as {origin}");
 
         if (motionDB == null)
         {
-            motionDB = database.Instance;
+            motionDB = MocapDB.Instance;
         }
         _config = ConfigManager.Instance;
         simulation_velocity_halflife = _config.simulationVelocityHalflife;
@@ -208,7 +202,6 @@ public class MotionMatchingAnimator : MonoBehaviour
 
     void init(Vector3 pos, Quaternion rot)
     {
-        //Debug.Log($"Init called, frame idx is currently {frameIdx}");
         curr_bone_positions = motionDB.bone_positions[frameIdx];
         curr_bone_velocities = motionDB.bone_velocities[frameIdx];
         curr_bone_rotations = motionDB.bone_rotations[frameIdx];
@@ -219,7 +212,7 @@ public class MotionMatchingAnimator : MonoBehaviour
         trns_bone_velocities = motionDB.bone_velocities[frameIdx];
         trns_bone_rotations = motionDB.bone_rotations[frameIdx];
         trns_bone_angular_velocities = motionDB.bone_angular_velocities[frameIdx];
-        //Debug.Log($"motionDB.bone_positions[frameIdx][0] {motionDB.bone_positions[frameIdx][0]}");
+
         bone_positions = new Vector3[numBones];
         bone_velocities = new Vector3[numBones];
         bone_rotations = new Quaternion[numBones];
@@ -228,36 +221,28 @@ public class MotionMatchingAnimator : MonoBehaviour
         System.Array.Copy(motionDB.bone_velocities[frameIdx], bone_velocities, numBones);
         System.Array.Copy(motionDB.bone_rotations[frameIdx], bone_rotations, numBones);
         System.Array.Copy(motionDB.bone_angular_velocities[frameIdx], bone_angular_velocities, numBones);
-        //bone_positions = motionDB.bone_positions[frameIdx];
-        //bone_velocities = motionDB.bone_velocities[frameIdx];
-        //bone_rotations = motionDB.bone_rotations[frameIdx];
-        //bone_angular_velocities = motionDB.bone_angular_velocities[frameIdx];
 
         bone_offset_positions = new Vector3[numBones];
         bone_offset_velocities = new Vector3[numBones];
-        bone_offset_rotations = identityQuatArray(numBones);
+        bone_offset_rotations = identity_quat_arr(numBones);
         bone_offset_angular_velocities = new Vector3[numBones];
 
         global_bone_positions = new Vector3[numBones];
-        global_bone_velocities = new Vector3[numBones];
-        global_bone_rotations = identityQuatArray(numBones);
-        global_bone_angular_velocities = new Vector3[numBones];
+        global_bone_rotations = identity_quat_arr(numBones);
 
         local_bone_positions = new Vector3[numBones];
-        local_bone_rotations = identityQuatArray(numBones);
+        local_bone_rotations = identity_quat_arr(numBones);
         bone_parents = motionDB.bone_parents;
 
         trajectory_desired_velocities = new Vector3[4];
-        trajectory_desired_rotations = identityQuatArray(4);
+        trajectory_desired_rotations = identity_quat_arr(4);
         trajectory_positions = new Vector3[4];
         trajectory_velocities = new Vector3[4];
         trajectory_accelerations = new Vector3[4];
-        trajectory_rotations = identityQuatArray(4);
+        trajectory_rotations = identity_quat_arr(4);
         trajectory_angular_velocities = new Vector3[4];
         random_lstick_input =  Random.insideUnitCircle;
 
-        //bone_positions[0] = pos;
-        //bone_rotations[0] = rot;
         simulation_position = pos;
         simulation_rotation = rot;
         inertialize_pose_reset(bone_positions[0], bone_rotations[0]);
@@ -275,15 +260,11 @@ public class MotionMatchingAnimator : MonoBehaviour
         adjusted_bone_rotations = bone_rotations;
         search_timer = search_time;
         force_search_timer = search_time;
-        //time_since_last_check = 0f;
     }
     public void Reset()
     {
-        //Debug.Log("Reset called");
         frameIdx = 0;
         frameCounter = 1;
-        //transform.position = origin;
-        //transform.rotation = origin_rot;
         simulation_velocity = Vector3.zero;
         simulation_acceleration = Vector3.zero;
         simulation_rotation = Quaternion.identity;
@@ -292,25 +273,7 @@ public class MotionMatchingAnimator : MonoBehaviour
         desired_rotation = Quaternion.identity;
         init(origin, Quaternion.identity);
     }
-    public void ResetAndTeleport(Vector3 newPosition, Quaternion newRootRotation)
-    {
-        //Debug.Log("Reset called");
-        frameIdx = 0;
-        frameCounter = 1;
-        //transform.position = newPosition;
-        //transform.rotation = newRootRotation;
-        simulation_velocity = Vector3.zero;
-        simulation_acceleration = Vector3.zero;
-        simulation_rotation = Quaternion.identity;
-        simulation_angular_velocity = Vector3.zero;
-        //desired_velocity = Vector3.zero;
-        //desired_rotation = Quaternion.identity;
-        init(newPosition, newRootRotation);
-        //bone_positions[0] = newPosition;
-        //simulation_position = newPosition;
-        //bone_rotations[0] = newRootRotation;
-        //simulation_rotation = newRootRotation;
-    }
+
     internal void reset_contact_state()
     {
         for (int i = 0; i < contact_bones.Length; i++)
@@ -345,16 +308,14 @@ public class MotionMatchingAnimator : MonoBehaviour
     }
     internal void set_random_pose()
     {
-
         if (motionDB == null)
         {
-            motionDB = new database();
+            motionDB = new MocapDB();
             bone_parents = motionDB.bone_parents;
             numBones = motionDB.nbones();
 
             global_bone_positions = new Vector3[numBones];
-            global_bone_rotations = identityQuatArray(numBones);
-            //motionDB = database.Instance;
+            global_bone_rotations = identity_quat_arr(numBones);
         }
         // Set bone positions and bone rotations
         int random_frame = (int)Random.Range(0f, motionDB.numframes - 1);
@@ -370,12 +331,10 @@ public class MotionMatchingAnimator : MonoBehaviour
             return false;
         return Random.value <= _config.prob_to_change_inputs;
     }
-    public bool debug_always_max_speed = false;
 
     internal void FixedUpdate()
     {
-        //Debug.Log("======================");
-        //Debug.Log($"{Time.frameCount} : Kinematic character updated");
+
         if (debug_move_every_second )
         {
             time_since_last_move += Time.fixedDeltaTime;
@@ -385,15 +344,11 @@ public class MotionMatchingAnimator : MonoBehaviour
                 return;
         }
         teleportedThisFixedUpdate = false;
-        // Update if we are reading from user input (ie not generating random rotations) or we are
-        // generating random inputs and every frame the user changes desires with P(.001)
         if (should_change_generated_inputs())
         {
-            //Debug.Log("Genning new inputs!");
             if (_config.useCustomInputGenerator)
                 input_generator.changeDirection();
-            random_lstick_input = _config.useCustomInputGenerator ? input_generator.currentPosition : debug_always_max_speed ? Random.insideUnitCircle.normalized : Random.insideUnitCircle;
-            // Random chance of making desired rotation face direction of velocity  
+            random_lstick_input = _config.useCustomInputGenerator ? input_generator.currentPosition : Random.insideUnitCircle;
             is_strafing = !_config.noStrafing && Random.value <= .5f;
             is_runbutton_pressed = !walk_only && Random.value <= .5f;
             Vector2 rotation_vec = is_strafing ? Random.insideUnitCircle : random_lstick_input;
@@ -516,7 +471,6 @@ public class MotionMatchingAnimator : MonoBehaviour
             simulation_position = bone_positions[0];
             simulation_rotation = bone_rotations[0];
         }
-
 
         Vector3[] adjusted_bone_positions = bone_positions;
         Quaternion[] adjusted_bone_rotations = bone_rotations;
@@ -648,7 +602,6 @@ public class MotionMatchingAnimator : MonoBehaviour
             bone_rotations = adjusted_bone_rotations;
         }
 
-
         forward_kinematics_full();
         apply_global_pos_and_rot();
     }
@@ -681,7 +634,6 @@ public class MotionMatchingAnimator : MonoBehaviour
     }
     private void motionMatch()
     {
-
         float[] query = new float[motionDB.nfeatures()];
         float[] query_features = motionDB.features[frameIdx];
         int num_features_to_copy =
@@ -690,19 +642,12 @@ public class MotionMatchingAnimator : MonoBehaviour
             + 3 // Left Foot velocity
             + 3 // Right Foot velocity
             + 3; //Hip Velocity
-        //int debug_ignore = num_features_to_copy;
+
         for (int i = 0; i < num_features_to_copy; i++)
             query[i] = query_features[i];
         query_compute_trajectory_position_feature(num_features_to_copy, query);
         query_compute_trajectory_direction_feature(num_features_to_copy + 6, query);
         best_idx = motionDB.motionMatch(query);
-        //Debug.Log($"Best idx: {best_idx}");
-        //StringBuilder sb = new StringBuilder("Query: ");
-        //for (int i = num_features_to_copy; i < query.Length; i++)
-        //{
-        //    sb.Append(query[i].ToString() + " , " );
-        //}
-        //Debug.Log(sb.ToString());
 
         trns_bone_positions = motionDB.bone_positions[best_idx];
         trns_bone_velocities = motionDB.bone_velocities[best_idx];
@@ -710,14 +655,6 @@ public class MotionMatchingAnimator : MonoBehaviour
         trns_bone_angular_velocities = motionDB.bone_angular_velocities[best_idx];
 
         inertialize_pose_transition(
-            //bone_offset_positions,
-            //bone_offset_velocities,
-            //bone_offset_rotations,
-            //bone_offset_angular_velocities,
-            //transition_src_position,
-            //transition_src_rotation,
-            //transition_dst_position,
-            //transition_dst_rotation,
             bone_positions[0],
             bone_velocities[0],
             bone_rotations[0],
@@ -778,13 +715,6 @@ public class MotionMatchingAnimator : MonoBehaviour
             query[i] = (query[i] - motionDB.features_offset[i]) / motionDB.features_scale[i];
         }
     }
-    float simulation_run_fwrd_speed = 4.5f;
-    float simulation_run_side_speed = 3.0f;
-    float simulation_run_back_speed = 2.5f;
-
-    float simulation_walk_fwrd_speed = 1.75f;
-    float simulation_walk_side_speed = 1.5f ;
-    float simulation_walk_back_speed = 1.25f ;
 
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)
@@ -1087,8 +1017,7 @@ public class MotionMatchingAnimator : MonoBehaviour
         if (gen_inputs || userIsInputting())
         {
             Vector3 desired_dir = velocity.normalized;
-            //Debug.Log(Mathf.Atan2(desired_dir.x, desired_dir.z));
-            return MathUtils.quat_from_stick_dir(desired_dir.x, desired_dir.z);// Quaternion.AngleAxis(Mathf.Atan2(desired_dir.x, desired_dir.z) * Mathf.Rad2Deg, Vector3.up);
+            return MathUtils.quat_from_stick_dir(desired_dir.x, desired_dir.z);
         }
         else
         {
@@ -1098,7 +1027,7 @@ public class MotionMatchingAnimator : MonoBehaviour
 
     private bool userIsInputting()
     {
-        return gamepad.leftStick.ReadValue().magnitude > .01f;
+        return gamepad != null && gamepad.leftStick.ReadValue().magnitude > .01f;
     }
 
     private bool is_out_of_bounds(Vector3 pos)
@@ -1125,31 +1054,22 @@ public class MotionMatchingAnimator : MonoBehaviour
         // the input animation from it's animation space into the 
         // space of the currently playing animation.
 
-        // For world posoition, first we subtract the transition src position. This tells us how far the
-        // 
         Vector3 world_space_position = MathUtils.quat_mul_vec3(transition_dst_rotation,
             MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position))
                 + transition_dst_position;
 
-        //Vector3 debugTerm = MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position);
-        //Debug.Log($"bone_input_positions[0] - transition_src_position: {bone_input_positions[0] - transition_src_position} \n" +
-        //    $"quat_inv_mul_vec3(transition_src_rotation, bone_input_positions[0] - transition_src_position): {debugTerm} \n" +
-        //    $"world_space_position: {world_space_position}");
 
         Vector3 world_space_velocity = MathUtils.quat_mul_vec3(transition_dst_rotation,
             MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_input_velocities[0]));
-        //Debug.Log($"world_space_velocity: {world_space_velocity}");
 
         // Normalize here because quat inv mul can sometimes produce 
         // unstable returns when the two rotations are very close.
         Quaternion world_space_rotation = transition_dst_rotation *
              MathUtils.quat_inv_mul(transition_src_rotation, bone_input_rotations[0]);
         world_space_rotation.Normalize();
-        //Debug.Log($"world_space_rotation: {world_space_rotation}");
 
         Vector3 world_space_angular_velocity = MathUtils.quat_mul_vec3(transition_dst_rotation,
             MathUtils.quat_inv_mul_vec3(transition_src_rotation, bone_input_angular_velocities[0]));
-        //Debug.Log($"world_space_angular_velocity: {world_space_angular_velocity}");
 
         SpringUtils.inertialize_update(
             ref bone_positions[0],
@@ -1160,7 +1080,6 @@ public class MotionMatchingAnimator : MonoBehaviour
             world_space_velocity,
             halflife,
             dt);
-        //Debug.Log($"Bone position after update: { bone_positions[0]}");
 
         SpringUtils.inertialize_update(
             ref bone_rotations[0],
@@ -1197,11 +1116,9 @@ public class MotionMatchingAnimator : MonoBehaviour
     }
     private void inertialize_pose_reset(Vector3 root_position, Quaternion root_rotation)
     {
-        //Debug.Log($"Intertialize pose reset called w root position: {root_position}");
-
         bone_offset_positions = new Vector3[numBones];
         bone_offset_velocities = new Vector3[numBones];
-        bone_offset_rotations = identityQuatArray(numBones);
+        bone_offset_rotations = identity_quat_arr(numBones);
         bone_offset_angular_velocities = new Vector3[numBones];
 
         transition_src_position = root_position;
@@ -1256,9 +1173,7 @@ public class MotionMatchingAnimator : MonoBehaviour
             root_velocity,
             root_position,
             world_space_dst_velocity);
-        //Debug.Log($"Transitioning - transition_dst_position: {transition_dst_position}\n" +
-        //            $"transition_src_position: {transition_src_position}\n" +
-        //            $"bone_offset_positions: {bone_offset_positions[0]}");
+
         SpringUtils.inertialize_transition(
             ref bone_offset_rotations[0],
             ref bone_offset_angular_velocities[0],
@@ -1293,8 +1208,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     // Compute forward kinematics for all joints
     private void forward_kinematics_full()
     {
-        //Vector3[] bone_pos = useBlending ? bone_positions : local_bone_positions;
-        //Quaternion[] bone_rot = useBlending ? bone_rotations : local_bone_rotations;
+
         for (int i = 0; i < bone_parents.Length; i++)
         {
             // Assumes bones are always sorted from root onwards
@@ -1335,11 +1249,6 @@ public class MotionMatchingAnimator : MonoBehaviour
             adjusted_position,
             target_pos,
            _config.clampingMaxDistance);
-
-        //adjusted_rotation = clamp_character_rotation(
-        //    adjusted_rotation,
-        //    target_rot,
-        //    _config.clampingMaxAngle);
 
         inertialize_root_adjust(
             ref bone_offset_positions[0],
@@ -1394,7 +1303,7 @@ public class MotionMatchingAnimator : MonoBehaviour
             return character_rotation;
         }
     }
-    public static Quaternion[] identityQuatArray(int size)
+    public static Quaternion[] identity_quat_arr(int size)
     {
         Quaternion[] ret = new Quaternion[size];
         for (int i = 0; i < size; i++)

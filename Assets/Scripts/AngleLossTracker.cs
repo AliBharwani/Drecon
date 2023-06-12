@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AngleLossTracker : MonoBehaviour
 {
-    // Start is called before the first frame update
     public GameObject target;
     Transform[] targetRots;
     public int numFramesToReport = 300;

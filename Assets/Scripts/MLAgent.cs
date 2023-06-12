@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
@@ -62,11 +61,10 @@ public class MLAgent : Agent
     float[] prevActionOutput;
     int numActions;
     int numObservations;
-    database motionDB;
+    MocapDB motionDB;
     public bool kinUseDebugMats = false;
     public bool simUseDebugMats = false;
 
-    // Used for normalization
     private Vector3 lastKinRootPos = Vector3.zero;
 
     [HideInInspector]
@@ -76,8 +74,6 @@ public class MLAgent : Agent
     public static MotionMatchingAnimator.Bones[] fullDOFBones = new MotionMatchingAnimator.Bones[]
     {  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Hips};
 
-    //public static mm_v2.Bones[] fullDOFBones = new mm_v2.Bones[]
-    //{  Bone_LeftUpLeg, Bone_RightUpLeg, Bone_LeftFoot, Bone_RightFoot, Bone_LeftArm, Bone_RightArm, Bone_Spine};
 
     [HideInInspector]
     public static MotionMatchingAnimator.Bones[] extendedfullDOFBones = new MotionMatchingAnimator.Bones[]
@@ -95,11 +91,6 @@ public class MLAgent : Agent
     public static MotionMatchingAnimator.Bones[] alwaysOpenloopBones = new MotionMatchingAnimator.Bones[]
     { Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand, Bone_LeftToe, Bone_RightToe};
 
-    // 0.2 m side length cube
-    // Mass between 0.01 kg and 8 kg
-    // The cube is launched at 5 m/s, towards a uniformly sampled location on the vertical axis,
-    // from −0.5 m to 0.5 m, centered on the character’s CM
-    // Launches occur every second, with the cube remaining in the scene until it is relaunched
     public GameObject projectilePrefab;
     internal GameObject projectile;
     internal Collider projectileCollider;
@@ -116,7 +107,6 @@ public class MLAgent : Agent
     }
     private void applyActions(float[] finalActions)
     {
-
         Quaternion[] curRotations = MMScript.bone_rotations;
         MotionMatchingAnimator.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
         int actionIdx = 0;
@@ -174,8 +164,7 @@ public class MLAgent : Agent
                 simChar.boneToArtBody[i].SetDriveTargetVelocity(MMScript.bone_angular_velocities[i], curRotations[i]);
 
     }
-    // 7 joints with 3 DOF with outputs as scaled angle axis = 21 outputs
-    // plus 4 joints with 1 DOF with outputs as scalars = 25 total outputs
+
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
         bool actionsAre6D = _config.actionRotType == ActionRotationType.SixD;
@@ -186,7 +175,6 @@ public class MLAgent : Agent
         prevActionOutput = finalActions;
         if (debug)
         {
-            //ArrayUtils.debugArray(curActions, "curActions: ");
             StringBuilder debugStr = new StringBuilder();
             int actionIdx = 0;
             MotionMatchingAnimator.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
@@ -210,7 +198,6 @@ public class MLAgent : Agent
     }
     private void applyActionsAsExp(float[] finalActions, Quaternion[] curRotations, MotionMatchingAnimator.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
-
         for (int i = 0; i < fullDOFBonesToUse.Length; i++)
         {
             int boneIdx = (int)fullDOFBonesToUse[i];
@@ -226,7 +213,6 @@ public class MLAgent : Agent
 
     private void applyActionsAsAxisAngleRotations(float[] finalActions, Quaternion[] curRotations, MotionMatchingAnimator.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
-
         for (int i = 0; i < fullDOFBonesToUse.Length; i++)
         {
             int boneIdx = (int)fullDOFBonesToUse[i];
@@ -234,9 +220,6 @@ public class MLAgent : Agent
             Vector3 output = new Vector3(finalActions[actionIdx], finalActions[actionIdx + 1], finalActions[actionIdx + 2]) * 120;
             actionIdx += 3;
             float angle = output.magnitude;
-            // Angle is in range (0,3) => map to (-180, 180)
-            //angle = (angle * 120) - 180;
-            //Vector3 normalizedOutput = output.normalized;
             Quaternion offset = Quaternion.AngleAxis(angle, output);
             Quaternion final = _config.setRotsDirectly ? offset : _config.outputIsBase ? curRotations[boneIdx] * offset : offset * curRotations[boneIdx];
             ab.SetDriveRotation(final);
@@ -303,19 +286,19 @@ public class MLAgent : Agent
             //Quaternion networkAdjustment = ArtBodyUtils.From6DRepresentation(outputV1, outputV2, ref initialRotInverses[i], _config.adjust6DRots);
             if (_config.sixDRotMethod == SixDRotationMethod.TRSTimesMatrix)
             {
-                Matrix4x4 networkAdjustment = ArtBodyUtils.MatrixFrom6DRepresentation(outputV1, outputV2);
+                Matrix4x4 networkAdjustment = MathUtils.MatrixFrom6DRepresentation(outputV1, outputV2);
                 Matrix4x4 rotationMatrix = Matrix4x4.TRS(Vector3.zero, curRotations[boneIdx].normalized, Vector3.one);
                 Matrix4x4 finalRot = networkAdjustment * rotationMatrix;
                 newTargetRot = Quaternion.LookRotation(finalRot.GetColumn(2), finalRot.GetColumn(1));
             }
             else if (_config.sixDRotMethod == SixDRotationMethod.RotateObjectWithOrthonormalVector)
             {
-                Quaternion offset = ArtBodyUtils.RotateObjectWithOrthonormalVector(outputV1, outputV2);
+                Quaternion offset = MathUtils.RotateObjectWithOrthonormalVector(outputV1, outputV2);
                 newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
             }
             else if (_config.sixDRotMethod == SixDRotationMethod.MatrixToQuat)
             {
-                Quaternion offset = ArtBodyUtils.QuatFrom6DRepresentation(outputV1, outputV2);
+                Quaternion offset = MathUtils.QuatFrom6DRepresentation(outputV1, outputV2);
                 newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
             }
             else
@@ -329,11 +312,11 @@ public class MLAgent : Agent
     public override void Heuristic(in ActionBuffers actionsout)
     {
 
-        Quaternion[] cur_rotations = MMScript.bone_rotations;
+        Quaternion[] curRotations = MMScript.bone_rotations;
         for (int i = 0; i < fullDOFBones.Length; i++)
         {
             int bone_idx = (int)fullDOFBones[i];
-            Quaternion final = cur_rotations[bone_idx];
+            Quaternion final = curRotations[bone_idx];
             ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             ab.SetDriveRotation(final);
         }
@@ -341,7 +324,7 @@ public class MLAgent : Agent
         {
             MotionMatchingAnimator.Bones bone =  limitedDOFBones[i];
             ArticulationBody ab = simChar.boneToArtBody[(int)bone];
-            Vector3 target = ab.ToTargetRotationInReducedSpace(cur_rotations[(int) bone], true);
+            Vector3 target = ab.ToTargetRotationInReducedSpace(curRotations[(int) bone], true);
             ArticulationDrive drive = ab.zDrive;
             drive.target = target.z;
             ab.zDrive = drive;
@@ -349,7 +332,7 @@ public class MLAgent : Agent
         for (int i = 0; i < openloopBones.Length; i++)
         {
             int bone_idx = (int)openloopBones[i];
-            Quaternion final = cur_rotations[bone_idx];
+            Quaternion final = curRotations[bone_idx];
             ArticulationBody ab = simChar.boneToArtBody[bone_idx];
             ab.SetDriveRotation(final);
         }
@@ -399,7 +382,7 @@ public class MLAgent : Agent
         kinChar.MMScript = MMScript;
 
         SimCharController = simulatedCharObj.GetComponent<SimCharController>();
-        SimCharController.is_active = false;
+        SimCharController.debug = false;
         SimCharController.enabled = true;
         simChar = new CharInfo(nbodies, stateBones.Length);
         simChar.trans = simulatedCharObj.transform;
@@ -442,13 +425,11 @@ public class MLAgent : Agent
         numActions = behaviorParameters.BrainParameters.ActionSpec.NumContinuousActions;
         bool isInference = behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
         _config.clampKinCharToSim &= isInference;
-        if (!isInference)
-            _config.friction = 1f;
-        numObservations = behaviorParameters.BrainParameters.VectorObservationSize; // 111 or 132 or 128 or 164
+        numObservations = behaviorParameters.BrainParameters.VectorObservationSize;
         if (_config.clampKinCharToSim) 
-            foreach(var col in simChar.trans.GetComponentsInChildren<ArticulationBody>()) { 
-                col.gameObject.AddComponent<CollisionReporter>().director = this;
-                col.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            foreach(var ab in simChar.trans.GetComponentsInChildren<ArticulationBody>()) {
+                ab.gameObject.AddComponent<CollisionReporter>().agent = this;
+                ab.collisionDetectionMode = CollisionDetectionMode.Continuous;
             }
 
         curFixedUpdate = _config.EVALUATE_EVERY_K_STEPS - 1;
@@ -469,8 +450,6 @@ public class MLAgent : Agent
         prevActionOutput = new float[numActions];
         kinChar.boneState = new float[36];
         simChar.boneState = new float[36];
-        //if (_config.setDriveTargetVelocities)
-        //    prevKinRots = MMScript.bone_rotations;
         UpdateKinCMData(false);
         UpdateSimCMData(false);
         UpdateBoneObsState(false, Time.fixedDeltaTime, true);
@@ -480,7 +459,7 @@ public class MLAgent : Agent
     public void Awake()
     {
         if (motionDB == null)
-            motionDB = database.Instance;
+            motionDB = MocapDB.Instance;
         _config = ConfigManager.Instance;
         nbodies = motionDB.nbones();
         kinematicCharObj = Instantiate(_config.useCapsuleFeet ? kinematic_char_type2_prefab : kinematic_handmade_char_prefab  , Vector3.zero, Quaternion.identity);
@@ -540,19 +519,13 @@ public class MLAgent : Agent
             return;
         lastProjectileLaunchtime = Time.time;
         projectileRB.mass = UnityEngine.Random.Range(_config.PROJECTILE_MIN_WEIGHT, _config.PROJECTILE_MAX_WEIGHT);
-        // To get XZ position, consider characters position on plane, pick random spot on unit cirlce,
-        // and go RADIUS units towards that spot 
-        // Y position is uniformly sampled from −0.5 m to 0.5 m, centered on the character’s CM
         float YTarget = UnityEngine.Random.Range(simChar.cm.y - .5f, simChar.cm.y + .5f);
         Vector2 randomUnitCircle = UnityEngine.Random.insideUnitCircle.normalized * _config.LAUNCH_RADIUS;
         Vector3 finalPosition = new Vector3(simChar.cm.x + randomUnitCircle.x, simChar.cm.y, simChar.cm.z + randomUnitCircle.y);
         projectile.transform.position = finalPosition;
-        // We want the projectile to be at YTarget when it reaches the target
-        // We know its acceleration (-9.8), its final position (YTarget), its starting Y position (simChar.cm.y), we need its
-        // current velocity 
-        float timeToTravel = _config.LAUNCH_RADIUS / _config.LAUNCH_SPEED; // So if it's traveling 1m at 5m/s, its timeToTravel is .2 seconds
+        float timeToTravel = _config.LAUNCH_RADIUS / _config.LAUNCH_SPEED; 
         float changeInY = YTarget - simChar.cm.y;
-        float totalAcceleration = timeToTravel * -9.8f; // this will be negative ofc
+        float totalAcceleration = timeToTravel * -9.8f; 
         float curYVelocity = -totalAcceleration + (changeInY / timeToTravel);
         projectileRB.AddForce(-randomUnitCircle.x * _config.LAUNCH_SPEED, curYVelocity, -randomUnitCircle.y * _config.LAUNCH_SPEED, ForceMode.VelocityChange);
     }
@@ -562,7 +535,6 @@ public class MLAgent : Agent
         Vector3 newKinCM = getCM(kinChar.boneToTransform);
         kinChar.cmVel = updateVelocity ? (newKinCM - kinChar.cm) / Time.fixedDeltaTime : kinChar.cmVel;
         kinChar.cm = newKinCM;
-        
     }
     private void UpdateSimCMData(bool updateVelocity)
     {
@@ -665,20 +637,11 @@ public class MLAgent : Agent
             lastEpisodeEndingFrame = curFixedUpdate;
             shouldEndThisFrame = false;
             EndEpisode();
-#if UNITY_EDITOR
-            //if (debug)
-                //EditorApplication.isPaused = true;
-#endif
             return true;
         }
-#if UNITY_EDITOR
-        //if (debug && fallFactor < 0.02)
-        //    EditorApplication.isPaused = true;
-#endif
+
         UpdateSimCMData(updateVelocity);
-        //Debug.Log($"{Time.frameCount}: Rewards kin cm: {kinChar.cm} kin cm vel: {kinChar.cmVel} sim cm: {simChar.cm} sim cm vel: {simChar.cmVel} ");
         UpdateBoneSurfacePts(updateVelocity);
-        // Calc them even if we don't use them for normalizer sake
         calcPosAndVelReward(out posReward, out velReward);
         calcLocalPoseReward(out localPoseReward);
         calcCMVelReward(out cmVelReward);
@@ -692,58 +655,41 @@ public class MLAgent : Agent
     }
 
     /*
-    At each control step the policy is provided with a state s in R^110
+       adding my own: difference in center of mass for each character
+       The state contains (from Drecon paper):
+       Center of Mass velocity in R^3 for kinematic and simulated character
 
-    adding my own: difference in center of mass for each character
-   The state contains:
-   Center of Mass velocity in R^3 for kinematic and simulated character
+       The desired horizontal CM velocity from user-input is also considered v(des) - R^2
 
-   The desired horizontal CM velocity from user-input is also considered v(des) - R^2
+       The diff between current simulated character horizontal
+       CM velocity and v(des) = v(diff) R^2
 
-   The diff between current simulated character horizontal
-   CM velocity and v(des) = v(diff) R^2
+       For a subset of bodies:
+       Left Toe, RightToe, Spine, Head, LeftForeArm, RightForeArm
+       We compute positions and velocities then concatenate these giving s(sim)
+       and s(kin) in R^36
 
+       The smootehd actions produced in the previous step of the policy are collected
+       in y(t-1) in R^25
 
-   For a subset of bodies:
-   Left Toe, RightToe, Spine, Head, LeftForeArm, RightForeArm
-   We compute positions and velocities then concatenate these giving s(sim)
-   and s(kin) in R^36
+       Animated character body positions, velocities, CM velocity, and
+       desired CM velocity are resolved in reference frame F(kin), which
+       is formed from the horizontal heading of the kinematic character,
+       the gravity direction, and positioned at the character CM
 
-   The smootehd actions produced in the previous step of the policy are collected
-   in y(t-1) in R^25
+       The exact same procedure is used for the simulated character positions and
+       velocities, except with a frame F(sim), which is identical to F(kin) in
+       orientation but positioned at the simulated character’s CM position.
 
-   Animated character body positions, velocities, CM velocity, and
-   desired CM velocity are resolved in reference frame F(kin), which
-   is formed from the horizontal heading of the kinematic character,
-   the gravity direction, and positioned at the character CM
-       -> Means multiply those by inverse of kin root bone rotation
-
-   The exact same procedure is used for the simulated character positions and
-   velocities, except with a frame F(sim), which is identical to F(kin) in
-   orientation but positioned at the simulated character’s CM position.
-       -> Means multiply by inverse of kin root bone rotation but keep sim position 
-
-   Note that when velocities are decomposed into F(kin) or F(sim), the
-   reference frames are considered to have no angular or linear velocity
-   and acceleration so that global velocity features are measurable in
-   the state.
-    Idx to value mapping: 
-    0-2   : cm distance
-    3-5   : kinematic cm vel
-    6-8   : sim cm vel
-    9-11   : difference between sim cm vel and kin cm vel
-    12-13  : desired velocity
-    14-15 : the diff between sim cm horizontal vel and desired vel
-    16-51 : sim char state
-    52-87 : sim state - kin state
-    88-110 : numActions (
+       Note that when velocities are decomposed into F(kin) or F(sim), the
+       reference frames are considered to have no angular or linear velocity
+       and acceleration so that global velocity features are measurable in
+       the state.
     */ 
     float[] getState()
     {
 
         Vector3 cmDistance = resolvePosInKinematicRefFrame(simChar.cm);
-        //bool endedEpisode = lastEpisodeEndingFrame >= (curFixedUpdate - 1);
-        //Debug.Log($"{Time.frameCount}: getState kinChar.cmVel {kinChar.cmVel} simChar.cmVel {simChar.cmVel} kinCMVelLastGetState: {kinCMVelLastGetState} simCMVelLastGetState: {simCMVelLastGetState}");
         Vector3 kinCMVelInKinRefFrame = resolveVelInKinematicRefFrame(kinChar.cmVel);        
         Vector3 simCMVelInKinRefFrame = resolveVelInSimRefFrame(simChar.cmVel);
         Vector3 desiredVel = resolveVelInKinematicRefFrame(MMScript.desired_velocity);
@@ -766,7 +712,6 @@ public class MLAgent : Agent
             ArrayUtils.copyVecIntoArray(ref state, ref state_idx, MathUtils.getContinuousRepOf2DAngle(yawDiffDesiredAndSim));
         }
 
-        // In the paper, instead of adding s(sim) and s(kin), they add s(sim) and then (s(sim) - s(kin))
         for (int i = 0; i < 36; i++)
             state[state_idx++] = simChar.boneState[i];
         for (int i = 0; i < 36; i++)
@@ -787,8 +732,6 @@ public class MLAgent : Agent
     public static Vector3 getCM(Transform[] boneToTransform, Vector3[] globalBonePositions = null)
     {
         // We start at 1 because 0 is the root bone with no colliders
-        // to calculate CM, we get the masses and centers of each capsule and
-        // sum them together and divide by the total mass
         float totalMass = 0f;
         Vector3 CoM = Vector3.zero;
         for (int i = 1; i < boneToTransform.Length; i++)
@@ -835,8 +778,6 @@ public class MLAgent : Agent
         double velDiffsSum = 0f;
         for (int i = 1; i < 23; i++)
         {
-            //if (_config.outputIsBase && ((mm_v2.Bones)i == Bone_LeftFoot || (mm_v2.Bones)i == Bone_RightFoot))
-            //    continue;
             for (int j = 0; j < 6; j++)
             {
                 posDiffsSum += (kinChar.boneSurfacePts[i][j] - simChar.boneSurfacePts[i][j]).magnitude;
@@ -852,8 +793,6 @@ public class MLAgent : Agent
         double totalLoss = 0;
         for (int i = 0; i < 23; i++)
         {
-            //if (_config.outputIsBase && ((mm_v2.Bones)i == Bone_LeftFoot || (mm_v2.Bones)i == Bone_RightFoot))
-            //    continue;
             Transform kinBone = kinChar.boneToTransform[i];
             Transform simBone = simChar.boneToTransform[i];
             // From Stack Overflow:
@@ -866,7 +805,6 @@ public class MLAgent : Agent
             // We want the magnitude of the diff so we take abs value
             angle = Math.Abs(GeoUtils.wrap_radians((float)angle));
             totalLoss += (float)angle;
-            //Debug.Log($"Bone: {(mm_v2.Bones)i} Quaternion loss: {angle} totalLoss: {totalLoss}");
         }
         poseReward = Math.Exp((-10f/nbodies) * totalLoss);
     }
@@ -897,7 +835,6 @@ public class MLAgent : Agent
                 Debug.Log($"Collider name: {colliderName} other collider name: {contact.otherCollider.gameObject.name}");
                 shouldEndThisFrame = true;
             }
-            //Debug.Log($"{colliderName} collided with {contact.otherCollider.gameObject.name}");
         }
     }
 
@@ -927,29 +864,10 @@ public class MLAgent : Agent
         return maxGroundPenetration;
     }
 
-    // Testing and internal stuff
-    [ContextMenu("Create gizmos for capsule position points")]
-    private void debugCapsuleSurfacePts()
-    {
-        customInit();
-        for (int i = 1; i < 23; i++)
-        {
-            // Get bone, transform, child capsule object
-            MotionMatchingAnimator.Bones bone = (MotionMatchingAnimator.Bones)i;
-            GameObject kin_collider_obj = kinChar.boneToCollider[i];
-            Vector3[] gizmos = new Vector3[6];
-            UnityObjUtils.getSixPointsOnCollider(kin_collider_obj, ref gizmos, bone);            
-            foreach (Vector3 v in gizmos)
-                AddGizmoSphere(v, Color.blue);
-        }
-    }
-
     public float gizmoSphereRad = .01f;
-
 
     List<(Vector3 pos, Color color)> gizmoSpheres;
     List<(Vector3 a, Vector3 b, Color color)> gizmoLines;
-
     private void AddGizmoSphere(Vector3 v, Color c)
     {
         if (gizmoSpheres == null)
@@ -993,7 +911,6 @@ public class MLAgent : Agent
             }
         }
     }
-
     private void OnGUI()
     {
         if (!_config.rewardsInGUI)
