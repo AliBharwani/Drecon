@@ -93,15 +93,15 @@ public class MLAgent : Agent
     public static MotionMatchingAnimator.Bones[] alwaysOpenloopBones = new MotionMatchingAnimator.Bones[]
     { Bone_Neck, Bone_Head, Bone_LeftHand, Bone_RightHand, Bone_LeftToe, Bone_RightToe};
 
+    private GameObject[] projectiles;
+    private int projectileIdx = 0;
     public GameObject projectilePrefab;
-    internal GameObject projectile;
-    internal Collider projectileCollider;
-    internal Rigidbody projectileRB;
     private float lastProjectileLaunchtime = 0f;
     public bool debug = false;
     public bool updateVelOnTeleport = true;
     public bool resetKinToSimOnFail = false;
     private Unity.MLAgents.Policies.BehaviorParameters behaviorParameters;
+
 
     public override void CollectObservations(VectorSensor sensor)
     {
@@ -417,11 +417,7 @@ public class MLAgent : Agent
         }
         groundColliderY = groundCollider.bounds.max.y;
         toeColliderRadius = simChar.boneToCollider[(int)Bone_RightToe].GetComponent<CapsuleCollider>().radius;
-        projectile = Instantiate(projectilePrefab, simulatedCharObj.transform.position + Vector3.up, Quaternion.identity);
-        projectileCollider = projectile.GetComponent<Collider>();
-        projectileRB = projectile.GetComponent<Rigidbody>();
-        if (!_config.projectileTraining)
-            projectile.SetActive(false);
+        projectiles = new GameObject[_config.maxNumProjectiles];
 
         behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
         numObservations = behaviorParameters.BrainParameters.VectorObservationSize;
@@ -495,7 +491,6 @@ public class MLAgent : Agent
             MMScript.FixedUpdate();
         }
         float verticalOffset = getVerticalOffset();
-        projectile.transform.position = kinChar.boneToTransform[(int)Bone_Entity].position + 2 * Vector3.right;
         SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .02f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
         Physics.Simulate(.00001f);
@@ -533,6 +528,13 @@ public class MLAgent : Agent
         if (Time.time - lastProjectileLaunchtime < _config.LAUNCH_FREQUENCY)
             return;
         lastProjectileLaunchtime = Time.time;
+        projectileIdx %= _config.maxNumProjectiles;
+        var curProjectile = projectiles[projectileIdx];
+        Destroy(curProjectile);
+        var projectile = Instantiate(projectilePrefab, Vector3.zero, Quaternion.identity);
+        var projectileRB = projectile.GetComponent<Rigidbody>();
+        projectiles[projectileIdx] = projectile;
+        projectileIdx++;
         projectileRB.mass = UnityEngine.Random.Range(_config.PROJECTILE_MIN_WEIGHT, _config.PROJECTILE_MAX_WEIGHT);
         float YTarget = UnityEngine.Random.Range(simChar.cm.y - .5f, simChar.cm.y + .5f);
         Vector2 randomUnitCircle = UnityEngine.Random.insideUnitCircle.normalized * _config.LAUNCH_RADIUS;
@@ -610,13 +612,11 @@ public class MLAgent : Agent
         }
     }
 
-    public void AssignLayer(int layer, int projectileLayer)
+    public void AssignLayer(int layer)
     {
         simulatedCharObj.layer = layer;
         foreach (var child in simulatedCharObj.GetComponentsInChildren<Transform>())
             child.gameObject.layer = layer;
-
-        projectile.layer = projectileLayer;
     }
 
 

@@ -33,9 +33,9 @@ public class MLAgentDirector : MonoBehaviour
         {
             agents[i] = createMLAgent();
             if (_config.selfCollision)
-                agents[i].AssignLayer(LayerMask.NameToLayer($"model_{i + 1}"), LayerMask.NameToLayer($"model_{i + 1}"));
+                agents[i].AssignLayer(LayerMask.NameToLayer($"model_{i + 1}"));
             else
-                agents[i].AssignLayer(LayerMask.NameToLayer($"test_model"), LayerMask.NameToLayer($"Default"));
+                agents[i].AssignLayer(LayerMask.NameToLayer($"test_model"));
 
         }
         Application.targetFrameRate = targetFrameRate;

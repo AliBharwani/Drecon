@@ -478,6 +478,10 @@ PrefabInstance:
       propertyPath: ShoulderOffset.y
       value: 1.5
       objectReference: {fileID: 0}
+    - target: {fileID: 2070925442191277752, guid: a1a802ecaf6775746bb2a929fb554ad8, type: 3}
+      propertyPath: CameraCollisionFilter.m_Bits
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a1a802ecaf6775746bb2a929fb554ad8, type: 3}
 --- !u!114 &271898298 stripped
@@ -554,6 +558,7 @@ MonoBehaviour:
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 50
   projectileTraining: 1
+  maxNumProjectiles: 10
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
@@ -2650,10 +2655,10 @@ MonoBehaviour:
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
   clampKinCharToSim: 1
-  userControl: 1
+  userControl: 0
   clampingMaxDistance: 0.666
   useSkinnedMesh: 0
-  doNotRenderKinChar: 1
+  doNotRenderKinChar: 0
   solverIterations: 256
   addOrientationDataToObsState: 0
   setDriveTargetVelocities: 1
@@ -2679,12 +2684,13 @@ MonoBehaviour:
   walkOnly: 0
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 100
-  projectileTraining: 0
-  LAUNCH_FREQUENCY: 3
+  projectileTraining: 1
+  maxNumProjectiles: 10
+  LAUNCH_FREQUENCY: 2
   LAUNCH_RADIUS: 0.5
-  LAUNCH_SPEED: 7.5
-  PROJECTILE_MAX_WEIGHT: 10
-  PROJECTILE_MIN_WEIGHT: 1
+  LAUNCH_SPEED: 10
+  PROJECTILE_MAX_WEIGHT: 8
+  PROJECTILE_MIN_WEIGHT: 7
   boneToNames:
   - Bone_Entity
   - Bone_Hips

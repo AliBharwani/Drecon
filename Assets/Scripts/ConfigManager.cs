@@ -61,6 +61,7 @@ public class ConfigManager : MonoBehaviour
     // PROJECTILE HYPER PARAMS
     [Header("PROJECTILE SETTINGS")]
     public bool projectileTraining = true;
+    public int maxNumProjectiles = 10;
     public float LAUNCH_FREQUENCY = 1f;
     public  float LAUNCH_RADIUS = .66f;
     public  float LAUNCH_SPEED = 5f;
