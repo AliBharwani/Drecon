@@ -424,24 +424,29 @@ public class MLAgent : Agent
             projectile.SetActive(false);
 
         behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
+        numObservations = behaviorParameters.BrainParameters.VectorObservationSize;
         numActions = behaviorParameters.BrainParameters.ActionSpec.NumContinuousActions;
         bool isInference = behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
-        _config.clampKinCharToSim &= isInference;
-        numObservations = behaviorParameters.BrainParameters.VectorObservationSize;
         if (isInference)
         {
             GameObject camTarget = new GameObject("PlayerCamTarget");
             PlayerCamTarget playerCamTarget = camTarget.AddComponent<PlayerCamTarget>();
             playerCamTarget.init(simChar.trans);
+            thirdPersonCam.gameObject.SetActive(true);
             thirdPersonCam.Follow = camTarget.transform;
             MMScript.playerCamTarget = playerCamTarget;
+            if (_config.userControl)
+                MMScript.gen_inputs = false;
+            if (_config.clampKinCharToSim)
+                foreach (var ab in simChar.trans.GetComponentsInChildren<ArticulationBody>())
+                {
+                    ab.gameObject.AddComponent<CollisionReporter>().agent = this;
+                    ab.collisionDetectionMode = CollisionDetectionMode.Continuous;
+                }
+            if (_config.doNotRenderKinChar)
+                foreach (var rend in kinChar.trans.GetComponentsInChildren<Renderer>())
+                    rend.enabled = false;
         }
-        if (_config.clampKinCharToSim) 
-            foreach(var ab in simChar.trans.GetComponentsInChildren<ArticulationBody>()) {
-                ab.gameObject.AddComponent<CollisionReporter>().agent = this;
-                ab.collisionDetectionMode = CollisionDetectionMode.Continuous;
-            }
-
         curFixedUpdate = _config.EVALUATE_EVERY_K_STEPS - 1;
         resetData();
     }

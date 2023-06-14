@@ -126,8 +126,6 @@ public class MotionMatchingAnimator : MonoBehaviour
     Vector3 desired_rotation_change_prev = Vector3.zero;
     float desired_rotation_change_threshold = 50.0f;
 
-    Vector3[] local_bone_positions;
-    Quaternion[] local_bone_rotations;
     int[] bone_parents;
     int best_idx;
     int numBones;
@@ -151,9 +149,6 @@ public class MotionMatchingAnimator : MonoBehaviour
     Vector3[] contact_offset_velocities = new Vector3[contact_bones.Length];
     bool[] global_bone_computed = new bool[23];
 
-    Vector3[] adjusted_bone_positions;
-    Quaternion[] adjusted_bone_rotations;
-
     // ====================== Stuff added for ML
     Vector2 random_lstick_input;
     internal Vector3 origin;
@@ -163,9 +158,6 @@ public class MotionMatchingAnimator : MonoBehaviour
     public bool teleportedThisFixedUpdate = false;
     [HideInInspector]
     public bool is_initalized = false;
-    internal bool debug_move_every_second = true;
-    float time_since_last_move = 0f;
-    float minimum_fixed_update_timer = 0f;
     public bool synchronization_enabled = false;
     private InputGenerator input_generator;
     internal PlayerCamTarget playerCamTarget;
@@ -177,11 +169,9 @@ public class MotionMatchingAnimator : MonoBehaviour
         origin = transform.position;
         origin_rot = transform.rotation;
 
-        if (motionDB == null)
-        {
-            motionDB = MocapDB.Instance;
-        }
+        motionDB = MocapDB.Instance;
         _config = ConfigManager.Instance;
+
         simulation_velocity_halflife = _config.simulationVelocityHalflife;
         simulation_rotation_halflife = _config.simulation_rotation_halflife;
 
@@ -231,8 +221,6 @@ public class MotionMatchingAnimator : MonoBehaviour
         global_bone_positions = new Vector3[numBones];
         global_bone_rotations = identity_quat_arr(numBones);
 
-        local_bone_positions = new Vector3[numBones];
-        local_bone_rotations = identity_quat_arr(numBones);
         bone_parents = motionDB.bone_parents;
 
         trajectory_desired_velocities = new Vector3[4];
@@ -257,8 +245,6 @@ public class MotionMatchingAnimator : MonoBehaviour
         );
         reset_contact_state();
 
-        adjusted_bone_positions = bone_positions;
-        adjusted_bone_rotations = bone_rotations;
         search_timer = search_time;
         force_search_timer = search_time;
     }
@@ -335,15 +321,6 @@ public class MotionMatchingAnimator : MonoBehaviour
 
     internal void FixedUpdate()
     {
-
-        if (debug_move_every_second )
-        {
-            time_since_last_move += Time.fixedDeltaTime;
-            if (time_since_last_move > minimum_fixed_update_timer)
-                time_since_last_move = 0f;
-             else
-                return;
-        }
         teleportedThisFixedUpdate = false;
         if (should_change_generated_inputs())
         {

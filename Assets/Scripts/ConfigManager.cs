@@ -25,8 +25,10 @@ public class ConfigManager : MonoBehaviour
 
     [Header("INFERENCE SETTINGS")]
     public bool clampKinCharToSim;
+    public bool userControl;
     public float clampingMaxDistance = .5f;
     public bool useSkinnedMesh = false;
+    public bool doNotRenderKinChar = false;
 
     [Header("PHYSICAL CHARACTER SETTINGS")]
     public int solverIterations = 32;
