@@ -535,6 +535,7 @@ public class MLAgent : Agent
         var projectileRB = projectile.GetComponent<Rigidbody>();
         projectiles[projectileIdx] = projectile;
         projectileIdx++;
+        projectile.transform.localScale = Vector3.one * _config.PROJECTILE_SCALE * .15f;
         projectileRB.mass = UnityEngine.Random.Range(_config.PROJECTILE_MIN_WEIGHT, _config.PROJECTILE_MAX_WEIGHT);
         float YTarget = UnityEngine.Random.Range(simChar.cm.y - .5f, simChar.cm.y + .5f);
         Vector2 randomUnitCircle = UnityEngine.Random.insideUnitCircle.normalized * _config.LAUNCH_RADIUS;

@@ -2655,10 +2655,10 @@ MonoBehaviour:
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
   clampKinCharToSim: 1
-  userControl: 0
+  userControl: 1
   clampingMaxDistance: 0.666
   useSkinnedMesh: 0
-  doNotRenderKinChar: 0
+  doNotRenderKinChar: 1
   solverIterations: 256
   addOrientationDataToObsState: 0
   setDriveTargetVelocities: 1

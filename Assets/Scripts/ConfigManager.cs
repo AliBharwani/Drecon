@@ -67,6 +67,7 @@ public class ConfigManager : MonoBehaviour
     public  float LAUNCH_SPEED = 5f;
     public float PROJECTILE_MAX_WEIGHT = 10f;
     public float PROJECTILE_MIN_WEIGHT = 1f;
+    public float PROJECTILE_SCALE = 1f;
     [Header("ARTICULATION BODY SETTINGS")]
     // Art body params
     public string[] boneToNames = new string[23];
