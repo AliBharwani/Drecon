@@ -564,6 +564,7 @@ MonoBehaviour:
   LAUNCH_SPEED: 7.5
   PROJECTILE_MAX_WEIGHT: 10
   PROJECTILE_MIN_WEIGHT: 1
+  PROJECTILE_SCALE: 1
   boneToNames:
   - Bone_Entity
   - Bone_Hips
@@ -1658,7 +1659,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 5b51e8b2205607f4a98ad3e4b19ba400, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 04eb0fb778f569d4ba393d096304d337, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -2305,7 +2306,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.375
+      value: 2.53
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2313,11 +2314,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.8660254
+      value: 0.9914449
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.5
+      value: 0.13052616
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.y
@@ -2329,7 +2330,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 32.089
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
@@ -2651,21 +2652,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/EulerBaseline
+  writeToFilePath: ../results/AABaseline
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
   clampKinCharToSim: 1
-  userControl: 1
+  userControl: 0
   clampingMaxDistance: 0.666
   useSkinnedMesh: 0
-  doNotRenderKinChar: 1
+  doNotRenderKinChar: 0
   solverIterations: 256
   addOrientationDataToObsState: 0
   setDriveTargetVelocities: 1
   noStrafing: 1
   setRotsDirectly: 0
   outputIsBase: 1
-  actionRotType: 0
+  actionRotType: 1
   alphaForExpMap: 120
   sixDRotMethod: 0
   networkControlsAllJoints: 0
@@ -2684,13 +2685,14 @@ MonoBehaviour:
   walkOnly: 0
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 100
-  projectileTraining: 1
-  maxNumProjectiles: 10
-  LAUNCH_FREQUENCY: 2
+  projectileTraining: 0
+  maxNumProjectiles: 15
+  LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
-  LAUNCH_SPEED: 10
-  PROJECTILE_MAX_WEIGHT: 8
-  PROJECTILE_MIN_WEIGHT: 7
+  LAUNCH_SPEED: 7.5
+  PROJECTILE_MAX_WEIGHT: 10
+  PROJECTILE_MIN_WEIGHT: 1
+  PROJECTILE_SCALE: 2
   boneToNames:
   - Bone_Entity
   - Bone_Hips

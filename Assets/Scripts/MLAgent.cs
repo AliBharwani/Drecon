@@ -60,6 +60,7 @@ public class MLAgent : Agent
     private int lastSimCharTeleportFixedUpdate = -1;
 
     float[] prevActionOutput;
+    float[] curActions;
     int numActions;
     int numObservations;
     MocapDB motionDB;
@@ -107,24 +108,28 @@ public class MLAgent : Agent
     {
         sensor.AddObservation(getState());
     }
-    private void applyActions(float[] finalActions)
+    private void applyActions()
     {
+        for (int i = 0; i < numActions; i++)
+            curActions[i] = _config.ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - _config.ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
+        if (debug)
+            debugPrintActions();
         Quaternion[] curRotations = MMScript.bone_rotations;
         MotionMatchingAnimator.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
         int actionIdx = 0;
         switch (_config.actionRotType)
         {
             case ActionRotationType.AxisAngle:
-                applyActionsAsAxisAngleRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                applyActionsAsAxisAngleRotations(curActions, curRotations, fullDOFBonesToUse, ref actionIdx);
                 break;
             case ActionRotationType.Euler:
-                applyActionsAsEulerRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                applyActionsAsEulerRotations(curActions, curRotations, fullDOFBonesToUse, ref actionIdx);
                 break;
             case ActionRotationType.SixD:
-                applyActionsWith6DRotations(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                applyActionsWith6DRotations(curActions, curRotations, fullDOFBonesToUse, ref actionIdx);
                 break; 
             case ActionRotationType.Exp:
-                applyActionsAsExp(finalActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                applyActionsAsExp(curActions, curRotations, fullDOFBonesToUse, ref actionIdx);
                 break;
         }
 
@@ -134,7 +139,7 @@ public class MLAgent : Agent
         {
             int boneIdx = (int)limitedDOFBonesToUse[i];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
-            float output = finalActions[actionIdx];
+            float output = curActions[actionIdx];
             actionIdx++;
             var zDrive = ab.zDrive;
             float target;
@@ -169,34 +174,8 @@ public class MLAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        bool actionsAre6D = _config.actionRotType == ActionRotationType.SixD;
-        float[] curActions = actionBuffers.ContinuousActions.Array;
-        float[] finalActions = new float[numActions];
-        for (int i = 0; i < numActions; i++)
-            finalActions[i] = _config.ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - _config.ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
-        prevActionOutput = finalActions;
-        if (debug)
-        {
-            StringBuilder debugStr = new StringBuilder();
-            int actionIdx = 0;
-            MotionMatchingAnimator.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
-            for (int i = 0; i < fullDOFBonesToUse.Length; i++)
-            {
-                MotionMatchingAnimator.Bones bone = fullDOFBonesToUse[i];
-                Vector3 output = new Vector3(curActions[actionIdx], curActions[actionIdx + 1], curActions[actionIdx + 2]);
-                debugStr.Append($"{bone.ToString().Substring(5)}: {output} " + (actionsAre6D ? $"{ new Vector3(curActions[actionIdx + 3], curActions[actionIdx + 4], curActions[actionIdx + 5])} " : ""));
-                actionIdx += actionsAre6D ? 6 : 3;
-            }
-            MotionMatchingAnimator.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
-            for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
-            {
-                MotionMatchingAnimator.Bones bone = limitedDOFBonesToUse[i];
-                debugStr.Append($"{bone}: {curActions[actionIdx]} | {finalActions[actionIdx]} ");
-                actionIdx += 1;
-            }
-            Debug.Log(debugStr.ToString());
-        }
-        applyActions(finalActions);
+        prevActionOutput = actionBuffers.ContinuousActions.Array;
+        applyActions();
     }
     private void applyActionsAsExp(float[] finalActions, Quaternion[] curRotations, MotionMatchingAnimator.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
@@ -459,6 +438,7 @@ public class MLAgent : Agent
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
         prevActionOutput = new float[numActions];
+        curActions = new float[numActions];
         kinChar.boneState = new float[36];
         simChar.boneState = new float[36];
         UpdateKinCMData(false);
@@ -516,7 +496,7 @@ public class MLAgent : Agent
         if (curFixedUpdate % _config.EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
         else 
-            applyActions(prevActionOutput);
+            applyActions();
         
         if (_config.projectileTraining)
             FireProjectile();
@@ -733,7 +713,7 @@ public class MLAgent : Agent
         for (int i = 0; i < 36; i++)
             state[state_idx++] = simChar.boneState[i] - kinChar.boneState[i];
         for (int i = 0; i < numActions; i++)
-            state[state_idx++] = prevActionOutput[i];
+            state[state_idx++] = curActions[i];
    
         if (state_idx != numObservations)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything");
@@ -926,6 +906,29 @@ public class MLAgent : Agent
                 Gizmos.DrawLine(a, b);
             }
         }
+    }
+
+    private void debugPrintActions()
+    {
+        bool actionsAre6D = _config.actionRotType == ActionRotationType.SixD;
+        StringBuilder debugStr = new StringBuilder();
+        int actionIdx = 0;
+        MotionMatchingAnimator.Bones[] fullDOFBonesToUse = _config.networkControlsAllJoints ? extendedfullDOFBones : fullDOFBones;
+        for (int i = 0; i < fullDOFBonesToUse.Length; i++)
+        {
+            MotionMatchingAnimator.Bones bone = fullDOFBonesToUse[i];
+            Vector3 output = new Vector3(prevActionOutput[actionIdx], prevActionOutput[actionIdx + 1], prevActionOutput[actionIdx + 2]);
+            debugStr.Append($"{bone.ToString().Substring(5)}: {output} " + (actionsAre6D ? $"{ new Vector3(prevActionOutput[actionIdx + 3], prevActionOutput[actionIdx + 4], prevActionOutput[actionIdx + 5])} " : ""));
+            actionIdx += actionsAre6D ? 6 : 3;
+        }
+        MotionMatchingAnimator.Bones[] limitedDOFBonesToUse = _config.networkControlsAllJoints ? extendedLimitedDOFBones : limitedDOFBones;
+        for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
+        {
+            MotionMatchingAnimator.Bones bone = limitedDOFBonesToUse[i];
+            debugStr.Append($"{bone}: {prevActionOutput[actionIdx]} | {curActions[actionIdx]} ");
+            actionIdx += 1;
+        }
+        Debug.Log(debugStr.ToString());
     }
     private void OnGUI()
     {
