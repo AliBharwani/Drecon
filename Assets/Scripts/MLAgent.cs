@@ -60,7 +60,7 @@ public class MLAgent : Agent
     private int lastSimCharTeleportFixedUpdate = -1;
 
     float[] prevActionOutput;
-    float[] curActions;
+    float[] smoothedActions;
     int numActions;
     int numObservations;
     MocapDB motionDB;
@@ -112,7 +112,7 @@ public class MLAgent : Agent
     {
         if (applyLastAction)
             for (int i = 0; i < numActions; i++)
-                curActions[i] = (1 - _config.ACTION_STIFFNESS_HYPERPARAM) * curActions[i] + _config.ACTION_STIFFNESS_HYPERPARAM * prevActionOutput[i];
+                smoothedActions[i] = (1 - _config.ACTION_STIFFNESS_HYPERPARAM) * smoothedActions[i] + _config.ACTION_STIFFNESS_HYPERPARAM * prevActionOutput[i];
         if (debug)
             debugPrintActions();
         Quaternion[] curRotations = MMScript.bone_rotations;
@@ -121,16 +121,16 @@ public class MLAgent : Agent
         switch (_config.actionRotType)
         {
             case ActionRotationType.AxisAngle:
-                applyActionsAsAxisAngleRotations(curActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                applyActionsAsAxisAngleRotations(smoothedActions, curRotations, fullDOFBonesToUse, ref actionIdx);
                 break;
             case ActionRotationType.Euler:
-                applyActionsAsEulerRotations(curActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                applyActionsAsEulerRotations(smoothedActions, curRotations, fullDOFBonesToUse, ref actionIdx);
                 break;
             case ActionRotationType.SixD:
-                applyActionsWith6DRotations(curActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                applyActionsWith6DRotations(smoothedActions, curRotations, fullDOFBonesToUse, ref actionIdx);
                 break; 
             case ActionRotationType.Exp:
-                applyActionsAsExp(curActions, curRotations, fullDOFBonesToUse, ref actionIdx);
+                applyActionsAsExp(smoothedActions, curRotations, fullDOFBonesToUse, ref actionIdx);
                 break;
         }
 
@@ -140,7 +140,7 @@ public class MLAgent : Agent
         {
             int boneIdx = (int)limitedDOFBonesToUse[i];
             ArticulationBody ab = simChar.boneToArtBody[boneIdx];
-            float output = curActions[actionIdx];
+            float output = smoothedActions[actionIdx];
             actionIdx++;
             var zDrive = ab.zDrive;
             float target;
@@ -439,7 +439,7 @@ public class MLAgent : Agent
             simChar.boneSurfaceVels[i] = new Vector3[6];
         }
         prevActionOutput = new float[numActions];
-        curActions = new float[numActions];
+        smoothedActions = new float[numActions];
         kinChar.boneState = new float[36];
         simChar.boneState = new float[36];
         UpdateKinCMData(false);
@@ -714,7 +714,7 @@ public class MLAgent : Agent
         for (int i = 0; i < 36; i++)
             state[state_idx++] = simChar.boneState[i] - kinChar.boneState[i];
         for (int i = 0; i < numActions; i++)
-            state[state_idx++] = curActions[i];
+            state[state_idx++] = smoothedActions[i];
    
         if (state_idx != numObservations)
             throw new Exception($"State may not be properly intialized - length is {state_idx} after copying everything");
@@ -926,7 +926,7 @@ public class MLAgent : Agent
         for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
         {
             MotionMatchingAnimator.Bones bone = limitedDOFBonesToUse[i];
-            debugStr.Append($"{bone}: {prevActionOutput[actionIdx]} | {curActions[actionIdx]} ");
+            debugStr.Append($"{bone}: {prevActionOutput[actionIdx]} | {smoothedActions[actionIdx]} ");
             actionIdx += 1;
         }
         Debug.Log(debugStr.ToString());
