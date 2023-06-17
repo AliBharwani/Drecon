@@ -108,10 +108,11 @@ public class MLAgent : Agent
     {
         sensor.AddObservation(getState());
     }
-    private void applyActions()
+    private void applyActions(bool applyLastAction)
     {
-        for (int i = 0; i < numActions; i++)
-            curActions[i] = _config.ACTION_STIFFNESS_HYPERPARAM * curActions[i] + (1 - _config.ACTION_STIFFNESS_HYPERPARAM) * prevActionOutput[i];
+        if (applyLastAction)
+            for (int i = 0; i < numActions; i++)
+                curActions[i] = (1 - _config.ACTION_STIFFNESS_HYPERPARAM) * curActions[i] + _config.ACTION_STIFFNESS_HYPERPARAM * prevActionOutput[i];
         if (debug)
             debugPrintActions();
         Quaternion[] curRotations = MMScript.bone_rotations;
@@ -175,7 +176,7 @@ public class MLAgent : Agent
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
         prevActionOutput = actionBuffers.ContinuousActions.Array;
-        applyActions();
+        applyActions(true);
     }
     private void applyActionsAsExp(float[] finalActions, Quaternion[] curRotations, MotionMatchingAnimator.Bones[] fullDOFBonesToUse, ref int actionIdx)
     {
@@ -496,7 +497,7 @@ public class MLAgent : Agent
         if (curFixedUpdate % _config.EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
         else 
-            applyActions();
+            applyActions(_config.applyActionOverMultipleTimeSteps);
         
         if (_config.projectileTraining)
             FireProjectile();

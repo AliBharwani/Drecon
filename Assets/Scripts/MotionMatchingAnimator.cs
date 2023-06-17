@@ -332,10 +332,10 @@ public class MotionMatchingAnimator : MonoBehaviour
             Vector2 rotation_vec = is_strafing ? Random.insideUnitCircle : random_lstick_input;
             desired_rotation = MathUtils.quat_from_stick_dir(rotation_vec.x, rotation_vec.y);
         }
-        else if (!gen_inputs && gamepad != null)
+        else if (!gen_inputs)
         {
-            is_strafing = gamepad.leftTrigger.isPressed;
-            is_runbutton_pressed = gamepad.aButton.isPressed;
+            is_strafing = gamepad != null && gamepad.leftTrigger.isPressed;
+            is_runbutton_pressed = gamepad != null ? gamepad.aButton.isPressed : Keyboard.current.shiftKey.isPressed;
         }
         else if (gen_inputs && _config.useCustomInputGenerator)
             random_lstick_input = input_generator.currentPosition;
@@ -694,10 +694,19 @@ public class MotionMatchingAnimator : MonoBehaviour
         }
     }
 
+    private Vector2 get_user_input()
+    {
+        if (gamepad != null)
+            return gamepad.leftStick.ReadValue();
+        float x_val = (Keyboard.current.aKey.isPressed ? -1f : 0f) + (Keyboard.current.dKey.isPressed ? 1f : 0f);
+        float y_val = (Keyboard.current.wKey.isPressed ? 1f : 0f) + (Keyboard.current.sKey.isPressed ? -1f : 0f);
+        return new Vector2(x_val, y_val);
+    }
+
     // Get desired velocity
     private Vector3 desired_velocity_update(Quaternion sim_rotation)
     {
-        Vector2 lstick2 = gen_inputs ? random_lstick_input : gamepad.leftStick.ReadValue();
+        Vector2 lstick2 = gen_inputs ? random_lstick_input : get_user_input();
         Vector3 lstick = new Vector3(lstick2.x, 0f, lstick2.y);
         if (!gen_inputs && playerCamTarget != null) {
             lstick = Quaternion.Euler(0f, playerCamTarget.yRot, 0f) * lstick;
@@ -996,7 +1005,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     {
         if ( is_strafing)
             return desired_rotation;
-        if (gen_inputs || userIsInputting())
+        if (gen_inputs || user_is_inputting())
         {
             Vector3 desired_dir = velocity.normalized;
             return MathUtils.quat_from_stick_dir(desired_dir.x, desired_dir.z);
@@ -1007,9 +1016,11 @@ public class MotionMatchingAnimator : MonoBehaviour
         }
     }
 
-    private bool userIsInputting()
+    private bool user_is_inputting()
     {
-        return gamepad != null && gamepad.leftStick.ReadValue().magnitude > .01f;
+        if (gamepad != null)
+            return gamepad.leftStick.ReadValue().magnitude > .01f;
+        return Keyboard.current.wKey.isPressed || Keyboard.current.sKey.isPressed || Keyboard.current.aKey.isPressed || Keyboard.current.dKey.isPressed;
     }
 
     private bool is_out_of_bounds(Vector3 pos)

@@ -544,6 +544,7 @@ MonoBehaviour:
   networkControlsAllJoints: 1
   fullRangeEulerOutputs: 0
   resolveSimReferenceFrameWithSimRotation: 0
+  applyActionOverMultipleTimeSteps: 0
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 1
   EPISODE_END_REWARD: -0.5
@@ -1661,7 +1662,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 04eb0fb778f569d4ba393d096304d337, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2652,11 +2653,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/AABaseline
+  writeToFilePath: ../results/EulerBaselineMultipleTimestepV2
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
-  clampKinCharToSim: 1
-  userControl: 0
+  clampKinCharToSim: 0
+  userControl: 1
   clampingMaxDistance: 0.666
   useSkinnedMesh: 0
   doNotRenderKinChar: 0
@@ -2666,12 +2667,13 @@ MonoBehaviour:
   noStrafing: 1
   setRotsDirectly: 0
   outputIsBase: 1
-  actionRotType: 1
+  actionRotType: 0
   alphaForExpMap: 120
   sixDRotMethod: 0
   networkControlsAllJoints: 0
   fullRangeEulerOutputs: 0
   resolveSimReferenceFrameWithSimRotation: 0
+  applyActionOverMultipleTimeSteps: 1
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 2
   EPISODE_END_REWARD: -0.5
@@ -3243,7 +3245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 1
+  numAgents: 2
   modelAgent: {fileID: 767361687}
   modelAgentWithOrientationData: {fileID: 818134323}
   model6DAgent: {fileID: 2033970009}

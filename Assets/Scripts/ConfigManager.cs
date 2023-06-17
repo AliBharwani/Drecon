@@ -43,6 +43,7 @@ public class ConfigManager : MonoBehaviour
     public bool networkControlsAllJoints = false;
     public bool fullRangeEulerOutputs;
     public bool resolveSimReferenceFrameWithSimRotation = false;
+    public bool applyActionOverMultipleTimeSteps = false;
     [Header("TRAINING HYPERPARAM SETTINGS")]
     public int EVALUATE_EVERY_K_STEPS = 2;
     public int N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT = 4;
