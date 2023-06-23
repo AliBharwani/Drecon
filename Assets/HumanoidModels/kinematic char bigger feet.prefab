@@ -1583,6 +1583,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  traj_marker: {fileID: 4031655416425847358, guid: d183bd2207ed8eb4f8739f562582f74a, type: 3}
   feature_weight_foot_position: 0.75
   feature_weight_foot_velocity: 1
   feature_weight_hip_velocity: 1
@@ -1627,6 +1628,7 @@ MonoBehaviour:
   is_initalized: 0
   synchronization_enabled: 1
   drawGizmos: 1
+  use_traj_markers: 1
 --- !u!114 &6572924355493366906
 MonoBehaviour:
   m_ObjectHideFlags: 0

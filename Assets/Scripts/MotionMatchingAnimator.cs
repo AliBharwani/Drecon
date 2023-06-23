@@ -35,6 +35,8 @@ public class MotionMatchingAnimator : MonoBehaviour
         Bone_RightHand = 22,
     };
     public Transform[] toy_pointers = new Transform[3];
+    public GameObject traj_marker;
+    GameObject[] traj_markers;
     public float feature_weight_foot_position = 0.75f;
     public float feature_weight_foot_velocity = 1.0f;
     public float feature_weight_hip_velocity = 1.0f;
@@ -161,6 +163,8 @@ public class MotionMatchingAnimator : MonoBehaviour
     public bool synchronization_enabled = false;
     private InputGenerator input_generator;
     internal PlayerCamTarget playerCamTarget;
+    public bool drawGizmos;
+    public bool use_traj_markers;
     void Awake()
     {
         Application.targetFrameRate = 60;
@@ -189,6 +193,12 @@ public class MotionMatchingAnimator : MonoBehaviour
         input_generator = gameObject.AddComponent<InputGenerator>();
         input_generator.inputChangeHalflife = _config.inputGeneratorHalflife;
         is_initalized = true;
+        if (use_traj_markers)
+        {
+            traj_markers = new GameObject[4];
+            for (int i = 0; i < 4; i++)
+                traj_markers[i] = Instantiate(traj_marker);
+        }
     }
 
     void init(Vector3 pos, Quaternion rot)
@@ -247,6 +257,7 @@ public class MotionMatchingAnimator : MonoBehaviour
 
         search_timer = search_time;
         force_search_timer = search_time;
+
     }
     public void Reset()
     {
@@ -403,7 +414,6 @@ public class MotionMatchingAnimator : MonoBehaviour
         frameCounter++;
     }
 
-    public bool drawGizmos;
 
     private void OnDrawGizmos()
     {
@@ -737,6 +747,8 @@ public class MotionMatchingAnimator : MonoBehaviour
         trajectory_positions[0] = simulation_position;
         trajectory_velocities[0] = simulation_velocity;
         trajectory_accelerations[0] = simulation_acceleration;
+        if (use_traj_markers)
+            traj_markers[0].transform.position = trajectory_positions[0];
 
         for (int i = 1; i < trajectory_positions.Length; i++)
         {
@@ -751,7 +763,10 @@ public class MotionMatchingAnimator : MonoBehaviour
                 trajectory_desired_velocities[i],
                 simulation_velocity_halflife,
                 dt);
+            if (use_traj_markers)
+                traj_markers[i].transform.position = trajectory_positions[i];
         }
+
     }
     private void trajectory_desired_velocities_predict()
     {

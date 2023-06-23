@@ -386,6 +386,7 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
+  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 1
 --- !u!4 &214671238
@@ -1487,6 +1488,7 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
+  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &710360380
@@ -1621,6 +1623,7 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
+  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &767361689
@@ -1660,9 +1663,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 04eb0fb778f569d4ba393d096304d337, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 71b7056d73105334ba452a70aeb8c519, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -1745,6 +1748,7 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
+  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 1
 --- !u!4 &818134327
@@ -2656,11 +2660,11 @@ MonoBehaviour:
   writeToFilePath: ../results/EulerBaselineMultipleTimestepV2
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
-  clampKinCharToSim: 0
+  clampKinCharToSim: 1
   userControl: 1
   clampingMaxDistance: 0.666
   useSkinnedMesh: 0
-  doNotRenderKinChar: 0
+  doNotRenderKinChar: 1
   solverIterations: 256
   addOrientationDataToObsState: 0
   setDriveTargetVelocities: 1
@@ -2688,12 +2692,12 @@ MonoBehaviour:
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 100
   projectileTraining: 0
-  maxNumProjectiles: 15
+  maxNumProjectiles: 1
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
-  PROJECTILE_MAX_WEIGHT: 10
-  PROJECTILE_MIN_WEIGHT: 1
+  PROJECTILE_MAX_WEIGHT: 5
+  PROJECTILE_MIN_WEIGHT: 5
   PROJECTILE_SCALE: 2
   boneToNames:
   - Bone_Entity
@@ -2961,6 +2965,7 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
+  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 1
 --- !u!4 &1537673250
@@ -3199,6 +3204,7 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
+  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &2033970013
@@ -3245,7 +3251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 2
+  numAgents: 1
   modelAgent: {fileID: 767361687}
   modelAgentWithOrientationData: {fileID: 818134323}
   model6DAgent: {fileID: 2033970009}

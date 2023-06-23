@@ -405,12 +405,12 @@ public class MLAgent : Agent
         bool isInference = behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
         if (isInference)
         {
-            GameObject camTarget = new GameObject("PlayerCamTarget");
-            PlayerCamTarget playerCamTarget = camTarget.AddComponent<PlayerCamTarget>();
-            playerCamTarget.init(simChar.trans);
-            thirdPersonCam.gameObject.SetActive(true);
-            thirdPersonCam.Follow = camTarget.transform;
-            MMScript.playerCamTarget = playerCamTarget;
+            //GameObject camTarget = new GameObject("PlayerCamTarget");
+            //PlayerCamTarget playerCamTarget = camTarget.AddComponent<PlayerCamTarget>();
+            //playerCamTarget.init(simChar.trans);
+            //thirdPersonCam.gameObject.SetActive(true);
+            //thirdPersonCam.Follow = camTarget.transform;
+            //MMScript.playerCamTarget = playerCamTarget;
             if (_config.userControl)
                 MMScript.gen_inputs = false;
             if (_config.clampKinCharToSim)
@@ -503,7 +503,7 @@ public class MLAgent : Agent
             FireProjectile();
         lastKinRootPos = kinChar.trans.position;
     }
-
+    public Transform tempProjectileLocation;
     private void FireProjectile()
     {
         if (Time.time - lastProjectileLaunchtime < _config.LAUNCH_FREQUENCY)
@@ -521,7 +521,12 @@ public class MLAgent : Agent
         float YTarget = UnityEngine.Random.Range(simChar.cm.y - .5f, simChar.cm.y + .5f);
         Vector2 randomUnitCircle = UnityEngine.Random.insideUnitCircle.normalized * _config.LAUNCH_RADIUS;
         Vector3 finalPosition = new Vector3(simChar.cm.x + randomUnitCircle.x, simChar.cm.y, simChar.cm.z + randomUnitCircle.y);
-        projectile.transform.position = finalPosition;
+
+        YTarget = simChar.cm.y + .25f;
+        projectile.transform.position = tempProjectileLocation.position; // finalPosition;
+        randomUnitCircle = new Vector2(simChar.cm.x - tempProjectileLocation.position.x, simChar.cm.z - tempProjectileLocation.position.z);
+        randomUnitCircle *= -1;
+
         float timeToTravel = _config.LAUNCH_RADIUS / _config.LAUNCH_SPEED; 
         float changeInY = YTarget - simChar.cm.y;
         float totalAcceleration = timeToTravel * -9.8f; 
@@ -926,7 +931,7 @@ public class MLAgent : Agent
         for (int i = 0; i < limitedDOFBonesToUse.Length; i++)
         {
             MotionMatchingAnimator.Bones bone = limitedDOFBonesToUse[i];
-            debugStr.Append($"{bone}: {prevActionOutput[actionIdx]} | {smoothedActions[actionIdx]} ");
+            debugStr.Append($"{bone.ToString().Substring(5)}: {prevActionOutput[actionIdx]} | {smoothedActions[actionIdx]} ");
             actionIdx += 1;
         }
         Debug.Log(debugStr.ToString());
