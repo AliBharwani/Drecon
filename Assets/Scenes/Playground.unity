@@ -386,7 +386,6 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
-  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 1
 --- !u!4 &214671238
@@ -1488,7 +1487,6 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
-  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &710360380
@@ -1623,7 +1621,6 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
-  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &767361689
@@ -1663,7 +1660,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 71b7056d73105334ba452a70aeb8c519, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 5b51e8b2205607f4a98ad3e4b19ba400, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 2
   m_BehaviorName: Drecon
@@ -1748,7 +1745,6 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
-  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 1
 --- !u!4 &818134327
@@ -2319,11 +2315,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9914449
+      value: 0.9848078
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.13052616
+      value: 0.17364816
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalRotation.y
@@ -2335,7 +2331,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 15
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 8944336655422409503, guid: f6d148d888ffbf54b9afe9936dfaec1f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
@@ -2657,12 +2653,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/EulerBaselineMultipleTimestepV2
+  writeToFilePath: ../results/EulerBaseline
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
   clampKinCharToSim: 1
   userControl: 1
-  clampingMaxDistance: 0.666
+  clampingMaxDistance: 0.5
   useSkinnedMesh: 0
   doNotRenderKinChar: 1
   solverIterations: 256
@@ -2677,7 +2673,7 @@ MonoBehaviour:
   networkControlsAllJoints: 0
   fullRangeEulerOutputs: 0
   resolveSimReferenceFrameWithSimRotation: 0
-  applyActionOverMultipleTimeSteps: 1
+  applyActionOverMultipleTimeSteps: 0
   EVALUATE_EVERY_K_STEPS: 2
   N_FRAMES_TO_NOT_COUNT_REWARD_AFTER_TELEPORT: 2
   EPISODE_END_REWARD: -0.5
@@ -2692,12 +2688,12 @@ MonoBehaviour:
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 100
   projectileTraining: 0
-  maxNumProjectiles: 1
+  maxNumProjectiles: 15
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
-  PROJECTILE_MAX_WEIGHT: 5
-  PROJECTILE_MIN_WEIGHT: 5
+  PROJECTILE_MAX_WEIGHT: 10
+  PROJECTILE_MIN_WEIGHT: 1
   PROJECTILE_SCALE: 2
   boneToNames:
   - Bone_Entity
@@ -2965,7 +2961,6 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
-  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 1
 --- !u!4 &1537673250
@@ -3204,7 +3199,6 @@ MonoBehaviour:
   debug: 0
   updateVelOnTeleport: 1
   resetKinToSimOnFail: 0
-  tempProjectileLocation: {fileID: 0}
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &2033970013

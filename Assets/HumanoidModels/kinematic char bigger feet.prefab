@@ -1628,7 +1628,7 @@ MonoBehaviour:
   is_initalized: 0
   synchronization_enabled: 1
   drawGizmos: 1
-  use_traj_markers: 1
+  show_traj_markers: 1
 --- !u!114 &6572924355493366906
 MonoBehaviour:
   m_ObjectHideFlags: 0

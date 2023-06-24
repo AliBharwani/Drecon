@@ -164,7 +164,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     private InputGenerator input_generator;
     internal PlayerCamTarget playerCamTarget;
     public bool drawGizmos;
-    public bool use_traj_markers;
+    public bool show_traj_markers;
     void Awake()
     {
         Application.targetFrameRate = 60;
@@ -193,7 +193,7 @@ public class MotionMatchingAnimator : MonoBehaviour
         input_generator = gameObject.AddComponent<InputGenerator>();
         input_generator.inputChangeHalflife = _config.inputGeneratorHalflife;
         is_initalized = true;
-        if (use_traj_markers)
+        if (show_traj_markers)
         {
             traj_markers = new GameObject[4];
             for (int i = 0; i < 4; i++)
@@ -257,7 +257,6 @@ public class MotionMatchingAnimator : MonoBehaviour
 
         search_timer = search_time;
         force_search_timer = search_time;
-
     }
     public void Reset()
     {
@@ -747,7 +746,7 @@ public class MotionMatchingAnimator : MonoBehaviour
         trajectory_positions[0] = simulation_position;
         trajectory_velocities[0] = simulation_velocity;
         trajectory_accelerations[0] = simulation_acceleration;
-        if (use_traj_markers)
+        if (show_traj_markers)
             traj_markers[0].transform.position = trajectory_positions[0];
 
         for (int i = 1; i < trajectory_positions.Length; i++)
@@ -763,10 +762,9 @@ public class MotionMatchingAnimator : MonoBehaviour
                 trajectory_desired_velocities[i],
                 simulation_velocity_halflife,
                 dt);
-            if (use_traj_markers)
+            if (show_traj_markers)
                 traj_markers[i].transform.position = trajectory_positions[i];
         }
-
     }
     private void trajectory_desired_velocities_predict()
     {
