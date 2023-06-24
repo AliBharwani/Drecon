@@ -510,17 +510,22 @@ public class MLAgent : Agent
         projectileIdx %= _config.maxNumProjectiles;
         var curProjectile = projectiles[projectileIdx];
         Destroy(curProjectile);
+
         var projectile = Instantiate(projectilePrefab, Vector3.zero, Quaternion.identity);
         var projectileRB = projectile.GetComponent<Rigidbody>();
         projectiles[projectileIdx] = projectile;
         projectileIdx++;
+
         projectile.transform.localScale = Vector3.one * _config.PROJECTILE_SCALE * .15f;
         projectileRB.mass = UnityEngine.Random.Range(_config.PROJECTILE_MIN_WEIGHT, _config.PROJECTILE_MAX_WEIGHT);
-        float YTarget = UnityEngine.Random.Range(simChar.cm.y - .5f, simChar.cm.y + .5f);
-        Vector2 randomUnitCircle = UnityEngine.Random.insideUnitCircle.normalized * _config.LAUNCH_RADIUS;
-        Vector3 finalPosition = new Vector3(simChar.cm.x + randomUnitCircle.x, simChar.cm.y, simChar.cm.z + randomUnitCircle.y);
+
+        Vector2 randomUnitCircle = UnityEngine.Random.insideUnitCircle.normalized;
+        Vector3 finalPosition = simChar.cm + new Vector3(randomUnitCircle.x, 0f, randomUnitCircle.y) * _config.LAUNCH_RADIUS;
+
         projectile.transform.position = finalPosition;
-        float timeToTravel = _config.LAUNCH_RADIUS / _config.LAUNCH_SPEED; 
+
+        float timeToTravel = _config.LAUNCH_RADIUS / _config.LAUNCH_SPEED;
+        float YTarget = UnityEngine.Random.Range(simChar.cm.y - .5f, simChar.cm.y + .5f);
         float changeInY = YTarget - simChar.cm.y;
         float totalAcceleration = timeToTravel * -9.8f; 
         float curYVelocity = -totalAcceleration + (changeInY / timeToTravel);

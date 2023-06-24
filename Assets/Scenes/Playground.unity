@@ -385,7 +385,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
-  resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
   drawGizmos: 1
 --- !u!4 &214671238
@@ -1486,7 +1485,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
-  resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &710360380
@@ -1620,7 +1618,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
-  resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &767361689
@@ -1744,7 +1741,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
-  resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
   drawGizmos: 1
 --- !u!4 &818134327
@@ -2657,7 +2653,7 @@ MonoBehaviour:
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
   clampKinCharToSim: 1
-  userControl: 1
+  userControl: 0
   clampingMaxDistance: 0.5
   useSkinnedMesh: 0
   doNotRenderKinChar: 1
@@ -2687,14 +2683,14 @@ MonoBehaviour:
   walkOnly: 0
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 100
-  projectileTraining: 0
+  projectileTraining: 1
   maxNumProjectiles: 15
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
   PROJECTILE_MAX_WEIGHT: 10
   PROJECTILE_MIN_WEIGHT: 1
-  PROJECTILE_SCALE: 2
+  PROJECTILE_SCALE: 3
   boneToNames:
   - Bone_Entity
   - Bone_Hips
@@ -2960,7 +2956,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
-  resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
   drawGizmos: 1
 --- !u!4 &1537673250
@@ -3198,7 +3193,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 4168547829855887833, guid: 3f28453539dd53a449bd6b2c45e6f39e, type: 3}
   debug: 0
   updateVelOnTeleport: 1
-  resetKinToSimOnFail: 0
   gizmoSphereRad: 0.01
   drawGizmos: 0
 --- !u!4 &2033970013
