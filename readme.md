@@ -1,6 +1,6 @@
 # DReCon Unity Implementation
 
-![GIF](gifs/drecon-short-gif.gif)
+![GIF](drecon-short-gif.gif)
 Youtube video: https://youtu.be/dqIwWVMw7HM
 
 This is a reimplementation of the [Drecon paper](https://www.theorangeduck.com/media/uploads/other_stuff/DReCon.pdf) [[1]](#citation1) for user controlled physically-simulated characters using Unity-ML Agents.
