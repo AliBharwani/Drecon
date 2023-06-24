@@ -28,9 +28,13 @@ Most of the logic lives in `MLAgent.cs`
 The script execution order is set in the Player Settings. The anatomy of a frame:
 
 (1) `MotionMatchingAnimator.cs` updates the kinematic character
+
 (2) `MLAgent.cs` updates observation state variables that are dependent on the kinematic character. It either requests an action or applies the actions from the last network output. 
+
 (3) `AcademyManager.cs` runs one step. If `MLAgent.cs` requested a decision, it will execute the `CollectObservations()` and `OnActionReceived()`  functions of `MLAgent.cs`
+
 (4) `PhysicsManger.cs` steps the simulation by the fixed timestep. This has to run after the PD motor targets are updated by the network in (3) or (4) 
+
 (5) `MultiMLAgentsDirector.cs` executes. This calls the `LateFixedUpdate()` method on `MLAgent.cs`, which calculates the rewards and updates data dependent on the simulated model (center of mass, etc) that changed after the physics step. 
 
 ### ConfigManager
