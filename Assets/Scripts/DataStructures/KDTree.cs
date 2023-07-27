@@ -94,10 +94,10 @@ public class KDTree
         //if (closest != null && Math.Pow(node.data[axis] - searchVector[axis], 2) > currentBestDist)
         //    return;
         int node_frame_idx = (int) node.data[k + extraData - 1];
-        float dist = distanceBetween( node.data, searchVector);
         bool ignore = Mathf.Abs(node_frame_idx - frame_idx) < ignore_surrounding;
         if (!ignore)
         {
+            float dist = distanceBetween(node.data, searchVector);
             if (numNeigh == 1)
             {
                 if (closest == null || dist < currentBestDist)
@@ -119,9 +119,6 @@ public class KDTree
         {
             // search left first
             recursiveNNSearch(node.left, searchVector, depth + 1, frame_idx);
-            // do the weird hypersphere thing wikipedia talked about 
-            // ok but really: 
-            // If the distance between the node's value at the splitting dimension and the search vector's va
             if (distBetweenAtAxis(node.data, searchVector, axis) < currentBestDist)
             {
                 recursiveNNSearch(node.right, searchVector, depth + 1, frame_idx);

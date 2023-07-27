@@ -1515,7 +1515,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1810728709180460642, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
       propertyPath: gen_inputs
@@ -2033,6 +2033,14 @@ PrefabInstance:
     - target: {fileID: 1945599472715944572, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
       propertyPath: m_ParentAnchorPosition.z
       value: -0.10548508
+      objectReference: {fileID: 0}
+    - target: {fileID: 2002638984816930159, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
+      propertyPath: debug
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2002638984816930159, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
+      propertyPath: isKinematic
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2052702090637411545, guid: 489340cf521b689498c6d6d6ef4b4817, type: 3}
       propertyPath: m_ParentAnchorPosition.y
@@ -2560,7 +2568,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1313389653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2662,7 +2670,7 @@ MonoBehaviour:
   setDriveTargetVelocities: 1
   noStrafing: 1
   setRotsDirectly: 0
-  outputIsBase: 1
+  outputIsBase: 0
   actionRotType: 0
   alphaForExpMap: 120
   sixDRotMethod: 0
@@ -2678,8 +2686,8 @@ MonoBehaviour:
   prob_to_change_inputs: 0.005
   useCustomInputGenerator: 1
   inputGeneratorHalflife: 0.5
-  simulationVelocityHalflife: 0.5
-  simulation_rotation_halflife: 0.5
+  simulationVelocityHalflife: 0.27
+  simulation_rotation_halflife: 0.27
   walkOnly: 0
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 100
@@ -2843,7 +2851,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1394463714
 Transform:
   m_ObjectHideFlags: 0
@@ -3226,7 +3234,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2090630088
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4544,7 +4552,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 536787371494200998, guid: 0122f7b7f5b26b843bd88f8c210cdd39, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 880697722890587164, guid: 0122f7b7f5b26b843bd88f8c210cdd39, type: 3}
       propertyPath: m_RootOrder

@@ -275,12 +275,12 @@ public class MLAgent : Agent
             else if (_config.sixDRotMethod == SixDRotationMethod.RotateObjectWithOrthonormalVector)
             {
                 Quaternion offset = MathUtils.RotateObjectWithOrthonormalVector(outputV1, outputV2);
-                newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
+                newTargetRot = _config.setRotsDirectly ? offset : _config.outputIsBase ? curRotations[boneIdx] * offset : offset * curRotations[boneIdx];
             }
             else if (_config.sixDRotMethod == SixDRotationMethod.MatrixToQuat)
             {
                 Quaternion offset = MathUtils.QuatFrom6DRepresentation(outputV1, outputV2);
-                newTargetRot = _config.setRotsDirectly ? offset : offset * curRotations[boneIdx];
+                newTargetRot = _config.setRotsDirectly ? offset : _config.outputIsBase ? curRotations[boneIdx] * offset : offset * curRotations[boneIdx];
             }
             else
                 newTargetRot = Quaternion.identity;
@@ -297,9 +297,7 @@ public class MLAgent : Agent
         for (int i = 0; i < fullDOFBones.Length; i++)
         {
             int bone_idx = (int)fullDOFBones[i];
-            Quaternion final = curRotations[bone_idx];
-            ArticulationBody ab = simChar.boneToArtBody[bone_idx];
-            ab.SetDriveRotation(final);
+            simChar.boneToArtBody[bone_idx].SetDriveRotation(curRotations[bone_idx]);
         }
         for (int i = 0; i < limitedDOFBones.Length; i++)
         {
@@ -313,9 +311,7 @@ public class MLAgent : Agent
         for (int i = 0; i < openloopBones.Length; i++)
         {
             int bone_idx = (int)openloopBones[i];
-            Quaternion final = curRotations[bone_idx];
-            ArticulationBody ab = simChar.boneToArtBody[bone_idx];
-            ab.SetDriveRotation(final);
+            simChar.boneToArtBody[bone_idx].SetDriveRotation(curRotations[bone_idx]);
         }
     }
     private Vector3 feetBozSize;

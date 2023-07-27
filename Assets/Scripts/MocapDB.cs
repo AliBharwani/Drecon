@@ -28,7 +28,7 @@ public class MocapDB : MonoBehaviour
     int offset;
     int num_neigh;
     KDTree tree;
-    private Quaternion inv_sim_rot(int frame)
+    private Quaternion inv_root_rot(int frame)
     {
         return MathUtils.quat_inv(bone_rotations[frame][0]);
     }
@@ -37,6 +37,7 @@ public class MocapDB : MonoBehaviour
     {
         // Assume query is already normalized
         float[] bestEntry = tree.nnSearch(query);
+        // The last value in the array contains the frame number
         int best_idx = (int) bestEntry[bestEntry.Length - 1];
         return best_idx;
     }
@@ -94,9 +95,9 @@ public class MocapDB : MonoBehaviour
     // This does not match the training clips that the original Drecon paper used, and also makes it hard for the sim character to balance
     // This should improve balance by offsetting them 20 deg towards the ground 
     // Note: this needs to be called before database_build_matching_features() and will also skew angular velocity  
-    public void offset_foot_rots(float num_deg = 20)
+    public void offset_foot_rots(float num_deg = -20)
     {
-        Quaternion offset = Quaternion.AngleAxis(-20f, Vector3.forward);
+        Quaternion offset = Quaternion.AngleAxis(num_deg, Vector3.forward);
         for(int i = 0; i < numframes; i++)
         {
             bone_rotations[i][(int)Bone_LeftFoot] *= offset;
@@ -171,9 +172,9 @@ public class MocapDB : MonoBehaviour
             int t1 = database_trajectory_index_clamp(i, frame_increments * 2);
             int t2 = database_trajectory_index_clamp(i, frame_increments * 3);
 
-            Vector3 trajectory_pos0 = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t0][0] - bone_positions[i][0]);
-            Vector3 trajectory_pos1 = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t1][0] - bone_positions[i][0]);
-            Vector3 trajectory_pos2 = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_positions[t2][0] - bone_positions[i][0]);
+            Vector3 trajectory_pos0 = MathUtils.quat_mul_vec3(inv_root_rot(i), bone_positions[t0][0] - bone_positions[i][0]);
+            Vector3 trajectory_pos1 = MathUtils.quat_mul_vec3(inv_root_rot(i), bone_positions[t1][0] - bone_positions[i][0]);
+            Vector3 trajectory_pos2 = MathUtils.quat_mul_vec3(inv_root_rot(i), bone_positions[t2][0] - bone_positions[i][0]);
 
             features[i][offset + 0] = trajectory_pos0.x;
             features[i][offset + 1] = trajectory_pos0.z;
@@ -195,9 +196,9 @@ public class MocapDB : MonoBehaviour
             int t1 = database_trajectory_index_clamp(i, frame_increments * 2);
             int t2 = database_trajectory_index_clamp(i, frame_increments * 3);
 
-            Vector3 trajectory_pos0 = MathUtils.quat_mul_vec3(inv_sim_rot(i), MathUtils.quat_mul_vec3(bone_rotations[t0][0], Vector3.forward));
-            Vector3 trajectory_pos1 = MathUtils.quat_mul_vec3(inv_sim_rot(i), MathUtils.quat_mul_vec3(bone_rotations[t1][0], Vector3.forward));
-            Vector3 trajectory_pos2 = MathUtils.quat_mul_vec3(inv_sim_rot(i), MathUtils.quat_mul_vec3(bone_rotations[t2][0], Vector3.forward));
+            Vector3 trajectory_pos0 = MathUtils.quat_mul_vec3(inv_root_rot(i), MathUtils.quat_mul_vec3(bone_rotations[t0][0], Vector3.forward));
+            Vector3 trajectory_pos1 = MathUtils.quat_mul_vec3(inv_root_rot(i), MathUtils.quat_mul_vec3(bone_rotations[t1][0], Vector3.forward));
+            Vector3 trajectory_pos2 = MathUtils.quat_mul_vec3(inv_root_rot(i), MathUtils.quat_mul_vec3(bone_rotations[t2][0], Vector3.forward));
 
             features[i][offset + 0] = trajectory_pos0.x;
             features[i][offset + 1] = trajectory_pos0.z;
@@ -230,7 +231,7 @@ public class MocapDB : MonoBehaviour
                 bone_angular_velocities[i],
                 bone);
 
-            bone_velocity = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_velocity);
+            bone_velocity = MathUtils.quat_mul_vec3(inv_root_rot(i), bone_velocity);
 
             features[i][offset + 0] = bone_velocity.x;
             features[i][offset + 1] = bone_velocity.y;
@@ -259,7 +260,7 @@ public class MocapDB : MonoBehaviour
                 bone);
 
             // multiply by inverse of simulation bone 
-            bone_position = MathUtils.quat_mul_vec3(inv_sim_rot(i), bone_position - bone_positions[i][0]);
+            bone_position = MathUtils.quat_mul_vec3(inv_root_rot(i), bone_position - bone_positions[i][0]);
 
             features[i][offset + 0] = bone_position.x;
             features[i][offset + 1] = bone_position.y;

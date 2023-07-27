@@ -621,7 +621,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     }
     private void motionMatch()
     {
-        float[] query = new float[motionDB.nfeatures()];
+        float[] query = new float[motionDB.nfeatures() + 1];
         float[] query_features = motionDB.features[frameIdx];
         int num_features_to_copy =
             3 // Left Foot position
@@ -634,6 +634,7 @@ public class MotionMatchingAnimator : MonoBehaviour
             query[i] = query_features[i];
         query_compute_trajectory_position_feature(num_features_to_copy, query);
         query_compute_trajectory_direction_feature(num_features_to_copy + 6, query);
+        query[query.Length - 1] = frameIdx;
         best_idx = motionDB.motionMatch(query);
 
         trns_bone_positions = motionDB.bone_positions[best_idx];
@@ -979,7 +980,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     }
     private void simulation_rotations_update(ref Quaternion rotation, ref Vector3 angular_velocity, in Quaternion desired_rot, float halflife, float dt)
     {
-        SpringUtils.simple_spring_damper_implicit(
+        SpringUtils.simple_spring_damper_exact(
                 ref rotation,
                 ref angular_velocity,
                 desired_rot,

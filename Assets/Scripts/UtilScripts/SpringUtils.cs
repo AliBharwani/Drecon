@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public static class SpringUtils
@@ -117,7 +114,7 @@ public static class SpringUtils
             spring_character_update(px, pv, pa, i, v_goal, halflife, (i + 1) * dt);
         }
     }
-    public static void simple_spring_damper_implicit(
+    public static void simple_spring_damper_exact(
         ref Quaternion x,
         ref Vector3 v,
         in Quaternion x_goal,
@@ -134,6 +131,7 @@ public static class SpringUtils
         x = MathUtils.quat_from_scaled_angle_axis(eydt * (j0 + j1 * dt)) * x_goal;
         v = eydt * (v - (j1 * y * dt));
     }
+
     public static void decay_spring_damper_exact(
         ref Vector3 x,
         ref Vector3 v,
@@ -186,7 +184,7 @@ public static class SpringUtils
         in Quaternion dst_x,
         in Vector3 dst_v)
     {
-        off_x = MathUtils.quat_abs( (off_x * src_x) * MathUtils.quat_inv(dst_x));
+        off_x = MathUtils.quat_abs((off_x * src_x) * MathUtils.quat_inv(dst_x));
         off_v = (off_v + src_v) - dst_v;
     }
 
@@ -216,8 +214,7 @@ public static class SpringUtils
         in float dt)
     {
         decay_spring_damper_exact(ref off_x, ref off_v, halflife, dt);
-        //off_x = Quaternion.identity;
         out_x = off_x * in_x;
-        out_v = off_v + in_v;
+        out_v = off_v + MathUtils.quat_mul_vec3(off_x, in_v);
     }
 }
