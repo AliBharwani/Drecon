@@ -32,6 +32,7 @@ public class ConfigManager : MonoBehaviour
 
     [Header("PHYSICAL CHARACTER SETTINGS")]
     public int solverIterations = 32;
+    public int fixedUpdateFrequency = 256;
     public bool addOrientationDataToObsState = false;
     public bool setDriveTargetVelocities;
     public bool noStrafing = false;
@@ -103,6 +104,7 @@ public class ConfigManager : MonoBehaviour
         else
         {
             Application.targetFrameRate = 60;
+            Time.fixedDeltaTime = 1f / fixedUpdateFrequency;
             _instance = this;
         }
     }

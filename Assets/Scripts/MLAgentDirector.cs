@@ -24,8 +24,6 @@ public class MLAgentDirector : MonoBehaviour
         if (modelAgent == null)
             return;
         _config = ConfigManager.Instance;
-
-        Time.fixedDeltaTime = (1f / (float)fps);
         Physics.defaultSolverIterations = _config.solverIterations;
         Physics.defaultSolverVelocityIterations = _config.solverIterations;
         agents = new MLAgent[numAgents];

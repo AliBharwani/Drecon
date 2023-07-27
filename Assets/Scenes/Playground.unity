@@ -532,6 +532,7 @@ MonoBehaviour:
   useSkinnedMesh: 0
   doNotRenderKinChar: 0
   solverIterations: 255
+  fixedUpdateFrequency: 256
   addOrientationDataToObsState: 0
   setDriveTargetVelocities: 0
   noStrafing: 0
@@ -1659,7 +1660,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 5022602860645237092, guid: 5b51e8b2205607f4a98ad3e4b19ba400, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 2
+  m_BehaviorType: 0
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2657,20 +2658,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/EulerBaseline
+  writeToFilePath: ../results/EulerBaselineInertializeFixed
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
-  clampKinCharToSim: 1
-  userControl: 0
-  clampingMaxDistance: 0.5
+  clampKinCharToSim: 0
+  userControl: 1
+  clampingMaxDistance: 0.666
   useSkinnedMesh: 0
-  doNotRenderKinChar: 1
-  solverIterations: 256
+  doNotRenderKinChar: 0
+  solverIterations: 20
+  fixedUpdateFrequency: 240
   addOrientationDataToObsState: 0
   setDriveTargetVelocities: 1
   noStrafing: 1
   setRotsDirectly: 0
-  outputIsBase: 0
+  outputIsBase: 1
   actionRotType: 0
   alphaForExpMap: 120
   sixDRotMethod: 0
@@ -2686,19 +2688,19 @@ MonoBehaviour:
   prob_to_change_inputs: 0.005
   useCustomInputGenerator: 1
   inputGeneratorHalflife: 0.5
-  simulationVelocityHalflife: 0.27
-  simulation_rotation_halflife: 0.27
+  simulationVelocityHalflife: 0.5
+  simulation_rotation_halflife: 0.5
   walkOnly: 0
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 100
-  projectileTraining: 1
+  projectileTraining: 0
   maxNumProjectiles: 15
   LAUNCH_FREQUENCY: 3
   LAUNCH_RADIUS: 0.5
   LAUNCH_SPEED: 7.5
   PROJECTILE_MAX_WEIGHT: 10
   PROJECTILE_MIN_WEIGHT: 1
-  PROJECTILE_SCALE: 3
+  PROJECTILE_SCALE: 2
   boneToNames:
   - Bone_Entity
   - Bone_Hips
@@ -3120,6 +3122,67 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
   m_PrefabInstance: {fileID: 761501877}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1837096079
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_Name
+      value: kinematic char bigger feet
+      objectReference: {fileID: 0}
+    - target: {fileID: 1810728709180460642, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: gen_inputs
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_RootOrder
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.1813421
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.00000047683716
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.1718926
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241818812940926812, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
 --- !u!4 &1877289342 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 880697722890587164, guid: 0122f7b7f5b26b843bd88f8c210cdd39, type: 3}
@@ -3247,7 +3310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 1
+  numAgents: 2
   modelAgent: {fileID: 767361687}
   modelAgentWithOrientationData: {fileID: 818134323}
   model6DAgent: {fileID: 2033970009}
