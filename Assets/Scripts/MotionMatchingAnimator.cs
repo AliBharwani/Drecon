@@ -180,6 +180,9 @@ public class MotionMatchingAnimator : MonoBehaviour
 
         simulation_velocity_halflife = _config.simulationVelocityHalflife;
         simulation_rotation_halflife = _config.simulation_rotation_halflife;
+        simulation_run_fwrd_speed = _config.simulation_run_fwrd_speed;
+        simulation_run_side_speed = _config.simulation_run_side_speed;
+        simulation_run_back_speed = _config.simulation_run_back_speed;
 
         walk_only = _config.walkOnly;
         motionDB.database_build_matching_features(
