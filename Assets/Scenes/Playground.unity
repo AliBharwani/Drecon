@@ -692,6 +692,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1873439064}
   - {fileID: 1357924715}
   - {fileID: 1013764259}
   - {fileID: 1234743671}
@@ -1869,7 +1870,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 400164449}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1126254640
 GameObject:
@@ -2394,7 +2395,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 400164449}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1249444428 stripped
 Transform:
@@ -2569,7 +2570,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1313389653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2595,7 +2596,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 400164449}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1327619676
 GameObject:
@@ -2666,7 +2667,7 @@ MonoBehaviour:
   clampingMaxDistance: 0.666
   useSkinnedMesh: 0
   doNotRenderKinChar: 0
-  solverIterations: 20
+  solverIterations: 256
   fixedUpdateFrequency: 240
   addOrientationDataToObsState: 0
   setDriveTargetVelocities: 1
@@ -2692,7 +2693,7 @@ MonoBehaviour:
   simulation_rotation_halflife: 0.5
   walkOnly: 0
   searchTime: 0.2
-  MAX_WANDERING_RADIUS: 100
+  MAX_WANDERING_RADIUS: 150
   projectileTraining: 0
   maxNumProjectiles: 15
   LAUNCH_FREQUENCY: 3
@@ -2799,7 +2800,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 400164449}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1390176460
 GameObject:
@@ -3133,6 +3134,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: kinematic char bigger feet
       objectReference: {fileID: 0}
+    - target: {fileID: 1465740232288757222, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1810728709180460642, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
       propertyPath: gen_inputs
       value: 0
@@ -3183,6 +3188,51 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: da97c08afa0f1214097e29168fa3b07a, type: 3}
+--- !u!1 &1873439062
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1873439064}
+  - component: {fileID: 1873439063}
+  m_Layer: 0
+  m_Name: 60HzOracle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1873439063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873439062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 346bce3e92db7b34194142d99341e8f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isSyncFrame: 0
+--- !u!4 &1873439064
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873439062}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -4.618256, y: -1.9986104, z: 2.0046322}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 400164449}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1877289342 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 880697722890587164, guid: 0122f7b7f5b26b843bd88f8c210cdd39, type: 3}
@@ -3297,7 +3347,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2090630088
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3310,7 +3360,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 2
+  numAgents: 1
   modelAgent: {fileID: 767361687}
   modelAgentWithOrientationData: {fileID: 818134323}
   model6DAgent: {fileID: 2033970009}

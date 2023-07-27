@@ -165,12 +165,12 @@ public class MotionMatchingAnimator : MonoBehaviour
     internal PlayerCamTarget playerCamTarget;
     public bool drawGizmos;
     public bool show_traj_markers;
-    float frequency, frameIncTime, timeSinceLastFrameInc;
+    float frequencyPerSec, frameIncTime, timeSinceLastFrameInc;
     void Awake()
     {
         Application.targetFrameRate = 60;
-        frequency = 60;
-        frameIncTime = 1f / frequency;
+        frequencyPerSec = 60;
+        frameIncTime = 1f / frequencyPerSec;
         gamepad = Gamepad.current;
         origin = transform.position;
         origin_rot = transform.rotation;
@@ -402,17 +402,17 @@ public class MotionMatchingAnimator : MonoBehaviour
         trajectory_rotations_predict(frame_increments * (frameIncTime));
         trajectory_desired_velocities_predict();
         trajectory_positions_predict(frame_increments * (frameIncTime));
-        if (((force_search || search_timer <= 0.0f) && timeSinceLastFrameInc >= frameIncTime) || end_of_anim)
+        if (force_search || search_timer <= 0.0f|| end_of_anim)
         {
             // Search database and update frame idx 
             motionMatch();
             search_timer = search_time;
-            timeSinceLastFrameInc = 0f;
+            timeSinceLastFrameInc -= frameIncTime;
         }
         else if (timeSinceLastFrameInc >= frameIncTime)
         {
             frameIdx++;
-            timeSinceLastFrameInc = 0f;
+            timeSinceLastFrameInc -= frameIncTime;
         }
         playFrameIdx();
         search_timer -= Time.fixedDeltaTime;

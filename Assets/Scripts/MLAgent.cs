@@ -41,6 +41,7 @@ public struct CharInfo
 public class MLAgent : Agent
 {
     private ConfigManager _config;
+    private SixtyFPSSyncOracle _sixtyFPSSyncOracle;
     CharInfo kinChar, simChar;
     GameObject kinematicCharObj;
     internal GameObject simulatedCharObj;
@@ -102,6 +103,7 @@ public class MLAgent : Agent
     public bool updateVelOnTeleport = true;
     private Unity.MLAgents.Policies.BehaviorParameters behaviorParameters;
 
+    float period = 1f / 60f;
 
     public override void CollectObservations(VectorSensor sensor)
     {
@@ -437,10 +439,10 @@ public class MLAgent : Agent
         smoothedActions = new float[numActions];
         kinChar.boneState = new float[36];
         simChar.boneState = new float[36];
-        UpdateKinCMData(false);
-        UpdateSimCMData(false);
-        UpdateBoneObsState(false, Time.fixedDeltaTime, true);
-        UpdateBoneSurfacePts(false);
+        UpdateKinCMData(false, period);
+        UpdateSimCMData(false, period);
+        UpdateBoneObsState(false, period, true);
+        UpdateBoneSurfacePts(false, period);
     }
 
     public void Awake()
@@ -448,13 +450,14 @@ public class MLAgent : Agent
         if (motionDB == null)
             motionDB = MocapDB.Instance;
         _config = ConfigManager.Instance;
+        _sixtyFPSSyncOracle = SixtyFPSSyncOracle.Instance;
         nbodies = motionDB.nbones();
         kinematicCharObj = Instantiate(_config.useCapsuleFeet ? kinematic_char_type2_prefab : kinematic_handmade_char_prefab  , Vector3.zero, Quaternion.identity);
         simulatedCharObj = Instantiate(_config.useCapsuleFeet ? simulated_char_type2_prefab : simulated_handmade_char_prefab  , Vector3.zero, Quaternion.identity);
         debug = debug && !Academy.Instance.IsCommunicatorOn;
         if (Academy.Instance.IsCommunicatorOn)
         {
-            int numStepsPerSecond = (int)(Mathf.Ceil(1f / Time.fixedDeltaTime) / _config.EVALUATE_EVERY_K_STEPS);
+            int numStepsPerSecond = (int)(Mathf.Ceil(1f / period) / _config.EVALUATE_EVERY_K_STEPS);
             MaxStep = numStepsPerSecond * _config.MAX_EPISODE_LENGTH_SECONDS;
         }
         customInit();
@@ -478,16 +481,21 @@ public class MLAgent : Agent
     bool updateVelocity;
     private void FixedUpdate()
     {
-        curFixedUpdate++;
         if (MMScript.teleportedThisFixedUpdate)
         {
             Vector3 preTeleportSimCharPosOffset = lastKinRootPos - simChar.root.transform.position;
             SimCharController.teleportSimCharRoot(simChar, MMScript.origin, preTeleportSimCharPosOffset);
+            applyActions(false);
             lastSimCharTeleportFixedUpdate = curFixedUpdate;
         }
+
+        if (!_sixtyFPSSyncOracle.isSyncFrame)
+            return;
+
+        curFixedUpdate++;
         updateVelocity = lastSimCharTeleportFixedUpdate + 1 < curFixedUpdate;
-        UpdateKinCMData(updateVelocity);
-        UpdateBoneObsState(updateVelocity, Time.fixedDeltaTime);
+        UpdateKinCMData(updateVelocity, period);
+        UpdateBoneObsState(updateVelocity, period);
 
         if (curFixedUpdate % _config.EVALUATE_EVERY_K_STEPS == 0)
             RequestDecision();
@@ -496,6 +504,7 @@ public class MLAgent : Agent
         
         if (_config.projectileTraining)
             FireProjectile();
+
         lastKinRootPos = kinChar.trans.position;
     }
     private void FireProjectile()
@@ -528,20 +537,20 @@ public class MLAgent : Agent
         projectileRB.AddForce(-randomUnitCircle.x * _config.LAUNCH_SPEED, curYVelocity, -randomUnitCircle.y * _config.LAUNCH_SPEED, ForceMode.VelocityChange);
     }
 
-    private void UpdateKinCMData(bool updateVelocity)
+    private void UpdateKinCMData(bool updateVelocity, float dt)
     {
         Vector3 newKinCM = getCM(kinChar.boneToTransform);
-        kinChar.cmVel = updateVelocity ? (newKinCM - kinChar.cm) / Time.fixedDeltaTime : kinChar.cmVel;
+        kinChar.cmVel = updateVelocity ? (newKinCM - kinChar.cm) / dt : kinChar.cmVel;
         kinChar.cm = newKinCM;
     }
-    private void UpdateSimCMData(bool updateVelocity)
+    private void UpdateSimCMData(bool updateVelocity, float dt)
     {
         Vector3 newSimCM = getCM(simChar.boneToTransform);
-        simChar.cmVel = updateVelocity ? (newSimCM - simChar.cm) / Time.fixedDeltaTime : simChar.cmVel;
+        simChar.cmVel = updateVelocity ? (newSimCM - simChar.cm) / dt : simChar.cmVel;
         simChar.cm = newSimCM;
     }
 
-    private void UpdateBoneSurfacePts(bool updateVelocity)
+    private void UpdateBoneSurfacePts(bool updateVelocity, float dt)
     {
         foreach (bool isKinChar in new bool[] { true, false })
             for (int i = 1; i < 23; i++)
@@ -557,7 +566,7 @@ public class MLAgent : Agent
                     newSurfacePts[j] = isKinChar ? resolvePosInKinematicRefFrame(newWorldSurfacePts[j]) :  resolvePosInSimRefFrame(newWorldSurfacePts[j]);
                     if (updateVelocity)
                     {
-                        Vector3 surfaceVel = (newWorldSurfacePts[j] - prevWorldSurfacePts[j]) / Time.fixedDeltaTime;
+                        Vector3 surfaceVel = (newWorldSurfacePts[j] - prevWorldSurfacePts[j]) / dt;
                         charInfo.boneSurfaceVels[i][j] = isKinChar ? resolveVelInKinematicRefFrame(surfaceVel) : resolveVelInSimRefFrame(surfaceVel);
                     }
                 }
@@ -606,6 +615,8 @@ public class MLAgent : Agent
     private bool shouldEndThisFrame = false;
     public void LateFixedUpdate()
     {
+        if (!_sixtyFPSSyncOracle.isSyncFrame)
+            return;
         calcAndSetRewards();
 
         bool inInferenceMode = behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.InferenceOnly;
@@ -615,8 +626,8 @@ public class MLAgent : Agent
             Quaternion horizontalHeadingRotation = Quaternion.Euler(0f, simChar.trans.rotation.eulerAngles.y, 0f);
             MMScript.clamp_pos_and_rot(new Vector3(simChar.cm.x, 0f, simChar.cm.z), horizontalHeadingRotation);
         }
-        UpdateKinCMData(false);
-        UpdateBoneObsState(false, Time.fixedDeltaTime, false, true);
+        UpdateKinCMData(false, period);
+        UpdateBoneObsState(false, period, false, true);
         return;
     }
     // returns TRUE if episode ended
@@ -636,8 +647,8 @@ public class MLAgent : Agent
             return true;
         }
 
-        UpdateSimCMData(updateVelocity);
-        UpdateBoneSurfacePts(updateVelocity);
+        UpdateSimCMData(updateVelocity, period);
+        UpdateBoneSurfacePts(updateVelocity, period);
         calcPosAndVelReward(out posReward, out velReward);
         calcLocalPoseReward(out localPoseReward);
         calcCMVelReward(out cmVelReward);

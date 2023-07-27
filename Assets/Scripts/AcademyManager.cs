@@ -5,9 +5,12 @@ using Unity.MLAgents;
 
 public class AcademyManager : MonoBehaviour
 {
+    private SixtyFPSSyncOracle _sixtyFPSSyncOracle;
+
     void Awake()
     {
         Academy.Instance.AutomaticSteppingEnabled = false;
+        _sixtyFPSSyncOracle = SixtyFPSSyncOracle.Instance;
     }
     
     /* https://forum.unity.com/threads/lifecycle.989227/
@@ -25,6 +28,7 @@ public class AcademyManager : MonoBehaviour
      */
     void FixedUpdate()
     {
-        Academy.Instance.EnvironmentStep();
+        if (_sixtyFPSSyncOracle.isSyncFrame)
+            Academy.Instance.EnvironmentStep();
     }
 }
