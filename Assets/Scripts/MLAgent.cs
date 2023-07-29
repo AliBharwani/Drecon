@@ -469,6 +469,8 @@ public class MLAgent : Agent
             MMScript.Reset();
             MMScript.FixedUpdate();
         }
+        Debug.Log($"{Time.frameCount}: Begin Episode on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame) / 60f} sec)");
+        lastEpisodeEndingFrame = curFixedUpdate;
         float verticalOffset = getVerticalOffset();
         SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .02f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
         lastSimCharTeleportFixedUpdate = curFixedUpdate;
@@ -640,8 +642,8 @@ public class MLAgent : Agent
         {
             finalReward = _config.EPISODE_END_REWARD;
             SetReward(_config.EPISODE_END_REWARD);
-            Debug.Log($"{Time.frameCount}: Calling end episode on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame)/60f} sec)");
-            lastEpisodeEndingFrame = curFixedUpdate;
+            Debug.Log($"{Time.frameCount}: Calling end episode on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame) / 60f} sec)");
+            //lastEpisodeEndingFrame = curFixedUpdate;
             shouldEndThisFrame = false;
             EndEpisode();
             return true;

@@ -14,7 +14,6 @@ public class MLAgentDirector : MonoBehaviour
     private int curStep = 0;
     public int targetFrameRate = -1;
     private float meanReward;
-    public int fps = 60;
     private ConfigManager _config;
 
 

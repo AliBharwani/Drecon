@@ -309,6 +309,50 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 164818128}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &178814570
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 178814572}
+  - component: {fileID: 178814571}
+  m_Layer: 0
+  m_Name: coun ter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &178814571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 178814570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50dc9ce6c50f6a64a9b14f795d2e8e6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &178814572
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 178814570}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.11372042, y: 0.44241595, z: -0.9641762}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &214671234
 GameObject:
   m_ObjectHideFlags: 0
@@ -558,6 +602,9 @@ MonoBehaviour:
   walkOnly: 1
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 50
+  simulation_run_fwrd_speed: 3
+  simulation_run_side_speed: 2.5
+  simulation_run_back_speed: 2
   projectileTraining: 1
   maxNumProjectiles: 10
   LAUNCH_FREQUENCY: 3
@@ -1659,7 +1706,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 5b51e8b2205607f4a98ad3e4b19ba400, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: e92663f4aafec7b43bc1cb530a1eeda4, type: 3}
   m_InferenceDevice: 1
   m_BehaviorType: 0
   m_BehaviorName: Drecon
@@ -2659,7 +2706,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/EulerBaselineInertializeFixed
+  writeToFilePath: ../results/EulerBaseline
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
   clampKinCharToSim: 0
@@ -2667,7 +2714,7 @@ MonoBehaviour:
   clampingMaxDistance: 0.666
   useSkinnedMesh: 0
   doNotRenderKinChar: 0
-  solverIterations: 256
+  solverIterations: 64
   fixedUpdateFrequency: 240
   addOrientationDataToObsState: 0
   setDriveTargetVelocities: 1
@@ -2693,7 +2740,10 @@ MonoBehaviour:
   simulation_rotation_halflife: 0.5
   walkOnly: 0
   searchTime: 0.2
-  MAX_WANDERING_RADIUS: 150
+  MAX_WANDERING_RADIUS: 100
+  simulation_run_fwrd_speed: 4.5
+  simulation_run_side_speed: 3
+  simulation_run_back_speed: 2.5
   projectileTraining: 0
   maxNumProjectiles: 15
   LAUNCH_FREQUENCY: 3
@@ -3360,7 +3410,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 1
+  numAgents: 2
   modelAgent: {fileID: 767361687}
   modelAgentWithOrientationData: {fileID: 818134323}
   model6DAgent: {fileID: 2033970009}
@@ -3369,7 +3419,6 @@ MonoBehaviour:
   modelAgentAllJointsWOrientData: {fileID: 1537673246}
   reportMeanRewardEveryNSteps: 100000
   targetFrameRate: 60
-  fps: 60
 --- !u!4 &2090630089
 Transform:
   m_ObjectHideFlags: 0

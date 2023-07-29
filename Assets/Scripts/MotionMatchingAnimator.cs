@@ -7,7 +7,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     public bool gen_inputs = true;
     public bool walk_only = false;
     private ConfigManager _config;
-
+    private SixtyFPSSyncOracle _sixtyFPSSyncOracle;
     public enum Bones
     {
         Bone_Entity = 0,
@@ -177,6 +177,7 @@ public class MotionMatchingAnimator : MonoBehaviour
 
         motionDB = MocapDB.Instance;
         _config = ConfigManager.Instance;
+        _sixtyFPSSyncOracle = SixtyFPSSyncOracle.Instance;
 
         simulation_velocity_halflife = _config.simulationVelocityHalflife;
         simulation_rotation_halflife = _config.simulation_rotation_halflife;
@@ -331,8 +332,9 @@ public class MotionMatchingAnimator : MonoBehaviour
     {
         if (!gen_inputs)
             return false;
-        return Random.value <= _config.prob_to_change_inputs;
+        return Random.value <= (_config.prob_to_change_inputs * (Time.fixedDeltaTime / frameIncTime));
     }
+    bool force_search = false;
 
     internal void FixedUpdate()
     {
@@ -375,7 +377,6 @@ public class MotionMatchingAnimator : MonoBehaviour
         desired_rotation_change_curr = MathUtils.quat_to_scaled_angle_axis(MathUtils.quat_abs(MathUtils.quat_mul_inv(desired_rotation_curr, desired_rotation))) / Time.fixedDeltaTime;
         desired_rotation = desired_rotation_curr;
 
-        bool force_search = false;
 
         if (force_search_timer <= 0.0f && (
             ((desired_velocity_change_prev).magnitude >= desired_velocity_change_threshold &&
@@ -405,11 +406,12 @@ public class MotionMatchingAnimator : MonoBehaviour
         trajectory_rotations_predict(frame_increments * (frameIncTime));
         trajectory_desired_velocities_predict();
         trajectory_positions_predict(frame_increments * (frameIncTime));
-        if (force_search || search_timer <= 0.0f|| end_of_anim)
+        if (force_search || search_timer <= 0.0f || end_of_anim )
         {
             // Search database and update frame idx 
             motionMatch();
             search_timer = search_time;
+            force_search = false;
             timeSinceLastFrameInc -= frameIncTime;
         }
         else if (timeSinceLastFrameInc >= frameIncTime)

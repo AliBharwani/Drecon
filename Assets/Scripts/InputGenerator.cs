@@ -8,7 +8,7 @@ public class InputGenerator : MonoBehaviour
     public float inputChangeHalflife = .5f;
     void Start()
     {
-        targetPosition = Random.insideUnitCircle;    
+        targetPosition = Random.insideUnitCircle;
     }
 
     void FixedUpdate()
