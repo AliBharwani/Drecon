@@ -340,14 +340,6 @@ public class MotionMatchingAnimator : MonoBehaviour
         return lockTo60hz ? frameIncTime : Time.fixedDeltaTime;
     }
 
-    public float secondCounter = 0f;
-    public int numSwitches = 0;
-    int totalSwitches = 0;
-    public int forceSearchCounter = 0;
-    public int searchTimerCounter = 0;
-    public int bothCounter = 0;
-    public int frameIncrements = 0;
-
     internal void FixedUpdate()
     {
         lockTo60hz = false;
@@ -427,34 +419,15 @@ public class MotionMatchingAnimator : MonoBehaviour
         trajectory_positions_predict(frame_increments * (frameIncTime));
         if (timeSinceLastFrameInc >= frameIncTime)
         {
-            if (force_search && search_timer <= 0f)
-                bothCounter += 1;
-            else if (force_search)
-                forceSearchCounter++;
-            else if (search_timer <= 0f)
-                searchTimerCounter++;
-            frameIncrements++;
             if (force_search || search_timer <= 0.0f || end_of_anim)
             {
                 // Search database and update frame idx 
                 motionMatch();
-                numSwitches += 1;
                 search_timer = search_time;
             }
             else
                 frameIdx++;
             timeSinceLastFrameInc = 0;
-        }
-        if (secondCounter >= 1f)
-        {
-            secondCounter -= 1f;
-            totalSwitches += numSwitches;
-            Debug.Log($"{(!lockTo60hz ? "240hz" : "60hz")}: {numSwitches} last second, average switch every {1000f/numSwitches} ms force_search: {forceSearchCounter} searchTimer: {searchTimerCounter} both: {bothCounter} total: {totalSwitches} numInc: {frameIncrements}");
-            numSwitches = 0;
-            frameIncrements = 0;
-            bothCounter = 0;
-            forceSearchCounter = 0;
-            searchTimerCounter = 0;
         }
         playFrameIdx();
         search_timer -= getFixedDeltaTime();

@@ -2775,7 +2775,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa80316179e0124ba63d919a8b928a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  writeToFilePath: ../results/EulerBaseline
+  writeToFilePath: ../results/EulerBaseline240Hz-LowerSpeed
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
   clampKinCharToSim: 0
@@ -2810,9 +2810,9 @@ MonoBehaviour:
   walkOnly: 0
   searchTime: 0.2
   MAX_WANDERING_RADIUS: 100
-  simulation_run_fwrd_speed: 4.5
-  simulation_run_side_speed: 3
-  simulation_run_back_speed: 2.5
+  simulation_run_fwrd_speed: 3
+  simulation_run_side_speed: 2.5
+  simulation_run_back_speed: 2
   projectileTraining: 0
   maxNumProjectiles: 15
   LAUNCH_FREQUENCY: 3
@@ -3349,10 +3349,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isSyncFrame: 0
-  mm1: {fileID: 0}
-  mm2: {fileID: 0}
-  agent1: {fileID: 0}
-  agent2: {fileID: 0}
 --- !u!4 &1873439064
 Transform:
   m_ObjectHideFlags: 0
