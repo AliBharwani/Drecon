@@ -54,7 +54,7 @@ public class MLAgent : Agent
     public GameObject simulated_handmade_char_prefab;
     public GameObject kinematic_handmade_char_prefab;
     public int reportMeanRewardEveryNSteps = 10000;
-    private MotionMatchingAnimator MMScript;
+    internal MotionMatchingAnimator MMScript;
     private SimCharController SimCharController;
     private int nbodies;
     private int curFixedUpdate = -1;
@@ -457,7 +457,7 @@ public class MLAgent : Agent
         debug = debug && !Academy.Instance.IsCommunicatorOn;
         if (Academy.Instance.IsCommunicatorOn)
         {
-            int numStepsPerSecond = (int)(Mathf.Ceil(1f / period) / _config.EVALUATE_EVERY_K_STEPS);
+            int numStepsPerSecond = (int)Mathf.Ceil(1f / period);
             MaxStep = numStepsPerSecond * _config.MAX_EPISODE_LENGTH_SECONDS;
         }
         customInit();
@@ -469,7 +469,7 @@ public class MLAgent : Agent
             MMScript.Reset();
             MMScript.FixedUpdate();
         }
-        Debug.Log($"{Time.frameCount}: Begin Episode on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame) / 60f} sec)");
+        //Debug.Log($"{Time.frameCount}: Begin Episode on: {curFixedUpdate}, lasted {curFixedUpdate - lastEpisodeEndingFrame} frames ({(curFixedUpdate - lastEpisodeEndingFrame) / 60f} sec)");
         lastEpisodeEndingFrame = curFixedUpdate;
         float verticalOffset = getVerticalOffset();
         SimCharController.teleportSimChar(simChar, kinChar, verticalOffset + .02f, !_config.resetKinCharOnEpisodeEnd && updateVelOnTeleport);
@@ -481,7 +481,7 @@ public class MLAgent : Agent
     }
 
     bool updateVelocity;
-    private void FixedUpdate()
+    public void FixedUpdate()
     {
         if (MMScript.teleportedThisFixedUpdate)
         {

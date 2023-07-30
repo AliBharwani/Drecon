@@ -8,6 +8,7 @@ public class SixtyFPSSyncOracle : MonoBehaviour
     float timeSinceLastUpdate = 0f;
     public bool isSyncFrame = false;
     float period = 1f / 60f;
+
     public static SixtyFPSSyncOracle Instance { get { return _instance; } }
     private void Awake()
     {
