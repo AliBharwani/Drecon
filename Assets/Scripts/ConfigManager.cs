@@ -32,6 +32,7 @@ public class ConfigManager : MonoBehaviour
 
     [Header("PHYSICAL CHARACTER SETTINGS")]
     public int solverIterations = 32;
+    public int fixedUpdateFrequency = 256;
     public bool addOrientationDataToObsState = false;
     public bool setDriveTargetVelocities;
     public bool noStrafing = false;
@@ -59,6 +60,9 @@ public class ConfigManager : MonoBehaviour
     public bool walkOnly = false;
     public float searchTime = .2f;
     public float MAX_WANDERING_RADIUS = 50f;
+    public float simulation_run_fwrd_speed = 3f; // 4.5f
+    public float simulation_run_side_speed = 2.5f; // 3f
+    public float simulation_run_back_speed = 2f; // 2.5f
     // PROJECTILE HYPER PARAMS
     [Header("PROJECTILE SETTINGS")]
     public bool projectileTraining = true;
@@ -103,6 +107,7 @@ public class ConfigManager : MonoBehaviour
         else
         {
             Application.targetFrameRate = 60;
+            Time.fixedDeltaTime = 1f / fixedUpdateFrequency;
             _instance = this;
         }
     }

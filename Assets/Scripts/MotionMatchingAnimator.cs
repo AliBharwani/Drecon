@@ -7,7 +7,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     public bool gen_inputs = true;
     public bool walk_only = false;
     private ConfigManager _config;
-
+    private SixtyFPSSyncOracle _sixtyFPSSyncOracle;
     public enum Bones
     {
         Bone_Entity = 0,
@@ -165,19 +165,26 @@ public class MotionMatchingAnimator : MonoBehaviour
     internal PlayerCamTarget playerCamTarget;
     public bool drawGizmos;
     public bool show_traj_markers;
+    internal float timeSinceLastFrameInc;
+    float frequencyPerSec, frameIncTime;
     void Awake()
     {
         Application.targetFrameRate = 60;
-        Time.fixedDeltaTime = 1f / 60f;
+        frequencyPerSec = 60;
+        frameIncTime = 1f / frequencyPerSec;
         gamepad = Gamepad.current;
         origin = transform.position;
         origin_rot = transform.rotation;
 
         motionDB = MocapDB.Instance;
         _config = ConfigManager.Instance;
+        _sixtyFPSSyncOracle = SixtyFPSSyncOracle.Instance;
 
         simulation_velocity_halflife = _config.simulationVelocityHalflife;
         simulation_rotation_halflife = _config.simulation_rotation_halflife;
+        simulation_run_fwrd_speed = _config.simulation_run_fwrd_speed;
+        simulation_run_side_speed = _config.simulation_run_side_speed;
+        simulation_run_back_speed = _config.simulation_run_back_speed;
 
         walk_only = _config.walkOnly;
         motionDB.database_build_matching_features(
@@ -253,9 +260,7 @@ public class MotionMatchingAnimator : MonoBehaviour
             inertialize_blending_halflife,
             0f
         );
-        reset_contact_state();
-
-        search_timer = search_time;
+        reset_contact_state(); search_timer = search_time;
         force_search_timer = search_time;
     }
     public void Reset()
@@ -326,11 +331,21 @@ public class MotionMatchingAnimator : MonoBehaviour
     {
         if (!gen_inputs)
             return false;
-        return Random.value <= _config.prob_to_change_inputs;
+        return _sixtyFPSSyncOracle.isSyncFrame && Random.value <= _config.prob_to_change_inputs;
+    }
+
+    public bool lockTo60hz = false;
+    float getFixedDeltaTime()
+    {
+        return lockTo60hz ? frameIncTime : Time.fixedDeltaTime;
     }
 
     internal void FixedUpdate()
     {
+        lockTo60hz = false;
+        if (lockTo60hz && !_sixtyFPSSyncOracle.isSyncFrame)
+            return;
+        timeSinceLastFrameInc += getFixedDeltaTime();
         teleportedThisFixedUpdate = false;
         if (should_change_generated_inputs())
         {
@@ -350,7 +365,7 @@ public class MotionMatchingAnimator : MonoBehaviour
         else if (gen_inputs && _config.useCustomInputGenerator)
             random_lstick_input = input_generator.currentPosition;
 
-        desired_gait_update(Time.fixedDeltaTime);
+        desired_gait_update(getFixedDeltaTime());
         simulation_fwrd_speed = Mathf.Lerp(simulation_walk_fwrd_speed, simulation_run_fwrd_speed, desired_gait);
         simulation_side_speed = Mathf.Lerp(simulation_walk_side_speed, simulation_run_side_speed, desired_gait);
         simulation_back_speed = Mathf.Lerp( simulation_walk_back_speed, simulation_run_back_speed, desired_gait);
@@ -362,29 +377,32 @@ public class MotionMatchingAnimator : MonoBehaviour
 
         // Check if we should force a search because input changed quickly
         desired_velocity_change_prev = desired_velocity_change_curr;
-        desired_velocity_change_curr = (desired_velocity_curr - desired_velocity) / Time.fixedDeltaTime;
+        desired_velocity_change_curr = (desired_velocity_curr - desired_velocity) / getFixedDeltaTime();
         desired_velocity = desired_velocity_curr;
 
         desired_rotation_change_prev = desired_rotation_change_curr;
-        desired_rotation_change_curr = MathUtils.quat_to_scaled_angle_axis(MathUtils.quat_abs(MathUtils.quat_mul_inv(desired_rotation_curr, desired_rotation))) / Time.fixedDeltaTime;
+        desired_rotation_change_curr = MathUtils.quat_to_scaled_angle_axis(MathUtils.quat_abs(MathUtils.quat_mul_inv(desired_rotation_curr, desired_rotation))) / getFixedDeltaTime();
         desired_rotation = desired_rotation_curr;
-
         bool force_search = false;
 
-        if (force_search_timer <= 0.0f && (
-            ((desired_velocity_change_prev).magnitude >= desired_velocity_change_threshold &&
-             (desired_velocity_change_curr).magnitude < desired_velocity_change_threshold)
-        || ((desired_rotation_change_prev).magnitude >= desired_rotation_change_threshold &&
-             (desired_rotation_change_curr).magnitude < desired_rotation_change_threshold)))
+        // We don't want to query change in input at >60 hz
+        if (timeSinceLastFrameInc >= frameIncTime)
         {
-            force_search = true;
-            force_search_timer = search_time;
+            if (force_search_timer <= 0.0f && (
+                ((desired_velocity_change_prev).magnitude >= desired_velocity_change_threshold &&
+                 (desired_velocity_change_curr).magnitude < desired_velocity_change_threshold)
+            || ((desired_rotation_change_prev).magnitude >= desired_rotation_change_threshold &&
+                 (desired_rotation_change_curr).magnitude < desired_rotation_change_threshold)))
+            {
+                force_search = true;
+                force_search_timer = search_time;
+            }
+            else if (force_search_timer > 0)
+            {
+                force_search_timer -= frameIncTime;
+            }
         }
-        else if (force_search_timer > 0)
-        {
-            force_search_timer -= Time.fixedDeltaTime;
-        }
-        //bool search = end_of_anim || (frameCounter % searchEveryNFrames) == 0;
+
         if (is_out_of_bounds(world_space_position))
         {
             bone_positions[0] = origin;
@@ -393,23 +411,25 @@ public class MotionMatchingAnimator : MonoBehaviour
             reset_contact_state();
             teleportedThisFixedUpdate = true;
         }
-        // Get the desired velocity
 
         trajectory_desired_rotations_predict();
-        trajectory_rotations_predict(frame_increments * (Time.fixedDeltaTime));
+        trajectory_rotations_predict(frame_increments * (frameIncTime));
         trajectory_desired_velocities_predict();
-        trajectory_positions_predict(frame_increments * (Time.fixedDeltaTime));
-        if (force_search || search_timer <= 0.0f || end_of_anim)
+        trajectory_positions_predict(frame_increments * (frameIncTime));
+        if (timeSinceLastFrameInc >= frameIncTime)
         {
-            // Search database and update frame idx 
-            motionMatch();
-            search_timer = search_time;
+            if (force_search || search_timer <= 0.0f || end_of_anim)
+            {
+                // Search database and update frame idx 
+                motionMatch();
+                search_timer = search_time;
+            }
+            else
+                frameIdx++;
+            timeSinceLastFrameInc = 0;
         }
-        else
-            frameIdx++;
-
         playFrameIdx();
-        search_timer -= Time.fixedDeltaTime;
+        search_timer -= getFixedDeltaTime();
         frameCounter++;
     }
 
@@ -437,7 +457,7 @@ public class MotionMatchingAnimator : MonoBehaviour
             curr_bone_rotations,
             curr_bone_angular_velocities,
             inertialize_blending_halflife,
-            Time.fixedDeltaTime
+            getFixedDeltaTime()
             );
         simulation_positions_update(
             ref simulation_position,
@@ -445,13 +465,13 @@ public class MotionMatchingAnimator : MonoBehaviour
             ref simulation_acceleration,
             desired_velocity,
             simulation_velocity_halflife,
-            Time.fixedDeltaTime);
+            getFixedDeltaTime());
         simulation_rotations_update(
             ref simulation_rotation,
             ref simulation_angular_velocity,
             desired_rotation,
             simulation_rotation_halflife,
-            Time.fixedDeltaTime);
+            getFixedDeltaTime());
 
         if (synchronization_enabled)
         {
@@ -499,7 +519,7 @@ public class MotionMatchingAnimator : MonoBehaviour
                     ik_unlock_radius,
                     ik_foot_height,
                     ik_blending_halflife,
-                    Time.fixedDeltaTime);
+                    getFixedDeltaTime());
 
                 // Ensure contact position never goes through floor
                 Vector3 contact_position_clamp = contact_positions[i];
@@ -621,7 +641,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     }
     private void motionMatch()
     {
-        float[] query = new float[motionDB.nfeatures()];
+        float[] query = new float[motionDB.nfeatures() + 1];
         float[] query_features = motionDB.features[frameIdx];
         int num_features_to_copy =
             3 // Left Foot position
@@ -634,6 +654,7 @@ public class MotionMatchingAnimator : MonoBehaviour
             query[i] = query_features[i];
         query_compute_trajectory_position_feature(num_features_to_copy, query);
         query_compute_trajectory_direction_feature(num_features_to_copy + 6, query);
+        query[query.Length - 1] = frameIdx;
         best_idx = motionDB.motionMatch(query);
 
         trns_bone_positions = motionDB.bone_positions[best_idx];
@@ -979,7 +1000,7 @@ public class MotionMatchingAnimator : MonoBehaviour
     }
     private void simulation_rotations_update(ref Quaternion rotation, ref Vector3 angular_velocity, in Quaternion desired_rot, float halflife, float dt)
     {
-        SpringUtils.simple_spring_damper_implicit(
+        SpringUtils.simple_spring_damper_exact(
                 ref rotation,
                 ref angular_velocity,
                 desired_rot,

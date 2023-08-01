@@ -8,10 +8,12 @@ public static class ArtBodyUtils
         /* Angular velocity appears in scaled angle axis representation 
          * 
          */
-        Quaternion targetAngularVelocityQ = Quaternion.AngleAxis(targetAngularVel.magnitude * Mathf.Rad2Deg * Time.fixedDeltaTime  , targetAngularVel.normalized);
+        // The period from the mocap database is based on 60fps
+        float period = 1f / 60f;
+        Quaternion targetAngularVelocityQ = Quaternion.AngleAxis(targetAngularVel.magnitude * Mathf.Rad2Deg * period, targetAngularVel.normalized);
 
         Vector3 degsPerSecond = (targetAngularVelocityQ * localRotation).ToEulerAnglesInRange180() - localRotation.ToEulerAnglesInRange180();
-        degsPerSecond /= Time.fixedDeltaTime;
+        degsPerSecond /= period;
         //if (body.name == "Model:LeftUpLeg")
         //    Debug.Log($"DegsPerSecond: {degsPerSecond}");
 
