@@ -346,7 +346,6 @@ public class MotionMatchingAnimator : MonoBehaviour
         if (lockTo60hz && !_sixtyFPSSyncOracle.isSyncFrame)
             return;
         timeSinceLastFrameInc += getFixedDeltaTime();
-        secondCounter += getFixedDeltaTime();
         teleportedThisFixedUpdate = false;
         if (should_change_generated_inputs())
         {

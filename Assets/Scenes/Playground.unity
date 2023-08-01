@@ -1775,9 +1775,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: e92663f4aafec7b43bc1cb530a1eeda4, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 2d34d25ecb419ee4ebd08a0b2c102212, type: 3}
   m_InferenceDevice: 1
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: Drecon
   TeamId: 0
   m_UseChildSensors: 1
@@ -2778,7 +2778,7 @@ MonoBehaviour:
   writeToFilePath: ../results/EulerBaseline240Hz-LowerSpeed
   filename: unityconfig.json
   loadFromFilePath: ../results/AA-AllJointsV2+FrameIncFixed
-  clampKinCharToSim: 0
+  clampKinCharToSim: 1
   userControl: 1
   clampingMaxDistance: 0.666
   useSkinnedMesh: 0
@@ -3491,7 +3491,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3d2e788ece2d1f4fa0c5a3fc5996f6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numAgents: 2
+  numAgents: 1
   modelAgent: {fileID: 767361687}
   modelAgentWithOrientationData: {fileID: 818134323}
   model6DAgent: {fileID: 2033970009}
